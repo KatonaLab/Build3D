@@ -2,6 +2,9 @@
 #include <python2.7/Python.h>
 #include <libics.h>
 
+#include <Qt3DQuickExtras/qt3dquickwindow.h>
+#include <QGuiApplication>
+
 using namespace std;
 
 void pythonTest();
@@ -9,10 +12,12 @@ void icsTest();
 
 int main(int argc, char* argv[])
 {
-    cout << "hey" << endl;
-    icsTest();
-    pythonTest();
-    return 0;
+    QGuiApplication app(argc, argv);
+    Qt3DExtras::Quick::Qt3DQuickWindow view;
+    view.setSource(QUrl("main.qml"));
+    view.show();
+
+    return app.exec();
 }
 
 void pythonTest()
