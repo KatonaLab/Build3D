@@ -1,3 +1,3 @@
 file(GLOB sources *.cpp)
 add_executable(app ${sources})
-target_link_libraries(app libics)
+target_link_libraries(app libics python2.7)
