@@ -1,0 +1,3 @@
+[submodule "lib/libics"]
+	path = lib/libics
+	url = https://github.com/svi-opensource/libics.git
