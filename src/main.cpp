@@ -44,9 +44,9 @@ int main(int argc, char* argv[])
     
     QQuickView view;
 
-    view.resize(1024, 1024);
+    view.resize(800, 800);
     view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setSource(QUrl("main.qml"));
+    view.setSource(QUrl("qml/main.qml"));
     view.show();
 
 
@@ -73,7 +73,7 @@ void pythonTest()
     parDict = PyDict_New();
     PyDict_SetItemString(parDict, "x0", PyFloat_FromDouble(1.0));
     // run python code to load functions
-    PyRun_SimpleString("exec(open('cpptest.py').read())");
+    PyRun_SimpleString("exec(open('scripts/cpptest.py').read())");
     // get function showval from __main__
     PyObject* main_module = PyImport_AddModule("__main__");
     PyObject* global_dict = PyModule_GetDict(main_module);
