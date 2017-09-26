@@ -1,21 +1,65 @@
 #include <iostream>
-#include <python2.7/Python.h>
+#include <python/Python.h>
 #include <libics.h>
 
 #include <Qt3DQuickExtras/qt3dquickwindow.h>
 #include <QGuiApplication>
+#include <QVector>
+#include <QQuickView>
+#include <QtDataVisualization/QCustom3DVolume.h>
+
+#include <QQuickView>
+#include <QOpenGLContext>
 
 using namespace std;
+
+using namespace QtDataVisualization;
 
 void pythonTest();
 void icsTest();
 
+void setSurfaceFormat()
+{
+    QSurfaceFormat format;
+
+    if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
+        format.setVersion(4, 3);
+        format.setProfile(QSurfaceFormat::CoreProfile);
+    }
+
+    format.setDepthBufferSize(24);
+    format.setSamples(4);
+    format.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
+}
+
 int main(int argc, char* argv[])
 {
+    // pythonTest();
     QGuiApplication app(argc, argv);
-    Qt3DExtras::Quick::Qt3DQuickWindow view;
+
+    setSurfaceFormat();
+
+    // Qt3DExtras::Quick::Qt3DQuickWindow view;
+    
+    QQuickView view;
+
+    view.resize(1024, 1024);
+    view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("main.qml"));
     view.show();
+
+
+
+    // QQuickView view;
+    // view.setSource(QUrl("main.qml"));
+    // view.show();
+
+    QQuickItem *object = view.rootObject();
+    // QCustom3DVolume *cv = object->findChild<QCustom3DVolume*>("volumeView");
+    // if (rect) {
+    //     rect->setProperty("color", "red");
+    // }
 
     return app.exec();
 }
@@ -41,7 +85,7 @@ void pythonTest()
     Py_Finalize();
 }
 
-void icsTest()
+QVector<uchar> loadICS()
 {
     ICS* ip;
     Ics_DataType dt;
