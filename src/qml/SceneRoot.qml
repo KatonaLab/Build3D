@@ -2,6 +2,8 @@ import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
 
+import foo.bar 1.0
+
 Entity {
     id: sceneRoot
 
@@ -20,6 +22,11 @@ Entity {
         id: simpleMaterial
     }
 
+    VolumeMaterial {
+        id: volumeMaterial
+        objectName: "objVol"
+    }
+
     Transform {
         id: boxTransform
         property real userAngle: 0.0
@@ -32,7 +39,7 @@ Entity {
 
     Entity {
         id: boxEntity
-        components: [ boxMesh, simpleMaterial, boxTransform ]
+        components: [ boxMesh, volumeMaterial, boxTransform ]
     }
 
     Camera {

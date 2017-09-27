@@ -2,18 +2,18 @@
 #include <python/Python.h>
 #include <libics.h>
 
-#include <Qt3DQuickExtras/qt3dquickwindow.h>
 #include <QGuiApplication>
 #include <QVector>
 #include <QQuickView>
-#include <QtDataVisualization/QCustom3DVolume.h>
 
-#include <QQuickView>
 #include <QOpenGLContext>
 
-using namespace std;
+#include <Qt3DRender/QTexture>
+#include <Qt3DRender/QTextureImage>
 
-using namespace QtDataVisualization;
+#include "VolumeMaterial.h"
+
+using namespace std;
 
 void pythonTest();
 void icsTest();
@@ -35,31 +35,26 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
-    // pythonTest();
     QGuiApplication app(argc, argv);
-
     setSurfaceFormat();
 
-    // Qt3DExtras::Quick::Qt3DQuickWindow view;
-    
-    QQuickView view;
+    qmlRegisterType<VolumeMaterial>("foo.bar", 1, 0, "VolumeMaterial");
 
+    QQuickView view;
     view.resize(800, 800);
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("qml/main.qml"));
     view.show();
 
+    VolumeMaterial *mat = view.findChild<VolumeMaterial*>("objVol");
+    cout << mat << endl;
+    mat->dumpObjectInfo();
 
-
-    // QQuickView view;
-    // view.setSource(QUrl("main.qml"));
-    // view.show();
-
-    QQuickItem *object = view.rootObject();
-    // QCustom3DVolume *cv = object->findChild<QCustom3DVolume*>("volumeView");
-    // if (rect) {
-    //     rect->setProperty("color", "red");
-    // }
+    Qt3DRender::QAbstractTexture *tex = new Qt3DRender::QTexture2D();
+    Qt3DRender::QTextureImage *texImage = new Qt3DRender::QTextureImage();
+    texImage->setSource(QUrl::fromLocalFile("qml/tex.tif"));
+    tex->addTextureImage(texImage);
+    mat->setTexture(tex);
 
     return app.exec();
 }
