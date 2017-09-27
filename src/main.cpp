@@ -1,6 +1,7 @@
 #include <iostream>
 #include <python/Python.h>
 #include <libics.h>
+#include <string>
 
 #include <QGuiApplication>
 #include <QVector>
@@ -10,13 +11,15 @@
 
 #include <Qt3DRender/QTexture>
 #include <Qt3DRender/QTextureImage>
+#include <Qt3DRender/QTextureImageData>
+#include <Qt3DRender/QTextureImageDataGenerator>
 
 #include "VolumeMaterial.h"
 
 using namespace std;
 
 void pythonTest();
-void icsTest();
+uchar* loadICS();
 
 void setSurfaceFormat()
 {
@@ -46,14 +49,23 @@ int main(int argc, char* argv[])
     view.setSource(QUrl("qml/main.qml"));
     view.show();
 
-    VolumeMaterial *mat = view.findChild<VolumeMaterial*>("objVol");
-    cout << mat << endl;
-    mat->dumpObjectInfo();
+//    Qt3DRender::QTextureFromSourceGenerator *sg = new Qt3DRender::QTextureFromSourceGenerator();
 
-    Qt3DRender::QAbstractTexture *tex = new Qt3DRender::QTexture2D();
+//    Qt3DRender::QTextureImageData *data = new Qt3DRender::QTextureImageData();
+//    data->
+    //data->setData(const QByteArray &data, <#int blockSize#>)
+
     Qt3DRender::QTextureImage *texImage = new Qt3DRender::QTextureImage();
     texImage->setSource(QUrl::fromLocalFile("qml/tex.tif"));
+
+//    CustomDataTextureImage *texImage = new CustomDataTextureImage();
+    uchar *data = loadICS();
+//    texImage->setData(data, 512, 152);
+
+    Qt3DRender::QAbstractTexture *tex = new Qt3DRender::QTexture2D();
     tex->addTextureImage(texImage);
+
+    VolumeMaterial *mat = view.findChild<VolumeMaterial*>("objVol");
     mat->setTexture(tex);
 
     return app.exec();
@@ -61,7 +73,7 @@ int main(int argc, char* argv[])
 
 void pythonTest()
 {
-    Py_SetProgramName("myPythonProgram");
+    Py_SetProgramName((char *)"myPythonProgram");
     Py_Initialize();
     // parDict is a parameter to send to python function
     PyObject * parDict;
@@ -80,7 +92,7 @@ void pythonTest()
     Py_Finalize();
 }
 
-QVector<uchar> loadICS()
+uchar* loadICS()
 {
     ICS* ip;
     Ics_DataType dt;
@@ -120,4 +132,7 @@ QVector<uchar> loadICS()
     if (retval != IcsErr_Ok) {
        cerr << "err IcsClose" << endl;
     }
+
+    // TODO: proper pointer handling, etc...
+    return (uchar*)buf;
 }
