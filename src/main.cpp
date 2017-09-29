@@ -49,18 +49,12 @@ int main(int argc, char* argv[])
     view.setSource(QUrl("qml/main.qml"));
     view.show();
 
-//    Qt3DRender::QTextureFromSourceGenerator *sg = new Qt3DRender::QTextureFromSourceGenerator();
+//    Qt3DRender::QTextureImage *texImage = new Qt3DRender::QTextureImage();
+//    texImage->setSource(QUrl::fromLocalFile("qml/tex.tif"));
 
-//    Qt3DRender::QTextureImageData *data = new Qt3DRender::QTextureImageData();
-//    data->
-    //data->setData(const QByteArray &data, <#int blockSize#>)
-
-    Qt3DRender::QTextureImage *texImage = new Qt3DRender::QTextureImage();
-    texImage->setSource(QUrl::fromLocalFile("qml/tex.tif"));
-
-//    CustomDataTextureImage *texImage = new CustomDataTextureImage();
+    CustomDataTextureImage *texImage = new CustomDataTextureImage();
     uchar *data = loadICS();
-//    texImage->setData(data, 512, 152);
+    texImage->setData(data, 256, 256);
 
     Qt3DRender::QAbstractTexture *tex = new Qt3DRender::QTexture2D();
     tex->addTextureImage(texImage);
