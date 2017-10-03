@@ -104,6 +104,9 @@ uchar* loadICS()
     IcsGetLayout(ip, &dt, &ndims, dims);
     bufsize = IcsGetDataSize (ip);
     buf = malloc(bufsize);
+
+    cout << dt << endl;
+
     if (buf == NULL){
        cerr << "err malloc" << endl;
     }
