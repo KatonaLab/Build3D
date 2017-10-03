@@ -34,34 +34,36 @@ QTextureImageDataPtr CustomDataTextureImageGenerator::operator()()
     texImage->setHeight(height);
     texImage->setDepth(1);
     texImage->setFaces(1);
-    texImage->setLayers(15);
+    texImage->setLayers(1);
     texImage->setMipLevels(1);
-    texImage->setFormat(QOpenGLTexture::TextureFormat::RGBA8U);
-    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Luminance);
-    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
-    texImage->setTarget(QOpenGLTexture::Target::Target2D);
+    texImage->setFormat(QOpenGLTexture::TextureFormat::RGBA8_UNorm);
+//    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Luminance);
+//    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
 
-//    texImage->setImage(<#const QImage &#>)
+    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
+    texImage->setPixelType(QOpenGLTexture::PixelType::UInt8);
+    texImage->setTarget(QOpenGLTexture::Target::Target2D);
 
 //    const float *fdata = (const float*)buf;
 //    for (int i = 0; i < 512; ++i) {
 //        qDebug() << fdata[i];
 //    }
 
+    const QByteArray bytes = QByteArray(reinterpret_cast<const char*>(buf), width * height);
 //    const QByteArray bytes = QByteArray(reinterpret_cast<const char*>(buf), width * height);
-    const QByteArray bytes = QByteArray(reinterpret_cast<const char*>(buf), width * height * 4);
 
-//    uchar *b = new uchar[width * height * 4];
+//    uchar *b = new uchar[width * height];
 //    for (int i = 0; i < height; ++i) {
 //        for (int j = 0; j < width; ++j) {
-//            b[(width * i + j) * 4 + 0] = j;
-//            b[(width * i + j) * 4 + 1] = 0;
-//            b[(width * i + j) * 4 + 2] = 0;
-//            b[(width * i + j) * 4 + 3] = 255;
+//            b[width * i + j] = j;
+////            b[(width * i + j) * 4 + 0] = j;
+////            b[(width * i + j) * 4 + 1] = i;
+////            b[(width * i + j) * 4 + 2] = 0;
+////            b[(width * i + j) * 4 + 3] = 255;
 //        }
 //    }
-//    const QByteArray bytes = QByteArray((char*)b, width * height * 4);
-    texImage->setData(bytes, width * height * 4);
+//    const QByteArray bytes = QByteArray(reinterpret_cast<const char*>(b), width * height * 1);
+    texImage->setData(bytes, 1);
 
     return texImage;
 }

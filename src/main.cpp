@@ -20,6 +20,7 @@ using namespace std;
 
 void pythonTest();
 uchar* loadICS();
+uchar* loadICSPreview();
 
 void setSurfaceFormat()
 {
@@ -52,9 +53,11 @@ int main(int argc, char* argv[])
 //    Qt3DRender::QTextureImage *texImage = new Qt3DRender::QTextureImage();
 //    texImage->setSource(QUrl::fromLocalFile("qml/tex.tif"));
 
+    uchar *prev = loadICSPreview();
+
     CustomDataTextureImage *texImage = new CustomDataTextureImage();
-    uchar *data = loadICS();
-    texImage->setData(data, 256, 256);
+//    uchar *data = loadICS();
+    texImage->setData(prev, 512, 512);
 
     Qt3DRender::QAbstractTexture *tex = new Qt3DRender::QTexture2D();
     tex->addTextureImage(texImage);
@@ -84,6 +87,15 @@ void pythonTest()
     // call the function
     PyObject_CallObject(func, par);
     Py_Finalize();
+}
+
+uchar* loadICSPreview()
+{
+    uchar* data = nullptr;
+    size_t w, h;
+    IcsLoadPreview("K32_bassoon_TH_vGluT1_c01_cmle.ics", 18, (void**)&data, &w, &h);
+    cout << w << " " << h << endl;
+    return data;
 }
 
 uchar* loadICS()
