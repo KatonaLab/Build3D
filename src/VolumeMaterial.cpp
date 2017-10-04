@@ -38,11 +38,11 @@ QTextureImageDataPtr CustomDataTextureImageGenerator::operator()()
     texImage->setMipLevels(1);
     texImage->setFormat(QOpenGLTexture::TextureFormat::RGBA8_UNorm);
 
-//    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
-//    texImage->setPixelType(QOpenGLTexture::PixelType::UInt8);
-
     texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
-    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
+    texImage->setPixelType(QOpenGLTexture::PixelType::UInt8);
+
+//    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
+//    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
 
     texImage->setTarget(QOpenGLTexture::Target::Target2D);
 
