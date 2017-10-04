@@ -16,10 +16,32 @@
 
 #include "VolumeMaterial.h"
 
+#include <functional>
+#include <array>
+
 using namespace std;
 
+class VolumetricData;
+typedef shared_ptr<VolumetricData> VolumetricDataPtr;
+
+class VolumetricData {
+public:
+    VolumetricData() : dims{{0, 0, 0}}, data(nullptr) {}
+    virtual ~VolumetricData() {}
+    const array<size_t, 3>& size() { return dims; }
+    const uchar* getData() { return data; }
+    size_t getWidth() { return dims[0]; }
+    size_t getHeight() { return dims[1]; }
+    size_t getDepth() { return dims[2]; }
+    // TODO: make it non-copyable or impl the big 3/4/5
+protected:
+    array<size_t, 3> dims;
+    uchar *data;
+public:
+    static vector<VolumetricDataPtr> loadICS(string filename);
+};
+
 void pythonTest();
-uchar* loadICS();
 uchar* loadICSPreview();
 
 void setSurfaceFormat()
@@ -53,11 +75,14 @@ int main(int argc, char* argv[])
 //    Qt3DRender::QTextureImage *texImage = new Qt3DRender::QTextureImage();
 //    texImage->setSource(QUrl::fromLocalFile("qml/tex.tif"));
 
-    uchar *prev = loadICSPreview();
+//    uchar *prev = loadICSPreview();
+
+    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("K32_bassoon_TH_vGluT1_c01_cmle.ics");
 
     CustomDataTextureImage *texImage = new CustomDataTextureImage();
-//    uchar *data = loadICS();
-    texImage->setData(prev, 512, 512);
+    texImage->setData(dataVec[0]->getData(), dataVec[0]->getWidth(), dataVec[0]->getHeight());
+//    uchar *prev = loadICSPreview();
+//    texImage->setData(prev, 512, 512);
 
     Qt3DRender::QAbstractTexture *tex = new Qt3DRender::QTexture2D();
     tex->addTextureImage(texImage);
@@ -98,50 +123,63 @@ uchar* loadICSPreview()
     return data;
 }
 
-uchar* loadICS()
+vector<VolumetricDataPtr> VolumetricData::loadICS(string filename)
 {
+    // TODO: use IcsGetOrder and prepare for shuffled dim order
     ICS* ip;
+    IcsOpen(&ip, filename.c_str(), "r");
+
     Ics_DataType dt;
     int ndims;
     size_t dims[ICS_MAXDIM];
-    size_t bufsize;
-    void* buf;
-    Ics_Error retval;
-
-    retval = IcsOpen(&ip, "K32_bassoon_TH_vGluT1_c01_cmle.ics", "r");
-    if (retval != IcsErr_Ok) {
-       cerr << "err IcsOpen" << endl;
-    }
-
     IcsGetLayout(ip, &dt, &ndims, dims);
-    bufsize = IcsGetDataSize (ip);
-    buf = malloc(bufsize);
+    size_t imageElementSize = IcsGetImelSize(ip);
 
-    cout << dt << endl;
+    size_t w, h, d, c, n;
+    c = ndims >= 4 ? dims[3] : 1;
+    d = ndims >= 3 ? dims[2] : 1;
+    h = ndims >= 2 ? dims[1] : 1;
+    w = ndims >= 1 ? dims[0] : 1;
+    n = w * h * d;
 
-    if (buf == NULL){
-       cerr << "err malloc" << endl;
-    }
-    cout << "ndims " << ndims << endl;
-    for (int i = 0; i < ndims; ++i) {
-        cout << dims[i] << endl;
-    }
-
-    retval = IcsGetData(ip, buf, bufsize);
-    if (retval != IcsErr_Ok) {
-       cerr << "err IcsGetData" << endl;
-    }
-
-    /*
-     * There are some other functions available to get
-     * more info on the image in the .ics file.
-     */
-
-    retval = IcsClose(ip);
-    if (retval != IcsErr_Ok) {
-       cerr << "err IcsClose" << endl;
+    ptrdiff_t strides[ndims];
+    for (int j = 0; j < ndims; ++j) {
+        strides[j] = 1;
+        if (j == 3) {
+            strides[j] = c;
+        }
     }
 
-    // TODO: proper pointer handling, etc...
-    return (uchar*)buf;
+    // !!!
+    c = 1;
+    // !!!
+
+    vector<VolumetricDataPtr> result;
+    for (int k = 0; k < c; ++k) {
+        VolumetricDataPtr vd = make_shared<VolumetricData>();
+        vd->data = new uchar[w * h * imageElementSize];
+        vd->dims[0] = w;
+        vd->dims[1] = h;
+        vd->dims[2] = 1;
+//        strides[2] = d;
+        // TODO: no offset was given to the data read
+        IcsGetDataWithStrides(ip, vd->data, 0, strides, ndims);
+//        for (int i = 0; i < 512*4*64; ++i) {
+//            vd->data[i] = i;
+//        }
+        result.push_back(vd);
+//        {
+//            VolumetricDataPtr vd = make_shared<VolumetricData>();
+//            vd->data = new uchar[n * imageElementSize];
+//            vd->dims[0] = w;
+//            vd->dims[1] = h;
+//            vd->dims[2] = d;
+//            // TODO: no offset was given to the data read
+//            IcsGetDataWithStrides(ip, vd->data, 0, strides, ndims);
+//            result.push_back(vd);
+//        }
+    }
+
+    IcsClose(ip);
+    return result;
 }
