@@ -11,7 +11,9 @@ include_directories("/Library/Frameworks/Python.framework/Versions/3.6/include/p
 include_directories("/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/numpy/core/include")
 
 file(GLOB sources *.cpp)
-add_executable(app ${sources})
+file(GLOB headers *.h)
+
+add_executable(app ${sources} ${headers})
 target_link_libraries(app
     libics 
     ${PYTHON_LIBRARIES}

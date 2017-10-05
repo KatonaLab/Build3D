@@ -2,7 +2,7 @@ import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
 
-import foo.bar 1.0
+// import foo.bar 1.0
 
 Entity {
     id: sceneRoot
@@ -14,18 +14,19 @@ Entity {
         zExtent: 5
     }
 
-    PhongMaterial {
-        id: material
-    }
+    // PhongMaterial {
+        // id: material
+    // }
 
     SimpleMaterial {
         id: simpleMaterial
+        // objectName: "objVol"
     }
 
-    VolumeMaterial {
-        id: volumeMaterial
-        objectName: "objVol"
-    }
+    // VolumeMaterial {
+        // id: volumeMaterial
+        // objectName: "objVol"
+    // }
 
     Transform {
         id: boxTransform
@@ -39,7 +40,7 @@ Entity {
 
     Entity {
         id: boxEntity
-        components: [ boxMesh, volumeMaterial, boxTransform ]
+        components: [ boxMesh, simpleMaterial, boxTransform ]
     }
 
     Camera {

@@ -2,6 +2,23 @@
 
 using namespace Qt3DRender;
 
+DynamicVolumetricTexture::DynamicVolumetricTexture(Qt3DCore::QNode *parent)
+{}
+
+DynamicVolumetricTexture::~DynamicVolumetricTexture()
+{}
+
+void DynamicVolumetricTexture::setData(const uchar *data, int width, int height)
+{
+//    setDataFunctor()
+//    texImage.setData(data, width, height);
+//    cout << "removing texture" << endl;
+//    this->texImage
+//    this->addTextureImage(&texImage);
+}
+
+// -----------------------------------------------------------------------------
+
 QTextureImageDataGeneratorPtr CustomDataTextureImage::dataGenerator() const
 {
     return generator;

@@ -1,6 +1,8 @@
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 
+import a3dc.koki 1.0
+
 Material {
     id: root
 
@@ -10,6 +12,12 @@ Material {
         Parameter {
             name: "maincolor"
             value: Qt.vector3d(root.maincolor.r, root.maincolor.g, root.maincolor.b)
+        },
+        Parameter {
+            name: "teximage"
+            value: VolumetricTexture {
+                objectName: "objVol"
+            }
         }
     ]
 
@@ -27,6 +35,7 @@ Material {
             vertexShaderCode: "#version 150 core
                 in vec3 vertexPosition;
                 out vec3 worldPosition;
+                out vec2 fragCoord;
                 uniform mat4 modelMatrix;
                 uniform mat4 mvp;
 
@@ -37,15 +46,20 @@ Material {
 
                     // Calculate vertex position in clip coordinates
                     gl_Position = mvp * vec4(worldPosition, 1.0);
+                    fragCoord = gl_Position.xy * 0.05 + 0.5;
                 }"
 
             fragmentShaderCode: "#version 150 core
                 out vec4 fragColor;
                 uniform vec3 maincolor;
+                in vec2 fragCoord;
+                uniform sampler2D teximage;
                 void main()
                 {
                     //output color from material
-                    fragColor = vec4(maincolor,1.0);
+                    //fragColor = vec4(maincolor,1.0);
+                    // fragColor = vec4(fragCoord.y*0.5, 0., 0., 1.);
+                    fragColor = texture(teximage, fragCoord);
                 }"
         }
 
