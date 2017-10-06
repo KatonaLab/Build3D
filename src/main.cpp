@@ -9,6 +9,7 @@
 #include <QQuickView>
 
 #include <QOpenGLContext>
+#include <Qt3DInput/QInputSettings>
 
 //#include <Qt3DRender/QTexture>
 //#include <Qt3DRender/QTextureImage>
@@ -57,6 +58,13 @@ int main(int argc, char* argv[])
 
     VolumetricTexture *tex = view.findChild<VolumetricTexture*>("objVol");
     tex->setDataSource(dataVec[0]);
+
+    Qt3DInput::QInputSettings *inputSettings = view.findChild<Qt3DInput::QInputSettings *>();
+    if (inputSettings) {
+        inputSettings->setEventSource(&view);
+    } else {
+        cerr << "No Input Settings found, keyboard and mouse events won't be handled";
+    }
 
     return app.exec();
 }

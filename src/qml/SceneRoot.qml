@@ -1,6 +1,7 @@
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
+import Qt3D.Input 2.0
 
 // import foo.bar 1.0
 
@@ -55,6 +56,10 @@ Entity {
         viewCenter: Qt.vector3d( 0.0, 0.0, 0.0 )
     }
 
+    OrbitCameraController {
+        camera: camera
+    }
+
     components: [
         RenderSettings {
             activeFrameGraph: ForwardRenderer {
@@ -62,8 +67,8 @@ Entity {
                 camera: camera
             }
         }
-        // ,
-        // InputSettings { }
+        ,
+        InputSettings { }
     ]
 
     SphereMesh {

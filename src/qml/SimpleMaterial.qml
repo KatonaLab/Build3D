@@ -34,6 +34,7 @@ Material {
             id: gl3Shader
             vertexShaderCode: "#version 150 core
                 in vec3 vertexPosition;
+                in vec2 vertexTexCoord;
                 out vec3 worldPosition;
                 out vec2 fragCoord;
                 uniform mat4 modelMatrix;
@@ -46,7 +47,7 @@ Material {
 
                     // Calculate vertex position in clip coordinates
                     gl_Position = mvp * vec4(worldPosition, 1.0);
-                    fragCoord = gl_Position.xy * 0.05 + 0.5;
+                    fragCoord = vertexTexCoord;
                 }"
 
             fragmentShaderCode: "#version 150 core
@@ -59,7 +60,7 @@ Material {
                     //output color from material
                     //fragColor = vec4(maincolor,1.0);
                     // fragColor = vec4(fragCoord.y*0.5, 0., 0., 1.);
-                    fragColor = texture(teximage, fragCoord);
+                    fragColor = texture(teximage, fragCoord) * 10.;
                 }"
         }
 
