@@ -1,56 +1,124 @@
 #include "volumetric.h"
-#include <libics.h>
+
+#include <iostream>
 
 using namespace std;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 
+const map<Ics_DataType, ICSFile::TypeInfoBasePtr> ICSFile::typeMap = {
+    {Ics_uint8, ti<uint8_t>()},
+    {Ics_sint8, ti<int8_t>()},
+    {Ics_uint16, ti<uint16_t>()},
+    {Ics_sint16, ti<int16_t>()},
+    {Ics_uint32, ti<uint32_t>()},
+    {Ics_sint32, ti<int32_t>()},
+    {Ics_real32, ti<float>()},
+    {Ics_real64, ti<double>()}
+};
+
+// TODO: proper error message
+#define ICS_EC(call) errorCheck(call, std::string(#call) + " - " + filename)
+
+ICSFile::ICSFile(std::string filename) : filename(filename)
+{
+    ICS_EC(IcsOpen(&ip, filename.c_str(), "r"));
+    ICS_EC(IcsGetLayout(ip, &dt, &ndims, dims));
+    if (typeMap.count(dt) == 0) {
+        throw ICSError("not supported data type format");
+    }
+    fillChannelData();
+}
+
+void ICSFile::fillChannelData()
+{
+    size_t size = IcsGetDataSize(ip);
+    shared_ptr<char> buffer(new char[size], default_delete<char[]>());
+    ICS_EC(IcsGetData(ip, buffer.get(), size));
+
+    size_t n = width() * height() * depth();
+    size_t c = channels();
+    for (size_t k = 0; k < c; ++k) {
+        channelData.emplace_back(new float[n], default_delete<float[]>());
+    }
+
+    using namespace std::placeholders;
+    auto cast = bind(&TypeInfoBase::cast, typeMap.at(dt), _1);
+    size_t bytes = typeMap.at(dt)->bytes();
+    for (int k = 0; k < c; ++k) {
+        size_t offset = n * k;
+        for (size_t i = 0; i < n; ++i) {
+            channelData[k].get()[i] = cast(buffer.get() + (i + offset) * bytes) / 1000.;
+        }
+    }
+}
+
+size_t ICSFile::channels() const
+{
+    // TODO: handle order in ics
+    return dims[3];
+}
+
+size_t ICSFile::width() const
+{
+    // TODO: handle order in ics
+    return dims[0];
+}
+
+size_t ICSFile::height() const
+{
+    // TODO: handle order in ics
+    return dims[1];
+}
+
+size_t ICSFile::depth() const
+{
+    // TODO: handle order in ics
+    return dims[2];
+}
+
+std::shared_ptr<float> ICSFile::getChannelData(int channel)
+{
+    return channelData[channel];
+}
+
+ICSFile::~ICSFile()
+{
+    ICS_EC(IcsClose(ip));
+}
+
+void ICSFile::errorCheck(Ics_Error error, const std::string message)
+{
+    if (error != IcsErr_Ok) {
+        throw ICSError(message);
+    }
+}
+
+#undef ICS_EC
+
+//------------------------------------------------------------------------------
+
 vector<VolumetricDataPtr> VolumetricData::loadICS(string filename)
 {
     vector<VolumetricDataPtr> vdList;
-
-    // TODO: use IcsGetOrder and prepare for shuffled dim order
-    ICS* ip;
-    IcsOpen(&ip, filename.c_str(), "r");
-
-    Ics_DataType dt;
-    int ndims;
-    size_t dims[ICS_MAXDIM];
-    IcsGetLayout(ip, &dt, &ndims, dims);
-    size_t imageElementSize = IcsGetImelSize(ip);
-
-    size_t w, h, d, c, n;
-    c = ndims >= 4 ? dims[3] : 1;
-    d = ndims >= 3 ? dims[2] : 1;
-    h = ndims >= 2 ? dims[1] : 1;
-    w = ndims >= 1 ? dims[0] : 1;
-    n = w * h * d;
-
-    ptrdiff_t strides[ndims];
-    for (int j = 0; j < ndims; ++j) {
-        strides[j] = 1;
-        if (j == 3) {
-            strides[j] = c;
-        }
-    }
-
-    for (int k = 0; k < c; ++k) {
+    ICSFile icsFile(filename);
+    for (int i = 0; i < icsFile.channels(); ++i) {
         VolumetricDataPtr vd = VolumetricDataPtr::create();
-        vd->m_data = new char[w * h];
-        vd->m_dims[0] = w;
-        vd->m_dims[1] = h;
-        vd->m_dims[2] = 1;
-        IcsGetPreviewData(ip, vd->m_data, w * h, k * d);
+        vd->m_dims[0] = icsFile.width();
+        vd->m_dims[1] = icsFile.height();
+        vd->m_dims[2] = icsFile.depth();
+        vd->m_data = icsFile.getChannelData(i);
         vdList.push_back(vd);
     }
-
-    IcsClose(ip);
     return vdList;
 }
 
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
-: Qt3DRender::QAbstractTexture(parent)
-{}
+: Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
+{
+    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
+    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
+}
 
 void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
 {
@@ -93,19 +161,41 @@ QTextureImageDataPtr ImageDataGenerator::operator()()
 
     texImage->setWidth(m_data->width());
     texImage->setHeight(m_data->height());
-    texImage->setDepth(1);
+    texImage->setDepth(m_data->depth());
     texImage->setFaces(1);
     texImage->setLayers(1);
     texImage->setMipLevels(1);
-    texImage->setFormat(QOpenGLTexture::TextureFormat::RGBA8_UNorm);
-
+    texImage->setFormat(QOpenGLTexture::TextureFormat::R32F);
     texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
-    texImage->setPixelType(QOpenGLTexture::PixelType::UInt8);
+    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
+    texImage->setTarget(QOpenGLTexture::Target::Target3D);
 
-    texImage->setTarget(QOpenGLTexture::Target::Target2D);
+    const QByteArray bytes = QByteArray((char*)m_data->data().get(), m_data->sizeInBytes());
+    texImage->setData(bytes, m_data->bytesPerPixel());
 
-    const QByteArray bytes = QByteArray(m_data->data(), m_data->width() * m_data->height());
-    texImage->setData(bytes, 1);
+//    texImage->setWidth(32);
+//    texImage->setHeight(32);
+//    texImage->setDepth(32);
+//    texImage->setFaces(1);
+//    texImage->setLayers(1);
+//    texImage->setMipLevels(1);
+//    texImage->setFormat(QOpenGLTexture::TextureFormat::R32F);
+//    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
+//    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
+//    texImage->setTarget(QOpenGLTexture::Target::Target3D);
+//
+//    float *data = new float[32*32*32];
+//    for (int x = 0; x < 32; ++x) {
+//        for (int y = 0; y < 32; ++y) {
+//            for (int z = 0; z < 32; ++z) {
+//                data[(x*32 + y)*32 + z] = x*y*z / (32. * 32. * 32.) * 16. + 0.5;
+//            }
+////            data[(x*32 + y)] = x*y / (32. * 32.) * 16.;
+//        }
+//    }
+//
+//    const QByteArray bytes = QByteArray((char*)data, 32*32*32*sizeof(float));
+//    texImage->setData(bytes, 1);
 
     return texImage;
 }
@@ -113,4 +203,8 @@ QTextureImageDataPtr ImageDataGenerator::operator()()
 bool ImageDataGenerator::operator ==(const QTextureImageDataGenerator &other) const
 {
     return true;
+
+    // TODO:
+//    const QPaintedTextureImageDataGenerator *otherFunctor = functor_cast<QPaintedTextureImageDataGenerator>(&other);
+//    return (otherFunctor != Q_NULLPTR && otherFunctor->m_generation == m_generation && otherFunctor->m_paintedTextureImageId == m_paintedTextureImageId);
 }

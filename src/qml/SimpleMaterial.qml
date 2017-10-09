@@ -1,6 +1,6 @@
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
-
+import QtQuick 2.0
 import a3dc.koki 1.0
 
 Material {
@@ -17,6 +17,15 @@ Material {
             name: "teximage"
             value: VolumetricTexture {
                 objectName: "objVol"
+            }
+        },
+        Parameter {
+            name: "time"
+            NumberAnimation on value {
+                from: -1.
+                to: 1.
+                duration: 1000
+                loops: Animation.Infinite
             }
         }
     ]
@@ -54,13 +63,18 @@ Material {
                 out vec4 fragColor;
                 uniform vec3 maincolor;
                 in vec2 fragCoord;
-                uniform sampler2D teximage;
+                uniform sampler3D teximage;
+                uniform float time;
                 void main()
                 {
                     //output color from material
                     //fragColor = vec4(maincolor,1.0);
                     // fragColor = vec4(fragCoord.y*0.5, 0., 0., 1.);
-                    fragColor = texture(teximage, fragCoord) * 10.;
+                    //fragColor = vec4(texture(teximage, vec3(fragCoord, fragCoord.x)).rgb * 1.0, 1.);
+                    // fragColor = texture(teximage, fragCoord);
+                    // fragColor = texture(teximage, vec3(0.0));
+                    // fragColor = vec4(fragCoord.xy, 0.5, 1.);
+                    fragColor = vec4(texture(teximage, vec3(fragCoord, abs(time))).rrr * 0.1, 1.);
                 }"
         }
 

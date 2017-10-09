@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     view.setSource(QUrl("qml/main.qml"));
     view.show();
 
-    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("K32_bassoon_TH_vGluT1_c01_cmle.ics");
+    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
 
     VolumetricTexture *tex = view.findChild<VolumetricTexture*>("objVol");
     tex->setDataSource(dataVec[0]);
