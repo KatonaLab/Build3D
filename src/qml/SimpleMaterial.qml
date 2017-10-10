@@ -1,7 +1,7 @@
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import QtQuick 2.0
-import a3dc.koki 1.0
+import koki.a3dc 1.0
 
 Material {
     id: root
@@ -24,7 +24,7 @@ Material {
             NumberAnimation on value {
                 from: -1.
                 to: 1.
-                duration: 1000
+                duration: 3000
                 loops: Animation.Infinite
             }
         }
@@ -67,14 +67,10 @@ Material {
                 uniform float time;
                 void main()
                 {
-                    //output color from material
-                    //fragColor = vec4(maincolor,1.0);
-                    // fragColor = vec4(fragCoord.y*0.5, 0., 0., 1.);
-                    //fragColor = vec4(texture(teximage, vec3(fragCoord, fragCoord.x)).rgb * 1.0, 1.);
-                    // fragColor = texture(teximage, fragCoord);
-                    // fragColor = texture(teximage, vec3(0.0));
-                    // fragColor = vec4(fragCoord.xy, 0.5, 1.);
-                    fragColor = vec4(texture(teximage, vec3(fragCoord, abs(time))).rrr * 0.1, 1.);
+                    float value = texture(teximage, vec3(fragCoord, abs(time))).r;
+                    // value = step(2., value);
+                    // value = pow(value, 0.8);
+                    fragColor = vec4(vec3(value), 1.);
                 }"
         }
 

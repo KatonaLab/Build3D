@@ -108,6 +108,7 @@ vector<VolumetricDataPtr> VolumetricData::loadICS(string filename)
         vd->m_dims[1] = icsFile.height();
         vd->m_dims[2] = icsFile.depth();
         vd->m_data = icsFile.getChannelData(i);
+        emit vd->dataChanged(vd);
         vdList.push_back(vd);
     }
     return vdList;
@@ -173,38 +174,11 @@ QTextureImageDataPtr ImageDataGenerator::operator()()
     const QByteArray bytes = QByteArray((char*)m_data->data().get(), m_data->sizeInBytes());
     texImage->setData(bytes, m_data->bytesPerPixel());
 
-//    texImage->setWidth(32);
-//    texImage->setHeight(32);
-//    texImage->setDepth(32);
-//    texImage->setFaces(1);
-//    texImage->setLayers(1);
-//    texImage->setMipLevels(1);
-//    texImage->setFormat(QOpenGLTexture::TextureFormat::R32F);
-//    texImage->setPixelFormat(QOpenGLTexture::PixelFormat::Red);
-//    texImage->setPixelType(QOpenGLTexture::PixelType::Float32);
-//    texImage->setTarget(QOpenGLTexture::Target::Target3D);
-//
-//    float *data = new float[32*32*32];
-//    for (int x = 0; x < 32; ++x) {
-//        for (int y = 0; y < 32; ++y) {
-//            for (int z = 0; z < 32; ++z) {
-//                data[(x*32 + y)*32 + z] = x*y*z / (32. * 32. * 32.) * 16. + 0.5;
-//            }
-////            data[(x*32 + y)] = x*y / (32. * 32.) * 16.;
-//        }
-//    }
-//
-//    const QByteArray bytes = QByteArray((char*)data, 32*32*32*sizeof(float));
-//    texImage->setData(bytes, 1);
-
     return texImage;
 }
 
 bool ImageDataGenerator::operator ==(const QTextureImageDataGenerator &other) const
 {
-    return true;
-
-    // TODO:
-//    const QPaintedTextureImageDataGenerator *otherFunctor = functor_cast<QPaintedTextureImageDataGenerator>(&other);
-//    return (otherFunctor != Q_NULLPTR && otherFunctor->m_generation == m_generation && otherFunctor->m_paintedTextureImageId == m_paintedTextureImageId);
+    const ImageDataGenerator *otherFunctor = functor_cast<ImageDataGenerator>(&other);
+    return (otherFunctor != Q_NULLPTR && otherFunctor->m_data == m_data);
 }

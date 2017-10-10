@@ -10,6 +10,7 @@
 
 #include <QOpenGLContext>
 #include <Qt3DInput/QInputSettings>
+#include <QQmlApplicationEngine>
 
 //#include <Qt3DRender/QTexture>
 //#include <Qt3DRender/QTextureImage>
@@ -43,30 +44,45 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
+    QGuiApplication::setApplicationName("A3DC");
+    QGuiApplication::setOrganizationName("KOKI MTA");
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//    QQuickStyle::setStyle("Material");
+
     QGuiApplication app(argc, argv);
     setSurfaceFormat();
 
-    qmlRegisterType<VolumetricTexture>("a3dc.koki", 1, 0, "VolumetricTexture");
+    qmlRegisterType<VolumetricTexture>("koki.a3dc", 1, 0, "VolumetricTexture");
 
-    QQuickView view;
-    view.resize(800, 800);
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setSource(QUrl("qml/main.qml"));
-    view.show();
+    QQmlApplicationEngine engine;
+    engine.load(QUrl("qml/main.qml"));
 
-    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
-
-    VolumetricTexture *tex = view.findChild<VolumetricTexture*>("objVol");
-    tex->setDataSource(dataVec[0]);
-
-    Qt3DInput::QInputSettings *inputSettings = view.findChild<Qt3DInput::QInputSettings *>();
-    if (inputSettings) {
-        inputSettings->setEventSource(&view);
-    } else {
-        cerr << "No Input Settings found, keyboard and mouse events won't be handled";
+    if (engine.rootObjects().isEmpty()) {
+        cerr << "qml error" << endl;
+        return -1;
     }
 
     return app.exec();
+
+//    QQuickView view;
+//    view.resize(800, 800);
+//    view.setResizeMode(QQuickView::SizeRootObjectToView);
+//    view.setSource(QUrl("qml/main.qml"));
+//    view.show();
+
+//    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
+
+//    VolumetricTexture *tex = view.findChild<VolumetricTexture*>("objVol");
+//    tex->setDataSource(dataVec[1]);
+
+//    Qt3DInput::QInputSettings *inputSettings = view.findChild<Qt3DInput::QInputSettings *>();
+//    if (inputSettings) {
+//        inputSettings->setEventSource(&view);
+//    } else {
+//        cerr << "No Input Settings found, keyboard and mouse events won't be handled";
+//    }
+
+//    return app.exec();
 }
 
 //void pythonTest()
