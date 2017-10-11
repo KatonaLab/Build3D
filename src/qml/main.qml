@@ -1,33 +1,35 @@
-// import QtQuick 2.7
-// import QtQuick.Layouts 1.1
-// import QtQuick.Controls 1.2
-import QtQuick.Scene3D 2.0
-// import Qt3D.Render 2.0
-
 import QtQuick 2.8
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.0
 import QtQuick.Controls.Material 2.1
 import QtQml.Models 2.1
-// import Qt.labs.controls.material 1.0
+import QtQuick.Scene3D 2.0
+import QtQuick.Dialogs 1.2
 
 ApplicationWindow {
 
-    // Material.theme: Material.Dark
-    // Material.theme: Material.Dark
-    // Material.accent: Material.Purple
-
-    id: window
+    id: root
     width: 1024
     height: 600
     visible: true
     title: "A3DC - KOKI MTA"
 
-    // Component.onCompleted: {
-    //     x = Screen.width / 2 - width / 2
-    //     y = Screen.height / 2 - height / 2
-    // }
+    Component.onCompleted: {
+        x = Screen.width / 2 - width / 2
+        y = Screen.height / 2 - height / 2
+    }
+
+    FileDialog {
+        id: openDialog
+        // fileMode: FileDialog.OpenFile
+        // selectedNameFilter.index: 1
+        nameFilters: ["Image Cytometry Standard (*.ics *.ids)"]
+        // folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        onAccepted: {
+            console.log("opened");
+        }
+    }
 
     header: ToolBar {
         leftPadding: 8
@@ -41,6 +43,7 @@ ApplicationWindow {
                 ToolButton {
                     id: openButton
                     text: "A" // icon-folder-open-empty
+                    onClicked: openDialog.open()
                 }
                 ToolSeparator {
                     contentItem.visible: fileRow.y === editRow.y
@@ -80,17 +83,53 @@ ApplicationWindow {
             focus: true
             aspects: ["input", "logic"]
             cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-            SceneRoot {}
+            Viewer {
+                id: sceneView
+            }
         }
 
-         ListView  {
-            Layout.fillHeight: true
-            Layout.preferredWidth: parent.width * 0.2
+        ListModel {
+            id: demoListModel
+            ListElement {
+                name: "Lorem"
+            }
+            ListElement {
+                name: "ipsum"
+            }
+            ListElement {
+                name: "dolorem"
+            }
+            ListElement {
+                name: "sit"
+            }
+        }
 
-            model: ObjectModel {
-                Repeater {
-                    model: 30
-                    CheckBox { text: "A" }
+        ColumnLayout {
+            ListView  {
+                Layout.fillHeight: true
+                Layout.preferredWidth: parent.width * 0.2
+
+                model: demoListModel
+                delegate: CheckBox {
+                    text: name
+                }
+            }
+
+            CheckBox {
+                text: "thresholding"
+                onClicked: {
+                    thresholdSlider.enabled = checked;
+                    sceneView.thresholding = checked;
+                }
+            }
+
+            Slider {
+                id: thresholdSlider
+                enabled: false
+                from: 0.
+                to: 10.
+                onMoved: {
+                    sceneView.threshold = value;
                 }
             }
         }
@@ -102,17 +141,17 @@ ApplicationWindow {
     //     color: "steelblue"
     //     anchors.fill: parent
 
-        // Scene3D {
-        //     id: scene3d
-        //     anchors.fill: parent
-        //     // anchors.centerIn: parent
+    //     Scene3D {
+    //         id: scene3d
+    //         anchors.fill: parent
+    //         // anchors.centerIn: parent
 
-        //     focus: true
-        //     aspects: ["input", "logic"]
-        //     cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+    //         focus: true
+    //         aspects: ["input", "logic"]
+    //         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
 
-        //     SceneRoot {}
-        // }
+    //         Viewer {}
+    //     }
     // }
 }
 

@@ -8,6 +8,9 @@ import Qt3D.Input 2.0
 Entity {
     id: sceneRoot
 
+    property alias thresholding: simpleMaterial.thresholding
+    property alias threshold: simpleMaterial.threshold
+
     CuboidMesh {
         id: boxMesh
         xExtent: 5
@@ -19,7 +22,7 @@ Entity {
         // id: material
     // }
 
-    SimpleMaterial {
+    VolumetricMaterial {
         id: simpleMaterial
         // objectName: "objVol"
     }
@@ -63,7 +66,7 @@ Entity {
     components: [
         RenderSettings {
             activeFrameGraph: ForwardRenderer {
-                clearColor: Qt.rgba(0, 0.5, 1, 1)
+                clearColor: Qt.rgba(0, 0, 0, 1)
                 camera: camera
             }
         }

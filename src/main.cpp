@@ -47,7 +47,6 @@ int main(int argc, char* argv[])
     QGuiApplication::setApplicationName("A3DC");
     QGuiApplication::setOrganizationName("KOKI MTA");
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-//    QQuickStyle::setStyle("Material");
 
     QGuiApplication app(argc, argv);
     setSurfaceFormat();
@@ -62,6 +61,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
+
+    QList<QObject*> roots = engine.rootObjects();
+    VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
+    tex->setDataSource(dataVec[1]);
+
     return app.exec();
 
 //    QQuickView view;
@@ -69,11 +74,6 @@ int main(int argc, char* argv[])
 //    view.setResizeMode(QQuickView::SizeRootObjectToView);
 //    view.setSource(QUrl("qml/main.qml"));
 //    view.show();
-
-//    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
-
-//    VolumetricTexture *tex = view.findChild<VolumetricTexture*>("objVol");
-//    tex->setDataSource(dataVec[1]);
 
 //    Qt3DInput::QInputSettings *inputSettings = view.findChild<Qt3DInput::QInputSettings *>();
 //    if (inputSettings) {

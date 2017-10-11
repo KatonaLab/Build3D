@@ -6,13 +6,10 @@ import koki.a3dc 1.0
 Material {
     id: root
 
-    property color maincolor: Qt.rgba(0.0, 1.0, 0.0, 1.0)
+    property bool thresholding: false
+    property real threshold: 0.
 
     parameters: [
-        Parameter {
-            name: "maincolor"
-            value: Qt.vector3d(root.maincolor.r, root.maincolor.g, root.maincolor.b)
-        },
         Parameter {
             name: "teximage"
             value: VolumetricTexture {
@@ -20,11 +17,19 @@ Material {
             }
         },
         Parameter {
+            name: "threshold"
+            value: root.threshold
+        },
+        Parameter {
+            name: "thresholding"
+            value: root.thresholding ? 1. : 0.
+        },
+        Parameter {
             name: "time"
             NumberAnimation on value {
                 from: -1.
                 to: 1.
-                duration: 3000
+                duration: 6000
                 loops: Animation.Infinite
             }
         }
@@ -61,16 +66,18 @@ Material {
 
             fragmentShaderCode: "#version 150 core
                 out vec4 fragColor;
-                uniform vec3 maincolor;
                 in vec2 fragCoord;
                 uniform sampler3D teximage;
                 uniform float time;
+                uniform float threshold;
+                uniform float thresholding;
                 void main()
                 {
                     float value = texture(teximage, vec3(fragCoord, abs(time))).r;
-                    // value = step(2., value);
+                    value = mix(value, step(threshold, value), thresholding);
                     // value = pow(value, 0.8);
                     fragColor = vec4(vec3(value), 1.);
+                    // fragColor = vec4(vec3(threshold), 1.);
                 }"
         }
 
