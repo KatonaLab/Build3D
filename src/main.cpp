@@ -11,6 +11,7 @@
 #include <QOpenGLContext>
 #include <Qt3DInput/QInputSettings>
 #include <QQmlApplicationEngine>
+#include <QFontDatabase>
 
 //#include <Qt3DRender/QTexture>
 //#include <Qt3DRender/QTextureImage>
@@ -53,6 +54,10 @@ int main(int argc, char* argv[])
 
     qmlRegisterType<VolumetricTexture>("koki.a3dc", 1, 0, "VolumetricTexture");
 
+    if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
+        qWarning() << "Failed to load fontello.ttf";
+    }
+
     QQmlApplicationEngine engine;
     engine.load(QUrl("qml/main.qml"));
 
@@ -61,11 +66,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+//    "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics"
     vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
 
     QList<QObject*> roots = engine.rootObjects();
     VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
-    tex->setDataSource(dataVec[1]);
+    tex->setDataSource(dataVec[0]);
 
     return app.exec();
 

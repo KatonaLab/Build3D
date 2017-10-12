@@ -1,5 +1,6 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 # LDFLAGS:  -L/usr/local/opt/qt/lib
 
@@ -20,7 +21,7 @@ include_directories("/Library/Frameworks/Python.framework/Versions/3.6/lib/pytho
 file(GLOB sources *.cpp)
 file(GLOB headers *.h)
 
-add_executable(app ${sources} ${headers})
+add_executable(app ${sources} ${headers} ../resources.qrc)
 target_link_libraries(app
     libics 
     ${PYTHON_LIBRARIES}

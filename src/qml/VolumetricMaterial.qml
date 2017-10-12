@@ -46,38 +46,75 @@ Material {
 
         ShaderProgram {
             id: gl3Shader
+            // vertexShaderCode: "#version 150 core
+            //     in vec3 vertexPosition;
+            //     in vec2 vertexTexCoord;
+            //     out vec3 worldPosition;
+            //     out vec2 fragCoord;
+            //     uniform mat4 modelMatrix;
+            //     uniform mat4 mvp;
+
+            //     void main()
+            //     {
+            //         // Transform position, normal, and tangent to world coords
+            //         worldPosition = vec3(modelMatrix * vec4(vertexPosition, 1.0));
+
+            //         // Calculate vertex position in clip coordinates
+            //         gl_Position = mvp * vec4(worldPosition, 1.0);
+            //         fragCoord = vertexTexCoord;
+            //     }"
+
+            // fragmentShaderCode: "#version 150 core
+            //     out vec4 fragColor;
+            //     in vec2 fragCoord;
+            //     uniform sampler3D teximage;
+            //     uniform float time;
+            //     uniform float threshold;
+            //     uniform float thresholding;
+            //     void main()
+            //     {
+            //         float value = texture(teximage, vec3(fragCoord, abs(time))).r * 0.1;
+            //         value = mix(value, step(threshold, value), thresholding);
+            //         // value = pow(value, 0.8);
+            //         fragColor = vec4(vec3(value), 1.);
+            //         // fragColor = vec4(vec3(threshold), 1.);
+            //     }"
+
             vertexShaderCode: "#version 150 core
                 in vec3 vertexPosition;
-                in vec2 vertexTexCoord;
-                out vec3 worldPosition;
-                out vec2 fragCoord;
+                out vec3 position;
+                out vec3 direction;
+                uniform mat4 viewMatrix;
                 uniform mat4 modelMatrix;
-                uniform mat4 mvp;
-
+                uniform mat4 modelViewMatrix;
+                uniform mat4 modelViewProjection;
+                uniform vec3 eyePosition;
                 void main()
                 {
-                    // Transform position, normal, and tangent to world coords
-                    worldPosition = vec3(modelMatrix * vec4(vertexPosition, 1.0));
-
-                    // Calculate vertex position in clip coordinates
-                    gl_Position = mvp * vec4(worldPosition, 1.0);
-                    fragCoord = vertexTexCoord;
+                    position.xyz = vertexPosition.xyz + 0.5;
+                    vec4 d = modelMatrix * vec4(vertexPosition, 1.0) - vec4(eyePosition, 1.);
+                    direction = d.xyz;
+                    gl_Position = modelViewProjection * vec4(vertexPosition, 1.0);
                 }"
 
             fragmentShaderCode: "#version 150 core
-                out vec4 fragColor;
-                in vec2 fragCoord;
+                out vec4 outputColor;
+                in vec3 position;
+                in vec3 direction;
                 uniform sampler3D teximage;
                 uniform float time;
                 uniform float threshold;
                 uniform float thresholding;
                 void main()
                 {
-                    float value = texture(teximage, vec3(fragCoord, abs(time))).r;
-                    value = mix(value, step(threshold, value), thresholding);
-                    // value = pow(value, 0.8);
-                    fragColor = vec4(vec3(value), 1.);
-                    // fragColor = vec4(vec3(threshold), 1.);
+                    vec3 d = normalize(direction);
+                    // vec3 d = direction;
+                    float acc = 0.2;
+                    float t = 0.;
+                    for (int i = 0; i < 100; ++i) {
+                        acc = max(acc, 0.1 * texture(teximage, position + d * float(i)*0.01).r);
+                    }
+                    outputColor = vec4(vec3(acc), 1.);
                 }"
         }
 

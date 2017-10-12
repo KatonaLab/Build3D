@@ -123,6 +123,7 @@ VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 
 void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
 {
+    setStatus(Qt3DRender::QAbstractTexture::Status::Loading);
     if (m_textureImage) {
         removeTextureImage(m_textureImage);
         delete m_textureImage;
@@ -131,6 +132,8 @@ void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
 
     m_textureImage = new VolumetricTextureImage(data);
     addTextureImage(m_textureImage);
+    setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
+    cout << "tex ready" << endl;
 }
 
 VolumetricTexture::~VolumetricTexture()

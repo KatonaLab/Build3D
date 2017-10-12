@@ -6,6 +6,7 @@ import QtQuick.Controls.Material 2.1
 import QtQml.Models 2.1
 import QtQuick.Scene3D 2.0
 import QtQuick.Dialogs 1.2
+import QtGraphicalEffects 1.0
 
 ApplicationWindow {
 
@@ -74,17 +75,50 @@ ApplicationWindow {
     RowLayout {
         anchors.fill: parent
 
-        Scene3D {
-            id: scene3d
-            
+        Item {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            focus: true
-            aspects: ["input", "logic"]
-            cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-            Viewer {
-                id: sceneView
+            Scene3D {
+                id: scene3d
+                
+                anchors.fill: parent
+
+                focus: true
+                aspects: ["input", "logic"]
+                cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+                Viewer {
+                    id: sceneView
+                }
+            }
+
+            Rectangle {
+                id:sceneLoadingOverlay
+                visible: true
+                anchors.fill: parent
+                color: "Black"
+                opacity: 0.75
+                
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 20
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\uE839"
+                        font.family: "fontello"
+                        font.pointSize: 22
+                        color: "White"
+                        NumberAnimation on rotation {
+                            from: 0; to: 360;
+                            running: sceneLoadingOverlay.visible == true; 
+                            loops: Animation.Infinite
+                            duration: 1200;
+                        }
+                    }
+                    ProgressBar {
+                        value: 0.3
+                    }
+                }
             }
         }
 
