@@ -94,7 +94,7 @@ ApplicationWindow {
 
             Rectangle {
                 id:sceneLoadingOverlay
-                visible: true
+                visible: false
                 anchors.fill: parent
                 color: "Black"
                 opacity: 0.75

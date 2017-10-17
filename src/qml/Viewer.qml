@@ -58,7 +58,7 @@ Entity {
     components: [
         RenderSettings {
             activeFrameGraph: ForwardRenderer {
-                clearColor: Qt.rgba(0.2, 0.2, 0.2, 1)
+                clearColor: Qt.rgba(0.0, 0.0, 0.0, 1)
                 camera: camera
             }
         }

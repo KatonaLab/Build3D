@@ -92,6 +92,7 @@ Material {
                 void main()
                 {
                     position.xyz = vertexPosition.xyz + 0.5;
+                    // position.z *= 15./512.;
                     vec4 d = modelMatrix * vec4(vertexPosition, 1.0) - vec4(eyePosition, 1.);
                     direction = d.xyz;
                     gl_Position = modelViewProjection * vec4(vertexPosition, 1.0);
@@ -107,14 +108,17 @@ Material {
                 uniform float thresholding;
                 void main()
                 {
-                    vec3 d = normalize(direction);
+                    vec3 d = direction;
                     // vec3 d = direction;
-                    float acc = 0.2;
+                    float acc = 0.0;
                     float t = 0.;
-                    for (int i = 0; i < 100; ++i) {
-                        acc = max(acc, 0.1 * texture(teximage, position + d * float(i)*0.01).r);
+                    for (int i = 0; i < 256; ++i) {
+                        vec3 p = position + d * float(i)*0.05;
+                        acc = acc + step(0.05, texture(teximage, p).r);
+                        // 0.25 * 
                     }
-                    outputColor = vec4(vec3(acc), 1.);
+                    outputColor = vec4(vec3(acc*0.05*0.25), 1.);
+                    // outputColor = vec4(2.*texture(teximage, position).rrr, 1.);
                 }"
         }
 

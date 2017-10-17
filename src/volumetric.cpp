@@ -1,6 +1,7 @@
 #include "volumetric.h"
 
 #include <iostream>
+#include <QTextureWrapMode>
 
 using namespace std;
 using namespace Qt3DCore;
@@ -119,6 +120,7 @@ VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 {
     setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
     setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
+    setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
 }
 
 void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
@@ -133,7 +135,6 @@ void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
     m_textureImage = new VolumetricTextureImage(data);
     addTextureImage(m_textureImage);
     setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
-    cout << "tex ready" << endl;
 }
 
 VolumetricTexture::~VolumetricTexture()

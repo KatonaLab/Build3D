@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     }
 
 //    "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics"
-    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics");
+    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/Desktop/test.ics");
 
     QList<QObject*> roots = engine.rootObjects();
     VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
