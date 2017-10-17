@@ -99,21 +99,51 @@ void ICSFile::errorCheck(Ics_Error error, const std::string message)
 
 //------------------------------------------------------------------------------
 
-vector<VolumetricDataPtr> VolumetricData::loadICS(string filename)
+bool VolumetricDataManager::loadICS(string filename)
 {
-    vector<VolumetricDataPtr> vdList;
-    ICSFile icsFile(filename);
-    for (int i = 0; i < icsFile.channels(); ++i) {
-        VolumetricDataPtr vd = VolumetricDataPtr::create();
-        vd->m_dims[0] = icsFile.width();
-        vd->m_dims[1] = icsFile.height();
-        vd->m_dims[2] = icsFile.depth();
-        vd->m_data = icsFile.getChannelData(i);
-        emit vd->dataChanged(vd);
-        vdList.push_back(vd);
+    emit progressChanged(0.0);
+    m_dataList.clear();
+    try {
+        ICSFile icsFile(filename);
+        for (int i = 0; i < icsFile.channels(); ++i) {
+            VolumetricDataPtr vd = VolumetricDataPtr::create();
+            vd->m_dims[0] = icsFile.width();
+            vd->m_dims[1] = icsFile.height();
+            vd->m_dims[2] = icsFile.depth();
+            vd->m_data = icsFile.getChannelData(i);
+            m_dataList.append(vd);
+            emit progressChanged((i + 1) / (float)icsFile.channels());
+        }
+    } catch (ICSError &e) {
+        return false;
     }
-    return vdList;
+    return true;
 }
+
+void VolumetricDataManager::setSource(const QString& source)
+{
+    m_source = source;
+    emit sourceChanged();
+    setStatus(Loading);
+    bool success = loadICS(source.toStdString());
+    setStatus(success ? Ready : Failure);
+}
+
+void VolumetricDataManager::setStatus(const Status &status)
+{
+    m_status = status;
+    emit statusChanged();
+}
+
+QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
+{
+    QList<VolumetricData *> list;
+    for (auto &elem : m_dataList) {
+        list.append(elem.data());
+    }
+    return QQmlListProperty<VolumetricData>(this, list);
+}
+//------------------------------------------------------------------------------
 
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)

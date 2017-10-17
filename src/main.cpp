@@ -4,9 +4,10 @@
 
 #include <string>
 
-#include <QGuiApplication>
+#include <QApplication>
 //#include <QVector>
 #include <QQuickView>
+#include <QStyleFactory>
 
 #include <QOpenGLContext>
 #include <Qt3DInput/QInputSettings>
@@ -45,14 +46,18 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
-    QGuiApplication::setApplicationName("A3DC");
-    QGuiApplication::setOrganizationName("KOKI MTA");
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
+    app.setOrganizationName("MTA KOKI KatonaLab");
+    app.setOrganizationDomain("koki.hu");
+    app.setApplicationName("A3DC");
+
     setSurfaceFormat();
 
-    qmlRegisterType<VolumetricTexture>("koki.a3dc", 1, 0, "VolumetricTexture");
+    qmlRegisterType<VolumetricData>("koki.katonalab.a3dc", 1, 0, "VolumetricData");
+    qmlRegisterType<VolumetricDataManager>("koki.katonalab.a3dc", 1, 0, "VolumetricDataManager");
+    qmlRegisterType<VolumetricTexture>("koki.katonalab.a3dc", 1, 0, "VolumetricTexture");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";
@@ -61,17 +66,17 @@ int main(int argc, char* argv[])
     QQmlApplicationEngine engine;
     engine.load(QUrl("qml/main.qml"));
 
-    if (engine.rootObjects().isEmpty()) {
-        cerr << "qml error" << endl;
-        return -1;
-    }
-
-//    "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics"
-    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/Desktop/test.ics");
-
-    QList<QObject*> roots = engine.rootObjects();
-    VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
-    tex->setDataSource(dataVec[0]);
+//    if (engine.rootObjects().isEmpty()) {
+//        cerr << "qml error" << endl;
+//        return -1;
+//    }
+//
+////    "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics"
+//    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/Desktop/test.ics");
+//
+//    QList<QObject*> roots = engine.rootObjects();
+//    VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
+//    tex->setDataSource(dataVec[0]);
 
     return app.exec();
 

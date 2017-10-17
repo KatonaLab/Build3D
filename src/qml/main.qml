@@ -8,17 +8,33 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Dialogs 1.2
 import QtGraphicalEffects 1.0
 
-ApplicationWindow {
+import Qt.labs.settings 1.0
+import koki.katonalab.a3dc 1.0
 
+ApplicationWindow {
     id: root
+    visible: true
+
     width: 1024
     height: 600
-    visible: true
-    title: "A3DC - KOKI MTA"
+    title: "A3DC - KatonaLab KOKI MTA"
+
+    Settings {
+        property alias x: root.x
+        property alias y: root.y
+        property alias width: root.width
+        property alias height: root.height
+    }
+
+    VolumetricDataManager {
+        id: dataManager
+        onSourceChanged: { console.log("src changed ", source); }
+        onStatusChanged: { console.log("src changed ", status); }
+    }
 
     Component.onCompleted: {
-        x = Screen.width / 2 - width / 2
-        y = Screen.height / 2 - height / 2
+        dataManager.source = "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics";
+        console.log("len", dataManager.volumes.length);
     }
 
     FileDialog {
@@ -65,9 +81,9 @@ ApplicationWindow {
                     id: pasteButton
                     text: "D" // icon-paste
                 }
-                ToolSeparator {
-                    contentItem.visible: editRow.y === formatRow.y
-                }
+                // ToolSeparator {
+                    // contentItem.visible: editRow.y === formatRow.y
+                // }
             }
         } // flow
     } // header toolbar
