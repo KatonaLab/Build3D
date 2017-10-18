@@ -1,3 +1,3 @@
 [submodule "lib/libics"]
 	path = lib/libics
-	url = https://github.com/svi-opensource/libics.git
+	url = https://github.com/KatonaLab/libics.git

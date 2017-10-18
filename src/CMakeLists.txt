@@ -46,10 +46,10 @@ target_link_libraries(app
 #     ${CMAKE_SOURCE_DIR}/scripts $<TARGET_FILE_DIR:app>/scripts)
 #
 
-add_custom_command(TARGET app PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink
-    ${CMAKE_SOURCE_DIR}/src/qml $<TARGET_FILE_DIR:app>/qml)
+# add_custom_command(TARGET app PRE_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E create_symlink
+#     ${CMAKE_SOURCE_DIR}/src/qml $<TARGET_FILE_DIR:app>/qml)
 
-add_custom_command(TARGET app PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink
-    ${CMAKE_SOURCE_DIR}/scripts $<TARGET_FILE_DIR:app>/scripts)
+# add_custom_command(TARGET app PRE_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E create_symlink
+#     ${CMAKE_SOURCE_DIR}/scripts $<TARGET_FILE_DIR:app>/scripts)

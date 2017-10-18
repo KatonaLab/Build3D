@@ -2,11 +2,11 @@ import QtQuick 2.8
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.0
-import QtQuick.Controls.Material 2.1
-import QtQml.Models 2.1
+// import QtQuick.Controls.Material 2.1
+// import QtQml.Models 2.1
 import QtQuick.Scene3D 2.0
 import QtQuick.Dialogs 1.2
-import QtGraphicalEffects 1.0
+// import QtGraphicalEffects 1.0
 
 import Qt.labs.settings 1.0
 import koki.katonalab.a3dc 1.0
