@@ -8,15 +8,47 @@ import koki.katonalab.a3dc 1.0
 Entity {
     id: root
 
+    property vector3d size
+
+    readonly property Buffer tex3DCoordsBuffer: Buffer {
+        data: {
+            return new Float32Array([
+                0, 0, 0,  0, 1, 0,  0, 0, 1,  0, 1, 1, // neg x
+                1, 0, 1,  1, 1, 1,  1, 0, 0,  1, 1, 0, // pos x
+                1, 1, 1,  0, 1, 1,  1, 1, 0,  0, 1, 0, // pos y
+                1, 0, 0,  0, 0, 0,  1, 0, 1,  0, 0, 1, // neg y
+                1, 0, 1,  0, 0, 1,  1, 1, 1,  0, 1, 1, // pos z
+                0, 0, 0,  1, 0, 0,  0, 1, 0,  1, 1, 0, // neg z
+                ]);
+        }
+    }
+
     VolumeMaterial {
         id: material
     }
-
-    CuboidMesh {
+ 
+    GeometryRenderer {
         id: mesh
-        xExtent: Math.random()
-        yExtent: Math.random()
-        zExtent: Math.random()
+        instanceCount: 1 // we need one instance
+        geometry: cubeGeo
+    }
+
+    CuboidGeometry {
+        id: cubeGeo
+        xExtent: size.x
+        yExtent: size.y
+        zExtent: size.z
+        attributes: [
+            Attribute {
+                attributeType: Attribute.VertexAttribute
+                vertexBaseType: Attribute.Float
+                vertexSize: 3 // we need 3 floats
+                byteStride: 3 * 4 // a float is 4 bytes, so 12 bytes
+                byteOffset: 0
+                name: "tex3DCoords"
+                buffer: tex3DCoordsBuffer
+            }
+        ]
     }
 
     components: [mesh, material]

@@ -24,7 +24,7 @@ Entity {
     {
         var component = Qt.createComponent("VolumeCube.qml");
         // TODO: set the ranges properly
-        var object = component.createObject(root);
+        var object = component.createObject(root, {"size": Qt.vector3d(1., 1., 0.4)});
         d.cubeList.push(object);
         return object;
     }
@@ -43,7 +43,7 @@ Entity {
 
     OrbitCameraController {
         camera: camera
-        lookSpeed: -180
+        lookSpeed: -180 * 2
     }
 
     components: [

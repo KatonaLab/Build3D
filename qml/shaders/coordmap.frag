@@ -1,7 +1,7 @@
 #version 150 core
 
 in vec3 position;
-in vec3 direction;
+// in vec3 direction;
 
 out vec4 outputColor;
 
