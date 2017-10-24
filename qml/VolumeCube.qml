@@ -3,29 +3,22 @@ import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
 import Qt3D.Input 2.0
-
 import koki.katonalab.a3dc 1.0
 
-// Component {
+Entity {
+    id: root
+    property alias color: material.diffuse
 
-    Entity {
-
-        id: root
-        // property alias data: material.data
-        property VolumetricData data: undefined
-
-        VolumetricMaterial {
-            id: material
-            data: root.data
-        }
-
-        CuboidMesh {
-            id: boxMesh
-            xExtent: 1
-            yExtent: 1
-            zExtent: 1
-        }
-
-        components: [ boxMesh, simpleMaterial ]
+    PhongMaterial {
+        id: material
     }
-// }
+
+    CuboidMesh {
+        id: mesh
+        xExtent: Math.random()
+        yExtent: Math.random()
+        zExtent: Math.random()
+    }
+
+    components: [mesh, material]
+}

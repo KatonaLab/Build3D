@@ -7,6 +7,30 @@ import Qt3D.Input 2.0
 Entity {
     id: root
 
+    QtObject {
+        id: d
+        property var cubeList : []
+    }
+
+    function clearCubes()
+    {
+        for (var i = 0; i < d.cubeList.length; ++i) {
+            d.cubeList[i].destroy();
+        }
+        d.cubeList = [];
+    }
+
+    function createCube(volumeData)
+    {
+        var component = Qt.createComponent("VolumeCube.qml");
+        // TODO: set the ranges properly
+        var object = component.createObject(root, 
+            {"color" : Qt.rgba(Math.random(), Math.random(), Math.random(), 1)}
+            );
+        d.cubeList.push(object);
+        return object;
+    }
+
     // property alias thresholding: simpleMaterial.thresholding
     // property alias threshold: simpleMaterial.threshold
 
@@ -31,8 +55,8 @@ Entity {
     //     }
     // }
 
-    function addModel(volumeData)
-    {
+    // function addModel(volumeData)
+    // {
         // var component = Qt.createComponent("VolumeCube.qml");
         // console.log(component.errorString());
 
@@ -41,24 +65,24 @@ Entity {
         // if (obj == null) {
         //     console.log("Error creating object");
         // }
-    }
+    // }
 
-    CuboidMesh {
-        id: boxMesh
-        xExtent: 1
-        yExtent: 1
-        zExtent: 1
-    }
+    // CuboidMesh {
+    //     id: boxMesh
+    //     xExtent: 1
+    //     yExtent: 1
+    //     zExtent: 1
+    // }
 
     // VolumetricMaterial {
     //     id: simpleMaterial
     //     // objectName: "objVol"
     // }
 
-    DiffuseMapMaterial {
-        id: simpleMaterial
-        ambient: "#225588"
-    }
+    // DiffuseMapMaterial {
+        // id: simpleMaterial
+        // ambient: "#225588"
+    // }
 
     // Transform {
     //     id: boxTransform
@@ -75,10 +99,10 @@ Entity {
     //     components: [ boxMesh, simpleMaterial, boxTransform ]
     // }
 
-    Entity {
-        id: boxEntity
-        components: [ boxMesh, simpleMaterial ]
-    }
+    // Entity {
+        // id: boxEntity
+        // components: [ boxMesh, simpleMaterial ]
+    // }
 
     Camera {
         id: camera
@@ -95,6 +119,7 @@ Entity {
 
     OrbitCameraController {
         camera: camera
+        lookSpeed: -180
     }
 
     components: [
@@ -103,8 +128,7 @@ Entity {
                 clearColor: Qt.rgba(0.0, 0.2, 0.2, 1)
                 camera: camera
             }
-        }
-        ,
+        },
         InputSettings { }
     ]
 }

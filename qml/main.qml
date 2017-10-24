@@ -15,6 +15,21 @@ ApplicationWindow {
     height: 600
     title: "A3DC - KatonaLab KOKI MTA"
 
+    function buildGuiForVolumeData(manager)
+    {
+        channelPanel.clearControls();
+        sceneObject.clearCubes();
+        for (var i = 0; i < manager.volumes.length; ++i) {
+            var cube = sceneObject.createCube(manager.volumes[i]);
+            channelPanel.createViewControl(manager.volumes[i], cube);
+        }
+    }
+
+    Component.onCompleted: {
+        // NOTE: for test purposes
+        dataManager.source = "file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics";
+    }
+
     menuBar: MenuBar {
         // TODO
     }
@@ -28,12 +43,6 @@ ApplicationWindow {
         height: 16
     }
 
-    Component.onCompleted: {
-        dataManager.source = "file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics";
-        console.log("len", dataManager.volumes.length);
-        console.log("len", dataManager.source);
-    }
-
     Settings {
         property alias x: root.x
         property alias y: root.y
@@ -41,28 +50,26 @@ ApplicationWindow {
         property alias height: root.height
     }
 
-    SystemPalette {
-        id: sysColors
-        colorGroup: SystemPalette.Active
-    }
-
     VolumetricDataManager {
         id: dataManager
         onStatusChanged: { 
             switch (status) {
                 case Component.Ready:
-                    loadIndicator.visible = true;
+                    loadIndicator.visible = false;
+                    buildGuiForVolumeData(dataManager);
                     break;
                 case Component.Loading:
                     loadIndicator.visible = true;
                     break;
                 case Component.Error:
                     // TODO: pop up error
+                    // and reset the changes
                     console.log("error in loading")
                     break;
             }
         }
         onProgressChanged: {
+            // TODO: progress to bg thread in the cpp impl.
             loadIndicator.progress = progress;
         }
     }
@@ -71,20 +78,10 @@ ApplicationWindow {
         anchors.fill: parent
         spacing: 0
     
-        Rectangle {
-            Layout.preferredWidth: 240
+        ChannelViewPanel {
+            id: channelPanel
+            Layout.preferredWidth: 250
             Layout.fillHeight: true
-            color: sysColors.dark
-            border.color: sysColors.mid
-            border.width: 1
-
-            ScrollView {
-                anchors.fill: parent
-                ColumnLayout {
-                    spacing: 8
-                    
-                }
-            }
         }
 
         Scene3D {
@@ -93,32 +90,19 @@ ApplicationWindow {
             aspects: ["input", "logic"]
             cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
             SceneModel {
-                id: sceneModel
+                id: sceneObject
             }
         }
 
         Rectangle {
             Layout.preferredWidth: 250
             Layout.fillHeight: true
-            color: sysColors.dark
-            border.color: sysColors.mid
-            border.width: 1
+            // TODO: activate
+            visible: false
         }
     }
 
-    Window {
-        width: 100
-        height: 200
-    }
-
-    Label {
+    LoadIndicator {
         id: loadIndicator
-        
-        property real progress
-
-        // TODO: text for loading
-        anchors.centerIn: parent
-        text: "loading " + progress*100 + "%"
-        color: "white"
     }
 }

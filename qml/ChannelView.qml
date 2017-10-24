@@ -3,9 +3,9 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
 
-GroupBox {
+Item {
     id: root
-    width: 50
+    height: layout.height
 
     property string text
     property real from
@@ -32,7 +32,8 @@ GroupBox {
     }
 
     ColumnLayout {
-        anchors.fill: parent
+        id: layout
+        // anchors.fill: parent
         RowLayout {
             CheckBox {
                 id: visibilityCheckBox
