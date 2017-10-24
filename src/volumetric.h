@@ -7,6 +7,7 @@
 #include <Qt3DRender/QTextureImageData>
 #include <Qt3DRender/QTextureImageDataGenerator>
 #include <QQmlListProperty>
+#include <QQmlComponent>
 #include <array>
 #include <vector>
 #include <string>
@@ -63,31 +64,33 @@ typedef QSharedPointer<VolumetricData> VolumetricDataPtr;
 
 class VolumetricDataManager: public QObject {
     Q_OBJECT
-    Q_ENUMS(Status)
-    Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(Status status READ status WRITE setStatus NOTIFY statusChanged)
-//    Q_PROPERTY(float progress READ getProgress NOTIFY porgressChanged)
+    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(QQmlComponent::Status status READ status WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY(float progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(QQmlListProperty<VolumetricData> volumes READ volumes)
-
 public:
-    enum Status {Ready, Loading, Failure};
-
+    typedef QQmlComponent::Status Status;
 public:
-    QString source() const { return m_source; }
+    QUrl source() const { return m_source; }
     Status status() const { return m_status; }
+    float progress() const { return m_progress; }
     QQmlListProperty<VolumetricData> volumes();
-    void setSource(const QString &source);
+    void setSource(const QUrl &source);
     void setStatus(const Status &status);
 
 Q_SIGNALS:
     void sourceChanged();
     void statusChanged();
-    void progressChanged(float);
+    void progressChanged();
 
 private:
     bool loadICS(std::string filename);
-    QString m_source;
-    Status m_status;
+    QUrl m_source;
+    Status m_status = Status::Null;
+    float m_progress;
+
+// FIXME:
+public:
     QVector<VolumetricDataPtr> m_dataList;
 };
 
@@ -122,15 +125,23 @@ class VolumetricTextureImage;
 
 class VolumetricTexture : public Qt3DRender::QAbstractTexture {
     Q_OBJECT
+    Q_PROPERTY(const VolumetricData* data READ data WRITE setData)
+    Q_PROPERTY(bool valid READ valid NOTIFY validityChanged)
 public:
-    explicit VolumetricTexture(Qt3DCore::QNode *parent = nullptr);
+    explicit VolumetricTexture(Qt3DCore::QNode* parent = nullptr);
     virtual ~VolumetricTexture();
 
-public Q_SLOTS:
-    void setDataSource(const VolumetricDataPtr data);
+    const VolumetricData* data() const { return m_data; }
+    void setData(const VolumetricData *data);
+    bool valid() const { return m_valid; }
+
+Q_SIGNALS:
+    void validityChanged();
 
 protected:
-    VolumetricTextureImage *m_textureImage = nullptr;
+    const VolumetricData* m_data = nullptr;
+    bool m_valid = false;
+    VolumetricTextureImage* m_textureImage = nullptr;
 };
 
 //------------------------------------------------------------------------------
@@ -141,7 +152,7 @@ typedef QSharedPointer<ImageDataGenerator> ImageDataGeneratorPtr;
 class VolumetricTextureImage : public Qt3DRender::QAbstractTextureImage {
     Q_OBJECT
 public:
-    explicit VolumetricTextureImage(const VolumetricDataPtr data,
+    explicit VolumetricTextureImage(const VolumetricData* data,
                                     Qt3DCore::QNode *parent = nullptr);
 
 protected:
@@ -154,12 +165,12 @@ protected:
 class ImageDataGenerator : public Qt3DRender::QTextureImageDataGenerator {
 public:
     QT3D_FUNCTOR(ImageDataGenerator)
-    ImageDataGenerator(VolumetricDataPtr data);
+    ImageDataGenerator(const VolumetricData* data);
     Qt3DRender::QTextureImageDataPtr operator()() override;
     bool operator ==(const QTextureImageDataGenerator &other) const override;
 
 private:
-    VolumetricDataPtr m_data;
+    const VolumetricData* m_data;
 };
 
 typedef QSharedPointer<ImageDataGenerator> DataGeneratorPtr;

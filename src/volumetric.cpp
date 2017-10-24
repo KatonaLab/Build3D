@@ -3,6 +3,10 @@
 #include <iostream>
 #include <QTextureWrapMode>
 
+// TEST
+#include <chrono>
+#include <thread>
+
 using namespace std;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -101,7 +105,9 @@ void ICSFile::errorCheck(Ics_Error error, const std::string message)
 
 bool VolumetricDataManager::loadICS(string filename)
 {
-    emit progressChanged(0.0);
+    m_progress = 0.0f;
+    emit progressChanged();
+
     m_dataList.clear();
     try {
         ICSFile icsFile(filename);
@@ -112,21 +118,26 @@ bool VolumetricDataManager::loadICS(string filename)
             vd->m_dims[2] = icsFile.depth();
             vd->m_data = icsFile.getChannelData(i);
             m_dataList.append(vd);
-            emit progressChanged((i + 1) / (float)icsFile.channels());
+
+            m_progress = (i + 1) / (float)icsFile.channels();
+            emit progressChanged();
         }
     } catch (ICSError &e) {
+        // FIXME
+        cout << e.what() << endl;
         return false;
     }
     return true;
 }
 
-void VolumetricDataManager::setSource(const QString& source)
+void VolumetricDataManager::setSource(const QUrl& source)
 {
+    // TODO: loading to another thread (?)
     m_source = source;
     emit sourceChanged();
-    setStatus(Loading);
-    bool success = loadICS(source.toStdString());
-    setStatus(success ? Ready : Failure);
+    setStatus(Status::Loading);
+    bool success = loadICS(source.toLocalFile().toStdString());
+    setStatus(success ? Status::Ready : Status::Error);
 }
 
 void VolumetricDataManager::setStatus(const Status &status)
@@ -153,7 +164,7 @@ VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
 }
 
-void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
+void VolumetricTexture::setData(const VolumetricData* data)
 {
     setStatus(Qt3DRender::QAbstractTexture::Status::Loading);
     if (m_textureImage) {
@@ -162,9 +173,13 @@ void VolumetricTexture::setDataSource(const VolumetricDataPtr data)
         m_textureImage = nullptr;
     }
 
-    m_textureImage = new VolumetricTextureImage(data);
+    m_data = data;
+    m_textureImage = new VolumetricTextureImage(m_data);
     addTextureImage(m_textureImage);
     setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
+
+    m_valid = true;
+    emit validityChanged();
 }
 
 VolumetricTexture::~VolumetricTexture()
@@ -174,7 +189,7 @@ VolumetricTexture::~VolumetricTexture()
 
 //------------------------------------------------------------------------------
 
-VolumetricTextureImage::VolumetricTextureImage(const VolumetricDataPtr data, QNode *parent)
+VolumetricTextureImage::VolumetricTextureImage(const VolumetricData* data, QNode *parent)
 : QAbstractTextureImage(parent)
 {
     m_generator = ImageDataGeneratorPtr::create(data);
@@ -187,7 +202,7 @@ QTextureImageDataGeneratorPtr VolumetricTextureImage::dataGenerator() const
 
 //------------------------------------------------------------------------------
 
-ImageDataGenerator::ImageDataGenerator(VolumetricDataPtr data) : m_data(data)
+ImageDataGenerator::ImageDataGenerator(const VolumetricData* data) : m_data(data)
 {}
 
 QTextureImageDataPtr ImageDataGenerator::operator()()

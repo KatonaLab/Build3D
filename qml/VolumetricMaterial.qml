@@ -8,11 +8,13 @@ Material {
 
     property bool thresholding: false
     property real threshold: 0.
+    // property VolumetricData data: undefined
 
     parameters: [
         Parameter {
             name: "teximage"
             value: VolumetricTexture {
+                // data: root.data
                 objectName: "objVol"
             }
         },
@@ -113,11 +115,11 @@ Material {
                     float acc = 0.0;
                     float t = 0.;
                     for (int i = 0; i < 256; ++i) {
-                        vec3 p = position + d * float(i)*0.05;
+                        vec3 p = position + d * float(i)*0.015;
                         acc = acc + step(0.05, texture(teximage, p).r);
                         // 0.25 * 
                     }
-                    outputColor = vec4(vec3(acc*0.05*0.25), 1.);
+                    outputColor = vec4(vec3(acc*0.05*0.5), 1.);
                     // outputColor = vec4(2.*texture(teximage, position).rrr, 1.);
                 }"
         }

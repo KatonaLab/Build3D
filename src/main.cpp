@@ -19,6 +19,8 @@
 //#include <Qt3DRender/QTextureImageData>
 //#include <Qt3DRender/QTextureImageDataGenerator>
 
+#include <QQmlDebuggingEnabler>
+
 #include "volumetric.h"
 
 //#include <functional>
@@ -39,13 +41,15 @@ void setSurfaceFormat()
     }
 
     format.setDepthBufferSize(24);
-    format.setSamples(4);
+    format.setSamples(0);
     format.setStencilBufferSize(8);
     QSurfaceFormat::setDefaultFormat(format);
 }
 
 int main(int argc, char* argv[])
 {
+//    QQmlDebuggingEnabler enabler;
+
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication app(argc, argv);
@@ -74,9 +78,12 @@ int main(int argc, char* argv[])
 ////    "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics"
 //    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/Desktop/test.ics");
 //
+//    VolumetricDataManager dm;
+//    dm.setSource(QUrl("file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics"));
+//
 //    QList<QObject*> roots = engine.rootObjects();
 //    VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
-//    tex->setDataSource(dataVec[0]);
+//    tex->setData(dm.m_dataList[0].data());
 
     return app.exec();
 
