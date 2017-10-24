@@ -7,9 +7,8 @@ import koki.katonalab.a3dc 1.0
 
 Entity {
     id: root
-    property alias color: material.diffuse
 
-    PhongMaterial {
+    VolumeMaterial {
         id: material
     }
 

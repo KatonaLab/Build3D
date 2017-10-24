@@ -1,13 +1,21 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>assets/fonts/fontello.ttf</file>
-    <file>qml/SceneModel.qml</file>
-    <file>qml/VolumeCube.qml</file>
-    <file>qml/VolumetricMaterial.qml</file>
+    
     <file>qml/ChannelViewPanel.qml</file>
     <file>qml/ChannelView.qml</file>
     <file>qml/ColorIndicator.qml</file>
     <file>qml/LoadIndicator.qml</file>
+
+    <file>qml/SceneEntity.qml</file>
+    
+    <file>qml/VolumeCube.qml</file>
+    <file>qml/VolumeEffect.qml</file>
+    <file>qml/VolumeMaterial.qml</file>
+    <file>qml/VolumeRenderSettings.qml</file>
+    
+    <file>qml/shaders/coordmap.vert</file>
+    <file>qml/shaders/coordmap.frag</file>
     <file>qml/main.qml</file>
 </qresource>
 </RCC>

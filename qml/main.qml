@@ -18,9 +18,9 @@ ApplicationWindow {
     function buildGuiForVolumeData(manager)
     {
         channelPanel.clearControls();
-        sceneObject.clearCubes();
+        sceneEntity.clearCubes();
         for (var i = 0; i < manager.volumes.length; ++i) {
-            var cube = sceneObject.createCube(manager.volumes[i]);
+            var cube = sceneEntity.createCube(manager.volumes[i]);
             channelPanel.createViewControl(manager.volumes[i], cube);
         }
     }
@@ -89,8 +89,8 @@ ApplicationWindow {
             Layout.fillHeight: true
             aspects: ["input", "logic"]
             cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-            SceneModel {
-                id: sceneObject
+            SceneEntity {
+                id: sceneEntity
             }
         }
 
