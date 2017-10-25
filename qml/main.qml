@@ -87,6 +87,10 @@ ApplicationWindow {
         Scene3D {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            // prevent errors when shrinked size 0
+            Layout.minimumWidth: 128
+            Layout.minimumHeight: 128
+
             aspects: ["input", "logic"]
             cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
             SceneEntity {

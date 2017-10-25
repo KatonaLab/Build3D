@@ -9,6 +9,7 @@ Entity {
     id: root
 
     property vector3d size
+    property Texture2D backfaceMap
 
     readonly property Buffer tex3DCoordsBuffer: Buffer {
         data: {
@@ -25,6 +26,7 @@ Entity {
 
     VolumeMaterial {
         id: material
+        backfaceMap: root.backfaceMap
     }
  
     GeometryRenderer {

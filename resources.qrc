@@ -14,8 +14,11 @@
     <file>qml/VolumeMaterial.qml</file>
     <file>qml/VolumeRenderSettings.qml</file>
     
-    <file>qml/shaders/coordmap.vert</file>
-    <file>qml/shaders/coordmap.frag</file>
+    <file>qml/shaders/backfacemap.vert</file>
+    <file>qml/shaders/backfacemap.frag</file>
+    <file>qml/shaders/volume.vert</file>
+    <file>qml/shaders/volume.frag</file>
+
     <file>qml/main.qml</file>
 </qresource>
 </RCC>

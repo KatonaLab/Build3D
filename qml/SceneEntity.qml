@@ -24,7 +24,9 @@ Entity {
     {
         var component = Qt.createComponent("VolumeCube.qml");
         // TODO: set the ranges properly
-        var object = component.createObject(root, {"size": Qt.vector3d(1., 1., 0.4)});
+        var object = component.createObject(root, {
+            "size": Qt.vector3d(1., 1., 0.4), 
+            "backfaceMap": renderSettings.backfaceMap});
         d.cubeList.push(object);
         return object;
     }
@@ -48,8 +50,10 @@ Entity {
 
     components: [
         VolumeRenderSettings {
+            id: renderSettings
             clearColor: Qt.rgba(0.0, 0.4, 0.6, 1)
             camera: camera
+            renderSize: Qt.size(width, height)
         },
         InputSettings { }
     ]
