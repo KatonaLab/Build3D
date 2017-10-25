@@ -12,6 +12,7 @@
     <file>qml/VolumeCube.qml</file>
     <file>qml/VolumeEffect.qml</file>
     <file>qml/VolumeMaterial.qml</file>
+    <file>qml/VolumeParameters.qml</file>
     <file>qml/VolumeRenderSettings.qml</file>
     
     <file>qml/shaders/backfacemap.vert</file>

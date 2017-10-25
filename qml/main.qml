@@ -18,10 +18,28 @@ ApplicationWindow {
     function buildGuiForVolumeData(manager)
     {
         channelPanel.clearControls();
-        sceneEntity.clearCubes();
         for (var i = 0; i < manager.volumes.length; ++i) {
-            var cube = sceneEntity.createCube(manager.volumes[i]);
-            channelPanel.createViewControl(manager.volumes[i], cube);
+            var v = manager.volumes[i];
+            var d = Math.max(v.width, v.height, v.depth);
+            sceneEntity.volumeCube.size = Qt.vector3d(v.width / d, v.height / d, v.depth / d);
+
+            var cp;
+            switch (i) {
+                case 0:
+                    cp = sceneEntity.volumeCube.volumeParameter0;
+                    break;
+                case 1:
+                    cp = sceneEntity.volumeCube.volumeParameter1;
+                    break;
+                case 2:
+                    cp = sceneEntity.volumeCube.volumeParameter2;
+                    break;
+                default:
+                    cp = sceneEntity.volumeCube.volumeParameter3;
+                    break;
+            }
+            cp.texture.data = manager.volumes[i];
+            channelPanel.createViewControl(cp.texture.data, cp);
         }
     }
 

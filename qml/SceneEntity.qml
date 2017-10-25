@@ -3,33 +3,12 @@ import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
 import Qt3D.Input 2.0
+import koki.katonalab.a3dc 1.0
 
 Entity {
     id: root
 
-    QtObject {
-        id: d
-        property var cubeList : []
-    }
-
-    function clearCubes()
-    {
-        for (var i = 0; i < d.cubeList.length; ++i) {
-            d.cubeList[i].destroy();
-        }
-        d.cubeList = [];
-    }
-
-    function createCube(volumeData)
-    {
-        var component = Qt.createComponent("VolumeCube.qml");
-        // TODO: set the ranges properly
-        var object = component.createObject(root, {
-            "size": Qt.vector3d(1., 1., 0.4), 
-            "backfaceMap": renderSettings.backfaceMap});
-        d.cubeList.push(object);
-        return object;
-    }
+    property alias volumeCube: cube
 
     Camera {
         id: camera
@@ -46,6 +25,15 @@ Entity {
     OrbitCameraController {
         camera: camera
         lookSpeed: -180 * 2
+    }
+
+    VolumeCube {
+        id: cube
+        backfaceMap: renderSettings.backfaceMap
+        volumeParameter0: VolumeParameters{}
+        volumeParameter1: VolumeParameters{}
+        volumeParameter2: VolumeParameters{}
+        volumeParameter3: VolumeParameters{}
     }
 
     components: [

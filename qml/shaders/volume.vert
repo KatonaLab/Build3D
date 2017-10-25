@@ -2,7 +2,8 @@
 
 in vec3 vertexPosition;
 in vec3 tex3DCoords;
-// important not to do perspective correct interpolation, because it is in the screen space
+// important not to do perspective correct interpolation, 
+// because it is in the screen space
 noperspective out vec4 screenCoord;
 out vec3 position;
 uniform mat4 modelViewProjection;

@@ -164,7 +164,7 @@ VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
 }
 
-void VolumetricTexture::setData(const VolumetricData* data)
+void VolumetricTexture::setData(VolumetricData* data)
 {
     setStatus(Qt3DRender::QAbstractTexture::Status::Loading);
     if (m_textureImage) {
@@ -178,7 +178,7 @@ void VolumetricTexture::setData(const VolumetricData* data)
     addTextureImage(m_textureImage);
     setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
 
-    m_valid = true;
+    m_valid = true; 
     emit validityChanged();
 }
 

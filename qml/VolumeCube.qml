@@ -1,4 +1,3 @@
-import QtQuick 2.8
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
@@ -9,7 +8,11 @@ Entity {
     id: root
 
     property vector3d size
-    property Texture2D backfaceMap
+    property alias backfaceMap: material.backfaceMap
+    property alias volumeParameter0: material.volumeParameter0
+    property alias volumeParameter1: material.volumeParameter1
+    property alias volumeParameter2: material.volumeParameter2
+    property alias volumeParameter3: material.volumeParameter3
 
     readonly property Buffer tex3DCoordsBuffer: Buffer {
         data: {
@@ -26,7 +29,6 @@ Entity {
 
     VolumeMaterial {
         id: material
-        backfaceMap: root.backfaceMap
     }
  
     GeometryRenderer {

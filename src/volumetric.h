@@ -99,6 +99,10 @@ public:
 class VolumetricData : public QObject {
     Q_OBJECT
     friend class VolumetricDataManager;
+
+    Q_PROPERTY(int width READ width)
+    Q_PROPERTY(int height READ height)
+    Q_PROPERTY(int depth READ depth)
 public:
     // non-copyable
     VolumetricData() = default;
@@ -125,21 +129,22 @@ class VolumetricTextureImage;
 
 class VolumetricTexture : public Qt3DRender::QAbstractTexture {
     Q_OBJECT
-    Q_PROPERTY(const VolumetricData* data READ data WRITE setData)
+    Q_PROPERTY(VolumetricData* data READ data WRITE setData NOTIFY dataChanged)
     Q_PROPERTY(bool valid READ valid NOTIFY validityChanged)
 public:
     explicit VolumetricTexture(Qt3DCore::QNode* parent = nullptr);
     virtual ~VolumetricTexture();
 
-    const VolumetricData* data() const { return m_data; }
-    void setData(const VolumetricData *data);
+    VolumetricData* data() const { return m_data; }
+    void setData(VolumetricData *data);
     bool valid() const { return m_valid; }
 
 Q_SIGNALS:
     void validityChanged();
+    void dataChanged();
 
 protected:
-    const VolumetricData* m_data = nullptr;
+    VolumetricData* m_data = nullptr;
     bool m_valid = false;
     VolumetricTextureImage* m_textureImage = nullptr;
 };
