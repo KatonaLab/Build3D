@@ -30,16 +30,16 @@ Entity {
     VolumeCube {
         id: cube
         backfaceMap: renderSettings.backfaceMap
-        volumeParameter0: VolumeParameters{}
-        volumeParameter1: VolumeParameters{}
-        volumeParameter2: VolumeParameters{}
-        volumeParameter3: VolumeParameters{}
+        volumeParameter0: VolumeParameters {}
+        volumeParameter1: VolumeParameters {}
+        volumeParameter2: VolumeParameters {}
+        volumeParameter3: VolumeParameters {}
     }
 
     components: [
         VolumeRenderSettings {
             id: renderSettings
-            clearColor: Qt.rgba(0.0, 0.4, 0.6, 1)
+            clearColor: Qt.rgba(0.2, 0.2, 0.2, 1.0)
             camera: camera
             renderSize: Qt.size(width, height)
         },

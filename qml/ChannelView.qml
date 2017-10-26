@@ -2,74 +2,47 @@ import QtQuick 2.8
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
+import "ui-controls"
 
-Item {
-    id: root
-    height: layout.height
+Rectangle {
+    id: root    
 
-    property string text
-    property real from
-    property real to
-    property alias channelColor: colorIndicator.color
+    property alias text: visibleCheck.text
+    property alias from: slider.lowValue
+    property alias to: slider.highValue
+    property alias channelColor: colorSelect.color
+    property alias channelVisible: visibleCheck.checked
 
-    signal visibilityChanged(bool visible)
-    signal valueChanged(real first, real second)
+    width: 200
+    implicitHeight: 56
+    radius: 4
+    border {
+        color: Qt.rgba(0, 0, 0, 0.1)
+        width: 1
+    }
+    color: Qt.rgba(0,0,0,0)
 
-    Component.onCompleted: syncSliders(true)
-
-    function syncSliders(lowChanged)
-    {
-        if (lowChanged) {
-            highSlider.value = Math.max(lowSlider.value, highSlider.value);
-        } else {
-            lowSlider.value = Math.min(lowSlider.value, highSlider.value);
-        }
-        minLimitLabel.text = (from).toFixed(2);
-        maxLimitLabel.text = (to).toFixed(2);
-        minLabel.text = (lowSlider.value).toFixed(2);
-        maxLabel.text = (highSlider.value).toFixed(2);
-        valueChanged(lowSlider.value, highSlider.value);
+    CheckBox {
+        id: visibleCheck
+        anchors.left: parent.left
+        anchors.top: parent.top
+        width: parent.width - colorSelect.width
+        anchors.margins: 8
     }
 
-    ColumnLayout {
-        id: layout
-        // anchors.fill: parent
-        RowLayout {
-            CheckBox {
-                id: visibilityCheckBox
-                text: root.text
-                onClicked: root.visibilityChanged(checked)
-                Layout.fillWidth: true
-            }
-            ColorIndicator {
-                id: colorIndicator
-            }
-        }
-        RowLayout {
-            Label {
-                id: minLimitLabel
-                Layout.fillWidth: true
-            }
-            Label {id: maxLimitLabel}
-        }
-        Slider {
-            id: lowSlider
-            minimumValue: from
-            maximumValue: to
-            onValueChanged: root.syncSliders(true)
-        }
-        Slider {
-            id: highSlider
-            minimumValue: from
-            maximumValue: to
-            onValueChanged: root.syncSliders(false)
-        }
-        RowLayout {
-            Label {
-                id: minLabel
-                Layout.fillWidth: true
-            }
-            Label {id: maxLabel}
-        }
+    ColorIndicator {
+        id: colorSelect
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: 8
+    }
+
+    DualSlider {
+        id: slider
+        anchors.left: parent.left
+        anchors.top: visibleCheck.bottom
+        anchors.topMargin: 8
+        width: parent.width - 17*2
+        anchors.margins: 8
     }
 }

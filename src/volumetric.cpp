@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include <QTextureWrapMode>
+#include <QPointF>
 
 // TEST
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 using namespace std;
 using namespace Qt3DCore;
@@ -32,7 +34,20 @@ ICSFile::ICSFile(std::string filename) : filename(filename)
     if (typeMap.count(dt) == 0) {
         throw ICSError("not supported data type format");
     }
+
+    for (int i = 0; i < ndims; ++i) {
+        char order[ICS_STRLEN_TOKEN];
+        char label[ICS_STRLEN_TOKEN];
+        ICS_EC(IcsGetOrder(ip, i, order, label));
+        channelLabels.push_back(label);
+   }
+
     fillChannelData();
+}
+
+std::string ICSFile::getChannelLabel(int channel)
+{
+    return channelLabels[channel];
 }
 
 void ICSFile::fillChannelData()
@@ -53,7 +68,7 @@ void ICSFile::fillChannelData()
     for (int k = 0; k < c; ++k) {
         size_t offset = n * k;
         for (size_t i = 0; i < n; ++i) {
-            channelData[k].get()[i] = cast(buffer.get() + (i + offset) * bytes) / 1000.;
+            channelData[k].get()[i] = cast(buffer.get() + (i + offset) * bytes);
         }
     }
 }
@@ -103,6 +118,17 @@ void ICSFile::errorCheck(Ics_Error error, const std::string message)
 
 //------------------------------------------------------------------------------
 
+QPointF VolumetricData::dataLimits()
+{
+    if (!m_dataLimitsReady && sizeInPixels()) {
+        auto mm = std::minmax_element(m_data.get(), m_data.get() + sizeInPixels());
+        m_dataLimits = QPointF(*mm.first, *mm.second);
+    }
+    return m_dataLimits;
+}
+
+//------------------------------------------------------------------------------
+
 bool VolumetricDataManager::loadICS(string filename)
 {
     m_progress = 0.0f;
@@ -117,6 +143,7 @@ bool VolumetricDataManager::loadICS(string filename)
             vd->m_dims[1] = icsFile.height();
             vd->m_dims[2] = icsFile.depth();
             vd->m_data = icsFile.getChannelData(i);
+            vd->m_dataName = QString::fromStdString(icsFile.getChannelLabel(i));
             m_dataList.append(vd);
 
             m_progress = (i + 1) / (float)icsFile.channels();
@@ -178,7 +205,7 @@ void VolumetricTexture::setData(VolumetricData* data)
     addTextureImage(m_textureImage);
     setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
 
-    m_valid = true; 
+    m_valid = true;
     emit validityChanged();
 }
 

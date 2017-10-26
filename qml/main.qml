@@ -39,12 +39,13 @@ ApplicationWindow {
                     break;
             }
             cp.texture.data = manager.volumes[i];
-            channelPanel.createViewControl(cp.texture.data, cp);
+            channelPanel.createViewControl(cp);
         }
     }
 
     Component.onCompleted: {
         // NOTE: for test purposes
+        // K32_bassoon_TH_vGluT1_c01_cmle
         dataManager.source = "file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics";
     }
 
@@ -75,6 +76,7 @@ ApplicationWindow {
                 case Component.Ready:
                     loadIndicator.visible = false;
                     buildGuiForVolumeData(dataManager);
+                    console.log(sceneEntity);
                     break;
                 case Component.Loading:
                     loadIndicator.visible = true;
@@ -98,7 +100,7 @@ ApplicationWindow {
     
         ChannelViewPanel {
             id: channelPanel
-            Layout.preferredWidth: 250
+            Layout.preferredWidth: 240
             Layout.fillHeight: true
         }
 

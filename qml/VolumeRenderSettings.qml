@@ -9,7 +9,7 @@ RenderSettings {
     property size renderSize
     readonly property Texture2D backfaceMap: backfaceTexture
 
-    // renderPolicy: RenderSettings.OnDemand
+    renderPolicy: RenderSettings.OnDemand
 
     activeFrameGraph: Viewport {
         normalizedRect: Qt.rect(0.0, 0.0, 1.0, 1.0)

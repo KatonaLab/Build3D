@@ -22,17 +22,29 @@ uniform vec4 ch1cutParams;
 uniform vec4 ch2cutParams;
 uniform vec4 ch3cutParams;
 
+float cut(in sampler3D tex, in vec3 pos, in vec4 params)
+{
+    // normalize to [0, 1] by dividing with max data value
+    float x = texture(tex, pos).r / params.y;
+    float a = params.z;
+    float b = params.w;
+    return ((clamp(x, a, b) - a) - (b-a) * step(b, x)) / b;
+}
+
 void main()
 {
     vec3 far = texture(backfaceMap, screenCoord.xy).xyz;
     vec3 near = position;
-    vec4 acc = vec4(0.);
-    for (int i = 0; i < 32; ++i) {
-        vec3 pos = mix(far, near, float(i) * 0.0625*0.5); // 0.0625 = 1/16
-        acc += texture(ch0texture, pos);
-        acc += texture(ch1texture, pos);
-        acc += texture(ch2texture, pos);
-        acc += texture(ch3texture, pos);
+    vec4 alpha = vec4(0.);
+    for (int i = 0; i <= 16; ++i) {
+        vec3 pos = mix(far, near, float(i) * 1./16.);
+        alpha.r += cut(ch0texture, pos, ch0cutParams);
+        alpha.g += cut(ch1texture, pos, ch1cutParams);
+        alpha.b += cut(ch2texture, pos, ch2cutParams);
+        alpha.a += cut(ch3texture, pos, ch3cutParams);
     }
-    outputColor = vec4(acc.rgb * 0.01, acc.r * 0.1);
+    outputColor = (alpha.r * ch0color * ch0color.a
+        + alpha.g * ch1color * ch1color.a
+        + alpha.b * ch2color * ch2color.a
+        + alpha.a * ch3color * ch3color.a);
 }

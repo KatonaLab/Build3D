@@ -6,6 +6,6 @@ import koki.katonalab.a3dc 1.0
 // render-every-volume-in-one-material/effect idea should be rethinked
 Entity {
     property VolumetricTexture texture: VolumetricTexture {}
-    property color color
-    property vector4d cutParams
+    property color color: Qt.rgba(0., 0., 0., 0.)
+    property vector4d cutParams: Qt.vector4d(0., 1., 0., 1.)
 }

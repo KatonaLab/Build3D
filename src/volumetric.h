@@ -29,6 +29,7 @@ public:
     size_t height() const;
     size_t depth() const;
     std::shared_ptr<float> getChannelData(int channel);
+    std::string getChannelLabel(int channel);
     ~ICSFile();
 
 private:
@@ -49,6 +50,7 @@ private:
     int ndims = 0;
     size_t dims[ICS_MAXDIM];
     std::vector<std::shared_ptr<float>> channelData;
+    std::vector<std::string> channelLabels;
     static const std::map<Ics_DataType, TypeInfoBasePtr> typeMap;
 
 private:
@@ -103,6 +105,8 @@ class VolumetricData : public QObject {
     Q_PROPERTY(int width READ width)
     Q_PROPERTY(int height READ height)
     Q_PROPERTY(int depth READ depth)
+    Q_PROPERTY(QPointF dataLimits READ dataLimits)
+    Q_PROPERTY(QString dataName READ dataName)
 public:
     // non-copyable
     VolumetricData() = default;
@@ -117,10 +121,18 @@ public:
     size_t sizeInBytes() const { return sizeInPixels() * m_bpp; }
     const std::shared_ptr<float> data() const { return m_data; }
 
+    // TODO: move this functionality to elsewhere this class should
+    // deal with holding the data, purely
+    QPointF dataLimits();
+    QString dataName() const { return m_dataName; }
+
 protected:
     std::shared_ptr<float> m_data;
     std::array<size_t, 3> m_dims = {{0, 0, 0}};
     const size_t m_bpp = sizeof(float);
+    QPointF m_dataLimits;
+    bool m_dataLimitsReady = false;
+    QString m_dataName;
 };
 
 //------------------------------------------------------------------------------
