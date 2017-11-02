@@ -14,21 +14,13 @@ Entity {
     property alias volumeParameter2: material.volumeParameter2
     property alias volumeParameter3: material.volumeParameter3
 
-    readonly property Buffer tex3DCoordsBuffer: Buffer {
-        data: {
-            return new Float32Array([
-                0, 0, 0,  0, 1, 0,  0, 0, 1,  0, 1, 1, // neg x
-                1, 0, 1,  1, 1, 1,  1, 0, 0,  1, 1, 0, // pos x
-                1, 1, 1,  0, 1, 1,  1, 1, 0,  0, 1, 0, // pos y
-                1, 0, 0,  0, 0, 0,  1, 0, 1,  0, 0, 1, // neg y
-                1, 0, 1,  0, 0, 1,  1, 1, 1,  0, 1, 1, // pos z
-                0, 0, 0,  1, 0, 0,  0, 1, 0,  1, 1, 0, // neg z
-                ]);
-        }
-    }
-
     VolumeMaterial {
         id: material
+        vertexToTex3DCoordMatrix: Qt.matrix4x4(
+            1/size.x, 0, 0, 0.5,
+            0, 1/size.y, 0, 0.5,
+            0, 0, 1/size.z, 0.5,
+            0, 0, 0, 1)
     }
  
     GeometryRenderer {
@@ -42,17 +34,6 @@ Entity {
         xExtent: size.x
         yExtent: size.y
         zExtent: size.z
-        attributes: [
-            Attribute {
-                attributeType: Attribute.VertexAttribute
-                vertexBaseType: Attribute.Float
-                vertexSize: 3 // we need 3 floats
-                byteStride: 3 * 4 // a float is 4 bytes, so 12 bytes
-                byteOffset: 0
-                name: "tex3DCoords"
-                buffer: tex3DCoordsBuffer
-            }
-        ]
     }
 
     components: [mesh, material]

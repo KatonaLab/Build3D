@@ -58,6 +58,7 @@ RenderSettings {
                         buffers: ClearBuffers.ColorDepthBuffer
                     }
                 }
+
             } // sceneCameraSelector
         }
     }

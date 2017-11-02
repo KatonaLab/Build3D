@@ -186,8 +186,8 @@ QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {
-    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
-    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
+    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
+    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
 }
 

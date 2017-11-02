@@ -11,6 +11,7 @@ Material {
     property alias volumeParameter1: effect.volumeParameter1
     property alias volumeParameter2: effect.volumeParameter2
     property alias volumeParameter3: effect.volumeParameter3
+    property alias vertexToTex3DCoordMatrix: effect.vertexToTex3DCoordMatrix
 
     effect: VolumeEffect {
         id: effect

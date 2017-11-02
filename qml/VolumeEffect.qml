@@ -10,9 +10,12 @@ Effect {
     property VolumeParameters volumeParameter1
     property VolumeParameters volumeParameter2
     property VolumeParameters volumeParameter3
+    property matrix4x4 vertexToTex3DCoordMatrix
 
     parameters: [
         Parameter {name: "backfaceMap"; value: root.backfaceMap},
+
+        Parameter {name: "vertexToTex3DCoordMatrix"; value: root.vertexToTex3DCoordMatrix},
 
         Parameter {name: "ch0texture"; value: root.volumeParameter0.texture},
         Parameter {name: "ch1texture"; value: root.volumeParameter1.texture},
@@ -58,6 +61,7 @@ Effect {
                     
                     shaderProgram: ShaderProgram {
                         vertexShaderCode: loadSource("qrc:/qml/shaders/volume.vert")
+                        geometryShaderCode: loadSource("qrc:/qml/shaders/volume.geom")
                         fragmentShaderCode: loadSource("qrc:/qml/shaders/volume.frag")
                     }
 

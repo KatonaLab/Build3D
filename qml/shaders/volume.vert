@@ -1,16 +1,10 @@
 #version 150 core
 
-in vec3 vertexPosition;
-in vec3 tex3DCoords;
-// important not to do perspective correct interpolation, 
-// because it is in the screen space
-noperspective out vec4 screenCoord;
-out vec3 position;
-uniform mat4 modelViewProjection;
+in vec3 vertexPosition; // TODO: consider using 'invariant' qualifier
 
 void main()
 {
-    gl_Position = modelViewProjection * vec4(vertexPosition, 1.0);
-    screenCoord = gl_Position / gl_Position.w * 0.5 + 0.5;
-    position = tex3DCoords;
+    // NOTE: bypass for gl_Position,
+    // coord transformation will take place at geom shader
+    gl_Position = vec4(vertexPosition, 1.0);
 }

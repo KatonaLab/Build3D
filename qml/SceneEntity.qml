@@ -5,6 +5,9 @@ import Qt3D.Extras 2.0
 import Qt3D.Input 2.0
 import koki.katonalab.a3dc 1.0
 
+import Qt3D.Input 2.0
+import Qt3D.Logic 2.0
+
 Entity {
     id: root
 
@@ -14,18 +17,31 @@ Entity {
         id: camera
         projectionType: CameraLens.PerspectiveProjection
         fieldOfView: 45
-        aspectRatio: 16/9
+        // aspectRatio: 16/9
         nearPlane : 0.1
-        farPlane : 1000.0
+        farPlane : 100.0
         position: Qt.vector3d(0.0, 0.0, -2.0)
         upVector: Qt.vector3d(0.0, 1.0, 0.0)
         viewCenter: Qt.vector3d(0.0, 0.0, 0.0)
     }
 
     OrbitCameraController {
+    // FirstPersonCameraController {
         camera: camera
         lookSpeed: -180 * 2
     }
+    
+    // Entity {
+    //     components: [
+    //     FrameAction {
+    //         onTriggered: {
+    //             camera.translate(Qt.vector3d(0.001,0, 0), Camera.DontTranslateViewCenter);
+    //             // var up = Qt.vector3d(0, 1, 0);
+    //             // camera.pan(Qt.vector3d(0, 0.00001, 0), up)
+    //             //root.camera.panAboutViewCenter(root.lookSpeed * d.dx * dt, d.firstPersonUp)
+    //         }
+    //     }]
+    // }
 
     VolumeCube {
         id: cube
