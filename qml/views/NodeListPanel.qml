@@ -3,85 +3,66 @@ import QtQuick.Window 2.0
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 
-Rectangle {
+GroupBox {
     id: root
 
     property QtObject nodeManager;
 
-    QtObject {
-        id: d
-        property var dynamicViews : []
-    }
-
-    function clearControls()
+    function addNode(protoUrl, removable)
     {
-        for (var i = 0; i < d.dynamicViews.length; ++i) {
-            d.dynamicViews[i].destroy();
-        }
-        d.dynamicViews = [];
+        var settingsComponent = Qt.createComponent(protoUrl);
+        var itemComponent = Qt.createComponent("NodeListItem.qml");
+        var itemObject = itemComponent.createObject(nodeViewList,
+            {"Layout.fillWidth": true,
+            "nodeSettingsComponent": settingsComponent,
+            "removable": removable});
     }
 
-    function createViewControl(volumeParam)
-    {
-        var component = Qt.createComponent("NodeListItem.qml");
-        console.debug(component.errorString());
-        // TODO: set the ranges properly
-        var object = component.createObject(layout);
-
-        object.onChannelColorChanged.connect(function () {
-            volumeParam.color = object.channelColor;
-        });
-
-        object.onChannelVisibleChanged.connect(function () {
-            var c = volumeParam.color;
-            volumeParam.color = Qt.rgba(c.r, c.g, c.b, object.channelVisible ? 1.0 : 0.0);
-        });
-
-        object.onFromChanged.connect(function () {
-            volumeParam.cutParams.z = object.from
-            // console.debug(volumeParam.cutParams);
-        });
-
-        object.onToChanged.connect(function () {
-            volumeParam.cutParams.w = object.to;
-            // console.debug(volumeParam.cutParams);
-        });
-
-        object.channelColor = Qt.rgba(Math.random(), Math.random(), Math.random(), 1.);
-        object.channelVisible = true;
-        var limits = volumeParam.texture.data.dataLimits;
-        volumeParam.cutParams.x = limits.x;
-        volumeParam.cutParams.y = limits.y;
-        object.text = volumeParam.texture.data.dataName;
-
-        d.dynamicViews.push(object);
+    Action {
+        id: addSourceNode
+        text: "Add Source"
+        onTriggered: addNode(undefined, false)
     }
 
-    color: sysColors.dark
-    border.color: sysColors.mid
-    border.width: 1
+    Action {
+        id: addSegmentationNode
+        text: "Add Segmentation"
+        // onTriggered: addNode("qrc:/qml/nodes/SegmentNode.ui.qml", true)
+        onTriggered: addNode("../nodes/SegmentNode.ui.qml", true)
+    }
 
-    SystemPalette {
-        id: sysColors
-        colorGroup: SystemPalette.Active
+    Action {
+        id: addAnalysisNode
+        text: "Add Analysis"
+        // onTriggered: addNode("qrc:/qml/nodes/AnalysisNode.ui.qml", true)
+        onTriggered: addNode("../nodes/AnalysisNode.ui.qml", true)
     }
 
     ScrollView {
         anchors.fill: parent
-        anchors.margins: 8
-        ColumnLayout {
-            id: layout
-            anchors.fill: parent
 
-            Button {
-                text: "add segmentation"
-                onClicked: {
-                    nodeManager.createSegmentNode();
-                }
+        ColumnLayout {
+            width: parent.parent.width
+
+            ColumnLayout {
+                id: nodeViewList
+                
+                anchors.fill: parent
+                spacing: 4
             }
 
             Button {
-                text: "add analysis"
+                text: "+"
+                Layout.fillWidth: true
+                onClicked: {
+                    menu.popup();
+                }
+
+                Menu {
+                    id: menu
+                    MenuItem { action: addSegmentationNode }
+                    MenuItem { action: addAnalysisNode }
+                }
             }
         }
     }

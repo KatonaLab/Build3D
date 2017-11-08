@@ -59,6 +59,7 @@ void ICSFile::fillChannelData()
     size_t n = width() * height() * depth();
     size_t c = channels();
     for (size_t k = 0; k < c; ++k) {
+        // TODO: consider converting to int32/64 instead of float
         channelData.emplace_back(new float[n], default_delete<float[]>());
     }
 

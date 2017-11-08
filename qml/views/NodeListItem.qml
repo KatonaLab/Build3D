@@ -4,45 +4,106 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
 import "ui-components"
 
-Rectangle {
+GroupBox {
     id: root
 
-    property alias text: visibleCheck.text
-    property alias from: slider.lowValue
-    property alias to: slider.highValue
-    property alias channelColor: colorSelect.color
-    property alias channelVisible: visibleCheck.checked
+    property Component nodeSettingsComponent
+    property QtObject processNode
+    property bool removable: false;
+    property bool editable: true;
 
-    width: 200
-    implicitHeight: 56
-    radius: 4
-    border {
-        color: Qt.rgba(0, 0, 0, 0.1)
-        width: 1
-    }
-    color: Qt.rgba(0,0,0,0)
+    ColumnLayout {
+        spacing: 2
 
-    CheckBox {
-        id: visibleCheck
-        anchors.left: parent.left
-        anchors.top: parent.top
-        width: parent.width - colorSelect.width
-        anchors.margins: 8
+        anchors.fill: parent
+
+        GroupBox {
+            id: viewSettings
+
+            width: 0 // breaking a binding loop
+            Layout.fillWidth: true
+
+            // TODO: maybe put in a ColumnLayout
+            CheckBox {
+                id: visibleCheck
+                anchors.left: parent.left
+                anchors.top: parent.top
+                width: parent.width - colorSelect.width
+                anchors.margins: 8
+            }
+
+            ColorIndicator {
+                id: colorSelect
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 8
+            }
+
+            DualSlider {
+                id: slider
+                anchors.left: parent.left
+                anchors.top: visibleCheck.bottom
+                anchors.topMargin: 8
+                width: parent.width - 17*2
+                anchors.margins: 8
+            }
+        }
+
+        GroupBox {
+            id: nodeSettings
+            Layout.fillWidth: true
+            visible: nodeSettingsComponent != undefined
+            Loader {
+                sourceComponent: nodeSettingsComponent
+            }
+        }
+
+        GroupBox {
+            width: 0 // breaking a binding loop
+            Layout.fillWidth: true
+            ColumnLayout {
+
+                anchors.fill: parent
+                
+                Button {
+                    visible: nodeSettingsComponent != undefined
+                    Layout.fillWidth: true
+                    text: root.editable ? "Apply" : "Edit"
+                    onClicked: {
+                        root.editable = !(root.editable);
+                    }
+                }
+
+                Button {
+                    visible: root.removable
+                    Layout.fillWidth: true
+                    text: "Remove"
+                    onClicked: {
+                        root.destroy();
+                    }
+                }
+            }
+        }
     }
 
-    ColorIndicator {
-        id: colorSelect
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: 8
-    }
+    // TODO: make nice transitions
 
-    DualSlider {
-        id: slider
-        anchors.left: parent.left
-        anchors.top: visibleCheck.bottom
-        anchors.topMargin: 8
-        width: parent.width - 17*2
-        anchors.margins: 8
-    }
+    states: [
+        State {
+            name: "Expanded"
+            when: editable
+            PropertyChanges {
+                target: nodeSettings
+                visible: true
+            }
+        },
+        State {
+            name: "Collapsed"
+            when: !editable
+            PropertyChanges {
+                target: nodeSettings
+                visible: false
+            }
+        }
+    ]
 }
