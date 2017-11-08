@@ -6,6 +6,8 @@ import QtQuick.Layouts 1.1
 Rectangle {
     id: root
 
+    property QtObject nodeManager;
+
     QtObject {
         id: d
         property var dynamicViews : []
@@ -21,8 +23,8 @@ Rectangle {
 
     function createViewControl(volumeParam)
     {
-        var component = Qt.createComponent("ChannelView.qml");
-        // console.debug(component.errorString());
+        var component = Qt.createComponent("NodeListItem.qml");
+        console.debug(component.errorString());
         // TODO: set the ranges properly
         var object = component.createObject(layout);
 
@@ -70,6 +72,17 @@ Rectangle {
         ColumnLayout {
             id: layout
             anchors.fill: parent
+
+            Button {
+                text: "add segmentation"
+                onClicked: {
+                    nodeManager.createSegmentNode();
+                }
+            }
+
+            Button {
+                text: "add analysis"
+            }
         }
     }
 }

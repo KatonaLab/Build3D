@@ -2,29 +2,34 @@
 <qresource>
     <file>assets/fonts/fontello.ttf</file>
     
-    <file>qml/ChannelViewPanel.qml</file>
-    <file>qml/ChannelView.qml</file>
-    <file>qml/ColorIndicator.qml</file>
-    <file>qml/LoadIndicator.qml</file>
-    <file>qml/ObjectPlaneOrbitCamera.qml</file>
-    <file>qml/ui-controls/DualSlider.qml</file>
-    <file>qml/ui-controls/helpers/Palette.qml</file>
-    <file>qml/ui-controls/helpers/SliderHandle.qml</file>
-
-    <file>qml/SceneEntity.qml</file>
-    
-    <file>qml/VolumeCube.qml</file>
-    <file>qml/VolumeEffect.qml</file>
-    <file>qml/VolumeMaterial.qml</file>
-    <file>qml/VolumeParameters.qml</file>
-    <file>qml/VolumeRenderSettings.qml</file>
-    
-    <file>qml/shaders/backfacemap.vert</file>
-    <file>qml/shaders/backfacemap.frag</file>
-    <file>qml/shaders/volume.vert</file>
-    <file>qml/shaders/volume.frag</file>
-    <file>qml/shaders/volume.geom</file>
-
     <file>qml/main.qml</file>
+    <file>qml/NodeManager.qml</file>
+    
+    <file>qml/nodes/AnalysisNode.ui.qml</file>
+    <file>qml/nodes/SegmentNode.ui.qml</file>
+    <file>qml/nodes/SourceNode.ui.qml</file>
+    
+    <file>qml/scene/SceneEntity.qml</file>
+    <file>qml/scene/VolumeCube.qml</file>
+    <file>qml/scene/VolumeEffect.qml</file>
+    <file>qml/scene/VolumeMaterial.qml</file>
+    <file>qml/scene/VolumeParameters.qml</file>
+    <file>qml/scene/VolumeRenderSettings.qml</file>
+
+    <file>qml/views/NodeListItem.qml</file>
+    <file>qml/views/NodeListPanel.qml</file>
+
+    <file>qml/views/ui-components/ColorIndicator.qml</file>
+    <file>qml/views/ui-components/DualSlider.qml</file>
+    <file>qml/views/ui-components/LoadIndicator.qml</file>
+    <file>qml/views/ui-components/Palette.qml</file>
+    <file>qml/views/ui-components/SliderHandle.qml</file>
+
+    <file>qml/scene/shaders/backfacemap.vert</file>
+    <file>qml/scene/shaders/volume.vert</file>
+    <file>qml/scene/shaders/backfacemap.frag</file>
+    <file>qml/scene/shaders/volume.frag</file>
+    <file>qml/scene/shaders/volume.geom</file>
+
 </qresource>
 </RCC>

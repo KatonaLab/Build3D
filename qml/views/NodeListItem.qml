@@ -2,10 +2,10 @@ import QtQuick 2.8
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
-import "ui-controls"
+import "ui-components"
 
 Rectangle {
-    id: root    
+    id: root
 
     property alias text: visibleCheck.text
     property alias from: slider.lowValue

@@ -7,6 +7,11 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Dialogs 1.2
 import koki.katonalab.a3dc 1.0
 
+import "scene"
+import "views"
+import "nodes"
+import "views/ui-components"
+
 ApplicationWindow {
     id: root
 
@@ -17,7 +22,7 @@ ApplicationWindow {
 
     function buildGuiForVolumeData(manager)
     {
-        channelPanel.clearControls();
+        sideBar.clearControls();
         for (var i = 0; i < manager.volumes.length; ++i) {
             var v = manager.volumes[i];
             var d = Math.max(v.width, v.height, v.depth);
@@ -39,7 +44,7 @@ ApplicationWindow {
                     break;
             }
             cp.texture.data = manager.volumes[i];
-            channelPanel.createViewControl(cp);
+            sideBar.createViewControl(cp);
         }
     }
 
@@ -47,6 +52,7 @@ ApplicationWindow {
         // NOTE: for test purposes
         // K32_bassoon_TH_vGluT1_c01_cmle
         dataManager.source = "file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics";
+        // dataManager.source = "file:///Users/fodorbalint/Desktop/spheres.ics";
     }
 
     menuBar: MenuBar {
@@ -67,6 +73,10 @@ ApplicationWindow {
         property alias y: root.y
         property alias width: root.width
         property alias height: root.height
+    }
+
+    NodeManager {
+        id: nodeManager
     }
 
     VolumetricDataManager {
@@ -98,8 +108,9 @@ ApplicationWindow {
         anchors.fill: parent
         spacing: 0
     
-        ChannelViewPanel {
-            id: channelPanel
+        NodeListPanel {
+            id: sideBar
+            nodeManager: nodeManager
             Layout.preferredWidth: 240
             Layout.fillHeight: true
         }
@@ -115,6 +126,7 @@ ApplicationWindow {
             cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
             SceneEntity {
                 id: sceneEntity
+                nodeManager: nodeManager
             }
         }
 

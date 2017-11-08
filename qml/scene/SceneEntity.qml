@@ -5,13 +5,11 @@ import Qt3D.Extras 2.0
 import Qt3D.Input 2.0
 import koki.katonalab.a3dc 1.0
 
-import Qt3D.Input 2.0
-import Qt3D.Logic 2.0
-
 Entity {
     id: root
 
     property alias volumeCube: cube
+    property QtObject nodeManager;
 
     Camera {
         id: camera
@@ -31,6 +29,15 @@ Entity {
         lookSpeed: -180 * 2
     }
     
+    Component.onCompleted: {
+        nodeManager.segmentNodeAdded.connect(foo);
+    }
+
+    function foo(str)
+    {
+        console.log(str);
+    }
+
     // Entity {
     //     components: [
     //     FrameAction {

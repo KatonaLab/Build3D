@@ -1,7 +1,7 @@
 #version 150 core
 
-in vec3 tex3DCoordGeom;
 noperspective in vec2 screenCoordGeom;
+in vec3 tex3DCoordGeom;
 
 out vec4 outputColor;
 
@@ -41,15 +41,22 @@ void main()
     vec3 far = texture(backfaceMap, screenCoordGeom.xy).xyz;
     vec3 near = tex3DCoordGeom;
     vec4 alpha = vec4(0.);
-    for (int i = 0; i <= 16; ++i) {
-        vec3 pos = mix(far, near, float(i) * 1./16.);
-        alpha.r += lut(ch0texture, pos, ch0cutParams);
-        alpha.g += lut(ch1texture, pos, ch1cutParams);
-        alpha.b += lut(ch2texture, pos, ch2cutParams);
-        alpha.a += lut(ch3texture, pos, ch3cutParams);
+    float step = 0.03;
+    float t = 0.0;
+    for (int i = 0; i <= 32; ++i) {
+        // vec3 pos = mix(far, near, float(i) * 1./32.);
+        vec3 pos = near + normalize(far - near) * t;
+        t += step;
+
+        alpha.r = (alpha.r + lut(ch0texture, pos, ch0cutParams));
+        alpha.g = (alpha.g + lut(ch1texture, pos, ch1cutParams));
+        alpha.b = (alpha.b + lut(ch2texture, pos, ch2cutParams));
+        alpha.a = (alpha.a + lut(ch3texture, pos, ch3cutParams));
     }
     outputColor = (alpha.r * ch0color * ch0color.a
         + alpha.g * ch1color * ch1color.a
         + alpha.b * ch2color * ch2color.a
         + alpha.a * ch3color * ch3color.a);
+
+    outputColor = vec4(distance(near, far) * 0.5, 0., 0., 1.);
 }

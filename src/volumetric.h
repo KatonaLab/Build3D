@@ -16,6 +16,8 @@
 #include <functional>
 #include <libics.h>
 
+// TODO: classes to separate files
+
 class ICSError : public std::runtime_error {
 public:
     ICSError(std::string m) : std::runtime_error(m) {}
@@ -94,6 +96,19 @@ private:
 // FIXME:
 public:
     QVector<VolumetricDataPtr> m_dataList;
+};
+
+//------------------------------------------------------------------------------
+
+class ProcessNode: public QObject {
+    Q_OBJECT
+public:
+};
+
+class PythonProcessNode: public ProcessNode {
+    Q_OBJECT
+public:
+    PythonProcessNode(const std::string &filename, QObject *parent = Q_NULLPTR) {}
 };
 
 //------------------------------------------------------------------------------

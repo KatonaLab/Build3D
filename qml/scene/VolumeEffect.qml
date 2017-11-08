@@ -46,8 +46,8 @@ Effect {
                     filterKeys: [FilterKey {name: "renderStyle"; value: "backface"}]
                     
                     shaderProgram: ShaderProgram {
-                        vertexShaderCode: loadSource("qrc:/qml/shaders/backfacemap.vert")
-                        fragmentShaderCode: loadSource("qrc:/qml/shaders/backfacemap.frag")
+                        vertexShaderCode: loadSource("qrc:/qml/scene/shaders/backfacemap.vert")
+                        fragmentShaderCode: loadSource("qrc:/qml/scene/shaders/backfacemap.frag")
                     }
 
                     renderStates: [
@@ -60,9 +60,9 @@ Effect {
                     filterKeys: [FilterKey {name: "renderStyle"; value: "forward"}]
                     
                     shaderProgram: ShaderProgram {
-                        vertexShaderCode: loadSource("qrc:/qml/shaders/volume.vert")
-                        geometryShaderCode: loadSource("qrc:/qml/shaders/volume.geom")
-                        fragmentShaderCode: loadSource("qrc:/qml/shaders/volume.frag")
+                        vertexShaderCode: loadSource("qrc:/qml/scene/shaders/volume.vert")
+                        geometryShaderCode: loadSource("qrc:/qml/scene/shaders/volume.geom")
+                        fragmentShaderCode: loadSource("qrc:/qml/scene/shaders/volume.frag")
                     }
 
                     // using default render state
