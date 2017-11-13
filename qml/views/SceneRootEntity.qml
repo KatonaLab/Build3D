@@ -12,17 +12,12 @@ Entity {
     components: [
         SceneRenderSettings {
             id: renderSettings
-            clearColor: Qt.rgba(0.2, 0.2, 0.2, 1.0)
             camera: camera
+            clearColor: Qt.rgba(0.2, 0.2, 0.2, 1.0)
             renderSize: Qt.size(width, height)
+            sceneLayer: sceneLayer
+            screenQuadLayer: screenQuadLayer
         },
-        // RenderSettings {
-        //     activeFrameGraph: ForwardRenderer {
-        //         camera: camera
-        //         // clearColor: "transparent"
-        //         clearColor: Qt.rgba(0.2, 0.2, 0.2, 1.0)
-        //     }
-        // },
         InputSettings {}
     ]
 
@@ -43,15 +38,30 @@ Entity {
         lookSpeed: -180 * 2
     }
 
+
+    // TODO: find a way to do the rendering like this:
+    // 
+    // for 3d_objects:
+    //   do_backface_render -> backfacebuffer
+    //   do_frontface_render(backfacebuffer) -> accum buffer
+    // render_accum_buffer
+    // 
+    // so we need a per object volume rendering and then merging the results
+
     NodeInstantiator {
         model: MainStore.sceneStore.model
         delegate: VolumeEntity {
             uid: uid
+
             width: model.width
             height: model.height
             depth: model.depth
             volumeData: model.data
-            backfaceMap: renderSettings.backfaceMap
+
+            backFaceMap: renderSettings.backFaceMap
+            frontFaceAccumulatorMap: renderSettings.frontFaceAccumulatorMap
+            layer: sceneLayer
+            
             volumeColor: model.viewParameters.color
 
             Component.onCompleted: {
@@ -68,5 +78,18 @@ Entity {
                 });
             }
         }
+    }
+
+    Layer {
+        id: screenQuadLayer
+    }
+
+    Layer {
+        id: sceneLayer
+    }
+
+    ScreenQuadEntity {
+        layer: screenQuadLayer
+        frontFaceAccumulatorMap: renderSettings.frontFaceAccumulatorMap
     }
 }

@@ -7,13 +7,18 @@ import koki.katonalab.a3dc 1.0
 Entity {
 
     property int uid
+
     property real width
     property real height
     property real depth
-    property Texture2D backfaceMap
     property VolumetricData volumeData
+
     property color volumeColor
     property vector4d lutParameters
+
+    property Layer layer
+    property Texture2D backFaceMap
+    property Texture2D frontFaceAccumulatorMap
 
     QtObject {
         id: d
@@ -28,15 +33,10 @@ Entity {
         id: material
         effect: Effect {
         parameters: [
-                Parameter {name: "backfaceMap"; value: backfaceMap},
+                Parameter {name: "backFaceMap"; value: backFaceMap},
+                Parameter {name: "frontFaceAccumulatorMap"; value: frontFaceAccumulatorMap},
                 Parameter {name: "vertexToTex3DCoordMatrix"; value: d.vertexToTex3DCoordMatrix},
-                Parameter {
-                    name: "volumeTexture"
-                    value: VolumetricTexture {
-                            data: volumeData
-                            Component.onCompleted: {console.log(data);}
-                        }
-                    },
+                Parameter {name: "volumeTexture"; value: VolumetricTexture {data: volumeData}},
                 Parameter {name: "volumeColor"; value: volumeColor},
                 Parameter {name: "lutParameters"; value: lutParameters}
             ]
@@ -51,7 +51,7 @@ Entity {
                     }
                     renderPasses: [
                         RenderPass {
-                            filterKeys: [FilterKey {name: "renderStyle"; value: "backface"}]
+                            filterKeys: [FilterKey {name: "pass"; value: "BackFace"}]
                             
                             shaderProgram: ShaderProgram {
                                 vertexShaderCode: loadSource("qrc:/qml/views/shaders/backfacemap.vert")
@@ -59,13 +59,12 @@ Entity {
                             }
 
                             renderStates: [
-                                // DepthTest {depthFunction: DepthTest.Greater},
                                 CullFace {mode: CullFace.Front}
                             ]
                         },
 
                         RenderPass {
-                            filterKeys: [FilterKey {name: "renderStyle"; value: "forward"}]
+                            filterKeys: [FilterKey {name: "pass"; value: "FrontFaceAccumulate"}]
                             
                             shaderProgram: ShaderProgram {
                                 vertexShaderCode: loadSource("qrc:/qml/views/shaders/volume.vert")
@@ -88,5 +87,5 @@ Entity {
         zExtent: depth
     }
 
-    components: [mesh, material]
+    components: [mesh, material, layer]
 }

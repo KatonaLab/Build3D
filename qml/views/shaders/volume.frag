@@ -5,7 +5,8 @@ in vec3 tex3DCoordGeom;
 
 out vec4 outputColor;
 
-uniform sampler2D backfaceMap;
+uniform sampler2D backFaceMap;
+uniform sampler2D frontFaceAccumulatorMap;
 uniform sampler3D volumeTexture;
 uniform vec4 volumeColor;
 uniform vec4 lutParameters;
@@ -26,7 +27,7 @@ float lut(in sampler3D tex, in vec3 pos, in vec4 params)
 
 void main()
 {
-    vec3 far = texture(backfaceMap, screenCoordGeom.xy).xyz;
+    vec3 far = texture(backFaceMap, screenCoordGeom.xy).xyz;
     vec3 near = tex3DCoordGeom;
     float alpha = 0.;
     // float step = 0.03;
@@ -39,9 +40,10 @@ void main()
         // t += step;
         alpha = alpha + lut(volumeTexture, pos, lutParameters);
     }
-    outputColor = alpha * volumeColor * volumeColor.a;
-    // outputColor = vec4(alpha) * 0.001;
-    // outputColor.a = 1.0;
-    // outputColor = vec4(distance(near, far) * 0.5, 0., 0., 1.);
-    // outputColor = vec4(0.3, 0.5, 0.6, 1.);
+    vec4 accum = texture(frontFaceAccumulatorMap, screenCoordGeom.xy);
+
+    // TODO: remove magic number, check wether this is the correct way to accumulate
+    // chances are that input and output (frontFaceAccumulatorMap) can not be the
+    // same texture
+    outputColor = accum + 0.33*alpha * volumeColor * volumeColor.a;    
 }

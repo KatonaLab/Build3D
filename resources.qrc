@@ -23,15 +23,18 @@
     <file>qml/views/SceneRootEntity.qml</file>
     <file>qml/views/VolumeEntity.qml</file>
     <file>qml/views/SceneRenderSettings.qml</file>
+    <file>qml/views/ScreenQuadEntity.qml</file>
 
     <file>qml/views/nodetypes/SegmentNodeView.qml</file>
     <file>qml/views/nodetypes/AnalysisNodeView.qml</file>
 
     <file>qml/views/shaders/backfacemap.vert</file>
     <file>qml/views/shaders/volume.vert</file>
+    <file>qml/views/shaders/final.vert</file>
     
     <file>qml/views/shaders/backfacemap.frag</file>
     <file>qml/views/shaders/volume.frag</file>
+    <file>qml/views/shaders/final.frag</file>
 
     <file>qml/views/shaders/volume.geom</file>
 
