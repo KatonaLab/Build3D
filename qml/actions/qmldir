@@ -1,0 +1,3 @@
+singleton AppDispatcher 1.0 AppDispatcher.qml
+singleton AppActions 1.0 AppActions.qml
+singleton ActionTypes 1.0 ActionTypes.qml

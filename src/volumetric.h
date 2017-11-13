@@ -1,6 +1,10 @@
 #ifndef _volumetric_h_
 #define _volumetric_h_
 
+#undef slots
+// #include <boost/python.hpp>
+// #include <boost/python/numpy.hpp>
+
 #include <QtCore>
 #include <Qt3DRender/QAbstractTexture>
 #include <Qt3DRender/QAbstractTextureImage>
@@ -100,15 +104,39 @@ public:
 
 //------------------------------------------------------------------------------
 
-class ProcessNode: public QObject {
+//class Node;
+//
+//class NodeFactory: public QObject {
+//    Q_OBJECT
+//
+//public:
+//    Q_INVOKABLE void importICS(const QUrl &url);
+//signals:
+//
+//}
+
+//------------------------------------------------------------------------------
+
+class Node: public QObject {
     Q_OBJECT
 public:
+    Node(QObject *parent = Q_NULLPTR): QObject(parent) {}
 };
 
-class PythonProcessNode: public ProcessNode {
+//class SourceNode: public Node {
+//    Q_OBJECT
+//    Q_PROPERTY(VolumetricData* output READ output NOTIFY outputChanged)
+//public:
+//    SourceNode(VolumetricDataPtr source, QObject *parent = Q_NULLPTR): Node(parent) {}
+//private:
+//    VolumetricDataPtr m_dataPtr;
+//}
+
+class SegmentationNode: public Node {
     Q_OBJECT
 public:
-    PythonProcessNode(const std::string &filename, QObject *parent = Q_NULLPTR) {}
+    SegmentationNode(QObject *parent = Q_NULLPTR): Node(parent) {}
+    void process(VolumetricDataPtr inputData, VolumetricDataPtr outputData, float th);
 };
 
 //------------------------------------------------------------------------------

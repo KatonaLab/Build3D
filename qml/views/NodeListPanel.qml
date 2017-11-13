@@ -3,39 +3,22 @@ import QtQuick.Window 2.0
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 
+import "../actions"
+import "../stores"
+import "controls"
+
 GroupBox {
-    id: root
-
-    property QtObject nodeManager;
-
-    function addNode(protoUrl, removable)
-    {
-        var settingsComponent = Qt.createComponent(protoUrl);
-        var itemComponent = Qt.createComponent("NodeListItem.qml");
-        var itemObject = itemComponent.createObject(nodeViewList,
-            {"Layout.fillWidth": true,
-            "nodeSettingsComponent": settingsComponent,
-            "removable": removable});
-    }
-
-    Action {
-        id: addSourceNode
-        text: "Add Source"
-        onTriggered: addNode(undefined, false)
-    }
 
     Action {
         id: addSegmentationNode
         text: "Add Segmentation"
-        // onTriggered: addNode("qrc:/qml/nodes/SegmentNode.ui.qml", true)
-        onTriggered: addNode("../nodes/SegmentNode.ui.qml", true)
+        onTriggered: AppActions.addSegmentNode(AppActions.generateUid())
     }
 
     Action {
         id: addAnalysisNode
         text: "Add Analysis"
-        // onTriggered: addNode("qrc:/qml/nodes/AnalysisNode.ui.qml", true)
-        onTriggered: addNode("../nodes/AnalysisNode.ui.qml", true)
+        onTriggered: AppActions.addAnalysisNode(AppActions.generateUid())
     }
 
     ScrollView {
@@ -45,14 +28,21 @@ GroupBox {
             width: parent.parent.width
 
             ColumnLayout {
-                id: nodeViewList
-                
                 anchors.fill: parent
                 spacing: 4
+
+                Repeater {
+                    model: MainStore.nodeStore.model
+                    delegate: NodeListItem {
+                        uid: model.uid
+                        componentSource: model.componentSource ? model.componentSource : ""
+                        Layout.fillWidth: true
+                    }
+                }
             }
 
-            Button {
-                text: "+"
+            FontelloButton {
+                text: "\uE827"
                 Layout.fillWidth: true
                 onClicked: {
                     menu.popup();

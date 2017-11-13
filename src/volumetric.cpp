@@ -1,6 +1,7 @@
 #include "volumetric.h"
 
 #include <iostream>
+
 #include <QTextureWrapMode>
 #include <QPointF>
 
@@ -63,8 +64,7 @@ void ICSFile::fillChannelData()
         channelData.emplace_back(new float[n], default_delete<float[]>());
     }
 
-    using namespace std::placeholders;
-    auto cast = bind(&TypeInfoBase::cast, typeMap.at(dt), _1);
+    auto cast = bind(&TypeInfoBase::cast, typeMap.at(dt), std::placeholders::_1);
     size_t bytes = typeMap.at(dt)->bytes();
     for (int k = 0; k < c; ++k) {
         size_t offset = n * k;
@@ -258,4 +258,23 @@ bool ImageDataGenerator::operator ==(const QTextureImageDataGenerator &other) co
 {
     const ImageDataGenerator *otherFunctor = functor_cast<ImageDataGenerator>(&other);
     return (otherFunctor != Q_NULLPTR && otherFunctor->m_data == m_data);
+}
+
+//------------------------------------------------------------------------------
+
+void SegmentationNode::process(VolumetricDataPtr inputData, VolumetricDataPtr outputData, float th)
+{
+    // namespace p = boost::python;
+    // namespace np = boost::python::numpy;
+
+    // Py_Initialize();
+    // np::initialize();
+
+    // np::ndarray inputArray = np::from_data(inputData->data().get(),
+    //                                        np::dtype::get_builtin<float>(),
+    //                                        p::make_tuple(inputData->width(), inputData->height(), inputData->depth()),
+    //                                        p::make_tuple(inputData->height()*inputData->depth()*sizeof(float), inputData->depth()*sizeof(float), sizeof(float)),
+    //                                        p::object()
+    //                                      );
+
 }

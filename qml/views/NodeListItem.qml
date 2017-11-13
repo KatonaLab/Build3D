@@ -2,19 +2,24 @@ import QtQuick 2.8
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
-import "ui-components"
+
+import "controls"
+import "../actions"
 
 GroupBox {
-    id: root
 
-    property Component nodeSettingsComponent
-    property QtObject processNode
+    property int uid: -1
+    property url componentSource: null
     property bool removable: false;
     property bool editable: true;
 
+    QtObject {
+        id: d
+        readonly property bool showSettings: componentSource != null
+    }
+
     ColumnLayout {
         spacing: 2
-
         anchors.fill: parent
 
         GroupBox {
@@ -52,34 +57,44 @@ GroupBox {
         GroupBox {
             id: nodeSettings
             Layout.fillWidth: true
-            visible: nodeSettingsComponent != undefined
+            visible: d.showSettings
+            clip: true
             Loader {
-                sourceComponent: nodeSettingsComponent
+                source: componentSource
             }
         }
 
         GroupBox {
+            id: nodeControls
+
             width: 0 // breaking a binding loop
+            height: 0 // breaking a binding loop
             Layout.fillWidth: true
+            // visible: applyButton.visible && removeButton.visible
+            visible: true
+
             ColumnLayout {
 
                 anchors.fill: parent
-                
+
                 Button {
-                    visible: nodeSettingsComponent != undefined
+                    id: applyButton
+                    visible: d.showSettings
                     Layout.fillWidth: true
-                    text: root.editable ? "Apply" : "Edit"
+                    text: editable ? "Apply" : "Edit"
                     onClicked: {
-                        root.editable = !(root.editable);
+                        editable = !editable;
                     }
                 }
 
                 Button {
-                    visible: root.removable
+                    id: removeButton
+                    // visible: removable
+                    visible: true
                     Layout.fillWidth: true
                     text: "Remove"
                     onClicked: {
-                        root.destroy();
+                        AppActions.removeNode(uid);
                     }
                 }
             }
@@ -94,7 +109,10 @@ GroupBox {
             when: editable
             PropertyChanges {
                 target: nodeSettings
-                visible: true
+                // TODO: it might not be the nicest way to do
+                Layout.maximumHeight: nodeSettings.implicitHeight
+                enabled: true
+                opacity: 1.
             }
         },
         State {
@@ -102,8 +120,19 @@ GroupBox {
             when: !editable
             PropertyChanges {
                 target: nodeSettings
-                visible: false
+                Layout.maximumHeight: 0
+                enabled: false
+                opacity: 0.
             }
         }
     ]
+
+    transitions: Transition {
+        PropertyAnimation {
+            target: nodeSettings
+            properties: "Layout.maximumHeight, opacity"
+            easing.type: Easing.InOutQuad
+            duration: 200
+        }
+    }
 }
