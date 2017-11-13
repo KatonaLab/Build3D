@@ -19,8 +19,13 @@ Item {
         AppDispatcher.dispatch(ActionTypes.importIcsFile, {url: url});
     }
 
-    function addSourceNode(uid, data) {
-        AppDispatcher.dispatch(ActionTypes.addSourceNode, {uid: uid, data: data});
+    function autoImportIcsFile(url) {
+        AppDispatcher.dispatch(ActionTypes.autoImportIcsFile, {url: url});
+    }
+
+    function addSourceNode(uid, data, name) {
+        AppDispatcher.dispatch(ActionTypes.addSourceNode,
+            {uid: uid, data: data, name: name});
     }
 
     function addSegmentNode(uid) {

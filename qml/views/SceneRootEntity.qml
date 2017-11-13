@@ -52,6 +52,21 @@ Entity {
             depth: model.depth
             volumeData: model.data
             backfaceMap: renderSettings.backfaceMap
+            volumeColor: model.viewParameters.color
+
+            Component.onCompleted: {
+                var y = model.data.dataLimits.y;
+                lutParameters = Qt.binding(function() { 
+                    return Qt.vector4d(0, y, model.viewParameters.lowCut, 
+                        model.viewParameters.highCut); 
+                });
+
+                volumeColor = Qt.binding(function() { 
+                    var col = model.viewParameters.color;
+                    col.a = model.viewParameters.visible ? 1. : 0.;
+                    return col;
+                });
+            }
         }
     }
 }

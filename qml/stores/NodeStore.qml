@@ -12,7 +12,7 @@ Item {
         // TODO: find a better way for action response than a switch/case
         switch (actionType) {
             case ActionTypes.addSourceNode:
-                add(parameters.uid, null); 
+                addSource(parameters.uid, null, parameters);
                 break;
             case ActionTypes.addSegmentNode:
                 add(parameters.uid, "../views/nodetypes/SegmentNodeView.qml");
@@ -21,6 +21,7 @@ Item {
                 add(parameters.uid, "../views/nodetypes/AnalysisNodeView.qml"); 
                 break;
             case ActionTypes.importIcsFile:
+            case ActionTypes.autoImportIcsFile:
                 dataManager.source = parameters.url;
                 break;
             case ActionTypes.removeNode:
@@ -35,6 +36,16 @@ Item {
 
     function defaultViewAttributes() {
         return {visible: true, lowCut: 0, highCut: 1, color: randomColor()};
+    }
+
+    function addSource(uid, componentSource, parameters) {
+        var item = {
+            uid: uid,
+            viewAttributes: defaultViewAttributes(),
+            componentSource: componentSource,
+            name: parameters.name
+        };
+        model.append(item);
     }
 
     function add(uid, componentSource) {
@@ -65,8 +76,8 @@ Item {
         onStatusChanged: {
             if (status == Component.Ready) {
                 for (var i = 0; i < volumes.length; ++i) {
-                    console.log("add volume from VolumetricDataManager", volumes[i]);
-                    AppActions.addSourceNode(AppActions.generateUid(), volumes[i]);
+                    AppActions.addSourceNode(AppActions.generateUid(), 
+                        volumes[i], volumes[i].dataName);
                 }
             }
         }

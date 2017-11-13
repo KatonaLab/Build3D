@@ -12,6 +12,8 @@ Item {
         AppDispatcher.addStoreListener(MainStore.nodeStore);
         AppDispatcher.addStoreListener(MainStore.sceneStore);
         AppDispatcher.addMiddlewareListener(dialogMiddleware);
+
+        AppActions.autoImportIcsFile("file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics");
     }
 
     MainWindow {

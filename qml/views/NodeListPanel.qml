@@ -35,8 +35,18 @@ GroupBox {
                     model: MainStore.nodeStore.model
                     delegate: NodeListItem {
                         uid: model.uid
-                        componentSource: model.componentSource ? model.componentSource : ""
                         Layout.fillWidth: true
+
+                        // TODO: fix this componentSource usage
+                        componentSource: model.componentSource ? model.componentSource : ""
+                        removable: model.componentSource != null
+                        name: model.name
+
+                        visibleChecked: model.viewAttributes.visible
+                        // TODO: fix DualSlider to be able to set these bindings
+                        // lowCutValue: model.viewAttributes.lowCut
+                        // highCutValue: model.viewAttributes.highCut
+                        nodeColor: model.viewAttributes.color
                     }
                 }
             }

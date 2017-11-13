@@ -33,11 +33,15 @@ void main()
     // float t = 0.0;
     for (int i = 0; i <= 32; ++i) {
         vec3 pos = mix(far, near, float(i) * 1./32.);
+        // alpha += texture(volumeTexture, pos).r;
+
         // vec3 pos = near + normalize(far - near) * t;
         // t += step;
         alpha = alpha + lut(volumeTexture, pos, lutParameters);
     }
     outputColor = alpha * volumeColor * volumeColor.a;
-    outputColor = vec4(distance(near, far) * 0.5, 0., 0., 1.);
+    // outputColor = vec4(alpha) * 0.001;
+    // outputColor.a = 1.0;
+    // outputColor = vec4(distance(near, far) * 0.5, 0., 0., 1.);
     // outputColor = vec4(0.3, 0.5, 0.6, 1.);
 }

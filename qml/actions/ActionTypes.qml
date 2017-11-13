@@ -4,6 +4,7 @@ import QtQuick 2.8
 Item {
 
     property string resetWorkspace: "resetWorkspace"
+    property string autoImportIcsFile: "autoImportIcsFile"
     property string importIcsFile: "importIcsFile"
     property string addSourceNode: "addSourceNode"
     property string addSegmentNode: "addSegmentNode"

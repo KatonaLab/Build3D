@@ -12,10 +12,24 @@ GroupBox {
     property url componentSource: null
     property bool removable: false;
     property bool editable: true;
+    property string name
+
+    // TODO: put these props into class like ViewProperties
+    property alias visibleChecked: visibleCheck.checked
+    property alias lowCutValue: slider.lowValue
+    property alias highCutValue: slider.highValue
+    property alias nodeColor: colorSelect.color
+
+    function viewParameters() {
+        return {visible: visibleCheck.checked,
+                lowCut: slider.lowValue,
+                highCut: slider.highValue,
+                color: colorSelect.color};
+    }
 
     QtObject {
         id: d
-        readonly property bool showSettings: componentSource != null
+        readonly property bool showSettings: componentSource != null && componentSource != ""
     }
 
     ColumnLayout {
@@ -31,10 +45,16 @@ GroupBox {
             // TODO: maybe put in a ColumnLayout
             CheckBox {
                 id: visibleCheck
+
+                text: name                
                 anchors.left: parent.left
                 anchors.top: parent.top
                 width: parent.width - colorSelect.width
                 anchors.margins: 8
+
+                onClicked: {
+                    AppActions.setNodeViewParameters(uid, viewParameters());
+                }
             }
 
             ColorIndicator {
@@ -42,6 +62,10 @@ GroupBox {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.margins: 8
+
+                onColorChanged: {
+                    AppActions.setNodeViewParameters(uid, viewParameters());
+                }
             }
 
             DualSlider {
@@ -51,6 +75,14 @@ GroupBox {
                 anchors.topMargin: 8
                 width: parent.width - 17*2
                 anchors.margins: 8
+
+                // lowValue
+                onLowValueChanged: {
+                    AppActions.setNodeViewParameters(uid, viewParameters());
+                }
+                onHighValueChanged: {
+                    AppActions.setNodeViewParameters(uid, viewParameters());
+                }
             }
         }
 
@@ -70,8 +102,7 @@ GroupBox {
             width: 0 // breaking a binding loop
             height: 0 // breaking a binding loop
             Layout.fillWidth: true
-            // visible: applyButton.visible && removeButton.visible
-            visible: true
+            visible: applyButton.visible && removeButton.visible
 
             ColumnLayout {
 
@@ -89,8 +120,7 @@ GroupBox {
 
                 Button {
                     id: removeButton
-                    // visible: removable
-                    visible: true
+                    visible: removable
                     Layout.fillWidth: true
                     text: "Remove"
                     onClicked: {
