@@ -8,25 +8,24 @@
     <file>qml/main.qml</file>
     <file>qml/stores/NodeStore.qml</file>
     <file>qml/stores/MainStore.qml</file>
-    <file>qml/stores/SceneStore.qml</file>
     <file>qml/middlewares/Middleware.qml</file>
     <file>qml/middlewares/DialogMiddleware.qml</file>
     <file>qml/views/controls/ColorIndicator.qml</file>
     <file>qml/views/controls/DualSlider.qml</file>
     <file>qml/views/controls/FontelloButton.qml</file>
-    <file>qml/views/controls/LoadIndicator.qml</file>
     <file>qml/views/controls/Palette.qml</file>
     <file>qml/views/controls/SliderHandle.qml</file>
     <file>qml/views/MainWindow.qml</file>
-    <file>qml/views/NodeListItem.qml</file>
     <file>qml/views/NodeListPanel.qml</file>
     <file>qml/views/SceneRootEntity.qml</file>
     <file>qml/views/VolumeEntity.qml</file>
     <file>qml/views/SceneRenderSettings.qml</file>
     <file>qml/views/ScreenQuadEntity.qml</file>
 
-    <file>qml/views/nodetypes/SegmentNodeView.qml</file>
-    <file>qml/views/nodetypes/AnalysisNodeView.qml</file>
+    <file>qml/views/nodes/SegmentNodeView.qml</file>
+    <file>qml/views/nodes/AnalysisNodeView.qml</file>
+    <file>qml/views/nodes/SourceNodeView.qml</file>
+    <file>qml/views/nodes/NodeViewOptions.qml</file>
 
     <file>qml/views/shaders/backfacemap.vert</file>
     <file>qml/views/shaders/volume.vert</file>

@@ -14,11 +14,16 @@ Entity {
     property VolumetricData volumeData
 
     property color volumeColor
-    property vector4d lutParameters
+    property real accumDivisor
+    property bool visible
+    property real lutLowCut
+    property real lutHighCut
+    property real lutDataMax
+
+    property vector4d lutParameters: Qt.vector4d(0, lutDataMax, lutLowCut, lutHighCut)
 
     property Layer layer
     property Texture2D backFaceMap
-    property Texture2D frontFaceAccumulatorMap
 
     QtObject {
         id: d
@@ -34,11 +39,12 @@ Entity {
         effect: Effect {
         parameters: [
                 Parameter {name: "backFaceMap"; value: backFaceMap},
-                Parameter {name: "frontFaceAccumulatorMap"; value: frontFaceAccumulatorMap},
                 Parameter {name: "vertexToTex3DCoordMatrix"; value: d.vertexToTex3DCoordMatrix},
                 Parameter {name: "volumeTexture"; value: VolumetricTexture {data: volumeData}},
                 Parameter {name: "volumeColor"; value: volumeColor},
-                Parameter {name: "lutParameters"; value: lutParameters}
+                Parameter {name: "lutParameters"; value: lutParameters},
+                Parameter {name: "accumDivisor"; value: accumDivisor},
+                Parameter {name: "visible"; value: visible ? 1.0 : 0.0}
             ]
 
             techniques: [
@@ -72,7 +78,18 @@ Entity {
                                 fragmentShaderCode: loadSource("qrc:/qml/views/shaders/volume.frag")
                             }
 
-                            // using default render state
+                            renderStates: [
+                                // DepthMask { mask: false },
+                                BlendEquationArguments {
+                                    sourceRgb: BlendEquationArguments.One
+                                    destinationRgb: BlendEquationArguments.One
+                                    sourceAlpha: BlendEquationArguments.One
+                                    destinationAlpha: BlendEquationArguments.One
+                                },
+                                BlendEquation {
+                                    blendFunction: BlendEquation.Add
+                                }
+                            ]
                         }
                     ]
                 }

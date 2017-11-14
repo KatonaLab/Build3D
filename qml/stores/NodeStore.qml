@@ -5,29 +5,57 @@ import "../actions"
 
 Item {
 
-    property int nextUid: 0
     property alias model: model
+    // TODO: make VolumetricData size handling dynamic
+    // so dont store this information
+    // also change VolumetricData to VolumeData, 'cos it's shorter
+    property vector3d storedVolumeSize: Qt.vector3d(0, 0, 0)
 
-    function onDispatched(actionType, parameters) {
+    function onDispatched(actionType, args) {
         // TODO: find a better way for action response than a switch/case
         switch (actionType) {
             case ActionTypes.addSourceNode:
-                addSource(parameters.uid, null, parameters);
+                var path = "../views/nodes/SourceNodeView.qml";
+                addNode(args.uid, args.data, path);
                 break;
             case ActionTypes.addSegmentNode:
-                add(parameters.uid, "../views/nodetypes/SegmentNodeView.qml");
+                var path = "../views/nodes/SegmentNodeView.qml";
+                addNode(args.uid, args.data, path);
                 break;
             case ActionTypes.addAnalysisNode:
-                add(parameters.uid, "../views/nodetypes/AnalysisNodeView.qml"); 
+                var path = "../views/nodes/AnalysisNodeView.qml";
+                addNode(args.uid, args.data, path);
                 break;
             case ActionTypes.importIcsFile:
             case ActionTypes.autoImportIcsFile:
-                dataManager.source = parameters.url;
+                dataManager.source = args.url;
                 break;
             case ActionTypes.removeNode:
-                remove(parameters.uid)
+                remove(args.uid)
                 break;
+            case ActionTypes.setNodeViewParameters:
+                setViewParameters(args.uid, args.parameters)
+                break;
+            // TODO: cleanWorkspace
         }
+    }
+
+    function addNode(uid, data, nodeViewPath) {
+        // FIXME: nasty hack
+        if (storedVolumeSize.x == 0) {
+            storedVolumeSize = Qt.vector3d(data.width, data.height, data.depth);
+        }
+
+        var maxDim = Math.max(data.width, data.height, data.depth);
+        var item = {
+            uid: uid,
+            size: Qt.vector3d(data.width / maxDim, 
+                data.height / maxDim, data.depth / maxDim),
+            data: data,
+            nodeViewPath: nodeViewPath,
+            nodeViewParams: defaultViewAttributes()
+        };
+        model.append(item);
     }
 
     function randomColor() {
@@ -35,26 +63,18 @@ Item {
     }
 
     function defaultViewAttributes() {
-        return {visible: true, lowCut: 0, highCut: 1, color: randomColor()};
+        // TODO: debug: if visible is true here then you have to click twice on the checkbox to make it truly visible
+        return {visible: false, lowCut: 0, highCut: 1, color: randomColor()};
     }
 
-    function addSource(uid, componentSource, parameters) {
-        var item = {
-            uid: uid,
-            viewAttributes: defaultViewAttributes(),
-            componentSource: componentSource,
-            name: parameters.name
-        };
-        model.append(item);
-    }
-
-    function add(uid, componentSource) {
-        var item = {
-            uid: uid,
-            viewAttributes: defaultViewAttributes(),
-            componentSource: componentSource
-        };
-        model.append(item);
+    function setViewParameters(uid, args) {
+        for (var i = 0 ; i < model.count; i++) {
+            var item  = model.get(i);
+            if (item.uid === uid) {
+                item.nodeViewParams = args;
+                break;
+            }
+        }
     }
 
     function remove(uid) {
@@ -76,8 +96,7 @@ Item {
         onStatusChanged: {
             if (status == Component.Ready) {
                 for (var i = 0; i < volumes.length; ++i) {
-                    AppActions.addSourceNode(AppActions.generateUid(), 
-                        volumes[i], volumes[i].dataName);
+                    AppActions.addSourceNode(AppActions.generateUid(), volumes[i]);
                 }
             }
         }

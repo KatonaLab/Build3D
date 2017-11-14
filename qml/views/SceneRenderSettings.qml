@@ -81,7 +81,7 @@ RenderSettings {
                             } // RenderTargetSelector
 
                             ClearBuffers {
-                                clearColor: Qt.rgba(0.0, 0.0, 0.0, 0.0)
+                                clearColor: root.clearColor
                                 buffers: ClearBuffers.ColorDepthBuffer
                             }
                         } // RenderTargetSelector

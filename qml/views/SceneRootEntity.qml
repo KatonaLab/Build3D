@@ -49,33 +49,27 @@ Entity {
     // so we need a per object volume rendering and then merging the results
 
     NodeInstantiator {
-        model: MainStore.sceneStore.model
+        model: MainStore.nodeStore.model
         delegate: VolumeEntity {
-            uid: uid
+            uid: model.uid
 
-            width: model.width
-            height: model.height
-            depth: model.depth
+            width: model.size.x
+            height: model.size.y
+            depth: model.size.z
             volumeData: model.data
 
             backFaceMap: renderSettings.backFaceMap
-            frontFaceAccumulatorMap: renderSettings.frontFaceAccumulatorMap
+            // TODO: count only the visible channels
+            accumDivisor: 1.0 / MainStore.nodeStore.model.count
             layer: sceneLayer
-            
-            volumeColor: model.viewParameters.color
 
+            volumeColor: model.nodeViewParams.color
+            visible: model.nodeViewParams.visible
+
+            lutLowCut: model.nodeViewParams.lowCut
+            lutHighCut: model.nodeViewParams.highCut
             Component.onCompleted: {
-                var y = model.data.dataLimits.y;
-                lutParameters = Qt.binding(function() { 
-                    return Qt.vector4d(0, y, model.viewParameters.lowCut, 
-                        model.viewParameters.highCut); 
-                });
-
-                volumeColor = Qt.binding(function() { 
-                    var col = model.viewParameters.color;
-                    col.a = model.viewParameters.visible ? 1. : 0.;
-                    return col;
-                });
+                lutDataMax = model.data.dataLimits.y;
             }
         }
     }
