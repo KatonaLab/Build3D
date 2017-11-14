@@ -37,8 +37,9 @@ GroupBox {
                         Layout.fillWidth: true
                         onLoaded: {
                             item.uid = model.uid;
-                            item.nodeName = model.data.dataName;
+                            item.nodeName = model.nodeName;
                             item.nodeViewParams = model.nodeViewParams;
+                            item.nodeApplied = Qt.binding(function(){return model.nodeApplied});
                         }
                         source: model.nodeViewPath
                     }

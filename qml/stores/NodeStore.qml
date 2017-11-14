@@ -6,6 +6,7 @@ import "../actions"
 Item {
 
     property alias model: model
+    property alias sceneModel: sceneModel
     // TODO: make VolumetricData size handling dynamic
     // so dont store this information
     // also change VolumetricData to VolumeData, 'cos it's shorter
@@ -16,15 +17,15 @@ Item {
         switch (actionType) {
             case ActionTypes.addSourceNode:
                 var path = "../views/nodes/SourceNodeView.qml";
-                addNode(args.uid, args.data, path);
+                addSourceNode(args.uid, args.data, path);
                 break;
             case ActionTypes.addSegmentNode:
                 var path = "../views/nodes/SegmentNodeView.qml";
-                addNode(args.uid, args.data, path);
+                addProcessNode(args.uid, path);
                 break;
             case ActionTypes.addAnalysisNode:
                 var path = "../views/nodes/AnalysisNodeView.qml";
-                addNode(args.uid, args.data, path);
+                addProcessNode(args.uid, path);
                 break;
             case ActionTypes.importIcsFile:
             case ActionTypes.autoImportIcsFile:
@@ -36,26 +37,106 @@ Item {
             case ActionTypes.setNodeViewParameters:
                 setViewParameters(args.uid, args.parameters)
                 break;
+            case ActionTypes.applySegmentNode:
+                applySegmentNode(args.uid, args.parameters);
+                break;
+            case ActionTypes.applyAnalysisNode:
+                applyAnalysisNode(args.uid, args.parameters);
+                break;
             // TODO: cleanWorkspace
         }
     }
 
-    function addNode(uid, data, nodeViewPath) {
+    function addSourceNode(uid, data, nodeViewPath) {
         // FIXME: nasty hack
         if (storedVolumeSize.x == 0) {
             storedVolumeSize = Qt.vector3d(data.width, data.height, data.depth);
         }
 
-        var maxDim = Math.max(data.width, data.height, data.depth);
+        var viewParams = defaultViewAttributes();
+
         var item = {
+            uid: uid,
+            nodeName: data.dataName,
+            nodeViewPath: nodeViewPath,
+            nodeViewParams: viewParams,
+            nodeApplied: true
+        };
+        model.append(item);
+
+        var maxDim = Math.max(data.width, data.height, data.depth);
+        var sceneItem = {
             uid: uid,
             size: Qt.vector3d(data.width / maxDim, 
                 data.height / maxDim, data.depth / maxDim),
             data: data,
-            nodeViewPath: nodeViewPath,
-            nodeViewParams: defaultViewAttributes()
+            nodeViewParams: viewParams
+        };
+        sceneModel.append(sceneItem);
+    }
+
+    function addProcessNode(uid, nodeViewPath) {
+        var item = {
+            uid: uid,
+            nodeName: "abcd",
+            nodeViewPath: nodeViewPath,            
+            nodeViewParams: defaultViewAttributes(),
+            nodeApplied: false
         };
         model.append(item);
+    }
+
+    function getNode(uid) {
+        for (var i = 0; i < model.count; i++) {
+            var item  = model.get(i);
+            if (item.uid === uid) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    function getSceneNode(uid) {
+        for (var i = 0; i < sceneModel.count; i++) {
+            var item  = sceneModel.get(i);
+            if (item.uid === uid) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    function applySegmentNode(uid, args) {
+        var node = getNode(uid);
+        if (node == null) {
+            consol.log("no uid", uid);
+            return;
+        }
+
+        var sceneNode = getSceneNode(uid);
+        var outputData;
+        if (sceneNode == null) {
+            outputData = dataManager.newDataLike(args.data, node.nodeName);
+        }
+
+        dataManager.runSegmentation(args.data, outputData, 
+            args.method, args.param0, args.pamar1);
+
+        var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
+        var sceneItem = {
+            uid: uid,
+            size: Qt.vector3d(outputData.width / maxDim, 
+                outputData.height / maxDim, outputData.depth / maxDim),
+            data: outputData,
+            nodeViewParams: node.nodeViewParams
+        };
+        sceneModel.append(sceneItem);
+
+        node.nodeApplied = true;
+    }
+
+    function applyAnalysisNode(uid, parameters) {
+
     }
 
     function randomColor() {
@@ -68,8 +149,16 @@ Item {
     }
 
     function setViewParameters(uid, args) {
-        for (var i = 0 ; i < model.count; i++) {
+        for (var i = 0; i < model.count; i++) {
             var item  = model.get(i);
+            if (item.uid === uid) {
+                item.nodeViewParams = args;
+                break;
+            }
+        }
+
+        for (var i = 0; i < sceneModel.count; i++) {
+            var item  = sceneModel.get(i);
             if (item.uid === uid) {
                 item.nodeViewParams = args;
                 break;
@@ -78,10 +167,18 @@ Item {
     }
 
     function remove(uid) {
-        for (var i = 0 ; i < model.count; i++) {
+        for (var i = 0; i < model.count; i++) {
             var item  = model.get(i);
             if (item.uid === uid) {
                 model.remove(i);
+                break;
+            }
+        }
+
+        for (var i = 0; i < sceneModel.count; i++) {
+            var item  = sceneModel.get(i);
+            if (item.uid === uid) {
+                sceneModel.remove(i);
                 break;
             }
         }
@@ -89,6 +186,10 @@ Item {
 
     ListModel {
         id: model
+    }
+
+    ListModel {
+        id: sceneModel
     }
 
     VolumetricDataManager {

@@ -49,7 +49,7 @@ Entity {
     // so we need a per object volume rendering and then merging the results
 
     NodeInstantiator {
-        model: MainStore.nodeStore.model
+        model: MainStore.nodeStore.sceneModel
         delegate: VolumeEntity {
             uid: model.uid
 

@@ -41,21 +41,17 @@ Item {
             {uid: uid, parameters: viewParameters});
     }
 
-    function setSegmentNodeParameters(uid, segmentParameters) {
-        AppDispatcher.dispatch(ActionTypes.setSegmentNodeParameters,
+    function applySegmentNode(uid, segmentParameters) {
+        AppDispatcher.dispatch(ActionTypes.applySegmentNode,
             {uid: uid, parameters: segmentParameters});
     }
 
-    function setAnalysisNodeParameters(uid, analysisParameters) {
-        AppDispatcher.dispatch(ActionTypes.setAnalysisNodeParameters,
+    function applyAnalysisNode(uid, analysisParameters) {
+        AppDispatcher.dispatch(ActionTypes.applyAnalysisNode,
             {uid: uid, parameters: analysisParameters});
     }
 
     function removeNode(uid) {
         AppDispatcher.dispatch(ActionTypes.removeNode, {uid: uid});
-    }
-
-    function applyNodeParameters(uid) {
-        AppDispatcher.dispatch(ActionTypes.applyNodeParameters, {uid: uid});
     }
 }

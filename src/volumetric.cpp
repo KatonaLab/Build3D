@@ -174,6 +174,30 @@ void VolumetricDataManager::setStatus(const Status &status)
     emit statusChanged();
 }
 
+VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString name)
+{
+    VolumetricDataPtr vd = VolumetricDataPtr::create();
+    vd->m_dims = data->m_dims;
+    shared_ptr<float> buffer(new float[vd->sizeInPixels()], default_delete<float[]>());
+    for (int i = 0; i < vd->sizeInPixels(); ++i) {
+        buffer.get()[i] = i / 1000.;
+    }
+    vd->m_data = buffer;
+    vd->m_dataName = name;
+    m_dataList.append(vd);
+    return vd.data();
+}
+
+void VolumetricDataManager::runSegmentation(VolumetricData *data, 
+        VolumetricData *output, QString method, float p0, float p1)
+{
+    cout << "VolumetricDataManager::runSegmentation called " 
+    << (void*)data << ", "
+    << (void*)output << ", "
+    << p0 << ", "
+    << p1 << endl;
+}
+
 QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 {
     QList<VolumetricData *> list;

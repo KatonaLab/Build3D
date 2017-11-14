@@ -10,8 +10,7 @@ Item {
     property string addSegmentNode: "addSegmentNode"
     property string addAnalysisNode: "addAnalysisNode"
     property string setNodeViewParameters: "setNodeViewParameters"
-    property string setSegmentNodeParameters: "setSegmentNodeParameters"
-    property string setAnalysisNodeParameters: "setAnalysisNodeParameters"
+    property string applySegmentNode: "applySegmentNode"
+    property string applyAnalysisNode: "applyAnalysisNode"
     property string removeNode: "removeNode"
-    property string applyNodeParameters: "applyNode"
 }

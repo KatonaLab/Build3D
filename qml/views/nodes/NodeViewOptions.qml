@@ -21,7 +21,7 @@ GroupBox {
     CheckBox {
         id: visibleCheck
 
-        text: "show"
+        text: "Show"
         checked: nodeViewParams.visible
 
         anchors.left: parent.left

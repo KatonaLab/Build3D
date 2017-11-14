@@ -11,6 +11,7 @@ GroupBox {
     property int uid: -1
     property string nodeName
     property var nodeViewParams
+    property bool nodeApplied
 
     ColumnLayout {
         spacing: 2

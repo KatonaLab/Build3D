@@ -86,6 +86,9 @@ public:
     void setSource(const QUrl &source);
     void setStatus(const Status &status);
 
+    Q_INVOKABLE VolumetricData* newDataLike(VolumetricData *data, QString name);
+    Q_INVOKABLE void runSegmentation(VolumetricData *data,
+        VolumetricData *output, QString method, float p0, float p1);
 Q_SIGNALS:
     void sourceChanged();
     void statusChanged();

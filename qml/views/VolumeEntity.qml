@@ -23,7 +23,7 @@ Entity {
     property vector4d lutParameters: Qt.vector4d(0, lutDataMax, lutLowCut, lutHighCut)
 
     property Layer layer
-    property Texture2D backFaceMap
+    property Texture2D backFaceMap    
 
     QtObject {
         id: d
