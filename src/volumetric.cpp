@@ -180,7 +180,7 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
     vd->m_dims = data->m_dims;
     shared_ptr<float> buffer(new float[vd->sizeInPixels()], default_delete<float[]>());
     for (int i = 0; i < vd->sizeInPixels(); ++i) {
-        buffer.get()[i] = i / 1000.;
+        buffer.get()[i] = sin(i);
     }
     vd->m_data = buffer;
     vd->m_dataName = name;
