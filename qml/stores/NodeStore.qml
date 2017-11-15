@@ -21,11 +21,11 @@ Item {
                 break;
             case ActionTypes.addSegmentNode:
                 var path = "../views/nodes/SegmentNodeView.qml";
-                addProcessNode(args.uid, path);
+                addProcessNode(args.uid, path, "Segmentation");
                 break;
             case ActionTypes.addAnalysisNode:
                 var path = "../views/nodes/AnalysisNodeView.qml";
-                addProcessNode(args.uid, path);
+                addProcessNode(args.uid, path, "Analysis");
                 break;
             case ActionTypes.importIcsFile:
             case ActionTypes.autoImportIcsFile:
@@ -75,10 +75,10 @@ Item {
         sceneModel.append(sceneItem);
     }
 
-    function addProcessNode(uid, nodeViewPath) {
+    function addProcessNode(uid, nodeViewPath, nodeNameBase) {
         var item = {
             uid: uid,
-            nodeName: "abcd",
+            nodeName: nodeNameBase + " [node" + uid + "]",
             nodeViewPath: nodeViewPath,            
             nodeViewParams: defaultViewAttributes(),
             nodeApplied: false
@@ -107,30 +107,43 @@ Item {
     }
 
     function applySegmentNode(uid, args) {
+        console.log("applySegmentNode", 1);
         var node = getNode(uid);
         if (node == null) {
             consol.log("no uid", uid);
             return;
         }
+        console.log("applySegmentNode", 2);
 
         var sceneNode = getSceneNode(uid);
         var outputData;
         if (sceneNode == null) {
+            console.log("applySegmentNode", 3);
             outputData = dataManager.newDataLike(args.data, node.nodeName);
         }
+        console.log("applySegmentNode", 4);
 
         dataManager.runSegmentation(args.data, outputData, 
-            args.method, args.param0, args.pamar1);
+            args.method, args.param0, args.param1);
+        console.log("applySegmentNode", 5);
+    
+        if (sceneNode == null) {
 
-        var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
-        var sceneItem = {
-            uid: uid,
-            size: Qt.vector3d(outputData.width / maxDim, 
-                outputData.height / maxDim, outputData.depth / maxDim),
-            data: outputData,
-            nodeViewParams: node.nodeViewParams
-        };
-        sceneModel.append(sceneItem);
+            console.log("applySegmentNode", 6);
+            var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
+            var sceneItem = {
+                uid: uid,
+                size: Qt.vector3d(outputData.width / maxDim, 
+                    outputData.height / maxDim, outputData.depth / maxDim),
+                data: outputData,
+                nodeViewParams: node.nodeViewParams
+            };
+            sceneModel.append(sceneItem);
+            console.log("applySegmentNode", 7);
+        } else {
+            sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
+            console.log("applySegmentNode", 8);
+        }
 
         node.nodeApplied = true;
     }

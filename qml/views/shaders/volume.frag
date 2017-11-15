@@ -23,7 +23,8 @@ float lut(in sampler3D tex, in vec3 pos, in vec4 params)
     // return x if a < x < b
     // return 0 if b < x
     // https://www.wolframalpha.com/input/?i=((min(max(x,+2.5),+4)+-+2.5)%2F(4-2.5)+-+step(x-4)
-    return (clamp(x, a, b) - a) / r - step(b, x);
+    // return (clamp(x, a, b) - a) / r - step(b, x);
+    return (clamp(x, a, b) - a) / r;
 }
 
 void main()

@@ -178,12 +178,16 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
 {
     VolumetricDataPtr vd = VolumetricDataPtr::create();
     vd->m_dims = data->m_dims;
-    shared_ptr<float> buffer(new float[vd->sizeInPixels()], default_delete<float[]>());
-    for (int i = 0; i < vd->sizeInPixels(); ++i) {
-        buffer.get()[i] = sin(i);
-    }
-    vd->m_data = buffer;
+
+    // TOOD: there is some unknown crash that points to VolumetricData destructor:
+    // app(49302,0x7fffa985e340) malloc: *** error for object 0x1222af510: pointer being freed was not allocated
+    // it might originate here
+    // anyway this whole mess with the VolumetricData handling should be refactored
+    // keeping thread safety and flexibility in mind
+
+    vd->m_data.reset(new float[vd->sizeInPixels()], default_delete<float[]>());
     vd->m_dataName = name;
+    vd->m_dataLimitsReady = false;
     m_dataList.append(vd);
     return vd.data();
 }
@@ -191,11 +195,17 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
 void VolumetricDataManager::runSegmentation(VolumetricData *data, 
         VolumetricData *output, QString method, float p0, float p1)
 {
-    cout << "VolumetricDataManager::runSegmentation called " 
-    << (void*)data << ", "
-    << (void*)output << ", "
-    << p0 << ", "
-    << p1 << endl;
+    if (data->sizeInPixels() != output->sizeInPixels()) {
+        // TODO throw error
+        cerr << "runSegmentation: input-output size mismatch" << endl;
+        return;
+    }
+    float scale = 1. / data->dataLimits().y();
+    for (int i = 0; i < data->sizeInPixels(); ++i) {
+        float v = data->m_data.get()[i] * scale;
+        output->m_data.get()[i] = (p0 <= v && v <= p1) ? 1. : 0.;
+    }
+    output->m_dataLimitsReady = false;
 }
 
 QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()

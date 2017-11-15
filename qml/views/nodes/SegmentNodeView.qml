@@ -42,7 +42,7 @@ GroupBox {
 
         NodeViewOptions {
             uid: box.uid
-            visible: nodeApplied
+            enabled: nodeApplied
             width: 0 // breaking a binding loop (?), TODO
             nodeViewParams: box.nodeViewParams
             Layout.fillWidth: true
@@ -62,8 +62,18 @@ GroupBox {
                 ComboBox {
                     id: inputSelector
                     Layout.fillWidth: true
-                    model: MainStore.nodeStore.model
-                    textRole: "nodeName"
+                    textRole: "text"
+                    model: ListModel {
+                        Component.onCompleted: {
+                            var nodeStore = MainStore.nodeStore;
+                            var sm = nodeStore.sceneModel;
+                            for (var i = 0; i < sm.count; ++i) {
+                                var uid = sm.get(i).uid;
+                                var node = nodeStore.getNode(uid);
+                                append({text: node.nodeName, uid: uid});
+                            }
+                        }
+                    }
                 }
 
                 Label {
@@ -75,10 +85,7 @@ GroupBox {
                     enabled: !(manualCheckbox.checked)
                     Layout.fillWidth: true
                     model: ListModel {
-                        ListElement {text: "Method 1"; key: "m1"}
-                        ListElement {text: "Method 2"; key: "m2"}
-                        ListElement {text: "Method 3"; key: "m3"}
-                        ListElement {text: "Method 4"; key: "m4"}
+                        ListElement {text: "Unimplemented yet"; key: "m1"}
                     }
                 }
 
@@ -91,9 +98,10 @@ GroupBox {
 
         Button {
             text: "Apply"
+            enabled: !nodeApplied
             Layout.fillWidth: true
             onClicked: {
-                var inputUid = MainStore.nodeStore.model.get(inputSelector.currentIndex).uid;
+                var inputUid = inputSelector.model.get(inputSelector.currentIndex).uid;
                 var inputSceneNode = MainStore.nodeStore.getSceneNode(inputUid);
                 var inputData = inputSceneNode.data;
                 var param0 = inputSceneNode.nodeViewParams.lowCut;
