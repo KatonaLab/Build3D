@@ -177,6 +177,8 @@ void VolumetricDataManager::setStatus(const Status &status)
 VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString name)
 {
     VolumetricDataPtr vd = VolumetricDataPtr::create();
+    // TODO: rethink, potential leak
+    vd->setParent(this); // prevent from deleting the object
     vd->m_dims = data->m_dims;
 
     // TOOD: there is some unknown crash that points to VolumetricData destructor:
@@ -188,6 +190,7 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
     vd->m_data.reset(new float[vd->sizeInPixels()], default_delete<float[]>());
     vd->m_dataName = name;
     vd->m_dataLimitsReady = false;
+    // TODO: should I append?
     m_dataList.append(vd);
     return vd.data();
 }
@@ -204,6 +207,34 @@ void VolumetricDataManager::runSegmentation(VolumetricData *data,
     for (int i = 0; i < data->sizeInPixels(); ++i) {
         float v = data->m_data.get()[i] * scale;
         output->m_data.get()[i] = (p0 <= v && v <= p1) ? 1. : 0.;
+    }
+    output->m_dataLimitsReady = false;
+}
+
+void VolumetricDataManager::runAnalysis(
+    VolumetricData *data0,
+    VolumetricData *data1, 
+    VolumetricData *segData0,
+    VolumetricData *segData1,
+    VolumetricData *output)
+{
+    // TODO: size check
+
+    // VolumetricData* tmp0 = newDataLike(segData0, "");
+    dataOpAnd(segData0, segData1, output);
+
+    output->m_dataLimitsReady = false;
+}
+
+void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *data1,
+    VolumetricData *output)
+{
+    // TODO: size check
+    
+    for (int i = 0; i < data0->sizeInPixels(); ++i) {
+        bool v0 = data0->m_data.get()[i] != 0.0f;
+        bool v1 = data1->m_data.get()[i] != 0.0f;
+        output->m_data.get()[i] = v0 && v1 ? 1.0 : 0.0;
     }
     output->m_dataLimitsReady = false;
 }

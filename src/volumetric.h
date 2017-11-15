@@ -89,6 +89,13 @@ public:
     Q_INVOKABLE VolumetricData* newDataLike(VolumetricData *data, QString name);
     Q_INVOKABLE void runSegmentation(VolumetricData *data,
         VolumetricData *output, QString method, float p0, float p1);
+    Q_INVOKABLE void runAnalysis(
+        VolumetricData *data0,
+        VolumetricData *data1, 
+        VolumetricData *segData0,
+        VolumetricData *segData1,
+        VolumetricData *output);
+
 Q_SIGNALS:
     void sourceChanged();
     void statusChanged();
@@ -99,6 +106,10 @@ private:
     QUrl m_source;
     Status m_status = Status::Null;
     float m_progress;
+
+private:
+    void dataOpAnd(VolumetricData *data0,
+        VolumetricData *data1, VolumetricData *output);
 
 // FIXME:
 public:

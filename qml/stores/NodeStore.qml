@@ -148,8 +148,36 @@ Item {
         node.nodeApplied = true;
     }
 
-    function applyAnalysisNode(uid, parameters) {
+    function applyAnalysisNode(uid, args) {
+        var node = getNode(uid);
+        if (node == null) {
+            consol.log("no uid, analysis", uid);
+            return;
+        }
 
+        var sceneNode = getSceneNode(uid);
+        var outputData;
+        if (sceneNode == null) {
+            outputData = dataManager.newDataLike(args.segData0, node.nodeName);
+        }
+
+        dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
+        if (sceneNode == null) {
+
+            var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
+            var sceneItem = {
+                uid: uid,
+                size: Qt.vector3d(outputData.width / maxDim, 
+                    outputData.height / maxDim, outputData.depth / maxDim),
+                data: outputData,
+                nodeViewParams: node.nodeViewParams
+            };
+            sceneModel.append(sceneItem);
+        } else {
+            sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
+        }
+
+        node.nodeApplied = true;
     }
 
     function randomColor() {

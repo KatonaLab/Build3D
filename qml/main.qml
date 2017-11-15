@@ -12,8 +12,8 @@ Item {
         AppDispatcher.addStoreListener(MainStore.nodeStore);
         AppDispatcher.addMiddlewareListener(dialogMiddleware);
 
-        // AppActions.autoImportIcsFile("file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics");
-        AppActions.autoImportIcsFile("file:///Users/fodorbalint/Desktop/spheres.ics");
+        AppActions.autoImportIcsFile("file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics");
+        // AppActions.autoImportIcsFile("file:///Users/fodorbalint/Desktop/spheres.ics");
     }
 
     MainWindow {
