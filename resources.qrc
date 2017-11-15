@@ -2,29 +2,43 @@
 <qresource>
     <file>assets/fonts/fontello.ttf</file>
     
-    <file>qml/ChannelViewPanel.qml</file>
-    <file>qml/ChannelView.qml</file>
-    <file>qml/ColorIndicator.qml</file>
-    <file>qml/LoadIndicator.qml</file>
-    <file>qml/ObjectPlaneOrbitCamera.qml</file>
-    <file>qml/ui-controls/DualSlider.qml</file>
-    <file>qml/ui-controls/helpers/Palette.qml</file>
-    <file>qml/ui-controls/helpers/SliderHandle.qml</file>
-
-    <file>qml/SceneEntity.qml</file>
-    
-    <file>qml/VolumeCube.qml</file>
-    <file>qml/VolumeEffect.qml</file>
-    <file>qml/VolumeMaterial.qml</file>
-    <file>qml/VolumeParameters.qml</file>
-    <file>qml/VolumeRenderSettings.qml</file>
-    
-    <file>qml/shaders/backfacemap.vert</file>
-    <file>qml/shaders/backfacemap.frag</file>
-    <file>qml/shaders/volume.vert</file>
-    <file>qml/shaders/volume.frag</file>
-    <file>qml/shaders/volume.geom</file>
-
+    <file>qml/actions/ActionTypes.qml</file>
+    <file>qml/actions/AppActions.qml</file>
+    <file>qml/actions/AppDispatcher.qml</file>
     <file>qml/main.qml</file>
+    <file>qml/stores/NodeStore.qml</file>
+    <file>qml/stores/MainStore.qml</file>
+    <file>qml/middlewares/Middleware.qml</file>
+    <file>qml/middlewares/DialogMiddleware.qml</file>
+    <file>qml/views/controls/ColorIndicator.qml</file>
+    <file>qml/views/controls/DualSlider.qml</file>
+    <file>qml/views/controls/FontelloButton.qml</file>
+    <file>qml/views/controls/Palette.qml</file>
+    <file>qml/views/controls/SliderHandle.qml</file>
+    <file>qml/views/MainWindow.qml</file>
+    <file>qml/views/NodeListPanel.qml</file>
+    <file>qml/views/SceneRootEntity.qml</file>
+    <file>qml/views/VolumeEntity.qml</file>
+    <file>qml/views/SceneRenderSettings.qml</file>
+    <file>qml/views/ScreenQuadEntity.qml</file>
+
+    <file>qml/views/nodes/SegmentNodeView.qml</file>
+    <file>qml/views/nodes/AnalysisNodeView.qml</file>
+    <file>qml/views/nodes/SourceNodeView.qml</file>
+    <file>qml/views/nodes/NodeViewOptions.qml</file>
+
+    <file>qml/views/shaders/backfacemap.vert</file>
+    <file>qml/views/shaders/volume.vert</file>
+    <file>qml/views/shaders/final.vert</file>
+    
+    <file>qml/views/shaders/backfacemap.frag</file>
+    <file>qml/views/shaders/volume.frag</file>
+    <file>qml/views/shaders/final.frag</file>
+
+    <file>qml/views/shaders/volume.geom</file>
+
+    <file>qml/actions/qmldir</file>
+    <file>qml/stores/qmldir</file>
+
 </qresource>
 </RCC>

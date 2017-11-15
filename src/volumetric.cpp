@@ -1,6 +1,7 @@
 #include "volumetric.h"
 
 #include <iostream>
+
 #include <QTextureWrapMode>
 #include <QPointF>
 
@@ -59,11 +60,11 @@ void ICSFile::fillChannelData()
     size_t n = width() * height() * depth();
     size_t c = channels();
     for (size_t k = 0; k < c; ++k) {
+        // TODO: consider converting to int32/64 instead of float
         channelData.emplace_back(new float[n], default_delete<float[]>());
     }
 
-    using namespace std::placeholders;
-    auto cast = bind(&TypeInfoBase::cast, typeMap.at(dt), _1);
+    auto cast = bind(&TypeInfoBase::cast, typeMap.at(dt), std::placeholders::_1);
     size_t bytes = typeMap.at(dt)->bytes();
     for (int k = 0; k < c; ++k) {
         size_t offset = n * k;
@@ -173,6 +174,40 @@ void VolumetricDataManager::setStatus(const Status &status)
     emit statusChanged();
 }
 
+VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString name)
+{
+    VolumetricDataPtr vd = VolumetricDataPtr::create();
+    vd->m_dims = data->m_dims;
+
+    // TOOD: there is some unknown crash that points to VolumetricData destructor:
+    // app(49302,0x7fffa985e340) malloc: *** error for object 0x1222af510: pointer being freed was not allocated
+    // it might originate here
+    // anyway this whole mess with the VolumetricData handling should be refactored
+    // keeping thread safety and flexibility in mind
+
+    vd->m_data.reset(new float[vd->sizeInPixels()], default_delete<float[]>());
+    vd->m_dataName = name;
+    vd->m_dataLimitsReady = false;
+    m_dataList.append(vd);
+    return vd.data();
+}
+
+void VolumetricDataManager::runSegmentation(VolumetricData *data, 
+        VolumetricData *output, QString method, float p0, float p1)
+{
+    if (data->sizeInPixels() != output->sizeInPixels()) {
+        // TODO throw error
+        cerr << "runSegmentation: input-output size mismatch" << endl;
+        return;
+    }
+    float scale = 1. / data->dataLimits().y();
+    for (int i = 0; i < data->sizeInPixels(); ++i) {
+        float v = data->m_data.get()[i] * scale;
+        output->m_data.get()[i] = (p0 <= v && v <= p1) ? 1. : 0.;
+    }
+    output->m_dataLimitsReady = false;
+}
+
 QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 {
     QList<VolumetricData *> list;
@@ -186,8 +221,8 @@ QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {
-    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
-    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
+    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
+    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
 }
 
@@ -257,4 +292,23 @@ bool ImageDataGenerator::operator ==(const QTextureImageDataGenerator &other) co
 {
     const ImageDataGenerator *otherFunctor = functor_cast<ImageDataGenerator>(&other);
     return (otherFunctor != Q_NULLPTR && otherFunctor->m_data == m_data);
+}
+
+//------------------------------------------------------------------------------
+
+void SegmentationNode::process(VolumetricDataPtr inputData, VolumetricDataPtr outputData, float th)
+{
+    // namespace p = boost::python;
+    // namespace np = boost::python::numpy;
+
+    // Py_Initialize();
+    // np::initialize();
+
+    // np::ndarray inputArray = np::from_data(inputData->data().get(),
+    //                                        np::dtype::get_builtin<float>(),
+    //                                        p::make_tuple(inputData->width(), inputData->height(), inputData->depth()),
+    //                                        p::make_tuple(inputData->height()*inputData->depth()*sizeof(float), inputData->depth()*sizeof(float), sizeof(float)),
+    //                                        p::object()
+    //                                      );
+
 }

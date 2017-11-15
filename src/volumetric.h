@@ -1,6 +1,10 @@
 #ifndef _volumetric_h_
 #define _volumetric_h_
 
+#undef slots
+// #include <boost/python.hpp>
+// #include <boost/python/numpy.hpp>
+
 #include <QtCore>
 #include <Qt3DRender/QAbstractTexture>
 #include <Qt3DRender/QAbstractTextureImage>
@@ -15,6 +19,8 @@
 #include <map>
 #include <functional>
 #include <libics.h>
+
+// TODO: classes to separate files
 
 class ICSError : public std::runtime_error {
 public:
@@ -80,6 +86,9 @@ public:
     void setSource(const QUrl &source);
     void setStatus(const Status &status);
 
+    Q_INVOKABLE VolumetricData* newDataLike(VolumetricData *data, QString name);
+    Q_INVOKABLE void runSegmentation(VolumetricData *data,
+        VolumetricData *output, QString method, float p0, float p1);
 Q_SIGNALS:
     void sourceChanged();
     void statusChanged();
@@ -94,6 +103,43 @@ private:
 // FIXME:
 public:
     QVector<VolumetricDataPtr> m_dataList;
+};
+
+//------------------------------------------------------------------------------
+
+//class Node;
+//
+//class NodeFactory: public QObject {
+//    Q_OBJECT
+//
+//public:
+//    Q_INVOKABLE void importICS(const QUrl &url);
+//signals:
+//
+//}
+
+//------------------------------------------------------------------------------
+
+class Node: public QObject {
+    Q_OBJECT
+public:
+    Node(QObject *parent = Q_NULLPTR): QObject(parent) {}
+};
+
+//class SourceNode: public Node {
+//    Q_OBJECT
+//    Q_PROPERTY(VolumetricData* output READ output NOTIFY outputChanged)
+//public:
+//    SourceNode(VolumetricDataPtr source, QObject *parent = Q_NULLPTR): Node(parent) {}
+//private:
+//    VolumetricDataPtr m_dataPtr;
+//}
+
+class SegmentationNode: public Node {
+    Q_OBJECT
+public:
+    SegmentationNode(QObject *parent = Q_NULLPTR): Node(parent) {}
+    void process(VolumetricDataPtr inputData, VolumetricDataPtr outputData, float th);
 };
 
 //------------------------------------------------------------------------------

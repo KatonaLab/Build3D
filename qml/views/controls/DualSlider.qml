@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
-import "helpers"
 
 Item {
     id: root
@@ -8,9 +7,9 @@ Item {
     // TODO: fix the height, when no anchoring the knobs are off
     // TODO: the slider bed is not centered horizontally = the knob origin is not at its center
 
-    property bool enabled: true
-    property real lowValue: knobLeft.x / sliderBed.width
-    property real highValue: knobRight.x / sliderBed.width
+    property bool enabled: true    
+    property real lowValue
+    property real highValue
 
     QtObject {
         id: d
@@ -57,6 +56,10 @@ Item {
             minX: 0
             maxX: knobRight.x
             enabled: root.enabled
+            x: sliderBed.width * lowValue
+            onXChanged: {
+                lowValue = x / sliderBed.width;
+            }
         }
 
         SliderHandle {
@@ -64,6 +67,10 @@ Item {
             minX: knobLeft.x
             maxX: sliderBed.width
             enabled: root.enabled
+            x: sliderBed.width * highValue
+            onXChanged: {
+                highValue = x / sliderBed.width;
+            }
         }
     }
 
