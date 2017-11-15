@@ -4,6 +4,7 @@
 
 #include <QTextureWrapMode>
 #include <QPointF>
+#include <QQmlEngine>
 
 // TEST
 #include <chrono>
@@ -178,7 +179,11 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
 {
     VolumetricDataPtr vd = VolumetricDataPtr::create();
     // TODO: rethink, potential leak
-    vd->setParent(this); // prevent from deleting the object
+     vd->setParent(this); // prevent from deleting the object
+
+    // Hope this fix issue #11
+    QQmlEngine::setObjectOwnership(vd.data(), QQmlEngine::CppOwnership);
+
     vd->m_dims = data->m_dims;
 
     // TOOD: there is some unknown crash that points to VolumetricData destructor:
@@ -219,9 +224,38 @@ void VolumetricDataManager::runAnalysis(
     VolumetricData *output)
 {
     // TODO: size check
+    cout << "analysis 1" << endl;
+    VolumetricData* label0 = newDataLike(segData0, "");
+    cout << "analysis 2" << endl;
+    VolumetricData* label1 = newDataLike(segData1, "");
+    cout << "analysis 3" << endl;
+    dataLabel(segData0, label0);
+    cout << "analysis 4" << endl;
+    dataLabel(segData1, label1);
 
-    // VolumetricData* tmp0 = newDataLike(segData0, "");
-    dataOpAnd(segData0, segData1, output);
+//    float minVolume0 = 0.0;
+//    float maxVolume0 = 100.0;
+//    float minVolume1 = 0.0;
+//    float maxVolume1 = 100.0;
+
+//    dataFilter(tmp0, data0, tmp0, minVolume0, maxVolume0);
+//    dataFilter(tmp1, data1, tmp1, minVolume1, maxVolume1);
+
+    VolumetricData* intersect = newDataLike(segData1, "");
+    cout << "analysis 5" << endl;
+    dataOpAnd(segData0, segData1, intersect);
+    cout << "analysis 6" << endl;
+    VolumetricData* intersectLabel = newDataLike(segData1, "");
+    cout << "analysis 7" << endl;
+    dataLabel(intersect, output);
+    cout << "analysis 8" << endl;
+
+//    dataFilter(output, )
+
+    auto statList0 = dataStatistics(data0, label0, intersect);
+    cout << "analysis 9" << endl;
+    auto statList1 = dataStatistics(data1, label1, intersect);
+    cout << "analysis 10" << endl;
 
     output->m_dataLimitsReady = false;
 }
@@ -239,6 +273,102 @@ void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *dat
     output->m_dataLimitsReady = false;
 }
 
+std::map<float, VolumetricDataManager::StatRecord>
+VolumetricDataManager::dataStatistics(VolumetricData *data,
+                                           VolumetricData *labelData,
+                                           VolumetricData *segIntersect)
+{
+    // TODO: size check
+
+    map<float, StatRecord> statMap;
+
+    for (int i = 0; i < data->sizeInPixels(); ++i) {
+        float value = data->m_data.get()[i];
+        float label = labelData->m_data.get()[i];
+        float coloc = segIntersect->m_data.get()[i];
+        if (label != 0.0f) {
+            statMap[label].volume++;
+            statMap[label].intensity += value;
+            if (coloc != 0.0f) {
+                statMap[label].intersectVolume++;
+            }
+        }
+    }
+    for (auto &item : statMap) {
+        item.second.intensity /= item.second.volume;
+        item.second.overlapRatio = item.second.intersectVolume / item.second.volume;
+        cout << item.first << ": "
+            << item.second.intensity << " "
+            << item.second.volume << " "
+            << item.second.overlapRatio << endl;
+    }
+    return statMap;
+}
+
+void VolumetricDataManager::dataLabel(VolumetricData *data, VolumetricData *output)
+{
+    // TODO: size check
+
+    // TODO: find a better way
+    for (int i = 0; i < output->sizeInPixels(); ++i) {
+        output->m_data.get()[i] = 0.0f;
+    }
+
+    // TODO: refactor
+    auto getIndex = [&data](int x, int y, int z)
+    {
+        return x * (data->height() * data->depth()) + y * (data->depth()) + z;
+    };
+
+    float nextLabel = 1.0f;
+    auto getNearLabel = [&output, &getIndex](int x, int y, int z)
+    {
+        for (int u = -1; u <= 0; ++u) {
+            for (int v = -1; v <= 0; ++v) {
+                for (int w = -1; w <= 0; ++w) {
+                    int idx = getIndex(x + u, y + v, z + w);
+                    if (output->m_data.get()[idx] > 0.0) {
+                        return output->m_data.get()[idx];
+                    }
+                }
+            }
+        }
+        return 0.0f;
+    };
+
+    // connected components first pass
+
+    for (int x = 1; x < data->width(); ++x) {
+        for (int y = 1; y < data->height(); ++y) {
+            for (int z = 1; z < data->depth(); ++z) {
+                int idx = getIndex(x, y, z);
+                if (data->m_data.get()[idx] > 0.0f) {
+                    float label = getNearLabel(x, y, z);
+                    output->m_data.get()[idx] = label > 0.0f ? label : nextLabel++;
+                }
+            }
+        }
+    }
+
+    // connected components second pass
+
+    float maxLabel = 0.0f;
+
+    for (int x = 1; x < data->width()-1; ++x) {
+        for (int y = 1; y < data->height()-1; ++y) {
+            for (int z = 1; z < data->depth()-1; ++z) {
+                int idx = getIndex(x, y, z);
+                float label = output->m_data.get()[idx];
+                if (label > 0.0f) {
+                    float newLabel = min(label, getNearLabel(x, y, z));
+                    output->m_data.get()[idx] = newLabel;
+                    maxLabel = max(maxLabel, newLabel);
+                }
+            }
+        }
+    }
+}
+
 QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 {
     QList<VolumetricData *> list;
@@ -252,8 +382,8 @@ QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {
-    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
-    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Linear);
+    setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
+    setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
 }
 

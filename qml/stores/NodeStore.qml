@@ -107,29 +107,22 @@ Item {
     }
 
     function applySegmentNode(uid, args) {
-        console.log("applySegmentNode", 1);
         var node = getNode(uid);
         if (node == null) {
             consol.log("no uid", uid);
             return;
         }
-        console.log("applySegmentNode", 2);
 
         var sceneNode = getSceneNode(uid);
         var outputData;
         if (sceneNode == null) {
-            console.log("applySegmentNode", 3);
             outputData = dataManager.newDataLike(args.data, node.nodeName);
         }
-        console.log("applySegmentNode", 4);
 
         dataManager.runSegmentation(args.data, outputData, 
             args.method, args.param0, args.param1);
-        console.log("applySegmentNode", 5);
     
         if (sceneNode == null) {
-
-            console.log("applySegmentNode", 6);
             var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
             var sceneItem = {
                 uid: uid,
@@ -139,10 +132,8 @@ Item {
                 nodeViewParams: node.nodeViewParams
             };
             sceneModel.append(sceneItem);
-            console.log("applySegmentNode", 7);
         } else {
             sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
-            console.log("applySegmentNode", 8);
         }
 
         node.nodeApplied = true;
@@ -160,10 +151,10 @@ Item {
         if (sceneNode == null) {
             outputData = dataManager.newDataLike(args.segData0, node.nodeName);
         }
-
+        console.log("nodestore sending");
         dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
+        console.log("nodestore sent");
         if (sceneNode == null) {
-
             var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
             var sceneItem = {
                 uid: uid,

@@ -108,8 +108,19 @@ private:
     float m_progress;
 
 private:
+    struct StatRecord {
+        float volume = 0.0;
+        float intensity = 0.0;
+        float overlapRatio = 0.0;
+        float intersectVolume = 0.0;
+    };
+
     void dataOpAnd(VolumetricData *data0,
         VolumetricData *data1, VolumetricData *output);
+    void dataLabel(VolumetricData *data, VolumetricData *output);
+
+    std::map<float, VolumetricDataManager::StatRecord>
+    dataStatistics(VolumetricData *data, VolumetricData *labelData, VolumetricData *segIntersect);
 
 // FIXME:
 public:
