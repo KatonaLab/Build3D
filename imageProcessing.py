@@ -21,7 +21,7 @@ class Main(object):
     def __init__(self):
 
 
-        print("Modify")
+
         #############################################Load Images####################################################
         sourceImageList=[]
         # Channel 1
@@ -51,21 +51,25 @@ class Main(object):
 
 
         stats = sitk.LabelIntensityStatisticsImageFilter()
-        path = ("D:/Playground/large.tif")
+        path = ("D:/Playground/zsofi.tif")
         largeImage=Processor.load_image(path)
         itkLargeImage = sitk.GetImageFromArray(largeImage)
         largecc=sitk.ConnectedComponent(itkLargeImage)
         dataBase=stats.Execute(largecc,itkLargeImage)
 
         print(type(stats.GetMean(5)))
-        print(stats.GetMean(5))
+
+
+        Segmentation.threshold_auto(largeImage,"Yen")
+
+
 
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
 
         tstart = time.clock()
 
-
+        '''
         # Channel 1
         taggedImageList.append(Segmentation.tag_image(sourceImageList[0]))
         #Channel 3
@@ -143,7 +147,7 @@ class Main(object):
         #############################################################################################################
         ############################################Colocalization###################################################
 
-
+        '''
 
 
         #Measurement.colocalization(taggedImageList, sourceImageList)
@@ -629,41 +633,42 @@ class Segmentation(object):
 
         #Get threshold value
         if method == 'IsoData':
-            threshold = sitk.IsoDataThresholdImageFilter(itkImage)
+            threshold = sitk.IsoDataThresholdImageFilter()
 
         elif method == 'Otsu':
-            threshold = sitk.OtsuThresholdImageFilter(itkImage)
+            threshold = sitk.OtsuThresholdImageFilter()
 
         elif method == 'Huang':
-            threshold = sitk.HuangThresholdImageFilter(itkImage)
+            threshold = sitk.HuangThresholdImageFilter()
 
         elif method == 'MaxEntropy':
-            threshold = sitk.MaximumEntropyThresholdImageFilter(itkImage)
+            threshold = sitk.MaximumEntropyThresholdImageFilter()
 
         elif method == 'Li':
-            threshold = sitk.LiThresholdImageFilter(itkImage)
+            threshold = sitk.LiThresholdImageFilter()
 
         elif method == 'RenyiEntropy':
-            threshold = sitk.RenyiEntropyThresholdImageFilter(itkImage)
+            threshold = sitk.RenyiEntropyThresholdImageFilter()
 
         elif method == 'KittlerIllingworth':
-            threshold = sitk.KittlerIllingworthThresholdImageFilter(itkImage)
+            threshold = sitk.KittlerIllingworthThresholdImageFilter()
 
         elif method == 'Moments':
-            threshold = sitk.MomentsThresholdImageFilter(itkImage)
+            threshold = sitk.MomentsThresholdImageFilter()
 
         elif method == 'Yen':
-            threshold = sitk.YenThresholdImageFilter(itkImage)
+            threshold = sitk.YenThresholdImageFilter()
 
         elif method == 'Shanbhag':
-            threshold = sitk.ShanbhagThresholdImageFilter(itkImage)
+            threshold = sitk.ShanbhagThresholdImageFilter()
 
         else:
             raise LookupError('Not a valid Auto Threshold method!')
 
         #Aply threshold
         segmentedImage = threshold.Execute(itkImage)
-        #t = threshold.GetThreshold()
+        t = threshold.GetThreshold()
+        print(t)
 
         return sitk.GetArrayFromImage(segmentedImage)
 
