@@ -21,7 +21,7 @@ class Main(object):
     def __init__(self):
 
 
-
+        print("Modify")
         #############################################Load Images####################################################
         sourceImageList=[]
         # Channel 1
