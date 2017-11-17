@@ -12,19 +12,161 @@ import multiprocessing as mp
 import copy
 from itertools import chain
 import matplotlib.pyplot as plt
-
+import pickle
+from operator import add
 
 
 class Main(object):
 
     def __init__(self):
-        tstart = time.clock()
-        tinyPath = ("D:/Playground/test3.tif")  # tinytest.tif")
+
+
+
+        #############################################Load Images####################################################
+        sourceImageList=[]
         # Channel 1
+        ch1Path = ("D:/Playground/test7_1.tif")
+        sourceImageList.append(Processor.load_image(ch1Path))
+        #sourceImageList.append(Processor.load_image(os.path.join(dir_name, test5_channel1.tif)
+        #ch1Path))
 
         # Channel 2
-        image=Processor.load_image(tinyPath)
-        Measurement.analyze(image)
+        ch2Path = ("D:/Playground/test7_2.tif")
+        sourceImageList.append(Processor.load_image(ch2Path))
+
+        # Channel 3
+        ch3Path = ("D:/Playground/test7_3.tif")
+        sourceImageList.append(Processor.load_image(ch3Path))
+
+        ## Channel 4
+        #sourceImageList.append(Processor.load_image(ch2Path))
+
+        #############################################################################################################
+
+        #######################################Create Tagged Image List##############################################
+        taggedImageList = []
+        nameList=[]
+
+        tstart = time.clock()
+
+
+        stats = sitk.LabelIntensityStatisticsImageFilter()
+        path = ("D:/Playground/large.tif")
+        largeImage=Processor.load_image(path)
+        itkLargeImage = sitk.GetImageFromArray(largeImage)
+        largecc=sitk.ConnectedComponent(itkLargeImage)
+        dataBase=stats.Execute(largecc,itkLargeImage)
+
+        print(type(stats.GetMean(5)))
+        print(stats.GetMean(5))
+
+        tstop = time.clock()
+        print('ITK STATS: ' + str(tstop - tstart))
+
+        tstart = time.clock()
+
+
+        # Channel 1
+        taggedImageList.append(Segmentation.tag_image(sourceImageList[0]))
+        #Channel 3
+        taggedImageList.append(Segmentation.tag_image(sourceImageList[1]))
+        #Channel 2
+        taggedImageList.append(Segmentation.tag_image(sourceImageList[2]))
+
+
+        #print('ch1')
+        #print(Segmentation.tag_image(sourceImageList[0]))
+        #print('ch2')
+        #print(Segmentation.tag_image(sourceImageList[1]))
+        #print('ch3')
+        #print(Segmentation.tag_image(sourceImageList[2]))
+        #############################################################################################################
+        ############################################Analyze Input####################################################
+        analysisInput = []
+        analysisInput.append({'chanelList':[0, 1, 2], 'isOnEdge': True, 'boundingBox': True, 'surface':True, 'centroid':True})#channel 1)
+        analysisInput.append({'chanelList': [0, 1, 2], 'isOnEdge': True, 'boundingBox': True, 'surface': True,'centroid': True})  # Channel 3
+        analysisInput.append({'chanelList':[0, 1, 2], 'isOnEdge': True, 'boundingBox': True, 'surface':True, 'centroid':True})#Channel 4
+
+        overlappingAnalysisInput=  {'chanelList':[], 'isOnEdge': False, 'boundingBox': False, 'surface':False, 'centroid':True}#Overlapping
+
+        ###############################################Results######################################################
+        dataBaseList = []
+        dataBaseList.append(Measurement.analyze(taggedImageList[0], 'Ch' + str(1), sourceImageList, **analysisInput[0]))
+        dataBaseList.append(Measurement.analyze(taggedImageList[1], 'Ch' + str(2), sourceImageList, **analysisInput[1]))
+        dataBaseList.append(Measurement.analyze(taggedImageList[2], 'Ch' + str(3), sourceImageList, **analysisInput[2]))
+
+
+        #############################################MAIN FUNCTION############################################################
+
+
+        #Generate overlapping map
+        # Generate and analyzeOverlapping area
+
+        #print('overlappingImage')
+        #print(overlappingImage)
+        #print(overlappingDataBase)
+
+        #print(len(taggedImageList))
+        #print(len(dataBaseList))
+        #print(len(overlappingDataBase))
+        overlappingimage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, overlappingAnalysisInput)
+
+        overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, dataBaseList, overlappingDataBase)
+
+
+        Measurement.colocalizaion_analysis(taggedImageList, dataBaseList, overlappingDataBase)
+
+
+
+        #Measurement.colocalize([taggedImageList[0],taggedImageList[1]],[dataBaseList[0],dataBaseList[1]], overlappingDataBase)
+
+
+        #dataDict=Measurement.analyze(taggedImageList[0], sourceImageList)
+        #tstart = time.clock()
+        #with open('D:/Playground/data.txt','wb') as fin:
+            #pickle.dump(dataDict, fin)
+        #tstop = time.clock()
+        #print('Time to PickleObject: ' + str(tstop - tstart))
+
+        #tstart = time.clock()
+        #dataDict = pickle.load(open('D:/Playground/data.txt', "rb"))
+        #tstop = time.clock()
+        #print('Time to losad PickleObject: ' + str(tstop - tstart))
+
+        #print(dataDict)
+
+
+
+
+        #resultsDict=Measurement.analyze(taggedImg, ch1Image)
+        #print(resultsList)
+        #############################################################################################################
+        ############################################Colocalization###################################################
+
+
+
+
+        #Measurement.colocalization(taggedImageList, sourceImageList)
+
+
+        #############################################################################################################
+        #print('Index:')
+        #print(resultsDict['PixelLists']['Index'])
+        #print('Cartesian:')
+        #print(resultsDict['PixelLists']['Cartesian X'])
+        #print(resultsDict['PixelLists']['Cartesian Y'])
+        #print(resultsDict['PixelLists']['Cartesian Z'])
+        #print('Bounding Box:')
+        #print(resultsDict['dataBase']['Bounding box X1'])
+        #print(resultsDict['dataBase']['Bounding box X2'])
+        #print(resultsDict['dataBase']['Bounding box Y1'])
+        #print(resultsDict['dataBase']['Bounding box Y2'])
+        #print(resultsDict['dataBase']['Bounding box Z1'])
+        #print(resultsDict['dataBase']['Bounding box Z2'])
+        #print('Surface:')
+        #print(resultsDict['PixelLists']['Surface'])
+        #print('Surface List:')
+        #print(resultsDict['dataBase']['Surface Area'])
 
         tstop = time.clock()
         print('Time to Tagg Image: ' + str(tstop - tstart))
@@ -41,51 +183,6 @@ class Main(object):
                 #tstop = time.clock()
                 #print('Time to Tagg Image: ' + str(tstop - tstart))
 
-class Segmentation(object):
-
-    @staticmethod
-    def threshold_manual(image,  lower, upper=pow(2, 32)):
-        # Threshold image using lower and upper as range
-        return (lower < img) & (img < upper)
-
-    @staticmethod
-    def tag_image(img):
-        # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
-        itk_image=sitk.GetImageFromArray(img)
-        tagged_image = sitk.ConnectedComponent(itk_image, fullyConnected=True)
-
-        return sitk.GetArrayFromImage(tagged_image)
-
-    @staticmethod
-    def generate_surface(tinyImg_tagged):
-
-        img=copy.copy(tinyImg_tagged)
-
-        kernel = np.array([[[1, 1, 1],
-                            [1, 1, 1],
-                            [1, 1, 1]],
-                           [[1, 1, 1],
-                            [1, 0, 1],
-                            [1, 1, 1]],
-                           [[1, 1, 1],
-                            [1, 1, 1],
-                            [1, 1, 1]]])
-
-        # Normalize non zero pixels to 1
-        img[img > 0] = 1
-        # print(tinyImg)
-        # Generate a map showing the number of non zero pixels surrounding each pixel
-        convolved = convolve(img, kernel, mode='constant', cval=1.0)
-        # Remove elements that have 26 neighbours (non surface pixels)
-        # convolved=np.multiply(tinyImg, convolved)
-        convolved[convolved == 26] = 0
-        # Normalize surface pixels
-        convolved[convolved > 0] = 1
-
-        # Generate surface map
-        convolved = np.multiply(img, convolved)
-
-        return convolved
 
 class Measurement(object):
     '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
@@ -93,27 +190,182 @@ class Measurement(object):
     	'''
 
     @staticmethod
-    def analyze(img):
-        taggedImg = Segmentation.tag_image(img)
-        pixelCoordinateList = Measurement.create_pixelCoordinateList(taggedImg)
-        volumeList = Measurement.measure_volume(pixelCoordinateList)
-        intensityList = Measurement.create_intensityList(img, pixelCoordinateList)
-        print(len(intensityList))
-        meanIntensityList=Measurement.measure_mean(intensityList)
-        isOnEdgeList = Measurement.isOnEdge(taggedImg)
-        surfacePixelCoordinateList = Measurement.create_surfacePixelList(taggedImg, pixelCoordinateList)
-        cartesianCoordinateList = Measurement.create_cartesianList(taggedImg, pixelCoordinateList)
-        centroidList = Measurement.create_centroidList(cartesianCoordinateList[0], cartesianCoordinateList[1],cartesianCoordinateList[2])
-        boundingBoxList=Measurement.measure_boundingBox(cartesianCoordinateList[0],cartesianCoordinateList[1], cartesianCoordinateList[2])
-        print(meanIntensityList)
-        #print(isOnEdgeList)
-        #print(volumeList)
-        #print(intensityList)
+    def colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={}):
 
-        #print(isOnEdgeList)
-        #print(surfacePixelCoordinateList)
-        #print(cartesianCoordinateList)
-        #print(centroidList)
+        overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
+        overlappingDataBase = Measurement.analyze(overlappingImage, 'Overlapping', sourceImageList, **overlappingAnalysisInput)
+
+        return overlappingImage, overlappingDataBase
+
+    @staticmethod
+    def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
+
+        print(overlappingDataBase)
+        #Generate array lists and name lists
+        taggedArrayList=[x.flatten() for x in taggedImgList]
+        nameList=[x['Name'] for x in dataBaseList]
+
+
+        for i in range(len(taggedArrayList)):
+
+            objectList = [ None for i in range(len(overlappingDataBase['Index']))]
+            ovlRatioList=[ None for i in range(len(overlappingDataBase['Index']))]
+
+            for j in range(len(overlappingDataBase['Index'])):
+                ovlPosition=overlappingDataBase['Index'][j][0]
+                objectList[j]=taggedArrayList[i][ovlPosition]
+                ovlRatioList[j] = overlappingDataBase['Volume'][j] / dataBaseList[i]['Volume'][objectList[j]-1]
+
+            overlappingDataBase['Object in '+nameList[i]]=objectList
+            overlappingDataBase['OverlappingRatio in ' + nameList[i]]=ovlRatioList
+
+        return overlappingDataBase
+
+    @staticmethod
+    def colocalizaion_analysis(taggedImgList, dataBaseList, overlappingDataBase):
+
+            # Generate array lists and name lists
+
+        nameList = [x['Name'] for x in dataBaseList]
+
+
+        #Update dataBase for segmented images
+        for i in range(len(taggedImgList)):
+
+            positionList = [x for x in range(len(taggedImgList)) if x != i]
+
+            buffer = []
+            ovlRatioBuffer=[]
+            for m in range(len(positionList)):
+                buffer.append([[] for n in range(dataBaseList[positionList[m]]['NbOfObjects'])])
+                ovlRatioBuffer.append([0 for n in range(dataBaseList[positionList[m]]['NbOfObjects'])])
+
+            for j in range(overlappingDataBase['NbOfObjects']):
+
+                tag=overlappingDataBase['Object in '+nameList[i]][j]
+
+                for k in range(len(positionList)):
+                    currentTag = overlappingDataBase['Object in ' + nameList[positionList[k]]][j]
+                    buffer[k][currentTag-1].append(tag)
+                    ovlRatioBuffer[k][currentTag - 1]+=overlappingDataBase['Volume'][j]#/dataBaseList[k]['Volume'][tag-1]
+
+
+            for q in range(len(positionList)):
+                dataBaseList[positionList[q]]['Objects in ' +nameList[i]]=buffer[q]
+                dataBaseList[positionList[q]]['TotalOverlappingRatios in ' + nameList[i]]=np.divide(ovlRatioBuffer[q], dataBaseList[positionList[q]]['Volume'])
+                dataBaseList[positionList[q]]['Colocalization Count']=Measurement.measure_volume(buffer[q])
+
+        print(dataBaseList[0])
+        print(dataBaseList[1])
+        print(dataBaseList[2])
+        print(overlappingDataBase)
+
+        return dataBaseList, overlappingDataBase
+
+        #for i in range(len(taggedArrayList)):
+
+        #Calculate Overlappin
+
+            #return connectivityList
+
+        #taggedImageList.append(overlappingImage)
+
+        #overlappingResultsList=Measurement.analyze(taggedImageList[len(taggedImageList)-1], sourceImageList,  **analysisInput[len(taggedImageList)-1])
+        #resultsList.append(overlappingResultsList)
+
+        #print(len(overlappingResultsList['PixelLists']['Index']))
+
+
+        #connectivityList = [[] for i in range(len(overlappingResultsList['PixelLists']['Index']))]
+    '''
+        for i in range(len(taggedImageList)-1):
+
+            if analysisInput[i]!=None:
+
+                taggedImageArray = taggedImageList[i].flatten()
+
+                for i in range(len(overlappingResultsList['PixelLists']['Index'])):
+                    currentPixel=overlappingResultsList['PixelLists']['Index'][i][0]
+
+                    if taggedImageArray[currentPixel]>0:
+                        connectivityList[i].append(taggedImageArray[currentPixel])
+
+            print(connectivityList)
+        #Analyze Overlapping area
+    '''
+        #connectivityList=[None for i in range(len(resultsList))]
+        #for i in range(len(resultsList)):
+            #if analysisInput[i]!=None:
+                #print(len(resultsList[i]['PixelLists']['Index']))
+                #connectivityList[i]=[[] for i in range(len(resultsList[i]['PixelLists']['Index']))]
+
+
+        #print(connectivityList)
+
+
+
+
+    @staticmethod
+    def analyze(taggedImg, name, sourceImageList, chanelList=[], isOnEdge=True, boundingBox=True, surface=True, centroid=True ):
+
+        #Output Dictionaries
+        dataBase = {} #Dictionary for measured parameters
+
+        dataBase['Name']=name
+        dataBase['NbOfObjects']=np.amax(taggedImg)
+
+        imgshape=taggedImg.shape
+        dataBase['Depth']=imgshape[0]
+        dataBase['Height']=imgshape[1]
+        dataBase['Width']=imgshape[2]
+
+        #Always Measured
+        pixelCoordinateList = Measurement.create_pixelCoordinateList(taggedImg)
+        dataBase['Index']=pixelCoordinateList
+        dataBase['Volume'] = Measurement.measure_volume(pixelCoordinateList)
+
+        #Measured conditionally
+        if isOnEdge==True:
+            dataBase['isOnEdge'] = Measurement.isOnEdge(taggedImg)
+
+        if surface==True:
+            surfacePixelList= Measurement.create_surfacePixelList(taggedImg, pixelCoordinateList)
+            dataBase['Surface']=surfacePixelList
+            dataBase['Surface Area'] = Measurement.measure_volume(surfacePixelList)
+
+        if (centroid or boundingBox)==True:
+            cartesianCoordinateList = Measurement.create_cartesianList(taggedImg, pixelCoordinateList)
+            dataBase['Cartesian X']=cartesianCoordinateList[0]; dataBase['Cartesian Y']=cartesianCoordinateList[1]; dataBase['Cartesian Z']=cartesianCoordinateList[2]
+
+            if centroid==True:
+                dataBase['Centroid X'], dataBase['Centroid Y'], dataBase['Centroid Z'] = Measurement.create_centroidList(cartesianCoordinateList[0], cartesianCoordinateList[1], cartesianCoordinateList[2])
+            if boundingBox==True:
+                dataBase['Bounding box X1'], dataBase['Bounding box X2'],dataBase['Bounding box Y1'], dataBase['Bounding box Y2'], dataBase['Bounding box Z1'], dataBase['Bounding box Z2'] = Measurement.measure_boundingBox(cartesianCoordinateList[0], cartesianCoordinateList[1], cartesianCoordinateList[2])
+
+        if len(chanelList)!=[]:
+            for i in chanelList:
+                    intensityList= Measurement.create_intensityList(sourceImageList[i], pixelCoordinateList)
+                    meanIntensityList=Measurement.measure_mean(intensityList)
+                    dataBase['Intensity in Ch' + str(i)]=intensityList; dataBase['Mean intensity in Ch' + str(i)]=meanIntensityList
+
+
+        return dataBase
+
+
+    @staticmethod
+    def create_connectivityList(pixelList, taggedImage):
+
+        connectivityList = [[] for i in range(pixelList)]
+
+        #Flatten images
+        array=taggedImage.flatten
+
+        for i in range(len(pixelList)):
+            if array(pixelList[i][0])>0:
+                connectivityList.append(array(pixelList[i][0]-1))
+
+        return connectivityList
+
 
     @staticmethod
     def tag_image(image):
@@ -238,10 +490,9 @@ class Measurement(object):
         for i in range(length):
             for j in range(len(objectCoordinateList[i])):
                 buffer=surfaceArray[objectCoordinateList[i][j]]
-                if len(objectCoordinateList[i])==1:
+                if len(objectCoordinateList[i])==1 or buffer>0:
                     surfaceCoordinates[i].append(objectCoordinateList[i][j])
-                if buffer>0:
-                    surfaceCoordinates[i].append(objectCoordinateList[i][j])
+
 
         return surfaceCoordinates
 
@@ -259,11 +510,11 @@ class Measurement(object):
 
         for i in range(len(objectList)):
             for j in range(len(objectList[i])):
-                location = objectList[i][j]
+                index = objectList[i][j]
 
-                zcoord=int(location / slicePixelnumber)
-                ycoord=int((location - zcoord * slicePixelnumber) / imageShape[2])
-                xcoord=(location - zcoord * slicePixelnumber - ycoord * imageShape[2])
+                zcoord=int(index / slicePixelnumber)
+                ycoord=int((index - zcoord * slicePixelnumber) / imageShape[2])
+                xcoord=(index - zcoord * slicePixelnumber - ycoord * imageShape[2])
 
                 z[i].append(zcoord)
                 y[i].append(ycoord)
@@ -293,28 +544,32 @@ class Measurement(object):
 
         length=len(cartesianListX)
 
-        boundingX = [[] for i in range(0, length)]
-        boundingY = [[] for i in range(0, length)]
-        boundingZ = [[] for i in range(0, length)]
+        boundingX1 = [[] for i in range(0, length)]
+        boundingX2 = [[] for i in range(0, length)]
+        boundingY1 = [[] for i in range(0, length)]
+        boundingY2 = [[] for i in range(0, length)]
+        boundingZ1 = [[] for i in range(0, length)]
+        boundingZ2 = [[] for i in range(0, length)]
 
         for i in range(length):
-            boundingX.append((np.amax(cartesianListX[i]),np.amin(cartesianListX[i])))
-            boundingY.append((np.amax(cartesianListY[i]),np.amin(cartesianListY[i])))
-            boundingZ.append((np.amax(cartesianListZ[i]),np.amin(cartesianListZ[i])))
+            boundingX1[i]=np.amin(cartesianListX[i])
+            boundingX2[i]=np.amax(cartesianListX[i])
+            boundingY1[i]=np.amin(cartesianListY[i])
+            boundingY2[i]=np.amax(cartesianListY[i])
+            boundingZ1[i]=np.amin(cartesianListZ[i])
+            boundingZ2[i]=np.amax(cartesianListZ[i])
 
-        return boundingX, boundingY, boundingZ
+        return boundingX1, boundingX2, boundingY1,  boundingY2, boundingZ1,  boundingZ2
 
     @staticmethod
     def measure_mean(objectList):
 
         length=len(objectList)
-
         meanList = np.zeros(length)
 
         for i in range(length):
             meanList[i] = np.mean(objectList[i])
-        print('Flowerpot')
-        print(meanList)
+
         return meanList
 
     @staticmethod
@@ -323,14 +578,133 @@ class Measurement(object):
 
         imgArray = image.flatten()
         intensityList = [[] for i in range(0, len(objectList))]
-        print(len(intensityList))
 
         for j in range(len(objectList)):
             for i in range(len(objectList[j])):
                 intensityList[j].append(imgArray[objectList[j][i]])
 
-        print(intensityList)
         return intensityList
+
+
+
+class Segmentation(object):
+
+    @staticmethod
+    def create_overlappingImage(taggedImageList):
+        # Create an overlapping image by pixelwise multiplication
+        img=taggedImageList[0]
+
+        for i in range(1,len(taggedImageList)):
+            img=np.multiply(img, taggedImageList[i])
+
+        return img
+
+    @staticmethod
+    def threshold_manual(img,  lower, upper=pow(2, 32)):
+        # Threshold image using lower and upper as range
+        return (lower < img) & (img < upper)
+
+    @staticmethod
+    def threshold_auto(img, method):
+        '''
+        Missing#####################Slice by slice analysis######################
+        Run autothreshold on image
+        :param img: image
+        :param thresholdMethod: threshold method name as string
+            * 'Otsu'
+            * 'Huang'
+            * 'IsoData'
+            * 'Li'
+            * 'MaxEntropy'
+            * 'KittlerIllingworth'
+            * 'Moments'
+            * 'Yen'
+            * 'RenyiEntropy'
+            * 'Shanbhag'
+        :return:
+        '''
+
+        #Convert nd Image to ITK image
+        itkImage = sitk.GetImageFromArray(img)
+
+        #Get threshold value
+        if method == 'IsoData':
+            threshold = sitk.IsoDataThresholdImageFilter(itkImage)
+
+        elif method == 'Otsu':
+            threshold = sitk.OtsuThresholdImageFilter(itkImage)
+
+        elif method == 'Huang':
+            threshold = sitk.HuangThresholdImageFilter(itkImage)
+
+        elif method == 'MaxEntropy':
+            threshold = sitk.MaximumEntropyThresholdImageFilter(itkImage)
+
+        elif method == 'Li':
+            threshold = sitk.LiThresholdImageFilter(itkImage)
+
+        elif method == 'RenyiEntropy':
+            threshold = sitk.RenyiEntropyThresholdImageFilter(itkImage)
+
+        elif method == 'KittlerIllingworth':
+            threshold = sitk.KittlerIllingworthThresholdImageFilter(itkImage)
+
+        elif method == 'Moments':
+            threshold = sitk.MomentsThresholdImageFilter(itkImage)
+
+        elif method == 'Yen':
+            threshold = sitk.YenThresholdImageFilter(itkImage)
+
+        elif method == 'Shanbhag':
+            threshold = sitk.ShanbhagThresholdImageFilter(itkImage)
+
+        else:
+            raise LookupError('Not a valid Auto Threshold method!')
+
+        #Aply threshold
+        segmentedImage = threshold.Execute(itkImage)
+        #t = threshold.GetThreshold()
+
+        return sitk.GetArrayFromImage(segmentedImage)
+
+    @staticmethod
+    def tag_image(img):
+        # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
+        itk_image=sitk.GetImageFromArray(img)
+        tagged_image = sitk.ConnectedComponent(itk_image, fullyConnected=True)
+
+        return sitk.GetArrayFromImage(tagged_image)
+
+    @staticmethod
+    def generate_surface(tinyImg_tagged):
+
+        img=copy.copy(tinyImg_tagged)
+
+        kernel = np.array([[[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]],
+                           [[1, 1, 1],
+                            [1, 0, 1],
+                            [1, 1, 1]],
+                           [[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]]])
+
+        # Normalize non zero pixels to 1
+        img[img > 0] = 1
+        # print(tinyImg)
+        # Generate a map showing the number of non zero pixels surrounding each pixel
+        convolved = convolve(img, kernel, mode='constant', cval=1.0)
+        # Remove elements that have 26 neighbours (non surface pixels)
+        # convolved=np.multiply(tinyImg, convolved)
+        convolved[convolved == 26] = 0
+        # Normalize surface pixels
+        convolved[convolved > 0] = 1
+
+        # Generate surface map
+        convolved = np.multiply(img, convolved)
+
+        return convolved
 
 class Processor(object):
 
