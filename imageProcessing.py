@@ -47,30 +47,42 @@ class Main(object):
         taggedImageList = []
         nameList=[]
 
+
+
+
+
+
         tstart = time.clock()
 
 
-        stats = sitk.LabelIntensityStatisticsImageFilter()
-        path = ("D:/Playground/test7_1.tif")
+        #stats = sitk.LabelIntensityStatisticsImageFilter()
+        path = ("D:/Playground/large.tif")
         largeImage=Processor.load_image(path)
-        print(largeImage)
-        itkLargeImage = sitk.GetImageFromArray(largeImage)
-        largecc=sitk.ConnectedComponent(itkLargeImage)
-        dataBase=stats.Execute(largecc,itkLargeImage)
+        #print(largeImage)
+        #itkLargeImage = sitk.GetImageFromArray(largeImage)
+
+        largecc=Segmentation.tag_image(largeImage)
+        #largecc=sitk.ConnectedComponent(itkLargeImage)
+
+        #a = getLabelShape(largecc)
+        a=Measurement.getShapeIntensityData(largecc, largeImage)
+        #print(a)
+
+        #dataBase=stats.Execute(largecc,itkLargeImage)
 
 
 
 
-        Segmentation.threshold_auto(largeImage,"Yen")
+        #Segmentation.threshold_auto(largeImage,"Yen")
 
-        Segmentation.threshold2D_auto(largeImage,"Yen")
+        #Segmentation.threshold2D_auto(largeImage,"Yen")
 
 
 
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
 
-        tstart = time.clock()
+
 
         '''
         # Channel 1
@@ -175,8 +187,7 @@ class Main(object):
         #print('Surface List:')
         #print(resultsDict['dataBase']['Surface Area'])
 
-        tstop = time.clock()
-        print('Time to Tagg Image: ' + str(tstop - tstart))
+
         #import os
         #dirPath = "D:\Playground\coloc"
         #for file in os.listdir(dirPath):
@@ -195,6 +206,47 @@ class Measurement(object):
     '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
     	the workflows to process images.
     	'''
+
+    @staticmethod
+    def getShapeData(image):
+
+        itkImage = sitk.GetImageFromArray(image)
+
+        itkFilter = sitk.LabelShapeStatisticsImageFilter()
+        itkFilter.Execute(itkImage)
+        data = itkFilter.GetLabels()
+
+        dataBase = {'Volume': [], 'Mean': [], 'Centroid': [], 'Ellipsoid Diameters': [], 'Bounding Box': [], }
+
+        for label in data:
+            dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
+            dataBase['Centroid'].append(itkFilter.GetCentroid(label))
+            dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
+            dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
+
+        return dataBase
+
+    @staticmethod
+    def getShapeIntensityData(image, raw=None):
+
+        itkImage = sitk.GetImageFromArray(image)
+        itkRaw = sitk.GetImageFromArray(raw)
+
+        itkFilter = sitk.LabelIntensityStatisticsImageFilter()
+        itkFilter.Execute(itkImage, itkRaw)
+        data = itkFilter.GetLabels()
+
+        dataBase = {'Volume': [], 'Mean': [], 'Centroid': [], 'Ellipsoid Diameters': [], 'Bounding Box': [], }
+
+        for label in data:
+            dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
+            dataBase['Mean'].append(itkFilter.GetMean(label))
+            dataBase['Centroid'].append(itkFilter.GetCentroid(label))
+            dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
+            dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
+
+        return dataBase
+
 
     @staticmethod
     def colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={}):
