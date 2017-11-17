@@ -56,17 +56,20 @@ class Main(object):
 
 
         #stats = sitk.LabelIntensityStatisticsImageFilter()
-        path = ("D:/Playground/large.tif")
+        path = ("D:/Playground/test7_1.tif")
         largeImage=Processor.load_image(path)
         #print(largeImage)
         #itkLargeImage = sitk.GetImageFromArray(largeImage)
 
         largecc=Segmentation.tag_image(largeImage)
+
+
+
         #largecc=sitk.ConnectedComponent(itkLargeImage)
 
         #a = getLabelShape(largecc)
         a=Measurement.getShapeIntensityData(largecc, largeImage)
-        #print(a)
+        print(a)
 
         #dataBase=stats.Execute(largecc,itkLargeImage)
 
@@ -220,6 +223,7 @@ class Measurement(object):
 
         for label in data:
             dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
+
             dataBase['Centroid'].append(itkFilter.GetCentroid(label))
             dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
             dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
@@ -236,12 +240,15 @@ class Measurement(object):
         itkFilter.Execute(itkImage, itkRaw)
         data = itkFilter.GetLabels()
 
-        dataBase = {'Volume': [], 'Mean': [], 'Centroid': [], 'Ellipsoid Diameters': [], 'Bounding Box': [], }
+        dataBase = {'Volume': [],'VoxelCount':[], 'Maximum Index':[], 'Mean': [], 'Centroid': [], 'CenterOfMass':[], 'Ellipsoid Diameters': [], 'Bounding Box': [], }
 
         for label in data:
             dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
+            dataBase['VoxelCount'].append(itkFilter.GetNumberOfPixels(label))
+            dataBase['Maximum Index'].append(itkFilter.GetMaximumIndex(label))
             dataBase['Mean'].append(itkFilter.GetMean(label))
             dataBase['Centroid'].append(itkFilter.GetCentroid(label))
+            dataBase['CenterOfMass'].append(itkFilter.GetCenterOfGravity(label))
             dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
             dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
 
