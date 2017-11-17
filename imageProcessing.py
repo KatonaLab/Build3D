@@ -51,16 +51,19 @@ class Main(object):
 
 
         stats = sitk.LabelIntensityStatisticsImageFilter()
-        path = ("D:/Playground/zsofi.tif")
+        path = ("D:/Playground/test7_1.tif")
         largeImage=Processor.load_image(path)
+        print(largeImage)
         itkLargeImage = sitk.GetImageFromArray(largeImage)
         largecc=sitk.ConnectedComponent(itkLargeImage)
         dataBase=stats.Execute(largecc,itkLargeImage)
 
-        print(type(stats.GetMean(5)))
+
 
 
         Segmentation.threshold_auto(largeImage,"Yen")
+
+        Segmentation.threshold2D_auto(largeImage,"Yen")
 
 
 
@@ -611,9 +614,9 @@ class Segmentation(object):
     @staticmethod
     def threshold_auto(img, method):
         '''
-        Missing#####################Slice by slice analysis######################
+        Apply autothreshold slice by slice
         Run autothreshold on image
-        :param img: image
+        :param img: nd array
         :param thresholdMethod: threshold method name as string
             * 'Otsu'
             * 'Huang'
@@ -625,7 +628,7 @@ class Segmentation(object):
             * 'Yen'
             * 'RenyiEntropy'
             * 'Shanbhag'
-        :return:
+        :return: nd array
         '''
 
         #Convert nd Image to ITK image
@@ -665,12 +668,42 @@ class Segmentation(object):
         else:
             raise LookupError('Not a valid Auto Threshold method!')
 
-        #Aply threshold
+        #Aply threshold and invert
         segmentedImage = threshold.Execute(itkImage)
-        t = threshold.GetThreshold()
-        print(t)
+        segmentedImage=sitk.InvertIntensity(segmentedImage,1)
+        #t = threshold.GetThreshold(); print(t)
 
         return sitk.GetArrayFromImage(segmentedImage)
+
+    @staticmethod
+    def threshold2D_auto(img, method):
+        '''
+        Apply autothreshold slice by slice
+        :param img: nd array
+        :param thresholdMethod: threshold method name as string
+            * 'Otsu'
+            * 'Huang'
+            * 'IsoData'
+            * 'Li'
+            * 'MaxEntropy'
+            * 'KittlerIllingworth'
+            * 'Moments'
+            * 'Yen'
+            * 'RenyiEntropy'
+            * 'Shanbhag'
+        :return: nd array
+        '''
+
+        #Convert nd Image to ITK image
+        itkImage = sitk.GetImageFromArray(img)
+
+        shape = itkImage.GetSize()
+
+        stack = []
+        for i in range(len(img)):
+            stack.append(Segmentation.threshold_auto(img[i], method))
+
+        return stack
 
     @staticmethod
     def tag_image(img):
