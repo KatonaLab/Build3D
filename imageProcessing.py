@@ -25,17 +25,17 @@ class Main(object):
         #############################################Load Images####################################################
         sourceImageList=[]
         # Channel 1
-        ch1Path = ("D:/Playground/test7_1.tif")
+        ch1Path = ("F:/Workspace/TestImages/test_1.tif")
         sourceImageList.append(Processor.load_image(ch1Path))
         #sourceImageList.append(Processor.load_image(os.path.join(dir_name, test5_channel1.tif)
         #ch1Path))
 
         # Channel 2
-        ch2Path = ("D:/Playground/test7_2.tif")
+        ch2Path = ("F:/Workspace/TestImages/test_2.tif")
         sourceImageList.append(Processor.load_image(ch2Path))
 
         # Channel 3
-        ch3Path = ("D:/Playground/test7_3.tif")
+        ch3Path = ("F:/Workspace/TestImages/test_3.tif")
         sourceImageList.append(Processor.load_image(ch3Path))
 
         ## Channel 4
@@ -56,20 +56,25 @@ class Main(object):
 
 
         #stats = sitk.LabelIntensityStatisticsImageFilter()
-        path = ("D:/Playground/test7_1.tif")
-        largeImage=Processor.load_image(path)
+        path = ("F:/Workspace/TestImages/test_3.tif")
+        img=Processor.load_image(path)
         #print(largeImage)
         #itkLargeImage = sitk.GetImageFromArray(largeImage)
 
-        largecc=Segmentation.tag_image(largeImage)
+        thresholdedImage=Segmentation.threshold2D_auto(img, "Otsu")
+        taggedImage=Segmentation.tag_image(thresholdedImage)
+
+        print(taggedImage)
+
+       # =largecc=Segmentation.tag_image(largeImage)
 
 
 
         #largecc=sitk.ConnectedComponent(itkLargeImage)
 
         #a = getLabelShape(largecc)
-        a=Measurement.getShapeIntensityData(largecc, largeImage)
-        print(a)
+        #a=Measurement.getShapeIntensityData(largecc, largeImage)
+        #print(a)
 
         #dataBase=stats.Execute(largecc,itkLargeImage)
 
@@ -670,6 +675,7 @@ class Segmentation(object):
         # Threshold image using lower and upper as range
         return (lower < img) & (img < upper)
 
+
     @staticmethod
     def threshold_auto(img, method):
         '''
@@ -693,7 +699,7 @@ class Segmentation(object):
         #Convert nd Image to ITK image
         itkImage = sitk.GetImageFromArray(img)
 
-        #Get threshold value
+        # Get threshold value
         if method == 'IsoData':
             threshold = sitk.IsoDataThresholdImageFilter()
 
@@ -727,12 +733,12 @@ class Segmentation(object):
         else:
             raise LookupError('Not a valid Auto Threshold method!')
 
-        #Aply threshold and invert
-        segmentedImage = threshold.Execute(itkImage)
-        segmentedImage=sitk.InvertIntensity(segmentedImage,1)
-        #t = threshold.GetThreshold(); print(t)
+        # Get and apply threshold and invert
+        segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
+        threshold = threshold.GetThreshold()
 
-        return sitk.GetArrayFromImage(segmentedImage)
+
+        return sitk.GetArrayFromImage(segmentedImage), threshold
 
     @staticmethod
     def threshold2D_auto(img, method):
@@ -753,14 +759,10 @@ class Segmentation(object):
         :return: nd array
         '''
 
-        #Convert nd Image to ITK image
-        itkImage = sitk.GetImageFromArray(img)
-
-        shape = itkImage.GetSize()
-
         stack = []
         for i in range(len(img)):
-            stack.append(Segmentation.threshold_auto(img[i], method))
+            segmentedImage, _ =Segmentation.threshold_auto(img[i], method)
+            stack.append(segmentedImage)
 
         return stack
 
