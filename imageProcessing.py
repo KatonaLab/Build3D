@@ -108,6 +108,8 @@ class Main(object):
         dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
 
         Measurement.filter(taggedDictList[0],dictFilter)
+        #print(taggedDictList)
+        Measurement.save(taggedDictList,'D:/')
 
 
         #print(taggedImage)
@@ -289,7 +291,7 @@ class Measurement(object):
 
 
     @staticmethod
-    def filter(dictionary, filterDict, removeFiltered=True):
+    def filter(dictionary, filterDict, removeFiltered=False):
 
         dataFrame=pd.DataFrame(dictionary['dataBase'])
 
@@ -302,8 +304,29 @@ class Measurement(object):
                 dataFrame=dataFrame[(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])]
 
         dictionary['dataBase'] = dataFrame.to_dict(orient='list')
-       
+
         return dictionary
+
+    @staticmethod
+    def save(dictionaryList, path, fileName='output.xls'):
+
+        filePath = os.path.join(path, fileName)
+
+        # Create a Pandas Excel writer using XlsxWriter as the engine.
+        writer = pd.ExcelWriter(filePath, engine='xlsxwriter')
+
+        for dict in dictionaryList:
+            #print(dict['dataBase'])
+            dataFrame = pd.DataFrame(dictionaryList[0]['dataBase'])
+
+            # Convert the dataframe to an XlsxWriter Excel object.
+            dataFrame.to_excel(writer, sheet_name=dict['name'])
+
+        # Close the Pandas Excel writer and output the Excel file.
+        writer.save()
+
+        return 0
+
 
 
 
