@@ -103,13 +103,12 @@ class Main(object):
         #print(sourceDictList[0])
         Measurement.analyze(taggedImageList[0], taggedDictList[0])
 
-        print(taggedDictList[0]['dataBase'])
 
         dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
 
         Measurement.filter(taggedDictList[0],dictFilter)
         #print(taggedDictList)
-        Measurement.save(taggedDictList,'D:/')
+        Measurement.save([taggedDictList[0],taggedDictList[0]],'D:/')
 
 
         #print(taggedImage)
@@ -308,22 +307,35 @@ class Measurement(object):
         return dictionary
 
     @staticmethod
-    def save(dictionaryList, path, fileName='output.xls'):
+    def save(dictionaryList, path, fileName='output', toText=True):
 
-        filePath = os.path.join(path, fileName)
+        if toText==False:
 
-        # Create a Pandas Excel writer using XlsxWriter as the engine.
-        writer = pd.ExcelWriter(filePath, engine='xlsxwriter')
+            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            writer = pd.ExcelWriter(os.path.join(path, fileName+'.xls'), engine='xlsxwriter')
 
-        for dict in dictionaryList:
-            #print(dict['dataBase'])
-            dataFrame = pd.DataFrame(dictionaryList[0]['dataBase'])
+            for dict in dictionaryList:
+                if 'dataBase' in dict:
+                    dataFrame = pd.DataFrame(dict['dataBase'])
 
-            # Convert the dataframe to an XlsxWriter Excel object.
-            dataFrame.to_excel(writer, sheet_name=dict['name'])
+                    # Convert the dataframe to an XlsxWriter Excel object.
+                    dataFrame.to_excel(writer, sheet_name=dict['name'])
 
-        # Close the Pandas Excel writer and output the Excel file.
-        writer.save()
+            # Close the Pandas Excel writer and output the Excel file.
+            writer.save()
+
+        elif toText==True:
+
+            with open(os.path.join(path, fileName + '.txt'), 'w') as outputFile:
+
+                for dict in dictionaryList:
+                    if 'dataBase' in dict:
+                        dataFrame = pd.DataFrame(dict['dataBase'])
+
+                        outputFile.write('name= '+dict['name']+'\n')
+                        outputFile.write(dataFrame.to_csv(sep='\t', index=False, header=True))
+
+
 
         return 0
 
