@@ -101,7 +101,7 @@ class Main(object):
         #############################################Analysis Images####################################################
         #print(taggedDictList[0])
         #print(sourceDictList[0])
-        Measurement.analyze(taggedImageList[0], taggedDictList[0], raw=taggedImageList[0])
+        Measurement.analyze(taggedImageList[0], taggedDictList[0])
 
         print(taggedDictList[0])
 
@@ -260,37 +260,47 @@ class Measurement(object):
         return dataBase
 
     @staticmethod
-    def analyze(image, dictionary, raw=None):
+    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
 
-        itkImage = sitk.GetImageFromArray(image)
-        itkRaw = sitk.GetImageFromArray(raw)
 
-        itkFilter = sitk.LabelIntensityStatisticsImageFilter()
-        itkFilter.Execute(itkImage, itkRaw)
-        data = itkFilter.GetLabels()
 
-        dataBase = {'Volume': [],'VoxelCount':[], 'Maximum Index':[], 'Mean': [], 'Centroid': [], 'CenterOfMass':[], 'Ellipsoid Diameters': [], 'Bounding Box': [], }
+        if imageList==[]:
+            imageList.append(taggedImage)
+            dictionaryList.append(dictionary)
 
-        for label in data:
-            dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
+        dataBase = {'volume': [], 'voxelCount': [], 'centroid': [], 'centerOfMass': [], 'ellipsoidDiameter': [],
+                    'boundingBox': []}
 
-            dataBase['VoxelCount'].append(itkFilter.GetNumberOfPixels(label))
+        for i in range(len(imageList)):
 
-            dataBase['Maximum Index'].append(itkFilter.GetMaximumIndex(label))
+            itkImage = sitk.GetImageFromArray(taggedImage)
+            itkRaw = sitk.GetImageFromArray(imageList[0])
+            # Measurements for parameters that do not need two images (data like volume, centroid etc.)  in ITK can
+            # can be done with itkFilter = sitk.LabelShapeStatisticsImageFilter()!!!!
 
-            dataBase['Mean'].append(itkFilter.GetMean(label))
+            itkFilter = sitk.LabelIntensityStatisticsImageFilter()
+            itkFilter.Execute(itkImage, itkRaw)
+            data = itkFilter.GetLabels()
 
-            dataBase['Centroid'].append(itkFilter.GetCentroid(label))
+            dataBase['pixel in'+dictionaryList[i]['name']]= []
+            dataBase['mean in ' + dictionaryList[i]['name']]=[]
+            dataBase['CenterOfMass in' + dictionaryList[i]['name']]=[]
 
-            dataBase['CenterOfMass'].append(itkFilter.GetCenterOfGravity(label))
+            for label in data:
+                if i==0:
+                    dataBase['volume'].append(itkFilter.GetPhysicalSize(label))
+                    dataBase['voxelCount'].append(itkFilter.GetNumberOfPixels(label))
+                    dataBase['centroid'].append(itkFilter.GetCentroid(label))
+                    dataBase['ellipsoidDiameter'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
+                    dataBase['boundingBox'].append(itkFilter.GetBoundingBox(label))
 
-            dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
-
-            dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
+                dataBase['mean in '+dictionaryList[i]['name']].append(itkFilter.GetMean(label))
+                dataBase['pixel in'+dictionaryList[i]['name']].append(itkFilter.GetMaximumIndex(label))
+                dataBase['CenterOfMass in'+dictionaryList[i]['name']].append(itkFilter.GetCenterOfGravity(label))
 
         dictionary['dataBase']=dataBase
 
-        return image, dataBase
+        return dataBase
 
 
 
