@@ -289,17 +289,20 @@ class Measurement(object):
 
 
     @staticmethod
-    def filter(dictionary, filterDict):
+    def filter(dictionary, filterDict, removeFiltered=True):
 
         dataFrame=pd.DataFrame(dictionary['dataBase'])
 
-        print(dataFrame)
+        #print(dataFrame)
         for key in filterDict:
+            if removeFiltered==False:
+                dataFrame['filterd']=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])
 
-            dataFrame['filterd']=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])#& )
+            elif removeFiltered == True:
+                dataFrame=dataFrame[(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])]
 
-        dictionary['dataBase']=dataFrame.to_dict(orient='records')
-
+        dictionary['dataBase'] = dataFrame.to_dict(orient='list')
+       
         return dictionary
 
 
