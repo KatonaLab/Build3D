@@ -64,7 +64,7 @@ class Main(object):
         thresholdedImage=Segmentation.threshold2D_auto(img, "Otsu")
         taggedImage=Segmentation.tag_image(thresholdedImage)
 
-        print(taggedImage)
+        print(taggedImage);print("")
 
        # =largecc=Segmentation.tag_image(largeImage)
 
