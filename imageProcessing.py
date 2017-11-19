@@ -20,7 +20,7 @@ class Main(object):
 
     def __init__(self):
 
-
+        tstart = time.clock()
 
         #############################################Load Images####################################################
         sourceImageList=[]
@@ -50,7 +50,7 @@ class Main(object):
 
         # Channel 3
         ch3Path = ("F:/Workspace/TestImages/test_3.tif")
-        ch3Img = Processor.load_image(ch1Path)
+        ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -64,69 +64,55 @@ class Main(object):
         #######################################Create Tagged Image List##############################################
         taggedImageList = []
         taggedDictList = []
-        nameList=[]
-
-
-
-
-
-
-        tstart = time.clock()
 
         # Channel 1
         thresholdedImage=Segmentation.threshold2D_auto(sourceImageList[0], "Otsu")
         taggedImage=Segmentation.tag_image(thresholdedImage)
 
-        tagged1Dict=sourceDictList[0]['name']='Channel1'
+        taggedDict1=sourceDictList[0]
+        taggedDict1['name']='Channel1'
 
         taggedImageList.append(taggedImage)
-        taggedDictList.append(tagged1Dict)
+        taggedDictList.append(taggedDict1)
 
 
         # Channel 2
         thresholdedImage = Segmentation.threshold2D_auto(sourceImageList[1], "MaxEntropy")
         taggedImage = Segmentation.tag_image(thresholdedImage)
 
-        tagged1Dict=sourceDictList[1]['name']='Channel2'
+        taggedDict2=sourceDictList[1]
+        taggedDict2['name']='Channel2'
+
 
         taggedImageList.append(taggedImage)
-        taggedDictList.append(tagged1Dict)
+        taggedDictList.append(taggedDict2)
 
         # Channel 3
         thresholdedImage = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
         taggedImage = Segmentation.tag_image(thresholdedImage)
 
-        tagged1Dict =sourceDictList[2]['name'] = 'Channel3'
+        taggedDict3 =sourceDictList[2]
+        taggedDict3['name'] = 'Channel3'
 
         taggedImageList.append(taggedImage)
-        taggedDictList.append(tagged1Dict)
+        taggedDictList.append(taggedDict3)
+        #############################################################################################################
+
+        #############################################Analysis Images####################################################
+        #print(taggedDictList[0])
+        #print(sourceDictList[0])
+        Measurement.analyze(taggedImageList[0], taggedDictList[0], raw=taggedImageList[0])
+
+        print(taggedDictList[0])
 
 
-        print(taggedImage)
-
-       # =largecc=Segmentation.tag_image(largeImage)
-
-
-
-        #largecc=sitk.ConnectedComponent(itkLargeImage)
-
-        #a = getLabelShape(largecc)
-        #a=Measurement.getShapeIntensityData(largecc, largeImage)
-        #print(a)
-
-        #dataBase=stats.Execute(largecc,itkLargeImage)
-
-
-
-
-        #Segmentation.threshold_auto(largeImage,"Yen")
-
-        #Segmentation.threshold2D_auto(largeImage,"Yen")
-
-
-
+        #print(taggedImage)
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
+
+
+
+
 
 
 
@@ -274,7 +260,7 @@ class Measurement(object):
         return dataBase
 
     @staticmethod
-    def getShapeIntensityData(image, raw=None):
+    def analyze(image, dictionary, raw=None):
 
         itkImage = sitk.GetImageFromArray(image)
         itkRaw = sitk.GetImageFromArray(raw)
@@ -287,15 +273,24 @@ class Measurement(object):
 
         for label in data:
             dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
+
             dataBase['VoxelCount'].append(itkFilter.GetNumberOfPixels(label))
+
             dataBase['Maximum Index'].append(itkFilter.GetMaximumIndex(label))
+
             dataBase['Mean'].append(itkFilter.GetMean(label))
+
             dataBase['Centroid'].append(itkFilter.GetCentroid(label))
+
             dataBase['CenterOfMass'].append(itkFilter.GetCenterOfGravity(label))
+
             dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
+
             dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
 
-        return dataBase
+        dictionary['dataBase']=dataBase
+
+        return image, dataBase
 
 
 
