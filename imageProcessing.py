@@ -4,7 +4,7 @@ import numpy as np
 from math import pow
 from skimage.external.tifffile import imread, imsave
 from skimage.filters import threshold_isodata, threshold_li, threshold_local, threshold_mean, threshold_minimum, threshold_niblack, threshold_otsu, threshold_sauvola, threshold_triangle, threshold_yen
-
+import pandas as pd
 from scipy.ndimage.filters import convolve
 import time
 import os
@@ -103,7 +103,11 @@ class Main(object):
         #print(sourceDictList[0])
         Measurement.analyze(taggedImageList[0], taggedDictList[0])
 
-        print(taggedDictList[0])
+        print(taggedDictList[0]['dataBase'])
+
+        dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
+
+        Measurement.filter(taggedDictList[0],dictFilter)
 
 
         #print(taggedImage)
@@ -239,36 +243,16 @@ class Measurement(object):
     	the workflows to process images.
     	'''
 
-    @staticmethod
-    def getShapeData(image):
 
-        itkImage = sitk.GetImageFromArray(image)
-
-        itkFilter = sitk.LabelShapeStatisticsImageFilter()
-        itkFilter.Execute(itkImage)
-        data = itkFilter.GetLabels()
-
-        dataBase = {'Volume': [], 'Mean': [], 'Centroid': [], 'Ellipsoid Diameters': [], 'Bounding Box': [], }
-
-        for label in data:
-            dataBase['Volume'].append(itkFilter.GetPhysicalSize(label))
-
-            dataBase['Centroid'].append(itkFilter.GetCentroid(label))
-            dataBase['Ellipsoid Diameters'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
-            dataBase['Bounding Box'].append(itkFilter.GetBoundingBox(label))
-
-        return dataBase
 
     @staticmethod
     def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
-
-
 
         if imageList==[]:
             imageList.append(taggedImage)
             dictionaryList.append(dictionary)
 
-        dataBase = {'volume': [], 'voxelCount': [], 'centroid': [], 'centerOfMass': [], 'ellipsoidDiameter': [],
+        dataBase = {'volume': [], 'voxelCount': [], 'centroid': [], 'ellipsoidDiameter': [],
                     'boundingBox': []}
 
         for i in range(len(imageList)):
@@ -282,9 +266,9 @@ class Measurement(object):
             itkFilter.Execute(itkImage, itkRaw)
             data = itkFilter.GetLabels()
 
-            dataBase['pixel in'+dictionaryList[i]['name']]= []
+            dataBase['pixel in '+dictionaryList[i]['name']]= []
             dataBase['mean in ' + dictionaryList[i]['name']]=[]
-            dataBase['CenterOfMass in' + dictionaryList[i]['name']]=[]
+            dataBase['centerOfMass in ' + dictionaryList[i]['name']]=[]
 
             for label in data:
                 if i==0:
@@ -295,12 +279,32 @@ class Measurement(object):
                     dataBase['boundingBox'].append(itkFilter.GetBoundingBox(label))
 
                 dataBase['mean in '+dictionaryList[i]['name']].append(itkFilter.GetMean(label))
-                dataBase['pixel in'+dictionaryList[i]['name']].append(itkFilter.GetMaximumIndex(label))
-                dataBase['CenterOfMass in'+dictionaryList[i]['name']].append(itkFilter.GetCenterOfGravity(label))
+                dataBase['pixel in '+dictionaryList[i]['name']].append(itkFilter.GetMaximumIndex(label))
+                dataBase['centerOfMass in '+dictionaryList[i]['name']].append(itkFilter.GetCenterOfGravity(label))
+
 
         dictionary['dataBase']=dataBase
 
         return dataBase
+
+
+    @staticmethod
+    def filter(dictionary, filterDict):
+
+        dataFrame=pd.DataFrame(dictionary['dataBase'])
+
+        print(dataFrame)
+        for key in filterDict:
+
+            dataFrame['filterd']=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])#& )
+
+        dictionary['dataBase']=dataFrame.to_dict(orient='records')
+
+        return dictionary
+
+
+
+
 
 
 
