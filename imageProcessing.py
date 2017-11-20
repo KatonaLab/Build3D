@@ -371,9 +371,26 @@ class Segmentation(object):
         return sitk.GetArrayFromImage(tagged_image)
 
     @staticmethod
-    def threshold_manual(img,  lower, upper=pow(2, 32)):
+    def threshold_manual(img, lowerThreshold=None, upperThreshold=None):
+
+        if lowerThreshold==None:
+            lowerThreshold=np.amin(img)
+
+        if lowerThreshold == None:
+            lowerThreshold = np.amax(img)
+
+        # Convert nd Image to ITK image
+        itkImage = sitk.GetImageFromArray(img)
+
+        #threshold=sitk.ThresholdImageFilter()
+        threshold=sitk.BinaryThresholdImageFilter()
+        threshold.SetUpperThreshold(upperThreshold)
+        threshold.SetLowerThreshold(lowerThreshold)
+
         # Threshold image using lower and upper as range
-        return (lower < img) & (img < upper)
+        segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
+
+        return segmentedImage
 
 
     @staticmethod
@@ -463,6 +480,53 @@ class Segmentation(object):
         for i in range(len(img)):
             segmentedImage, _ =Segmentation.threshold_auto(img[i], method)
             stack.append(segmentedImage)
+
+        return stack
+
+    @staticmethod
+    def threshold2DMean_auto(img, method, filter='Median', removeOutliers=False):
+        '''
+        Apply autothreshold slice by slice
+        :param img: nd array
+        :param thresholdMethod: threshold method name as string
+            * 'Otsu'
+            * 'Huang'
+            * 'IsoData'
+            * 'Li'
+            * 'MaxEntropy'
+            * 'KittlerIllingworth'
+            * 'Moments'
+            * 'Yen'
+            * 'RenyiEntropy'
+            * 'Shanbhag'
+        :return: nd array
+        '''
+
+        thresholdArray=np.zeroes(len(img))
+        for i in range(len(img)):
+            _, threshold = Segmentation.threshold_auto(img[i], method)
+            thresholdArray[i]=threshold
+
+        #Remove outliers
+        if removeOutliers==True:
+            m=2.0
+            d = np.abs(thresholdArray - np.median(thresholdArray))
+            mdev = np.median(d)
+            s = d / (mdev if mdev else 1.)
+            thresholdArray=thresholdArray[s < m]
+
+
+
+        #Calculate final threshold
+        if filter=='Mean':
+            finalThreshold=np.median(thresholdArray)
+        elif filter=='Median':
+            finalThreshold = np.mean(thresholdArray)
+        else:
+            raise LookupError('Not a valid method!')
+
+        #Apply threshold
+        itkImage = sitk.GetImageFromArray(img)
 
         return stack
 
