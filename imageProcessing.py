@@ -74,7 +74,7 @@ def filter(inputDictionary, filterDict, outputDictionary, removeFiltered=False )
     :return:
     '''
 
-    outputDictionary=Measurement.filter(inputDictionary, filterDict, removeFiltered)
+    outputDictionary=Measurement.filter_dataBase(inputDictionary, filterDict, removeFiltered)
 
 def save(inputDictionaryList, path, fileName='output', toText=True):
     '''
@@ -322,6 +322,30 @@ class Measurement(object):
     	the workflows to process images.
     	'''
     @staticmethod
+    def filter_image(taggedImg, taggedDict):
+
+        database=taggedDict['dataBase']
+        changeDict={}
+        if 'filtered' in database.keys():
+            for i in range(len(dataBase['filtered'])):#dataBase should have a label key!!!
+                if dataBase['filtered'][i]==False:
+                    changeDict[int(i)]=0
+
+        # change label
+        sitkFilter = sitk.ChangeLabelImageFilter()
+        sitkFilter.SetChangeMap(changeDict)
+
+        outputImage = sitkChange.Execute(taggedImg)
+
+        print("Is it possible we changed pixel")
+
+        return outputImage
+
+
+
+
+
+    @staticmethod
     def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
 
         #Create Overlapping Image
@@ -446,7 +470,7 @@ class Measurement(object):
 
 
     @staticmethod
-    def filter(dictionary, filterDict, removeFiltered=False):
+    def filter_dataBase(dictionary, filterDict, removeFiltered=False):
 
         dataFrame=pd.DataFrame(dictionary['dataBase'])
 
