@@ -17,12 +17,75 @@ from operator import add
 
 
 ####################################################Interface to call from C++####################################################
+def tagImage(inputImage, outputImage):
+    '''
+    Function that runs ITK connected components on input image
+    :param image: nd Array
+    :param outputImage: nd Array
+    '''
+    outputImage=Segmentation.tag_image(image)
+
+def autoThreshold(inputImage, method, outputImage):
+    '''
+    Apply autothreshold slice by slice. For later use there is an implementation that uses stack histograms
+    and one that uses the mean of the slice by slice threshold values.
+    :param inputImage: nd array
+    :param method: threshold method name as string
+            * 'Otsu'
+            * 'Huang'
+            * 'IsoData'
+            * 'Li'
+            * 'MaxEntropy'
+            * 'KittlerIllingworth'
+            * 'Moments'
+            * 'Yen'
+            * 'RenyiEntropy'
+            * 'Shanbhag'
+    :return:
+    '''
+
+    outputImage=Segmentation.threshold2D_auto(inputImage, method, outputImage)
+
+def analyze(taggedImage, taggedDictionary, outputDictionary, outputImage, imageList=[], dictionaryList=[]):
+    '''
+    Analyzes tagedImage and appends 'dataBase' to its dictionary that contain measured values.
+    :param taggedImage: tagged image
+    :param taggedDictionary: dictionary with descriptors of tagged image
+    :param imageList: image list where intensity is measured within objects of taggedImage
+    :param dictionaryList: list of dictionaries that apartain to each element in imageList
+    :param outputImage: output image
+    :param outputDictionary: dictionary with descriptors of outputImage
+    :return:
+    '''
+
+    outputDictionary =Measurement.analyze(taggedImage, taggedDictionary, imageList, dictionaryList)
 
 
 
+def filter(inputDictionary, filterDict, outputDictionary, removeFiltered=False ):
+    '''
+    :param dictionary: Filters dictionary stord in the 'dataBase' key of the inputDisctionary to be filtered
+    :param filterDict: Dictionary contains the keywords to be filtered and the min/maximum value as the following example:
 
+            dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
 
+    :param outputDictionary
+    :param removeFiltered: If True objects that are filtered out are removed
+    :return:
+    '''
 
+    outputDictionary=Measurement.filter(inputDictionary, filterDict, removeFiltered)
+
+def save(inputDictionaryList, path, fileName='output', toText=True):
+    '''
+    :param dictionaryList: Save dictionaries in inputDictionaryList
+    :param path: path where file is saved
+    :param toText: if True data are saved to text
+    :param fileName: fileneme WITHOUT extension
+    :return:
+    '''
+
+    Measurement.save(inputDictionaryList, path, fileName, toText)
 
 #############################################Class to use as sandbox for python####################################################
 class Main(object):
