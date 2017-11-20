@@ -16,6 +16,15 @@ import pickle
 from operator import add
 
 
+####################################################Interface to call from C++####################################################
+
+
+
+
+
+
+
+#############################################Class to use as sandbox for python####################################################
 class Main(object):
 
     def __init__(self):
@@ -96,7 +105,7 @@ class Main(object):
         taggedImage3 = Segmentation.tag_image(thresholdedImage3)
 
         taggedDict3 =sourceDictList[2]
-        taggedDict3 = Measurement.analyze(taggedImage2, taggedDict2, imageList=sourceImageList, dictionaryList=sourceDictList)
+        taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList)
         taggedDict3['name'] = 'Channel3'
 
         taggedImageList.append(taggedImage3)
@@ -110,10 +119,13 @@ class Main(object):
 
 
         dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
+        #print(taggedDictList[2])
+        overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
+        a=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
 
-        #colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={})
-
-
+        #print(overlappingImage)
+        #print(overlappingDataBase['dataBase'])
+        print(a)
         #print(taggedImage)
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
@@ -241,14 +253,59 @@ class Main(object):
                 #tstop = time.clock()
                 #print('Time to Tagg Image: ' + str(tstop - tstart))
 
-
+#############################################Class that contain main functions for A3DC###################################################
 class Measurement(object):
     '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
     	the workflows to process images.
     	'''
+    @staticmethod
+    def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
+
+        #Create Overlapping Image
+        overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
+        # Create Overlapping Dictionary
+        if name==None:
+            name='Overlapping'
+            for dict in taggedDictList:
+                name=name+'_'+dict['name']
+        overlappingDataBase = {'name': name}
+
+        sourceImageList.append(overlappingImage)
+        sourceDictionayList.append(overlappingDataBase)
+
+        overlappingDataBase=Measurement.analyze(overlappingImage, overlappingDataBase, sourceImageList, sourceDictionayList)
+
+        return overlappingImage, overlappingDataBase
+
+    @staticmethod
+    def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
+
+
+        # Generate array lists and name lists
+        taggedArrayList = [x.flatten() for x in taggedImgList]
+        nameList = [x['name'] for x in dataBaseList]
+
+        for i in range(len(taggedImgList)):
+            itk_image = sitk.GetImageFromArray(taggedImgList[i])
 
 
 
+            overlappingPixels=overlappingDataBase['dataBase']['pixel in '+overlappingDataBase['name']]
+
+            objectList = [None for i in range(len(overlappingPixels))]
+            ovlRatioList = [None for i in range(len(overlappingPixels))]
+
+            for j in range(len(overlappingPixels)):
+                ovlPosition = overlappingPixels[j]
+                objectList[j] = itk_image.GetPixel(ovlPosition)
+                ovlRatioList[j] = overlappingDataBase['dataBase']['volume'][j] / dataBaseList[i]['dataBase']['volume'][objectList[j] - 1]
+
+            overlappingDataBase['object in ' + nameList[i]] = objectList
+            overlappingDataBase['overlappingRatio in ' + nameList[i]] = ovlRatioList
+
+        return overlappingDataBase
+
+#'pixel in Channel3':
     @staticmethod
     def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
 
@@ -347,20 +404,9 @@ class Measurement(object):
 
 
 
-
-
-
-
+#############################################Class that contain main functions for A3DC####################################################
 class Segmentation(object):
 
-    @staticmethod
-    def colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={}):
-
-        overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
-        overlappingDataBase = Measurement.analyze(overlappingImage, 'Overlapping', sourceImageList,
-                                                  **overlappingAnalysisInput)
-
-        return overlappingImage, overlappingDataBase
 
     @staticmethod
     def create_overlappingImage(taggedImageList):
@@ -371,6 +417,7 @@ class Segmentation(object):
             img=np.multiply(img, taggedImageList[i])
 
         return img
+
 
     @staticmethod
     def tag_image(image):
@@ -568,6 +615,7 @@ class Segmentation(object):
 
         return convolved
 
+############################################Helper Functions for testing in python###################################
 class Processor(object):
 
     #This class is a collection of methods most of which are static methods used to process images and image arrays.
