@@ -2,6 +2,7 @@ import QtQuick 2.8
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
+import QtQuick.Window 2.0
 
 import "../controls"
 import "../../actions"
@@ -129,6 +130,33 @@ GroupBox {
                 };
                 console.log("nodeview sent");
                 AppActions.applyAnalysisNode(uid, analysisParams);
+            }
+        }
+
+        Button {
+            text: "Show Results"
+            // enabled: nodeApplied
+            Layout.fillWidth: true
+            onClicked: {
+                resultsWindow.visible = true;
+            }
+        }
+
+        Window {
+            id: resultsWindow
+
+            Component.onCompleted: {
+                for (var i = 0; i < MainStore.nodeStore.demoResults.length; ++i) {
+                    list.append({intensity: MainStore.nodeStore.demoResults[i]})
+                    console.log(MainStore.nodeStore.demoResults[i]);
+                }
+            }
+            ListModel {
+                id: list    
+            }
+            TableView {
+                anchors.fill: parent
+                model: list
             }
         }
     }

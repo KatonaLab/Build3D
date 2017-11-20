@@ -382,6 +382,7 @@ QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {
+    cout << "VolumetricTexture ctr " << (void*)this << endl;
     setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
     setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
@@ -397,7 +398,7 @@ void VolumetricTexture::setData(VolumetricData* data)
     }
 
     m_data = data;
-    m_textureImage = new VolumetricTextureImage(m_data);
+    m_textureImage = new VolumetricTextureImage(m_data, this);
     addTextureImage(m_textureImage);
     setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
 
@@ -408,6 +409,7 @@ void VolumetricTexture::setData(VolumetricData* data)
 VolumetricTexture::~VolumetricTexture()
 {
     delete m_textureImage;
+    cout << "VolumetricTexture dtr " << (void*)this << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -415,6 +417,7 @@ VolumetricTexture::~VolumetricTexture()
 VolumetricTextureImage::VolumetricTextureImage(const VolumetricData* data, QNode *parent)
 : QAbstractTextureImage(parent)
 {
+    cout << "VolumetricTextureImage ctr " << (void*)this << endl;
     m_generator = ImageDataGeneratorPtr::create(data);
 }
 
@@ -423,10 +426,17 @@ QTextureImageDataGeneratorPtr VolumetricTextureImage::dataGenerator() const
     return m_generator;
 }
 
+VolumetricTextureImage::~VolumetricTextureImage()
+{
+    cout << "VolumetricTextureImage dtr " << (void*)this << endl;
+}
+
 //------------------------------------------------------------------------------
 
 ImageDataGenerator::ImageDataGenerator(const VolumetricData* data) : m_data(data)
-{}
+{
+    cout << "ImageDataGenerator ctr " << (void*)this << endl;
+}
 
 QTextureImageDataPtr ImageDataGenerator::operator()()
 {
@@ -453,6 +463,11 @@ bool ImageDataGenerator::operator ==(const QTextureImageDataGenerator &other) co
 {
     const ImageDataGenerator *otherFunctor = functor_cast<ImageDataGenerator>(&other);
     return (otherFunctor != Q_NULLPTR && otherFunctor->m_data == m_data);
+}
+
+ImageDataGenerator::~ImageDataGenerator()
+{
+    cout << "ImageDataGenerator dtr " << (void*)this << endl;
 }
 
 //------------------------------------------------------------------------------

@@ -2,40 +2,42 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-# LDFLAGS:  -L/usr/local/opt/qt/lib
-# set(Qt5_DIR /usr/local/opt/qt)
-
-# set(CMAKE_EXE_LINKER_FLAGS "-Wl,-export-dynamic")
+# ADD_DEFINITIONS(${QT_DEFINITIONS})
+# # ADD_DEFINITIONS(-DQT_PLUGIN)
+# # ADD_DEFINITIONS(-DQT_NO_DEBUG)
+# # ADD_DEFINITIONS(-DQT_SHARED)
+# add_definitions("-DQT_STATICPLUGIN")
 
 find_package(Qt5 REQUIRED COMPONENTS 
     Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DQuickExtras
-    PATHS /usr/local/opt/qt/lib/cmake/Qt5
-    NO_DEFAULT_PATH)
-
-# Find necessary packages
-# find_package(PythonLibs 3.6.0 REQUIRED)
-# include_directories(${PYTHON_INCLUDE_DIRS})
-
-# set(Boost_USE_STATIC_LIBS ON)
-# find_package(Boost COMPONENTS python3 numpy REQUIRED)
-# include_directories(${Boost_INCLUDE_DIR})
-
-# set(Python_ADDITIONAL_VERSIONS 3.6)
-# find_package(PythonLibs 3 REQUIRED)
-
-# find_package(Boost 1.65.1 COMPONENTS program_options REQUIRED)
-# include_directories( ${Boost_INCLUDE_DIR} )
-
-# FIXME:
-# include_directories("/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m")
-# include_directories("/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/numpy/core/include")
+    # PATHS /usr/local/opt/qt/lib/cmake/Qt5
+    PATHS /Users/fodorbalint/projects/tmp/mxe/usr/i686-w64-mingw32.static/qt5/lib/cmake/Qt5
+    NO_DEFAULT_PATH
+)
 
 file(GLOB sources *.cpp)
 file(GLOB headers *.h)
 
+# SET(BUILD_SHARED_LIBRARIES OFF)
+# SET(CMAKE_EXE_LINKER_FLAGS "-static")
+
+add_definitions("-DQT_STATICPLUGIN")
+
+link_directories("/Users/fodorbalint/projects/tmp/mxe/usr/i686-w64-mingw32.static/qt5/lib")
+
 add_executable(app ${sources} ${headers} ../resources.qrc)
+
+foreach(plugin ${Qt5Core_PLUGINS} ${Qt5Gui_PLUGINS} ${Qt5Widgets_PLUGINS} ${Qt53DCore_PLUGINS} ${Qt53DExtras_PLUGINS} ${Qt53DRender_PLUGINS} ${Qt53DInput_PLUGINS} ${Qt53DQuickExtras_PLUGINS})
+    get_target_property(_loc ${plugin} LOCATION)
+    message("Plugin ${plugin} is at location ${_loc}")
+    # link_directories(${_loc})
+    target_link_libraries(app ${_loc})
+endforeach()
+
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+
 target_link_libraries(app
-    libics 
+    libics_static
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
@@ -44,25 +46,13 @@ target_link_libraries(app
     Qt5::3DRender
     Qt5::3DInput
     Qt5::3DQuickExtras
-    # ${Boost_LIBRARIES}
-    # ${PYTHON_LIBRARIES}
-    # "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/numpy/core/lib/libnpymath.a"
-    )
-
-# TODO: copy on windows
-# add_custom_command(TARGET app PRE_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_directory
-#     ${CMAKE_SOURCE_DIR}/src/qml $<TARGET_FILE_DIR:app>/qml)
-
-# add_custom_command(TARGET app PRE_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_directory
-#     ${CMAKE_SOURCE_DIR}/scripts $<TARGET_FILE_DIR:app>/scripts)
-#
-
-# add_custom_command(TARGET app PRE_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E create_symlink
-#     ${CMAKE_SOURCE_DIR}/src/qml $<TARGET_FILE_DIR:app>/qml)
-
-# add_custom_command(TARGET app PRE_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E create_symlink
-#     ${CMAKE_SOURCE_DIR}/scripts $<TARGET_FILE_DIR:app>/scripts)
+    Qt5::QWindowsIntegrationPlugin
+    libQt5EventDispatcherSupport.a
+    libQt5FontDatabaseSupport.a
+    libQt5ThemeSupport.a
+    freetype
+    bz2
+    harfbuzz
+    freetype_too
+    harfbuzz_too
+)

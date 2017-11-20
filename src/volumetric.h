@@ -17,8 +17,12 @@
 #include <string>
 #include <exception>
 #include <map>
+#include <memory>
 #include <functional>
 #include <libics.h>
+
+// debug:
+#include <iostream>
 
 // TODO: classes to separate files
 
@@ -177,7 +181,8 @@ class VolumetricData : public QObject {
     Q_PROPERTY(QString dataName READ dataName)
 public:
     // non-copyable
-    VolumetricData() = default;
+    VolumetricData() { std::cout << "VolumetricData ctr " << (void*)this << std::endl; }
+    ~VolumetricData() { std::cout << "VolumetricData dtr " << (void*)this << std::endl; }
     VolumetricData(const VolumetricData&) = delete;
     VolumetricData& operator=(const VolumetricData&) = delete;
 
@@ -239,6 +244,7 @@ class VolumetricTextureImage : public Qt3DRender::QAbstractTextureImage {
 public:
     explicit VolumetricTextureImage(const VolumetricData* data,
                                     Qt3DCore::QNode *parent = nullptr);
+    virtual ~VolumetricTextureImage();
 
 protected:
     Qt3DRender::QTextureImageDataGeneratorPtr dataGenerator() const override;
@@ -251,6 +257,7 @@ class ImageDataGenerator : public Qt3DRender::QTextureImageDataGenerator {
 public:
     QT3D_FUNCTOR(ImageDataGenerator)
     ImageDataGenerator(const VolumetricData* data);
+    virtual ~ImageDataGenerator();
     Qt3DRender::QTextureImageDataPtr operator()() override;
     bool operator ==(const QTextureImageDataGenerator &other) const override;
 
