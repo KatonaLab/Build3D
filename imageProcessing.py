@@ -26,7 +26,7 @@ class Main(object):
         sourceImageList=[]
         sourceDictList=[]
         # Channel 1
-        ch1Path = ("F:/Workspace/TestImages/test_1.tif")
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
 
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
@@ -38,7 +38,7 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path = ("F:/Workspace/TestImages/test_2.tif")
+        ch2Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
 
         ch2Img = Processor.load_image(ch2Path)
         ch2Dict={'name': 'RawImage1',
@@ -49,7 +49,7 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ("F:/Workspace/TestImages/test_3.tif")
+        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -106,9 +106,12 @@ class Main(object):
 
         dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
 
-        Measurement.filter(taggedDictList[0],dictFilter)
-        #print(taggedDictList)
-        Measurement.save([taggedDictList[0],taggedDictList[0]],'D:/')
+        rawImgPath= ("D:/OneDrive - MTA KOKI/Workspace/Playground/zsofi.tif")
+        rawImg = Processor.load_image(rawImgPath)
+        thresholdedrawImage = Segmentation.threshold_manual(rawImg, lowerThreshold=0, upperThreshold=155.833333333)
+        #thresholdedrawImage = Segmentation.threshold2DMean_auto(rawImg, 'Otsu', filter='Median')
+        outputPath = ("D:/OneDrive - MTA KOKI/Workspace/Playground/zsofi_output.tif")
+        Processor.save_image(thresholdedrawImage, outputPath)
 
 
         #print(taggedImage)
@@ -376,21 +379,20 @@ class Segmentation(object):
         if lowerThreshold==None:
             lowerThreshold=np.amin(img)
 
-        if lowerThreshold == None:
-            lowerThreshold = np.amax(img)
+        if upperThreshold == None:
+            upperThreshold = np.amax(img)
 
         # Convert nd Image to ITK image
         itkImage = sitk.GetImageFromArray(img)
 
         #threshold=sitk.ThresholdImageFilter()
         threshold=sitk.BinaryThresholdImageFilter()
-        threshold.SetUpperThreshold(upperThreshold)
-        threshold.SetLowerThreshold(lowerThreshold)
+        threshold.SetUpperThreshold(float(upperThreshold))
+        threshold.SetLowerThreshold(float(lowerThreshold))
+        segmentedImage=threshold.Execute(itkImage)
 
-        # Threshold image using lower and upper as range
-        segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
-
-        return segmentedImage
+        # Threshold and Invert
+        return sitk.GetArrayFromImage(sitk.InvertIntensity(segmentedImage, 1))
 
 
     @staticmethod
@@ -484,7 +486,7 @@ class Segmentation(object):
         return stack
 
     @staticmethod
-    def threshold2DMean_auto(img, method, filter='Median', removeOutliers=False):
+    def threshold2DMean_auto(img, method, filter='Median'):
         '''
         Apply autothreshold slice by slice
         :param img: nd array
@@ -502,20 +504,11 @@ class Segmentation(object):
         :return: nd array
         '''
 
-        thresholdArray=np.zeroes(len(img))
+        thresholdArray=np.zeros(len(img))
         for i in range(len(img)):
             _, threshold = Segmentation.threshold_auto(img[i], method)
+
             thresholdArray[i]=threshold
-
-        #Remove outliers
-        if removeOutliers==True:
-            m=2.0
-            d = np.abs(thresholdArray - np.median(thresholdArray))
-            mdev = np.median(d)
-            s = d / (mdev if mdev else 1.)
-            thresholdArray=thresholdArray[s < m]
-
-
 
         #Calculate final threshold
         if filter=='Mean':
@@ -525,10 +518,9 @@ class Segmentation(object):
         else:
             raise LookupError('Not a valid method!')
 
-        #Apply threshold
-        itkImage = sitk.GetImageFromArray(img)
 
-        return stack
+        #Apply threshold
+        return Segmentation.threshold_manual(img, lowerThreshold=0, upperThreshold=finalThreshold)
 
     @staticmethod
     def tag_image(img):
