@@ -363,12 +363,45 @@ class Measurement(object):
                 objectList[j] = itk_image.GetPixel(ovlPosition)
                 ovlRatioList[j] = overlappingDataBase['dataBase']['volume'][j] / dataBaseList[i]['dataBase']['volume'][objectList[j] - 1]
 
-            overlappingDataBase['object in ' + nameList[i]] = objectList
-            overlappingDataBase['overlappingRatio in ' + nameList[i]] = ovlRatioList
+            overlappingDataBase['dataBase']['object in ' + nameList[i]] = objectList
+            overlappingDataBase['dataBase']['overlappingRatio in ' + nameList[i]] = ovlRatioList
 
         return overlappingDataBase
 
-#'pixel in Channel3':
+    @staticmethod
+    def colocalizaion_analysis( dataBaseList, overlappingDataBase):
+
+        # Generate array lists and name lists
+
+        nameList = [x['Name'] for x in dataBaseList]
+
+        # Update dataBase for segmented images
+        for i in range(len(dataBaseList)):
+
+            positionList = [x for x in range(len(dataBaseList)) if x != i]
+            buffer = []
+            ovlRatioBuffer = []
+
+            for m in range(len(positionList)):
+                buffer.append([[] for n in range(dataBaseList[positionList[m]]['dataBase']['NbOfObjects'])])
+                ovlRatioBuffer.append([0 for n in range(dataBaseList[positionList[m]]['dataBase']['NbOfObjects'])])
+
+            for j in range(overlappingDataBase['dataBase']['NbOfObjects']):
+
+                tag = overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
+
+                for k in range(len(positionList)):
+                    currentTag = overlappingDataBase['dataBase']['object in ' + nameList[positionList[k]]][j]
+                    buffer[k][currentTag - 1].append(tag)
+                    ovlRatioBuffer[k][currentTag - 1] += overlappingDataBase['dataBase']['volume'][j]
+
+            for q in range(len(positionList)):
+                dataBaseList[positionList[q]]['dataBase']['objects in ' + nameList[i]] = buffer[q]
+                dataBaseList[positionList[q]]['dataBase']['totalOverlappingRatios in ' + nameList[i]] = np.divide(ovlRatioBuffer[q],dataBaseList[positionList[q]]['volume'])
+                dataBaseList[positionList[q]]['dataBase']['colocalization count'] = Measurement.measure_volume(buffer[q])
+
+        return dataBaseList, overlappingDataBase
+
     @staticmethod
     def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
 
