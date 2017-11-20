@@ -26,7 +26,7 @@ class Main(object):
         sourceImageList=[]
         sourceDictList=[]
         # Channel 1
-        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
 
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
@@ -38,7 +38,7 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        ch2Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
 
         ch2Img = Processor.load_image(ch2Path)
         ch2Dict={'name': 'RawImage1',
@@ -49,7 +49,7 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -66,35 +66,40 @@ class Main(object):
         taggedDictList = []
 
         # Channel 1
-        thresholdedImage=Segmentation.threshold2D_auto(sourceImageList[0], "Otsu")
-        taggedImage=Segmentation.tag_image(thresholdedImage)
+        thresholdedImage1=Segmentation.threshold2D_auto(sourceImageList[0], "Otsu")
+        taggedImage1=Segmentation.tag_image(thresholdedImage1)
 
         taggedDict1=sourceDictList[0]
+        taggedDict1=Measurement.analyze(taggedImage1, taggedDict1, imageList=sourceImageList, dictionaryList=sourceDictList)
         taggedDict1['name']='Channel1'
 
-        taggedImageList.append(taggedImage)
+        taggedImageList.append(taggedImage1)
         taggedDictList.append(taggedDict1)
 
 
         # Channel 2
-        thresholdedImage = Segmentation.threshold2D_auto(sourceImageList[1], "MaxEntropy")
-        taggedImage = Segmentation.tag_image(thresholdedImage)
+        thresholdedImage2 = Segmentation.threshold2D_auto(sourceImageList[1], "MaxEntropy")
+        taggedImage2 = Segmentation.tag_image(thresholdedImage2)
+
+
 
         taggedDict2=sourceDictList[1]
+        taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=sourceImageList, dictionaryList=sourceDictList)
         taggedDict2['name']='Channel2'
 
 
-        taggedImageList.append(taggedImage)
+        taggedImageList.append(taggedImage2)
         taggedDictList.append(taggedDict2)
 
         # Channel 3
-        thresholdedImage = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
-        taggedImage = Segmentation.tag_image(thresholdedImage)
+        thresholdedImage3 = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
+        taggedImage3 = Segmentation.tag_image(thresholdedImage3)
 
         taggedDict3 =sourceDictList[2]
+        taggedDict3 = Measurement.analyze(taggedImage2, taggedDict2, imageList=sourceImageList, dictionaryList=sourceDictList)
         taggedDict3['name'] = 'Channel3'
 
-        taggedImageList.append(taggedImage)
+        taggedImageList.append(taggedImage3)
         taggedDictList.append(taggedDict3)
         #############################################################################################################
 
@@ -106,12 +111,7 @@ class Main(object):
 
         dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
 
-        rawImgPath= ("D:/OneDrive - MTA KOKI/Workspace/Playground/zsofi.tif")
-        rawImg = Processor.load_image(rawImgPath)
-        thresholdedrawImage = Segmentation.threshold_manual(rawImg, lowerThreshold=0, upperThreshold=155.833333333)
-        #thresholdedrawImage = Segmentation.threshold2DMean_auto(rawImg, 'Otsu', filter='Median')
-        outputPath = ("D:/OneDrive - MTA KOKI/Workspace/Playground/zsofi_output.tif")
-        Processor.save_image(thresholdedrawImage, outputPath)
+        #colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={})
 
 
         #print(taggedImage)
@@ -289,7 +289,7 @@ class Measurement(object):
 
         dictionary['dataBase']=dataBase
 
-        return dataBase
+        return dictionary
 
 
     @staticmethod
@@ -338,8 +338,6 @@ class Measurement(object):
                         outputFile.write('name= '+dict['name']+'\n')
                         outputFile.write(dataFrame.to_csv(sep='\t', index=False, header=True))
 
-
-
         return 0
 
 
@@ -354,6 +352,15 @@ class Measurement(object):
 
 
 class Segmentation(object):
+
+    @staticmethod
+    def colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={}):
+
+        overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
+        overlappingDataBase = Measurement.analyze(overlappingImage, 'Overlapping', sourceImageList,
+                                                  **overlappingAnalysisInput)
+
+        return overlappingImage, overlappingDataBase
 
     @staticmethod
     def create_overlappingImage(taggedImageList):
