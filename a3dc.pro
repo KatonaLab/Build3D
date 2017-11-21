@@ -1,4 +1,4 @@
-QT += gui core widgets quick qml 3dcore 3drender 3dinput
+QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++14
 
 # The following define makes your compiler emit warnings if you use
