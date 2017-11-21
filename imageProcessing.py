@@ -88,6 +88,15 @@ def filter(inputImage ,inputDictionary, outputImage, outputDictionary, filterDic
         outputImage=inputImage
 
 
+def colocalization(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
+    #Create overlapping image and overlapping dictionary
+    overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImgList, taggedDictList, sourceImageList, sourceDictionayList, name)
+    #Filter overlapping image/dictionary
+
+    overlappingDataBase=Measurement.colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase)
+    dataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImgList, dataBaseList, overlappingImage, overlappingDataBase)
+
+
 def save(inputDictionaryList, path, fileName='output', toText=True):
     '''
     :param dictionaryList: Save dictionaries in inputDictionaryList
@@ -110,7 +119,7 @@ class Main(object):
         sourceImageList=[]
         sourceDictList=[]
         # Channel 1
-        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
+        ch1Path = ('F:/Workspace/TestImages/test_1.tif')#("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
 
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
@@ -122,7 +131,7 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        ch2Path = ('F:/Workspace/TestImages/test_2.tif')#("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
 
         ch2Img = Processor.load_image(ch2Path)
 
@@ -134,7 +143,7 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
+        ch3Path = ('F:/Workspace/TestImages/test_3.tif')#("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -223,123 +232,6 @@ class Main(object):
 
 
 
-        '''
-        # Channel 1
-        taggedImageList.append(Segmentation.tag_image(sourceImageList[0]))
-        #Channel 3
-        taggedImageList.append(Segmentation.tag_image(sourceImageList[1]))
-        #Channel 2
-        taggedImageList.append(Segmentation.tag_image(sourceImageList[2]))
-
-
-        #print('ch1')
-        #print(Segmentation.tag_image(sourceImageList[0]))
-        #print('ch2')
-        #print(Segmentation.tag_image(sourceImageList[1]))
-        #print('ch3')
-        #print(Segmentation.tag_image(sourceImageList[2]))
-        #############################################################################################################
-        ############################################Analyze Input####################################################
-        analysisInput = []
-        analysisInput.append({'chanelList':[0, 1, 2], 'isOnEdge': True, 'boundingBox': True, 'surface':True, 'centroid':True})#channel 1)
-        analysisInput.append({'chanelList': [0, 1, 2], 'isOnEdge': True, 'boundingBox': True, 'surface': True,'centroid': True})  # Channel 3
-        analysisInput.append({'chanelList':[0, 1, 2], 'isOnEdge': True, 'boundingBox': True, 'surface':True, 'centroid':True})#Channel 4
-
-        overlappingAnalysisInput=  {'chanelList':[], 'isOnEdge': False, 'boundingBox': False, 'surface':False, 'centroid':True}#Overlapping
-
-        ###############################################Results######################################################
-        dataBaseList = []
-        dataBaseList.append(Measurement.analyze(taggedImageList[0], 'Ch' + str(1), sourceImageList, **analysisInput[0]))
-        dataBaseList.append(Measurement.analyze(taggedImageList[1], 'Ch' + str(2), sourceImageList, **analysisInput[1]))
-        dataBaseList.append(Measurement.analyze(taggedImageList[2], 'Ch' + str(3), sourceImageList, **analysisInput[2]))
-
-
-        #############################################MAIN FUNCTION############################################################
-
-
-        #Generate overlapping map
-        # Generate and analyzeOverlapping area
-
-        #print('overlappingImage')
-        #print(overlappingImage)
-        #print(overlappingDataBase)
-
-        #print(len(taggedImageList))
-        #print(len(dataBaseList))
-        #print(len(overlappingDataBase))
-        overlappingimage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, overlappingAnalysisInput)
-
-        overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, dataBaseList, overlappingDataBase)
-
-
-        Measurement.colocalizaion_analysis(taggedImageList, dataBaseList, overlappingDataBase)
-
-
-
-        #Measurement.colocalize([taggedImageList[0],taggedImageList[1]],[dataBaseList[0],dataBaseList[1]], overlappingDataBase)
-
-
-        #dataDict=Measurement.analyze(taggedImageList[0], sourceImageList)
-        #tstart = time.clock()
-        #with open('D:/Playground/data.txt','wb') as fin:
-            #pickle.dump(dataDict, fin)
-        #tstop = time.clock()
-        #print('Time to PickleObject: ' + str(tstop - tstart))
-
-        #tstart = time.clock()
-        #dataDict = pickle.load(open('D:/Playground/data.txt', "rb"))
-        #tstop = time.clock()
-        #print('Time to losad PickleObject: ' + str(tstop - tstart))
-
-        #print(dataDict)
-
-
-
-
-        #resultsDict=Measurement.analyze(taggedImg, ch1Image)
-        #print(resultsList)
-        #############################################################################################################
-        ############################################Colocalization###################################################
-
-        '''
-
-
-        #Measurement.colocalization(taggedImageList, sourceImageList)
-
-
-        #############################################################################################################
-        #print('Index:')
-        #print(resultsDict['PixelLists']['Index'])
-        #print('Cartesian:')
-        #print(resultsDict['PixelLists']['Cartesian X'])
-        #print(resultsDict['PixelLists']['Cartesian Y'])
-        #print(resultsDict['PixelLists']['Cartesian Z'])
-        #print('Bounding Box:')
-        #print(resultsDict['dataBase']['Bounding box X1'])
-        #print(resultsDict['dataBase']['Bounding box X2'])
-        #print(resultsDict['dataBase']['Bounding box Y1'])
-        #print(resultsDict['dataBase']['Bounding box Y2'])
-        #print(resultsDict['dataBase']['Bounding box Z1'])
-        #print(resultsDict['dataBase']['Bounding box Z2'])
-        #print('Surface:')
-        #print(resultsDict['PixelLists']['Surface'])
-        #print('Surface List:')
-        #print(resultsDict['dataBase']['Surface Area'])
-
-
-        #import os
-        #dirPath = "D:\Playground\coloc"
-        #for file in os.listdir(dirPath):
-            #if file.endswith(".tif"):
-                #filePath = os.path.join(dirPath, file)
-
-                #img = processor.load_image(filePath)
-
-                #tstart = time.clock()
-                #analyze(img)
-                #tstop = time.clock()
-                #print('Time to Tagg Image: ' + str(tstop - tstart))
-
 #############################################Class that contain main functions for A3DC###################################################
 class Measurement(object):
     '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
@@ -367,7 +259,6 @@ class Measurement(object):
             outputImage = taggedImg
 
         return outputImage
-
 
 
 
@@ -422,7 +313,7 @@ class Measurement(object):
 
         # Generate array lists and name lists
 
-        nameList = [x['Name'] for x in dataBaseList]
+        nameList = [x['name'] for x in dataBaseList]
 
         # Update dataBase for segmented images
         for i in range(len(dataBaseList)):
@@ -441,9 +332,19 @@ class Measurement(object):
                 tag = overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
 
                 for k in range(len(positionList)):
-                    currentTag = overlappingDataBase['dataBase']['object in ' + nameList[positionList[k]]][j]
-                    buffer[k][currentTag - 1].append(tag)
-                    ovlRatioBuffer[k][currentTag - 1] += overlappingDataBase['dataBase']['volume'][j]
+                        currentTag = overlappingDataBase['dataBase']['object in ' + nameList[positionList[k]]][j]
+
+                        condition=((('filter' not in dataBaseList[i]['dataBase'].keys())&\
+                            ('filter' not in dataBaseList[positionList[k]]['dataBase'].keys())&\
+                            ('filter' not in overlappingDataBase['dataBase'])) or\
+                            ((dataBaseList[i]['dataBase']['filter'][tag] == True)&\
+                            (dataBaseList[positionList[k]]['dataBase']['filter'][currentTag] == True)&\
+                            (overlappingDataBase['dataBase']['filter'][j]==True)))
+
+                        if condition==True:
+
+                            buffer[k][currentTag - 1].append(tag)
+                            ovlRatioBuffer[k][currentTag - 1] += overlappingDataBase['dataBase']['volume'][j]
 
             for q in range(len(positionList)):
                 dataBaseList[positionList[q]]['dataBase']['objects in ' + nameList[i]] = buffer[q]
