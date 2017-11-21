@@ -18,6 +18,7 @@ Middleware {
         title: "Import"
         folder: shortcuts.home
         onAccepted: {
+            console.log(fileDialog.fileUrls[0]);
             next(ActionTypes.importIcsFile, {url: fileDialog.fileUrls[0]});
         }
     }
