@@ -113,6 +113,7 @@ class Main(object):
         ch2Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
 
         ch2Img = Processor.load_image(ch2Path)
+
         ch2Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
                  'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
@@ -156,7 +157,7 @@ class Main(object):
 
 
         taggedDict2=sourceDictList[1]
-        taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=sourceImageList, dictionaryList=sourceDictList)
+        taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=[sourceImageList[1]], dictionaryList=sourceDictList)
         taggedDict2['name']='Channel2'
 
 
@@ -184,11 +185,19 @@ class Main(object):
         dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
         #print(taggedDictList[2])
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
-        a=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
+        overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
+        print('###############################')
+        print(taggedDict2)
+        filteredDict2=Measurement.filter_dataBase(taggedDict2, {'mean in Channel1':{'min':2,'max':3}, 'ellipsoidDiameter':{'min':2,'max':3}})
+        print('###############################')
+        print(filteredDict2)
 
-        filtIm=Measurement.filter_image(overlappingImage, overlappingDataBase)
-        print(overlappingImage)
-        print(filtIm)
+        #filteredDict2 = Measurement.filter_dataBase(taggedDict2, {'mean in Channel1': {'min': 3, 'max': 4}})
+        #print('###############################')
+        #print(filteredDict2)
+        #filtIm=Measurement.filter_image(overlappingImage, overlappingDataBase)
+        #print(overlappingImage)
+        #print(filtIm)
         #print(overlappingImage)
         #print(overlappingDataBase['dataBase'])
         #print(a)
@@ -196,7 +205,7 @@ class Main(object):
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
 
-
+        print(False*True)
 
 
 
@@ -327,11 +336,11 @@ class Measurement(object):
     @staticmethod
     def filter_image(taggedImg, taggedDict):
 
-        database=taggedDict['dataBase']
+        dataBase=taggedDict['dataBase']
         changeDict={}
-        if 'filtered' in database.keys():
-            for i in range(len(dataBase['filtered'])):#dataBase should have a label key!!!
-                if dataBase['filtered'][i]==False:
+        if 'filter' in dataBase.keys():
+            for i in range(len(dataBase['filter'])):#dataBase should have a label key!!!
+                if dataBase['filter'][i]==False:
                     changeDict[int(i)]=0
 
             # change label
@@ -475,17 +484,28 @@ class Measurement(object):
 
 
     @staticmethod
-    def filter_dataBase(dictionary, filterDict, removeFiltered=False):
+    def filter_dataBase(dictionary, filterDict, removeFiltered=False, overWrite=True):
 
         dataFrame=pd.DataFrame(dictionary['dataBase'])
 
+        if 'filter' in dictionary['dataBase'].keys():
+            originalFilter = dictionary['dataBase']['filter']
+
         #print(dataFrame)
         for key in filterDict:
-            if removeFiltered==False:
-                dataFrame['filterd']=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])
 
-            elif removeFiltered == True:
-                dataFrame=dataFrame[(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])]
+            if dataFrame[key].dtype not in [object, str]:
+                print(key)
+
+
+                currentFilter=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])
+                if ('filter' in dictionary['dataBase'].keys()) & (overWrite == False):
+                    dataFrame['filter']=np.multiply(originalFilter,currentFilter)
+                else:
+                    dataFrame['filter']=currentFilter
+
+        if removeFiltered == True:
+            dataFrame=dataFrame[(dataFrame['filter']==True)]
 
         dictionary['dataBase'] = dataFrame.to_dict(orient='list')
 
