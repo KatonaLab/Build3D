@@ -333,6 +333,7 @@ class Measurement(object):
     '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
     	the workflows to process images.
     	'''
+
     @staticmethod
     def filter_image(taggedImg, taggedDict):
 
@@ -341,7 +342,7 @@ class Measurement(object):
         if 'filter' in dataBase.keys():
             for i in range(len(dataBase['filter'])):#dataBase should have a label key!!!
                 if dataBase['filter'][i]==False:
-                    changeDict[int(i)]=0
+                    changeDict[int(dataBase['tag'])]=0
 
             # change label
             itkImage = sitk.GetImageFromArray(taggedImg)
@@ -447,7 +448,7 @@ class Measurement(object):
             imageList.append(taggedImage)
             dictionaryList.append(dictionary)
 
-        dataBase = {'volume': [], 'voxelCount': [], 'centroid': [], 'ellipsoidDiameter': [],
+        dataBase = {'tag': [], 'volume': [], 'voxelCount': [], 'centroid': [], 'ellipsoidDiameter': [],
                     'boundingBox': []}
 
         for i in range(len(imageList)):
@@ -467,6 +468,7 @@ class Measurement(object):
 
             for label in data:
                 if i==0:
+                    dataBase['tag'].append(label)
                     dataBase['volume'].append(itkFilter.GetPhysicalSize(label))
                     dataBase['voxelCount'].append(itkFilter.GetNumberOfPixels(label))
                     dataBase['centroid'].append(itkFilter.GetCentroid(label))
