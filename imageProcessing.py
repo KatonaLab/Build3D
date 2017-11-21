@@ -418,7 +418,7 @@ class Measurement(object):
         return overlappingDataBase
 
     @staticmethod
-    def colocalizaion_analysis( dataBaseList, overlappingDataBase):
+    def colocalizaion_analysis( taggedImgList, dataBaseList, overlappingImage, overlappingDataBase):
 
         # Generate array lists and name lists
 
@@ -432,10 +432,11 @@ class Measurement(object):
             ovlRatioBuffer = []
 
             for m in range(len(positionList)):
-                buffer.append([[] for n in range(dataBaseList[positionList[m]]['dataBase']['NbOfObjects'])])
-                ovlRatioBuffer.append([0 for n in range(dataBaseList[positionList[m]]['dataBase']['NbOfObjects'])])
+                NbOfObjects=np.amax(taggedImgList[positionList[m]])
+                buffer.append([[] for n in range(NbOfObjects)])
+                ovlRatioBuffer.append([0 for n in range(NbOfObjects)])
 
-            for j in range(overlappingDataBase['dataBase']['NbOfObjects']):
+            for j in range(np.amax(overlappingImage)):
 
                 tag = overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
 
