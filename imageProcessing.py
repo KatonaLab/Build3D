@@ -186,9 +186,12 @@ class Main(object):
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
         a=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
 
+        filtIm=Measurement.filter_image(overlappingImage, overlappingDataBase)
+        print(overlappingImage)
+        print(filtIm)
         #print(overlappingImage)
         #print(overlappingDataBase['dataBase'])
-        print(a)
+        #print(a)
         #print(taggedImage)
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
@@ -331,13 +334,15 @@ class Measurement(object):
                 if dataBase['filtered'][i]==False:
                     changeDict[int(i)]=0
 
-        # change label
-        sitkFilter = sitk.ChangeLabelImageFilter()
-        sitkFilter.SetChangeMap(changeDict)
+            # change label
+            itkImage = sitk.GetImageFromArray(taggedImg)
 
-        outputImage = sitkChange.Execute(taggedImg)
+            sitkFilter = sitk.ChangeLabelImageFilter()
+            sitkFilter.SetChangeMap(changeDict)
 
-        print("Is it possible we changed pixel")
+            outputImage = sitk.GetArrayFromImage(sitkFilter.Execute(itkImage))
+        else:
+            outputImage = taggedImg
 
         return outputImage
 
