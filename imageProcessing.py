@@ -62,19 +62,31 @@ def analyze(taggedImage, taggedDictionary, outputDictionary, outputImage, imageL
 
 
 
-def filter(inputDictionary, filterDict, outputDictionary, removeFiltered=False ):
+def filter(inputImage ,inputDictionary, outputImage, outputDictionary, filterDict,  removeFiltered=False, overWrite=True, filterImage=False ):
     '''
-    :param dictionary: Filters dictionary stord in the 'dataBase' key of the inputDisctionary to be filtered
+    Filters dictionary stored in the 'dataBase' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['Database']
+    and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
+
+    :param inputDictionary: Dictionary containing informason related to inputImage
+    :param inputImage: Tagged image
     :param filterDict: Dictionary contains the keywords to be filtered and the min/maximum value as the following example:
 
             dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
 
     :param outputDictionary
+    :param inputImage
     :param removeFiltered: If True objects that are filtered out are removed
     :return:
     '''
 
-    outputDictionary=Measurement.filter_dataBase(inputDictionary, filterDict, removeFiltered)
+    #Filter dictionary
+    outputDictionary=Measurement.filter_dataBase(inputDictionary, filterDict, removeFiltered, overWrite)
+    #Filter image
+    if filterImage==True:
+        outputImage=Measurement.filter_image(inputImage, outputDictionary)
+    else:
+        outputImage=inputImage
+
 
 def save(inputDictionaryList, path, fileName='output', toText=True):
     '''
@@ -389,8 +401,6 @@ class Measurement(object):
 
         for i in range(len(taggedImgList)):
             itk_image = sitk.GetImageFromArray(taggedImgList[i])
-
-
 
             overlappingPixels=overlappingDataBase['dataBase']['pixel in '+overlappingDataBase['name']]
 
