@@ -446,7 +446,7 @@ class Measurement(object):
 
             for q in range(len(positionList)):
                 dataBaseList[positionList[q]]['dataBase']['objects in ' + nameList[i]] = buffer[q]
-                dataBaseList[positionList[q]]['dataBase']['totalOverlappingRatios in ' + nameList[i]] = np.divide(ovlRatioBuffer[q],dataBaseList[positionList[q]]['volume'])
+                dataBaseList[positionList[q]]['dataBase']['totalOverlappingRatios in ' + nameList[i]] = np.divide(ovlRatioBuffer[q],dataBaseList[positionList[q]]['dataBase']['volume'])
                 dataBaseList[positionList[q]]['dataBase']['colocalization count'] = Measurement.measure_volume(buffer[q])
 
         return dataBaseList, overlappingDataBase
@@ -506,7 +506,7 @@ class Measurement(object):
         #print(dataFrame)
         for key in filterDict:
 
-            if dataFrame[key].dtype not in [object, str]:
+            if dataFrame[key].dtype in [int, float, bool, complex]:
                 print(key)
 
 
