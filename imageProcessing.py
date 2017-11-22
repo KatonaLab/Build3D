@@ -308,54 +308,82 @@ class Measurement(object):
         return overlappingDataBase
 
     @staticmethod
-    def colocalizaion_analysis( taggedImgList, dataBaseList, overlappingImage, overlappingDataBase):
-        nameList = [x['name'] for x in dataBaseList]
-        # Create dictionaries to store data
-        outputList=[{} for x in range(len(dataBaseList))]
-        for i in range(len(dataBaseList)):
+    def colocalizaion_analysis( taggedImgList, dictionaryList, overlappingImage, overlappingDictionary):
 
-            NbObjects=len(dataBaseList[i]['dataBase']['tag'])
-            outputList[i]['nolocalizationCount']=[0 for x in range(NbObjects)]
-            outputList[i]['totalOverlappingRatio'] = [0 for x in range(NbObjects)]
 
-            positionList = [x for x in range(len(dataBaseList)) if x != i]
+        dataBaseList=[x['dataBase'] for x in dictionaryList]
+        overlappingDataBase=overlappingDictionary['dataBase']
+        nameList = [x['name'] for x in dictionaryList]
+        NbObjects = [len(x['dataBase']['tag']) for x in dictionaryList]
+        NbOfInputElements=len(dataBaseList)
+
+        ovlFiltered = 'filter' in overlappingDataBase.keys()
+        dictFiltered = [('filter' in x.keys()) for x in dataBaseList]
+
+        # Create list of dictionaries to store data
+        outputList=[{} for x in range(NbOfInputElements)]
+        for i in range(NbOfInputElements):
+
+
+            outputList[i]['colocalizationCount']=[0  in range(NbObjects[i])]
+            outputList[i]['totalOverlappingRatio'] = [0 for x in range(NbObjects[i])]
+
+            positionList = [x for x in range(NbOfInputElements) if x != i]
             for j in range(len(positionList)):
-                outputList[i]['objects in '+nameList[positionList[j]]]=[[] for x in range(NbObjects)]
+                outputList[i]['objects in '+nameList[positionList[j]]]=[[] for x in range(NbObjects[i])]
 
 
-        ovlFiltered='filter' in overlappingDataBase.keys()
-        dictFiltered = [('filter' in x['dataBase'].keys()) for x in dataBaseList]
+        for j in range(len(overlappingDataBase['tag'])):
 
+            currentTagList = [None for i in range(NbOfInputElements)]
+            currentPositionList = [None for i in range(NbOfInputElements)]
 
-        currentTagList = [0 for i in range(len(dataBaseList))]
-        for j in range(len(overlappingDataBase['dataBase']['tag'])):
-
-            flag=True# = [True for i in range(len(dataBaseList))]
-
-            ovlTag=overlappingDataBase['dataBase']['tag'][j]
+            #ovlTag=overlappingDataBase['dataBase']['tag'][j]
 
             # Determine if any of the overlapping object has been filteredobjects have been filtered out
             if ovlFiltered==True:
                 flag=overlappingDataBase['dataBase']['filter'][j]
                 print(flag)
-            #Determine if any of the objects have been filtered out
-            for i in range(len(dataBaseList)):
 
-                currentTagList[i]=overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
+            #Determine if any of the objects have been filtered out and retrieve tags and their rispected position
+            flag=True# = [True for i in range(len(dataBaseList))]
+            for i in range(NbOfInputElements):
+
+                currentTagList[i]=overlappingDataBase['object in ' + nameList[i]][j]
+                currentPositionList[i]=dataBaseList[i]['tag'].index(currentTagList[i])
 
                 if dictFiltered[i]==True:
-                    flag*=dataBaseList[i]['dataBase']['filter'][j]
+                    flag*=dataBaseList[i]['filter'][j]
 
-                #If none of the objects have been filtered out
-                if flag==True:
+            #If none of the objects have been filtered out add info to output
+            if flag==True:
+                for i in range(NbOfInputElements):
 
-                    NbObjects = len(dataBaseList[i]['dataBase']['tag'])
-                    outputList[i]['nolocalizationCount'] = [0 for x in range(NbObjects)]
-                    outputList[i]['totalOverlappingRatio'] = [0 for x in range(NbObjects)]
+                    positionList = [x for x in range(NbOfInputElements) if x != i]
+                    for j in range(NbOfInputElements):
+                        print('s')
+                        '''
+                        outputDict={}
+                        outputDict['colocalizationCount']=[0  in range(NbObjects[i])]
+                        outputDict['totalOverlappingRatio'] = [0 for x in range(NbObjects[i])]
 
-                    positionList = [x for x in range(len(dataBaseList)) if x != i]
-                    for j in range(len(positionList)):
-                        outputList[i]['objects in ' + nameList[positionList[j]]] = [[] for x in range(NbObjects)]
+                        positionList = [x for x in range(NbOfInputElements) if x != i]
+                        for j in range(NbOfInputElements):
+                            outputDict['objects in '+nameList[positionList[j]]]=[[] for i in range(NbObjects[i])]
+
+                        for i in range(NbOfInputElements):
+                      
+
+
+
+
+                NbObjects = len(dataBaseList[i]['dataBase']['tag'])
+                outputList[i]['nolocalizationCount'] = [0 for x in range(NbObjects)]
+                outputList[i]['totalOverlappingRatio'] = [0 for x in range(NbObjects)]
+
+                positionList = [x for x in range(len(dataBaseList)) if x != i]
+                for j in range(len(positionList)):
+                    outputList[i]['objects in ' + nameList[positionList[j]]] = [[] for x in range(NbObjects)]
 
 
                     print('s'+str(flag))
@@ -378,7 +406,7 @@ class Measurement(object):
 
             #tag = overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
 
-        '''
+    
         # Update dataBase for segmented images
         for i in range(len(dataBaseList)):
 
