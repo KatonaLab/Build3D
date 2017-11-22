@@ -119,8 +119,9 @@ class Main(object):
         sourceImageList=[]
         sourceDictList=[]
         # Channel 1
-        ch1Path = ('F:/Workspace/TestImages/test_1.tif')#("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
 
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
+        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -131,7 +132,8 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path = ('F:/Workspace/TestImages/test_2.tif')#("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
 
@@ -143,15 +145,16 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ('F:/Workspace/TestImages/test_3.tif')#("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
-        ch3Img = Processor.load_image(ch3Path)
+        #ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
+        #ch3Path =('F:/Workspace/TestImages/test_3.tif')
+        #ch3Img = Processor.load_image(ch3Path)
 
-        ch3Dict={'name': 'RawImage1',
-                 'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
-                 'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
+        #ch3Dict={'name': 'RawImage1',
+                 #'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
+                 #'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
 
-        sourceImageList.append(ch3Img)
-        sourceDictList.append(ch3Dict)
+        #sourceImageList.append(ch3Img)
+        #sourceDictList.append(ch3Dict)
         #############################################################################################################
 
 
@@ -186,15 +189,15 @@ class Main(object):
         taggedDictList.append(taggedDict2)
 
         # Channel 3
-        thresholdedImage3 = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
-        taggedImage3 = Segmentation.tag_image(thresholdedImage3)
+        #thresholdedImage3 = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
+        #taggedImage3 = Segmentation.tag_image(thresholdedImage3)
 
-        taggedDict3 =sourceDictList[2]
-        taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList)
-        taggedDict3['name'] = 'Channel3'
+        #taggedDict3 =sourceDictList[2]
+        #taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList)
+        #taggedDict3['name'] = 'Channel3'
 
-        taggedImageList.append(taggedImage3)
-        taggedDictList.append(taggedDict3)
+        #taggedImageList.append(taggedImage3)
+        #taggedDictList.append(taggedDict3)
         #############################################################################################################
 
         #############################################Analysis Images####################################################
@@ -203,30 +206,26 @@ class Main(object):
         Measurement.analyze(taggedImageList[0], taggedDictList[0])
 
 
-        dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
-        #print(taggedDictList[2])
+        #dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
+        taggedDictList[1]=Measurement.filter_dataBase(taggedDictList[1], {'mean in Channel1':{'min':2,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
+
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
+
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-        print('###############################')
-        print(taggedDict2)
-        filteredDict2=Measurement.filter_dataBase(taggedDict2, {'mean in Channel1':{'min':2,'max':3}, 'ellipsoidDiameter':{'min':2,'max':3}})
-        print('###############################')
-        print(filteredDict2)
+        dataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
+
+
+        dataBaseList.append(overlappingDataBase)
+        save(dataBaseList, "D:/OneDrive - MTA KOKI/Workspace/")
+        #filteredDict2=Measurement.filter_dataBase(taggedDict2, {'mean in Channel1':{'min':2,'max':3}, 'ellipsoidDiameter':{'min':2,'max':3}})
+
 
         #filteredDict2 = Measurement.filter_dataBase(taggedDict2, {'mean in Channel1': {'min': 3, 'max': 4}})
-        #print('###############################')
-        #print(filteredDict2)
-        #filtIm=Measurement.filter_image(overlappingImage, overlappingDataBase)
-        #print(overlappingImage)
-        #print(filtIm)
-        #print(overlappingImage)
-        #print(overlappingDataBase['dataBase'])
-        #print(a)
-        #print(taggedImage)
+
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
 
-        print(False*True)
+
 
 
 
@@ -313,10 +312,18 @@ class Measurement(object):
 
         # Generate array lists and name lists
 
+        #print(dataBaseList[0])
+        #print(dataBaseList[1])
+        #print(dataBaseList[2])
         nameList = [x['name'] for x in dataBaseList]
+        #isFiltered=[('filter' in x['dataBase'].keys()) for x in dataBaseList]
+        #isFiltered.append('filter' in overlappingDataBase.keys())
+        #print(isFiltered)
 
         # Update dataBase for segmented images
         for i in range(len(dataBaseList)):
+
+            print('processing dataBase of '+dataBaseList[i]['name'])
 
             positionList = [x for x in range(len(dataBaseList)) if x != i]
             buffer = []
@@ -331,20 +338,30 @@ class Measurement(object):
 
                 tag = overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
 
+
                 for k in range(len(positionList)):
                         currentTag = overlappingDataBase['dataBase']['object in ' + nameList[positionList[k]]][j]
+                        print('Overlapping object:' + str(tag)+' overlaps with '+str(currentTag)+' in '+nameList[positionList[k]])
+                        condition=True
+                        try:
+                            condition=((dataBaseList[i]['dataBase']['filter'][tag]==True))
+                        except:
+                            pass
 
-                        condition=((('filter' not in dataBaseList[i]['dataBase'].keys())&\
-                            ('filter' not in dataBaseList[positionList[k]]['dataBase'].keys())&\
-                            ('filter' not in overlappingDataBase['dataBase'])) or\
-                            ((dataBaseList[i]['dataBase']['filter'][tag] == True)&\
-                            (dataBaseList[positionList[k]]['dataBase']['filter'][currentTag] == True)&\
-                            (overlappingDataBase['dataBase']['filter'][j]==True)))
+                        try:
+                            condition=(dataBaseList[positionList[k]]['dataBase']['filter'][currentTag] == True)
+                        except:
+                            pass
 
-                        if condition==True:
+                        try:
+                            condition =(overlappingDataBase['dataBase']['filter'][j]==True)
+                        except:
+                            pass
 
-                            buffer[k][currentTag - 1].append(tag)
-                            ovlRatioBuffer[k][currentTag - 1] += overlappingDataBase['dataBase']['volume'][j]
+                        #if condition==False:
+
+                        buffer[k][currentTag - 1].append(tag)
+                        ovlRatioBuffer[k][currentTag - 1] += overlappingDataBase['dataBase']['volume'][j]
 
             for q in range(len(positionList)):
                 dataBaseList[positionList[q]]['dataBase']['objects in ' + nameList[i]] = buffer[q]
@@ -409,8 +426,6 @@ class Measurement(object):
         for key in filterDict:
 
             if dataFrame[key].dtype in [int, float, bool, complex]:
-                print(key)
-
 
                 currentFilter=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])
                 if ('filter' in dictionary['dataBase'].keys()) & (overWrite == False):
@@ -426,7 +441,7 @@ class Measurement(object):
         return dictionary
 
     @staticmethod
-    def save(dictionaryList, path, fileName='output', toText=True):
+    def save(dictionaryList, path, fileName='output', toText=False):
 
         if toText==False:
 
@@ -458,8 +473,34 @@ class Measurement(object):
 
 
 
+    @staticmethod
+    def isOnEdge(tinyImg_tagged):
 
+        shape = tinyImg_tagged.shape
+        NbOverlappingObj = np.amax(tinyImg_tagged)
+        matrixShape = shape
+        sidePixelList = [tinyImg_tagged[0, :, :], tinyImg_tagged[-1, :, :], tinyImg_tagged[1:matrixShape[0] - 1, 0, :],
+                         tinyImg_tagged[1:matrixShape[0] - 1, matrixShape[1] - 1, :],
+                         tinyImg_tagged[1:matrixShape[0] - 1, 1:matrixShape[0] - 2, 0],
+                         tinyImg_tagged[1:matrixShape[0] - 1, 1:matrixShape[0] - 2, matrixShape[2] - 1]]
 
+        isOnEdgeList = [False for i in range(0, NbOverlappingObj)]
+        for i in range(0, len(sidePixelList)):
+            for pix in sidePixelList[i].flatten():
+                if pix > 0:
+                    isOnEdgeList[pix - 1] = True
+
+        return isOnEdgeList
+
+    @staticmethod
+    def measure_volume(objectList):
+
+        volumes = np.zeros(len(objectList)) #dtype='uint32')
+
+        for i in range(0, len(objectList)):
+            volumes[i]=len(objectList[i])
+
+        return volumes
 
 
 
@@ -674,6 +715,7 @@ class Segmentation(object):
 
         return convolved
 
+
 ############################################Helper Functions for testing in python###################################
 class Processor(object):
 
@@ -763,10 +805,6 @@ class Processor(object):
                                                                                                           'Volume'])
                 dataBaseList[positionList[q]]['Colocalization Count'] = Measurement.measure_volume(buffer[q])
 
-        print(dataBaseList[0])
-        print(dataBaseList[1])
-        print(dataBaseList[2])
-        print(overlappingDataBase)
 
         return dataBaseList, overlappingDataBase
 
@@ -915,6 +953,153 @@ class Processor(object):
                     isOnEdgeList[pix - 1] = True
 
         return isOnEdgeList
+
+    @staticmethod
+    def measure_volume(objectList):
+
+        volumes = np.zeros(len(objectList), dtype='uint32')
+
+        for i in range(0, len(objectList)):
+            volumes[i]=len(objectList[i])
+
+        return volumes
+
+    @staticmethod
+    def measure_volume(objectList):
+
+        volumes = np.zeros(len(objectList), dtype='uint32')
+
+        for i in range(0, len(objectList)):
+            volumes[i] = len(objectList[i])
+
+        return volumes
+
+    @staticmethod
+    def create_surfacePixelList(image, objectCoordinateList):
+
+        image_copy = copy.copy(image)
+
+        # Measure the number of neighbors using convolution, objects that have one pixel are deleted (see later)
+        kernel = np.array([[[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]],
+                           [[1, 1, 1],
+                            [1, 0, 1],
+                            [1, 1, 1]],
+                           [[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]]])
+
+        # Normalize non zero pixels to 1
+        image_copy[image_copy > 0] = 1
+        # Generate a map showing the number of non zero pixels surrounding each pixel
+        convolved = convolve(image_copy, kernel, mode='constant', cval=1.0)
+        # Remove elements that have 26 neighbours (non surface pixels)
+        # convolved=np.multiply(tinyImg, convolved)
+        convolved[convolved == 26] = 0
+        # Normalize surface pixels
+        convolved[convolved > 0] = 1
+
+        # Generate surface map
+        convolved = np.multiply(image_copy, convolved)
+
+        # Create surfaceList from surface image. Objects with a single pixel are added to the list here.
+        length = len(objectCoordinateList)
+        surfaceArray = convolved.flatten()
+        surfaceCoordinates = [[] for i in range(0, length)]
+        for i in range(length):
+            for j in range(len(objectCoordinateList[i])):
+                buffer = surfaceArray[objectCoordinateList[i][j]]
+                if len(objectCoordinateList[i]) == 1 or buffer > 0:
+                    surfaceCoordinates[i].append(objectCoordinateList[i][j])
+
+        return surfaceCoordinates
+
+    @staticmethod
+    def create_cartesianList(tinyImg_tagged, objectList):
+
+        imageShape = tinyImg_tagged.shape
+        length = len(objectList)
+
+        slicePixelnumber = int(imageShape[1] * imageShape[2])
+
+        x = [[] for i in range(length)]
+        y = [[] for i in range(length)]
+        z = [[] for i in range(length)]
+
+        for i in range(len(objectList)):
+            for j in range(len(objectList[i])):
+                index = objectList[i][j]
+
+                zcoord = int(index / slicePixelnumber)
+                ycoord = int((index - zcoord * slicePixelnumber) / imageShape[2])
+                xcoord = (index - zcoord * slicePixelnumber - ycoord * imageShape[2])
+
+                z[i].append(zcoord)
+                y[i].append(ycoord)
+                x[i].append(xcoord)
+
+        return x, y, z
+
+    @staticmethod
+    def create_centroidList(cartesianListX, cartesianListY, cartesianListZ):
+
+        length = len(cartesianListX)
+
+        centroids_x = np.zeros(length)
+        centroids_y = np.zeros(length)
+        centroids_z = np.zeros(length)
+        for i in range(length):
+            centroids_x[i] = np.mean(cartesianListX[i])
+            centroids_y[i] = np.mean(cartesianListY[i])
+            centroids_z[i] = np.mean(cartesianListZ[i])
+
+        return centroids_x, centroids_y, centroids_z
+
+    @staticmethod
+    def measure_boundingBox(cartesianListX, cartesianListY, cartesianListZ):
+
+        length = len(cartesianListX)
+
+        boundingX1 = [[] for i in range(0, length)]
+        boundingX2 = [[] for i in range(0, length)]
+        boundingY1 = [[] for i in range(0, length)]
+        boundingY2 = [[] for i in range(0, length)]
+        boundingZ1 = [[] for i in range(0, length)]
+        boundingZ2 = [[] for i in range(0, length)]
+
+        for i in range(length):
+            boundingX1[i] = np.amin(cartesianListX[i])
+            boundingX2[i] = np.amax(cartesianListX[i])
+            boundingY1[i] = np.amin(cartesianListY[i])
+            boundingY2[i] = np.amax(cartesianListY[i])
+            boundingZ1[i] = np.amin(cartesianListZ[i])
+            boundingZ2[i] = np.amax(cartesianListZ[i])
+
+        return boundingX1, boundingX2, boundingY1, boundingY2, boundingZ1, boundingZ2
+
+    @staticmethod
+    def measure_mean(objectList):
+
+        length = len(objectList)
+        meanList = np.zeros(length)
+
+        for i in range(length):
+            meanList[i] = np.mean(objectList[i])
+
+        return meanList
+
+    @staticmethod
+    def create_intensityList(image, objectList):
+
+        imgArray = image.flatten()
+        intensityList = [[] for i in range(0, len(objectList))]
+
+        for j in range(len(objectList)):
+            for i in range(len(objectList[j])):
+                intensityList[j].append(imgArray[objectList[j][i]])
+
+        return intensityList
 
 
 if __name__ == '__main__':
