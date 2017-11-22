@@ -11,6 +11,9 @@
 #include <thread>
 #include <algorithm>
 
+#include <pybind11/embed.h> // everything needed for embedding
+namespace py = pybind11;
+
 using namespace std;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -203,6 +206,10 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
 void VolumetricDataManager::runSegmentation(VolumetricData *data, 
         VolumetricData *output, QString method, float p0, float p1)
 {
+    py::scoped_interpreter guard{}; // start the interpreter and keep it alive
+
+    py::print("Hello, World!"); // use the Python API
+
     if (data->sizeInPixels() != output->sizeInPixels()) {
         // TODO throw error
         cerr << "runSegmentation: input-output size mismatch" << endl;

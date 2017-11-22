@@ -1,3 +1,6 @@
 [submodule "lib/libics"]
 	path = lib/libics
 	url = https://github.com/KatonaLab/libics.git
+[submodule "lib/pybind11"]
+	path = lib/pybind11
+	url = https://github.com/pybind/pybind11.git

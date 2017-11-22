@@ -1,5 +1,6 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++14
+CONFIG += release
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -11,6 +12,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+system(cp lib/libics/libics_conf.h.in lib/libics/libics_conf.h)
 
 SOURCES +=  \
     src/volumetric.cpp \
@@ -43,13 +46,22 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     src/volumetric.h \
-    lib/libics/libics_conf.h \
     lib/libics/libics_ll.h \
     lib/libics/libics_intern.h \
     lib/libics/libics.h \
     lib/libics/libics_sensor.h
 
 INCLUDEPATH += \
-    lib/libics
+    lib/libics \
+    lib/pybind11/include
+
+macx {
+    LIBS += -lpython2.7
+    INCLUDEPATH += /usr/local/Cellar/python/2.7.13_1/Frameworks/Python.framework/Versions/2.7/include/python2.7
+}
+
+win32 {
+
+}
 
 #LIBS += -L build_ics -llibics_static

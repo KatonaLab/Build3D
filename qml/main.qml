@@ -18,6 +18,7 @@ Item {
 
     MainWindow {
         id: mainWindow
+        visible: true
 
         // FileDialog should be the child of the MainWindow
         DialogMiddleware {
