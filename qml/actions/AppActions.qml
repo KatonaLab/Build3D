@@ -54,4 +54,8 @@ Item {
     function removeNode(uid) {
         AppDispatcher.dispatch(ActionTypes.removeNode, {uid: uid});
     }
+
+    function saveAnalysisCsv(uid) {
+        AppDispatcher.dispatch(ActionTypes.saveAnalysisCsv, {uid: uid});
+    }
 }

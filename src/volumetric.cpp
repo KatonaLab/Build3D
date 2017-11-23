@@ -5,6 +5,7 @@
 #include <QTextureWrapMode>
 #include <QPointF>
 #include <QQmlEngine>
+#include <fstream>
 
 // TEST
 #include <chrono>
@@ -208,6 +209,8 @@ void VolumetricDataManager::runSegmentation(VolumetricData *data,
 {
     py::scoped_interpreter guard{}; // start the interpreter and keep it alive
 
+    py::module sys = py::module::import("sys");
+    py::print(sys.attr("path"));
     py::print("Hello, World!"); // use the Python API
 
     if (data->sizeInPixels() != output->sizeInPixels()) {
@@ -223,7 +226,7 @@ void VolumetricDataManager::runSegmentation(VolumetricData *data,
     output->m_dataLimitsReady = false;
 }
 
-void VolumetricDataManager::runAnalysis(
+QVariantList VolumetricDataManager::runAnalysis(
     VolumetricData *data0,
     VolumetricData *data1, 
     VolumetricData *segData0,
@@ -259,12 +262,53 @@ void VolumetricDataManager::runAnalysis(
 
 //    dataFilter(output, )
 
-    auto statList0 = dataStatistics(data0, label0, intersect);
-    cout << "analysis 9" << endl;
-    auto statList1 = dataStatistics(data1, label1, intersect);
-    cout << "analysis 10" << endl;
+    std::map<float, VolumetricDataManager::StatRecord> statList0 
+        = dataStatistics(data0, label0, intersect);
+    std::map<float, VolumetricDataManager::StatRecord> statList1
+        = dataStatistics(data1, label1, intersect);
+
+    QVariantList vlist;
+    for (const auto &item : statList0) {
+        QVariantMap vmap;
+        vmap.insert("intensity", item.second.intensity);
+        vmap.insert("volume", item.second.volume);
+        vmap.insert("overlapRatio", item.second.overlapRatio);
+        vlist << vmap;
+    }
+
+    for (const auto &item : statList1) {
+        QVariantMap vmap;
+        vmap.insert("intensity", item.second.intensity);
+        vmap.insert("volume", item.second.volume);
+        vmap.insert("overlapRatio", item.second.overlapRatio);
+        vlist << vmap;
+    }
 
     output->m_dataLimitsReady = false;
+    return vlist;
+}
+
+void VolumetricDataManager::saveCsv(QVariant list, QString filename)
+{
+    ofstream csvFile;
+    csvFile.open(filename.toStdString());
+    // cout << list.typeName() << endl;
+    // cout << "list size " << list.toList().size() << endl;
+    // QVariantList =
+    // for (auto &item : list.value<) {
+    //     cout << "aaa" << endl; 
+    //     for (auto &mapItem : item.toMap()) {
+    //         csvFile << mapItem.toString().toStdString() << ";";
+    //     }
+    //     csvFile << endl;
+    // }
+
+    // myfile << "This is the first cell in the first column.\n";
+    // myfile << "a,b,c,\n";
+    // myfile << "c,s,v,\n";
+    // myfile << "1,2,3.456\n";
+    // myfile << "semi;colon";
+    csvFile.close();
 }
 
 void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *data1,

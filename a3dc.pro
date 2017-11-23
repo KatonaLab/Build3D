@@ -1,6 +1,11 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++14
-CONFIG += release
+
+macx {
+    #CONFIG += plugin
+    #QMAKE_LFLAGS_PLUGIN += -dynamiclib
+    QMAKE_LFLAGS_PLUGIN -= -bundle
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings

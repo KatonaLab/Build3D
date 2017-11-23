@@ -135,28 +135,68 @@ GroupBox {
 
         Button {
             text: "Show Results"
-            // enabled: nodeApplied
+            enabled: nodeApplied
             Layout.fillWidth: true
             onClicked: {
+                resultsWindow.updateTable();
+                resultsWindow.visible = false;
                 resultsWindow.visible = true;
+            }
+        }
+
+        Button {
+            text: "Save to CSV" 
+            enabled: nodeApplied
+            Layout.fillWidth: true
+            onClicked: {
+                AppActions.saveAnalysisCsv(box.uid);
             }
         }
 
         Window {
             id: resultsWindow
 
-            Component.onCompleted: {
-                for (var i = 0; i < MainStore.nodeStore.demoResults.length; ++i) {
-                    list.append({intensity: MainStore.nodeStore.demoResults[i]})
-                    console.log(MainStore.nodeStore.demoResults[i]);
+            width: 500
+            height: 600
+
+            function updateTable() {
+                var node = MainStore.nodeStore.getNode(box.uid);
+                console.log("updateTable");
+                console.log(node);
+                console.log(node.nodeParams);
+                list.clear();
+                for (var i = 0; i < node.nodeParams.count; ++i) {
+                    list.append({intensity: node.nodeParams.get(i).intensity,
+                        volume: node.nodeParams.get(i).volume,
+                        overlapRatio: node.nodeParams.get(i).overlapRatio})
                 }
             }
+
+            //Component.onCompleted: updateTable()
+
             ListModel {
-                id: list    
+                id: list
             }
+
             TableView {
                 anchors.fill: parent
                 model: list
+                selectionMode: SelectionMode.ExtendedSelection
+
+                TableViewColumn {
+                    role: "volume"
+                    title: "Volume"
+                }
+
+                TableViewColumn {
+                    role: "intensity"
+                    title: "Intensity"
+                }
+
+                TableViewColumn {
+                    role: "overlapRatio"
+                    title: "Overlap Ratio"
+                }
             }
         }
     }

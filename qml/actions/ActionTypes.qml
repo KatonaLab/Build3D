@@ -13,4 +13,5 @@ Item {
     property string applySegmentNode: "applySegmentNode"
     property string applyAnalysisNode: "applyAnalysisNode"
     property string removeNode: "removeNode"
+    property string saveAnalysisCsv: "saveAnalysisCsv"
 }

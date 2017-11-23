@@ -43,6 +43,9 @@ Item {
             case ActionTypes.applyAnalysisNode:
                 applyAnalysisNode(args.uid, args.parameters);
                 break;
+            case ActionTypes.saveAnalysisCsv:
+                saveAnalysisCsv(args.uid);
+                break;
             // TODO: cleanWorkspace
         }
     }
@@ -60,7 +63,8 @@ Item {
             nodeName: data.dataName,
             nodeViewPath: nodeViewPath,
             nodeViewParams: viewParams,
-            nodeApplied: true
+            nodeApplied: true,
+            nodeParams: []
         };
         model.append(item);
 
@@ -81,7 +85,8 @@ Item {
             nodeName: nodeNameBase + " [node" + uid + "]",
             nodeViewPath: nodeViewPath,            
             nodeViewParams: defaultViewAttributes(),
-            nodeApplied: false
+            nodeApplied: false,
+            nodeParams: []
         };
         model.append(item);
     }
@@ -152,7 +157,8 @@ Item {
             outputData = dataManager.newDataLike(args.segData0, node.nodeName);
         }
         console.log("nodestore sending");
-        dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
+        node.nodeParams = dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
+        console.log(node.nodeParams);
         console.log("nodestore sent");
         if (sceneNode == null) {
             var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
@@ -169,6 +175,16 @@ Item {
         }
 
         node.nodeApplied = true;
+    }
+
+    function saveAnalysisCsv(uid) {
+        var node = getNode(uid);
+        if (node == null) {
+            consol.log("saveAnalysisCsv: no uid, analysis", uid);
+            return;
+        }
+        console.log(node.nodeParams.count);
+        dataManager.saveCsv(node.nodeParams, "save.csv");
     }
 
     function randomColor() {

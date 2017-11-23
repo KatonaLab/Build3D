@@ -12,6 +12,7 @@
 #include <Qt3DRender/QTextureImageDataGenerator>
 #include <QQmlListProperty>
 #include <QQmlComponent>
+#include <QVariant>
 #include <array>
 #include <vector>
 #include <string>
@@ -93,12 +94,13 @@ public:
     Q_INVOKABLE VolumetricData* newDataLike(VolumetricData *data, QString name);
     Q_INVOKABLE void runSegmentation(VolumetricData *data,
         VolumetricData *output, QString method, float p0, float p1);
-    Q_INVOKABLE void runAnalysis(
+    Q_INVOKABLE QVariantList runAnalysis(
         VolumetricData *data0,
         VolumetricData *data1, 
         VolumetricData *segData0,
         VolumetricData *segData1,
         VolumetricData *output);
+    Q_INVOKABLE void saveCsv(QVariant list, QString filename);
 
 Q_SIGNALS:
     void sourceChanged();
