@@ -5,11 +5,15 @@
 #include <QTextureWrapMode>
 #include <QPointF>
 #include <QQmlEngine>
+#include <fstream>
 
 // TEST
 #include <chrono>
 #include <thread>
 #include <algorithm>
+
+#include <pybind11/embed.h> // everything needed for embedding
+namespace py = pybind11;
 
 using namespace std;
 using namespace Qt3DCore;
@@ -203,6 +207,12 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
 void VolumetricDataManager::runSegmentation(VolumetricData *data, 
         VolumetricData *output, QString method, float p0, float p1)
 {
+    py::scoped_interpreter guard{}; // start the interpreter and keep it alive
+
+    py::module sys = py::module::import("sys");
+    py::print(sys.attr("path"));
+    py::print("Hello, World!"); // use the Python API
+
     if (data->sizeInPixels() != output->sizeInPixels()) {
         // TODO throw error
         cerr << "runSegmentation: input-output size mismatch" << endl;
@@ -216,7 +226,7 @@ void VolumetricDataManager::runSegmentation(VolumetricData *data,
     output->m_dataLimitsReady = false;
 }
 
-void VolumetricDataManager::runAnalysis(
+QVariantList VolumetricDataManager::runAnalysis(
     VolumetricData *data0,
     VolumetricData *data1, 
     VolumetricData *segData0,
@@ -224,13 +234,9 @@ void VolumetricDataManager::runAnalysis(
     VolumetricData *output)
 {
     // TODO: size check
-    cout << "analysis 1" << endl;
     VolumetricData* label0 = newDataLike(segData0, "");
-    cout << "analysis 2" << endl;
     VolumetricData* label1 = newDataLike(segData1, "");
-    cout << "analysis 3" << endl;
     dataLabel(segData0, label0);
-    cout << "analysis 4" << endl;
     dataLabel(segData1, label1);
 
 //    float minVolume0 = 0.0;
@@ -242,22 +248,85 @@ void VolumetricDataManager::runAnalysis(
 //    dataFilter(tmp1, data1, tmp1, minVolume1, maxVolume1);
 
     VolumetricData* intersect = newDataLike(segData1, "");
-    cout << "analysis 5" << endl;
     dataOpAnd(segData0, segData1, intersect);
-    cout << "analysis 6" << endl;
-    VolumetricData* intersectLabel = newDataLike(segData1, "");
-    cout << "analysis 7" << endl;
-    dataLabel(intersect, output);
-    cout << "analysis 8" << endl;
+    // VolumetricData* intersectLabel = newDataLike(segData1, "");
+    // dataLabel(intersect, output);
 
 //    dataFilter(output, )
 
-    auto statList0 = dataStatistics(data0, label0, intersect);
-    cout << "analysis 9" << endl;
-    auto statList1 = dataStatistics(data1, label1, intersect);
-    cout << "analysis 10" << endl;
+    std::map<float, VolumetricDataManager::StatRecord> statList0 
+        = dataStatistics(data0, label0, intersect);
+    std::map<float, VolumetricDataManager::StatRecord> statList1
+        = dataStatistics(data1, label1, intersect);
+
+    QVariantList vlist;
+
+    #define INSERT(name) vmap.insert(#name, item.second. name);
+
+    for (const auto &item : statList0) {
+        QVariantMap vmap;
+        vmap.insert("channelName", data0->dataName());
+        vmap.insert("objectId", item.first);
+        INSERT(volume)
+        INSERT(sumIntensity)
+        INSERT(meanIntensity)
+        INSERT(overlapRatio)
+        INSERT(intersectingVolume)
+        INSERT(centerX)
+        INSERT(centerY)
+        INSERT(centerZ)
+        INSERT(intensityWeightCenterX)
+        INSERT(intensityWeightCenterY)
+        INSERT(intensityWeightCenterZ)
+        vlist << vmap;
+    }
+
+    for (const auto &item : statList1) {
+        QVariantMap vmap;
+        vmap.insert("channelName", data1->dataName());
+        vmap.insert("objectId", item.first);
+        INSERT(volume)
+        INSERT(sumIntensity)
+        INSERT(meanIntensity)
+        INSERT(overlapRatio)
+        INSERT(intersectingVolume)
+        INSERT(centerX)
+        INSERT(centerY)
+        INSERT(centerZ)
+        INSERT(intensityWeightCenterX)
+        INSERT(intensityWeightCenterY)
+        INSERT(intensityWeightCenterZ)
+        vlist << vmap;
+    }
+
+    #undef INSERT
 
     output->m_dataLimitsReady = false;
+    return vlist;
+}
+
+void VolumetricDataManager::saveCsv(const QVariantList &list, const QStringList &heads, QUrl filename)
+{
+    ofstream csvFile;
+    csvFile.open(filename.toLocalFile().toStdString());
+
+    QStringList modifiedHead(heads);
+    modifiedHead.append("filename");
+
+    csvFile << modifiedHead.join(";").toStdString() << endl;
+
+    for (auto &item : list) {
+        QStringList sl;
+        for (auto &key : heads) {
+            sl.append(item.toMap()[key].toString());
+        }
+        sl.append(m_source.fileName());
+        csvFile << sl.join(";").toStdString() << endl;
+    }
+
+    csvFile.close();
+
+    cout << "wrote to " << filename.toLocalFile().toStdString() << endl;
 }
 
 void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *data1,
@@ -274,11 +343,28 @@ void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *dat
 }
 
 std::map<float, VolumetricDataManager::StatRecord>
-VolumetricDataManager::dataStatistics(VolumetricData *data,
-                                           VolumetricData *labelData,
-                                           VolumetricData *segIntersect)
+VolumetricDataManager::dataStatistics(VolumetricData *data, 
+    VolumetricData *labelData,
+    VolumetricData *segIntersect)
 {
     // TODO: size check
+
+    std::shared_ptr<array<int, 3>> coordinates(new array<int, 3>[data->sizeInPixels()], default_delete<array<int, 3>>());
+
+    // TODO: refactor
+
+    auto getIndex = [&data](int x, int y, int z)
+    {
+        return x * (data->height() * data->depth()) + y * (data->depth()) + z;
+    };
+
+    for (int x = 0; x < data->width(); ++x) {
+        for (int y = 0; y < data->height(); ++y) {
+            for (int z = 0; z < data->depth(); ++z) {
+                coordinates.get()[getIndex(x, y, z)] = {x, y, z};
+            }
+        }
+    }
 
     map<float, StatRecord> statMap;
 
@@ -287,20 +373,33 @@ VolumetricDataManager::dataStatistics(VolumetricData *data,
         float label = labelData->m_data.get()[i];
         float coloc = segIntersect->m_data.get()[i];
         if (label != 0.0f) {
-            statMap[label].volume++;
-            statMap[label].intensity += value;
+            statMap[label].volume += 1.0f;
+            statMap[label].sumIntensity += value;
+            
+            statMap[label].centerX += coordinates.get()[i][0];
+            statMap[label].centerY += coordinates.get()[i][1];
+            statMap[label].centerZ += coordinates.get()[i][2];
+            
+            statMap[label].intensityWeightCenterX += coordinates.get()[i][0] * value;
+            statMap[label].intensityWeightCenterY += coordinates.get()[i][1] * value;
+            statMap[label].intensityWeightCenterZ += coordinates.get()[i][2] * value;
+
             if (coloc != 0.0f) {
-                statMap[label].intersectVolume++;
+                statMap[label].intersectingVolume++;
             }
         }
     }
     for (auto &item : statMap) {
-        item.second.intensity /= item.second.volume;
-        item.second.overlapRatio = item.second.intersectVolume / item.second.volume;
-        cout << item.first << ": "
-            << item.second.intensity << " "
-            << item.second.volume << " "
-            << item.second.overlapRatio << endl;
+        item.second.meanIntensity = item.second.sumIntensity / item.second.volume;
+        item.second.overlapRatio = item.second.intersectingVolume / item.second.volume;
+        
+        item.second.centerX /= item.second.volume;
+        item.second.centerY /= item.second.volume;
+        item.second.centerZ /= item.second.volume;
+
+        item.second.intensityWeightCenterX /= item.second.sumIntensity;
+        item.second.intensityWeightCenterY /= item.second.sumIntensity;
+        item.second.intensityWeightCenterZ /= item.second.sumIntensity;
     }
     return statMap;
 }
@@ -382,6 +481,7 @@ QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 VolumetricTexture::VolumetricTexture(Qt3DCore::QNode *parent)
 : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {
+    cout << "VolumetricTexture ctr " << (void*)this << endl;
     setMinificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
     setMagnificationFilter(Qt3DRender::QAbstractTexture::Filter::Nearest);
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
@@ -397,7 +497,7 @@ void VolumetricTexture::setData(VolumetricData* data)
     }
 
     m_data = data;
-    m_textureImage = new VolumetricTextureImage(m_data);
+    m_textureImage = new VolumetricTextureImage(m_data, this);
     addTextureImage(m_textureImage);
     setStatus(Qt3DRender::QAbstractTexture::Status::Ready);
 
@@ -408,6 +508,7 @@ void VolumetricTexture::setData(VolumetricData* data)
 VolumetricTexture::~VolumetricTexture()
 {
     delete m_textureImage;
+    cout << "VolumetricTexture dtr " << (void*)this << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -415,6 +516,7 @@ VolumetricTexture::~VolumetricTexture()
 VolumetricTextureImage::VolumetricTextureImage(const VolumetricData* data, QNode *parent)
 : QAbstractTextureImage(parent)
 {
+    cout << "VolumetricTextureImage ctr " << (void*)this << endl;
     m_generator = ImageDataGeneratorPtr::create(data);
 }
 
@@ -423,10 +525,17 @@ QTextureImageDataGeneratorPtr VolumetricTextureImage::dataGenerator() const
     return m_generator;
 }
 
+VolumetricTextureImage::~VolumetricTextureImage()
+{
+    cout << "VolumetricTextureImage dtr " << (void*)this << endl;
+}
+
 //------------------------------------------------------------------------------
 
 ImageDataGenerator::ImageDataGenerator(const VolumetricData* data) : m_data(data)
-{}
+{
+    cout << "ImageDataGenerator ctr " << (void*)this << endl;
+}
 
 QTextureImageDataPtr ImageDataGenerator::operator()()
 {
@@ -453,6 +562,11 @@ bool ImageDataGenerator::operator ==(const QTextureImageDataGenerator &other) co
 {
     const ImageDataGenerator *otherFunctor = functor_cast<ImageDataGenerator>(&other);
     return (otherFunctor != Q_NULLPTR && otherFunctor->m_data == m_data);
+}
+
+ImageDataGenerator::~ImageDataGenerator()
+{
+    cout << "ImageDataGenerator dtr " << (void*)this << endl;
 }
 
 //------------------------------------------------------------------------------

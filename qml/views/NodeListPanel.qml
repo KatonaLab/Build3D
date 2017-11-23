@@ -26,7 +26,7 @@ GroupBox {
 
         ColumnLayout {
             width: parent.parent.width
-
+            //width: 150
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 4

@@ -43,6 +43,9 @@ Item {
             case ActionTypes.applyAnalysisNode:
                 applyAnalysisNode(args.uid, args.parameters);
                 break;
+            case ActionTypes.saveAnalysisCsv:
+                saveAnalysisCsv(args.uid, args.url);
+                break;
             // TODO: cleanWorkspace
         }
     }
@@ -60,7 +63,8 @@ Item {
             nodeName: data.dataName,
             nodeViewPath: nodeViewPath,
             nodeViewParams: viewParams,
-            nodeApplied: true
+            nodeApplied: true,
+            nodeParams: []
         };
         model.append(item);
 
@@ -81,7 +85,8 @@ Item {
             nodeName: nodeNameBase + " [node" + uid + "]",
             nodeViewPath: nodeViewPath,            
             nodeViewParams: defaultViewAttributes(),
-            nodeApplied: false
+            nodeApplied: false,
+            nodeParams: []
         };
         model.append(item);
     }
@@ -151,9 +156,7 @@ Item {
         if (sceneNode == null) {
             outputData = dataManager.newDataLike(args.segData0, node.nodeName);
         }
-        console.log("nodestore sending");
-        dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
-        console.log("nodestore sent");
+        node.nodeParams = dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
         if (sceneNode == null) {
             var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
             var sceneItem = {
@@ -169,6 +172,47 @@ Item {
         }
 
         node.nodeApplied = true;
+    }
+
+    function saveAnalysisCsv(uid, url) {
+        var node = getNode(uid);
+        if (node == null) {
+            consol.log("saveAnalysisCsv: no uid, analysis", uid);
+            return;
+        }
+        var table = [];
+        for (var i = 0; i < node.nodeParams.count; ++i) {
+            table.push({
+                channelName: node.nodeParams.get(i).channelName,
+                objectId: node.nodeParams.get(i).objectId,
+                volume: node.nodeParams.get(i).volume,
+                sumIntensity: node.nodeParams.get(i).sumIntensity,
+                meanIntensity: node.nodeParams.get(i).meanIntensity,
+                overlapRatio: node.nodeParams.get(i).overlapRatio,
+                intersectingVolume: node.nodeParams.get(i).intersectingVolume,
+                centerX: node.nodeParams.get(i).centerX,
+                centerY: node.nodeParams.get(i).centerY,
+                centerZ: node.nodeParams.get(i).centerZ,
+                intensityWeightCenterX: node.nodeParams.get(i).intensityWeightCenterX,
+                intensityWeightCenterY: node.nodeParams.get(i).intensityWeightCenterY,
+                intensityWeightCenterZ: node.nodeParams.get(i).intensityWeightCenterZ
+            });
+        }
+        console.log(url);
+        dataManager.saveCsv(table, [
+            "channelName",
+            "objectId",
+            "volume",
+            "sumIntensity",
+            "meanIntensity",
+            "overlapRatio",
+            "intersectingVolume",
+            "centerX",
+            "centerY",
+            "centerZ",
+            "intensityWeightCenterX",
+            "intensityWeightCenterY",
+            "intensityWeightCenterZ"], url);
     }
 
     function randomColor() {

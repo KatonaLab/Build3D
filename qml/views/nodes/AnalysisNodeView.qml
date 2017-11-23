@@ -2,6 +2,7 @@ import QtQuick 2.8
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
+import QtQuick.Window 2.0
 
 import "../controls"
 import "../../actions"
@@ -129,6 +130,79 @@ GroupBox {
                 };
                 console.log("nodeview sent");
                 AppActions.applyAnalysisNode(uid, analysisParams);
+            }
+        }
+
+        Button {
+            text: "Show Results"
+            enabled: nodeApplied
+            Layout.fillWidth: true
+            onClicked: {
+                resultsWindow.updateTable();
+                resultsWindow.visible = false;
+                resultsWindow.visible = true;
+            }
+        }
+
+        Button {
+            text: "Save as CSV" 
+            enabled: nodeApplied
+            Layout.fillWidth: true
+            onClicked: {
+                AppActions.saveAnalysisCsv(box.uid, "defaultname.csv");
+            }
+        }
+
+        Window {
+            id: resultsWindow
+
+            width: 500
+            height: 600
+
+            function updateTable() {
+                var node = MainStore.nodeStore.getNode(box.uid);
+                list.clear();
+                for (var i = 0; i < node.nodeParams.count; ++i) {
+                    list.append({
+                        channelName: node.nodeParams.get(i).channelName,
+                        objectId: node.nodeParams.get(i).objectId,
+                        volume: node.nodeParams.get(i).volume,
+                        sumIntensity: node.nodeParams.get(i).sumIntensity,
+                        meanIntensity: node.nodeParams.get(i).meanIntensity,
+                        overlapRatio: node.nodeParams.get(i).overlapRatio,
+                        intersectingVolume: node.nodeParams.get(i).intersectingVolume,
+                        centerX: node.nodeParams.get(i).centerX,
+                        centerY: node.nodeParams.get(i).centerY,
+                        centerZ: node.nodeParams.get(i).centerZ,
+                        intensityWeightCenterX: node.nodeParams.get(i).intensityWeightCenterX,
+                        intensityWeightCenterY: node.nodeParams.get(i).intensityWeightCenterY,
+                        intensityWeightCenterZ: node.nodeParams.get(i).intensityWeightCenterZ
+                    });
+                }
+            }
+
+            ListModel {
+                id: list
+            }
+
+            TableView {
+                anchors.fill: parent
+                model: list
+                selectionMode: SelectionMode.ExtendedSelection
+
+                TableViewColumn{ role: "channelName"; title: "channelName" }
+                TableViewColumn{ role: "objectId"; title: "objectId" }
+                TableViewColumn{ role: "volume"; title: "volume" }
+                TableViewColumn{ role: "sumIntensity"; title: "sumIntensity" }
+                TableViewColumn{ role: "meanIntensity"; title: "meanIntensity" }
+                TableViewColumn{ role: "overlapRatio"; title: "overlapRatio" }
+                TableViewColumn{ role: "intersectingVolume"; title: "intersectingVolume" }
+                TableViewColumn{ role: "centerX"; title: "centerX" }
+                TableViewColumn{ role: "centerY"; title: "centerY" }
+                TableViewColumn{ role: "centerZ"; title: "centerZ" }
+                TableViewColumn{ role: "intensityWeightCenterX"; title: "intensityWeightCenterX" }
+                TableViewColumn{ role: "intensityWeightCenterY"; title: "intensityWeightCenterY" }
+                TableViewColumn{ role: "intensityWeightCenterZ"; title: "intensityWeightCenterZ" }
             }
         }
     }

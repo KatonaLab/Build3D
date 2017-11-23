@@ -12,13 +12,18 @@
 #include <Qt3DRender/QTextureImageDataGenerator>
 #include <QQmlListProperty>
 #include <QQmlComponent>
+#include <QVariant>
 #include <array>
 #include <vector>
 #include <string>
 #include <exception>
 #include <map>
+#include <memory>
 #include <functional>
 #include <libics.h>
+
+// debug:
+#include <iostream>
 
 // TODO: classes to separate files
 
@@ -89,12 +94,13 @@ public:
     Q_INVOKABLE VolumetricData* newDataLike(VolumetricData *data, QString name);
     Q_INVOKABLE void runSegmentation(VolumetricData *data,
         VolumetricData *output, QString method, float p0, float p1);
-    Q_INVOKABLE void runAnalysis(
+    Q_INVOKABLE QVariantList runAnalysis(
         VolumetricData *data0,
-        VolumetricData *data1, 
+        VolumetricData *data1,
         VolumetricData *segData0,
         VolumetricData *segData1,
         VolumetricData *output);
+    Q_INVOKABLE void saveCsv(const QVariantList &list, const QStringList &heads, QUrl filename);
 
 Q_SIGNALS:
     void sourceChanged();
@@ -110,15 +116,22 @@ private:
 private:
     struct StatRecord {
         float volume = 0.0;
-        float intensity = 0.0;
+        float sumIntensity = 0.0;
+        float meanIntensity = 0.0;
         float overlapRatio = 0.0;
-        float intersectVolume = 0.0;
+        float intersectingVolume = 0.0;
+        float centerX = 0.0;
+        float centerY = 0.0;
+        float centerZ = 0.0;
+        float intensityWeightCenterX = 0.0;
+        float intensityWeightCenterY = 0.0;
+        float intensityWeightCenterZ = 0.0;
     };
 
     void dataOpAnd(VolumetricData *data0,
         VolumetricData *data1, VolumetricData *output);
     void dataLabel(VolumetricData *data, VolumetricData *output);
-
+ 
     std::map<float, VolumetricDataManager::StatRecord>
     dataStatistics(VolumetricData *data, VolumetricData *labelData, VolumetricData *segIntersect);
 
@@ -127,35 +140,11 @@ public:
     QVector<VolumetricDataPtr> m_dataList;
 };
 
-//------------------------------------------------------------------------------
-
-//class Node;
-//
-//class NodeFactory: public QObject {
-//    Q_OBJECT
-//
-//public:
-//    Q_INVOKABLE void importICS(const QUrl &url);
-//signals:
-//
-//}
-
-//------------------------------------------------------------------------------
-
 class Node: public QObject {
     Q_OBJECT
 public:
     Node(QObject *parent = Q_NULLPTR): QObject(parent) {}
 };
-
-//class SourceNode: public Node {
-//    Q_OBJECT
-//    Q_PROPERTY(VolumetricData* output READ output NOTIFY outputChanged)
-//public:
-//    SourceNode(VolumetricDataPtr source, QObject *parent = Q_NULLPTR): Node(parent) {}
-//private:
-//    VolumetricDataPtr m_dataPtr;
-//}
 
 class SegmentationNode: public Node {
     Q_OBJECT
@@ -177,7 +166,8 @@ class VolumetricData : public QObject {
     Q_PROPERTY(QString dataName READ dataName)
 public:
     // non-copyable
-    VolumetricData() = default;
+    VolumetricData() { std::cout << "VolumetricData ctr " << (void*)this << std::endl; }
+    ~VolumetricData() { std::cout << "VolumetricData dtr " << (void*)this << std::endl; }
     VolumetricData(const VolumetricData&) = delete;
     VolumetricData& operator=(const VolumetricData&) = delete;
 
@@ -238,7 +228,8 @@ class VolumetricTextureImage : public Qt3DRender::QAbstractTextureImage {
     Q_OBJECT
 public:
     explicit VolumetricTextureImage(const VolumetricData* data,
-                                    Qt3DCore::QNode *parent = nullptr);
+        Qt3DCore::QNode *parent = nullptr);
+    virtual ~VolumetricTextureImage();
 
 protected:
     Qt3DRender::QTextureImageDataGeneratorPtr dataGenerator() const override;
@@ -251,6 +242,7 @@ class ImageDataGenerator : public Qt3DRender::QTextureImageDataGenerator {
 public:
     QT3D_FUNCTOR(ImageDataGenerator)
     ImageDataGenerator(const VolumetricData* data);
+    virtual ~ImageDataGenerator();
     Qt3DRender::QTextureImageDataPtr operator()() override;
     bool operator ==(const QTextureImageDataGenerator &other) const override;
 

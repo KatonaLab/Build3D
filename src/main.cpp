@@ -4,6 +4,17 @@
 
 #include <string>
 
+//#ifdef QT_STATICPLUGIN
+//    #include <QtPlugin>
+    // #include <QQmlExtensionPlugin>
+//    Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+    // Q_IMPORT_PLUGIN(QtQuick2Plugin)
+    // Q_IMPORT_PLUGIN(QtQuick2Plugin)
+    // Q_IMPORT_PLUGIN(Qml)
+    // Q_IMPORT_PLUGIN(Quick)
+    // Q_IMPORT_PLUGIN(QuickControls2)
+//#endif
+
 #include <QApplication>
 //#include <QVector>
 #include <QQuickView>
@@ -49,7 +60,7 @@ void setSurfaceFormat()
 int main(int argc, char* argv[])
 {
 //    QQmlDebuggingEnabler enabler;
-
+    // QCoreApplication::addLibraryPath("./");
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication app(argc, argv);
@@ -68,6 +79,8 @@ int main(int argc, char* argv[])
     }
 
     QQmlApplicationEngine engine;
+    // engine.addImportPath("qrc:/");
+    // engine.addImportPath(QStringLiteral("./qml"));
     engine.load(QUrl("qrc:/qml/main.qml"));
 
 //    if (engine.rootObjects().isEmpty()) {
