@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from math import pow
 from skimage.external.tifffile import imread, imsave
-from skimage.filters import threshold_isodata, threshold_li, threshold_local, threshold_mean, threshold_minimum, threshold_niblack, threshold_otsu, threshold_sauvola, threshold_triangle, threshold_yen
+from skimage.filters import  threshold_li, threshold_local
 import pandas as pd
 from scipy.ndimage.filters import convolve
 import time
@@ -120,8 +120,8 @@ class Main(object):
         sourceDictList=[]
         # Channel 1
 
-        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
-        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
+        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
+        ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -132,8 +132,8 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
-        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
+        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
 
@@ -145,8 +145,8 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
-        #ch3Path =('F:/Workspace/TestImages/test_3.tif')
+        #ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
+        ch3Path =('F:/Workspace/TestImages/test_3.tif')
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -202,26 +202,22 @@ class Main(object):
 
         #############################################Analysis Images####################################################
 
-        Measurement.analyze(taggedImageList[0], taggedDictList[0])
-
-
+        #Filter database
         #dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
         taggedDictList[1]=Measurement.filter_dataBase(taggedDictList[1], {'tag':{'min':2,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
 
 
-        dataFrame = pd.DataFrame(taggedDictList[1]['dataBase']['filter'])
+        #Colocalization analysis
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
-
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-
         taggedImageList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
 
-        taggedImageList.append(overlappingDataBase)
-        save(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
-        #filteredDict2=Measurement.filter_dataBase(taggedDict2, {'mean in Channel1':{'min':2,'max':3}, 'ellipsoidDiameter':{'min':2,'max':3}})
+        #Save results
+        #taggedImageList.append(overlappingDataBase)
+        #save(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
 
 
-        #filteredDict2 = Measurement.filter_dataBase(taggedDict2, {'mean in Channel1': {'min': 3, 'max': 4}})
+
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
 
@@ -260,7 +256,7 @@ class Measurement(object):
         return outputImage
 
 
-    #print(a)
+
 
     @staticmethod
     def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
@@ -687,6 +683,21 @@ class Segmentation(object):
         return sitk.GetArrayFromImage(segmentedImage), threshold
 
     @staticmethod
+    def threshold_adaptive(image, method, blockSize=5, offSet=0):
+
+        if method == 'adaptiveMean':
+            outputImage = threshold_adaptive(image, blockSize, offSet)
+
+
+        elif method == 'adaptiveGaussian':
+            outputImage = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, offSet)
+
+
+        return outputImage
+
+
+
+    @staticmethod
     def threshold2D_auto(img, method):
         '''
         Apply autothreshold slice by slice
@@ -758,36 +769,72 @@ class Segmentation(object):
         return sitk.GetArrayFromImage(tagged_image)
 
     @staticmethod
-    def generate_surface(tinyImg_tagged):
+    def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, multiplier=2.5, NbrOfIterations=5, replaceValue=255):
 
-        img=copy.copy(tinyImg_tagged)
+        itkImage = sitk.GetImageFromArray(image)
+        pixelType = itkImage.GetPixelID()
 
-        kernel = np.array([[[1, 1, 1],
-                            [1, 1, 1],
-                            [1, 1, 1]],
-                           [[1, 1, 1],
-                            [1, 0, 1],
-                            [1, 1, 1]],
-                           [[1, 1, 1],
-                            [1, 1, 1],
-                            [1, 1, 1]]])
+        filter = sitk.ConfidenceConnectedImageFilter()
+        filter.SetSeedList(seedList)
+        filter.SetMultiplier(multiplier)
+        filter.SetNumberOfIterations(NbrOfIterations)
+        filter.SetReplaceValue(replaceValue)
+        filter.SetInitialNeighborhoodRadius(initialNeighborhoodRadius)
+        itkImage = filter.Execute(itkImage)
 
-        # Normalize non zero pixels to 1
-        img[img > 0] = 1
-        # print(tinyImg)
-        # Generate a map showing the number of non zero pixels surrounding each pixel
-        convolved = convolve(img, kernel, mode='constant', cval=1.0)
-        # Remove elements that have 26 neighbours (non surface pixels)
-        # convolved=np.multiply(tinyImg, convolved)
-        convolved[convolved == 26] = 0
-        # Normalize surface pixels
-        convolved[convolved > 0] = 1
 
-        # Generate surface map
-        convolved = np.multiply(img, convolved)
+        caster = sitk.CastImageFilter()
+        caster.SetOutputPixelType(pixelType)
 
-        return convolved
+        return sitk.GetArrayFromImage(caster.Execute(itkImage))
 
+
+###############################################Class that contain main functions for A3DC####################################################
+    class ImageProcessing(object):
+
+        @staticmethod
+        def smoothingGaussianFilter(image, sigma):
+
+            itkImage = sitk.GetImageFromArray(image)
+            pixelType = itkImage.GetPixelID()
+
+            sGaussian = sitk.SmoothingRecursiveGaussianImageFilter()
+            sGaussian.SetSigma(float(sigma))
+            itkImage = sGaussian.Execute(itkImage)
+
+            caster = sitk.CastImageFilter()
+            caster.SetOutputPixelType(pixelType)
+
+            return sitk.GetArrayFromImage(caster.Execute(itkImage))
+
+        @staticmethod
+        def discreteGaussianFilter(image, sigma):
+            itkImage = sitk.GetImageFromArray(image)
+            pixelType = itkImage.GetPixelID()
+
+            dGaussian = sitk.DiscreteGaussianImageFilter ()
+            dGaussian.SetVariance(int(sigma))
+            dGaussian.SetUseImageSpacing(False)
+            itkImage = dGaussian.Execute(itkImage)
+
+            caster = sitk.CastImageFilter(itkImage)
+            caster.SetOutputPixelType(pixelType)
+
+            return sitk.GetArrayFromImage(caster.Execute(itkImage))
+
+        @staticmethod
+        def medianFilter(image, radius):
+            itkImage = sitk.GetImageFromArray(image)
+            pixelType = itkImage.GetPixelID()
+
+            median = sitk.MedianImageFilter()
+            median.SetRadius(int(radius))
+            itkImage = median.Execute(itkImage)
+
+            caster = sitk.CastImageFilter(itkImage)
+            caster.SetOutputPixelType(pixelType)
+
+            return sitk.GetArrayFromImage(caster.Execute(itkImage))
 
 ############################################Helper Functions for testing in python###################################
 class Processor(object):
@@ -879,6 +926,37 @@ class Processor(object):
 
 
         return dataBaseList, overlappingDataBase
+
+    @staticmethod
+    def generate_surface(tinyImg_tagged):
+
+        img = copy.copy(tinyImg_tagged)
+
+        kernel = np.array([[[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]],
+                           [[1, 1, 1],
+                            [1, 0, 1],
+                            [1, 1, 1]],
+                           [[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]]])
+
+        # Normalize non zero pixels to 1
+        img[img > 0] = 1
+        # print(tinyImg)
+        # Generate a map showing the number of non zero pixels surrounding each pixel
+        convolved = convolve(img, kernel, mode='constant', cval=1.0)
+        # Remove elements that have 26 neighbours (non surface pixels)
+        # convolved=np.multiply(tinyImg, convolved)
+        convolved[convolved == 26] = 0
+        # Normalize surface pixels
+        convolved[convolved > 0] = 1
+
+        # Generate surface map
+        convolved = np.multiply(img, convolved)
+
+        return convolved
 
     @staticmethod
     def analyze(taggedImg, name, sourceImageList, chanelList=[], isOnEdge=True, boundingBox=True, surface=True,
