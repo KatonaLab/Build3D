@@ -201,32 +201,27 @@ class Main(object):
         #############################################################################################################
 
         #############################################Analysis Images####################################################
-        #print(taggedDictList[0])
-        #print(sourceDictList[0])
+
         Measurement.analyze(taggedImageList[0], taggedDictList[0])
 
 
         #dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
-        #print(taggedDictList[0]['dataBase'])
-        #taggedDictList[0]=Measurement.filter_dataBase(taggedDictList[0], {'volume':{'min':1,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
-        #print(taggedDictList[0]['dataBase'])
-        #print(taggedDictList[0]['dataBase'])
+        taggedDictList[1]=Measurement.filter_dataBase(taggedDictList[1], {'tag':{'min':2,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
+
+
+        dataFrame = pd.DataFrame(taggedDictList[1]['dataBase']['filter'])
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
 
-        #print(overlappingDataBase['dataBase'].keys())
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
 
+        taggedImageList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
 
-        dataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
-        #print(dataBaseList)
-
-        dataBaseList.append(overlappingDataBase)
-        save(dataBaseList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
+        taggedImageList.append(overlappingDataBase)
+        save(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
         #filteredDict2=Measurement.filter_dataBase(taggedDict2, {'mean in Channel1':{'min':2,'max':3}, 'ellipsoidDiameter':{'min':2,'max':3}})
 
 
         #filteredDict2 = Measurement.filter_dataBase(taggedDict2, {'mean in Channel1': {'min': 3, 'max': 4}})
-
         tstop = time.clock()
         print('ITK STATS: ' + str(tstop - tstart))
 
@@ -290,7 +285,7 @@ class Measurement(object):
     @staticmethod
     def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
 
-        #print(overlappingDataBase['dataBase'].keys())
+
         # Generate array lists and name lists
 
         nameList = [x['name'] for x in dataBaseList]
@@ -381,63 +376,6 @@ class Measurement(object):
 
         return dictionaryList, overlappingDictionary
 
-    @staticmethod
-    def colocalizaion_analysis2( taggedImgList, dataBaseList, overlappingImage, overlappingDataBase):
-
-        nameList = [x['name'] for x in dataBaseList]
-
-        # Update dataBase for segmented images
-        for i in range(len(dataBaseList)):
-
-            print('processing dataBase of '+dataBaseList[i]['name'])
-
-            positionList = [x for x in range(len(dataBaseList)) if x != i]
-            buffer = []
-            ovlRatioBuffer = []
-
-            for m in range(len(positionList)):
-                NbOfObjects=np.amax(taggedImgList[positionList[m]])
-                buffer.append([[] for n in range(NbOfObjects)])
-                ovlRatioBuffer.append([0 for n in range(NbOfObjects)])
-
-            for j in range(np.amax(overlappingImage)):
-
-                tag = overlappingDataBase['dataBase']['object in ' + nameList[i]][j]
-
-
-                for k in range(len(positionList)):
-                        currentTag = overlappingDataBase['dataBase']['object in ' + nameList[positionList[k]]][j]
-                        print('Overlapping object '+str(j+1)+':' +nameList[i]+' object '+ str(tag) + ' overlaps with ' + nameList[positionList[k]]+' object '+ str(currentTag) + ' in ' )
-
-
-                        condition=True
-                        if 'filter' in (dataBaseList[i]['dataBase'].keys()):
-                            print(str(1))
-                            condition=dataBaseList[i]['dataBase']['filter'][currentTag-1]
-                            print(condition)
-
-                        if 'filter' in (dataBaseList[positionList[k]]['dataBase'].keys()):
-                            print(str(2))
-                            condition=dataBaseList[positionList[k]]['dataBase']['filter'][tag]
-                            print(condition)
-
-                        if 'filter' in (overlappingDataBase['dataBase'].keys()):
-                            print(str(3))
-                            condition =overlappingDataBase['dataBase']['filter'][j]
-                            print(condition)
-
-
-                        if condition==True:
-                            print(' With filter Overlapping object:' + str(tag) + ' overlaps with ' + str(currentTag) + ' in ' +nameList[positionList[k]])
-                            buffer[k][currentTag - 1].append(tag)
-                            ovlRatioBuffer[k][currentTag - 1] += overlappingDataBase['dataBase']['volume'][j]
-
-            for q in range(len(positionList)):
-                dataBaseList[positionList[q]]['dataBase']['objects in ' + nameList[i]] = buffer[q]
-                dataBaseList[positionList[q]]['dataBase']['totalOverlappingRatios in ' + nameList[i]] = np.divide(ovlRatioBuffer[q],dataBaseList[positionList[q]]['dataBase']['volume'])
-                dataBaseList[positionList[q]]['dataBase']['colocalization count'] = Measurement.measure_volume(buffer[q])
-
-        return dataBaseList, overlappingDataBase
 
     @staticmethod
     def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
@@ -492,9 +430,11 @@ class Measurement(object):
             originalFilter = dictionary['dataBase']['filter']
 
         #Only run filter if key has numerical value
+        typeList=['int', 'float', 'bool', 'complex',  'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64'
+                        ,'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]
         for key in filterDict:
 
-            if dataFrame[key].dtype in [int, float, bool, complex]:
+            if dataFrame[key].dtype in typeList:
 
                 currentFilter=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])
                 if ('filter' in dictionary['dataBase'].keys()) & (overWrite == False):
@@ -511,7 +451,6 @@ class Measurement(object):
 
     @staticmethod
     def save(dictionaryList, path, fileName='output', toText=False):
-
 
         dataFrameList=[]
         keyOrderList=[]
@@ -541,7 +480,7 @@ class Measurement(object):
                         otherKeys.append(key)
 
                 #Rearange keylist
-                presetOrder=['tag', 'volume', 'voxelCount']
+                presetOrder=['tag', 'volume', 'voxelCount', 'filter']
                 numericalKeys=Measurement.reorderList(numericalKeys,presetOrder)
                 presetOrder = ['centroid']
                 otherKeys=Measurement.reorderList(otherKeys,presetOrder)
@@ -560,7 +499,8 @@ class Measurement(object):
         if toText==False:
 
             # Create a Pandas Excel writer using XlsxWriter as the engine.
-            writer = pd.ExcelWriter(os.path.join(path, fileName), engine='xlsxwriter')
+            writer = pd.ExcelWriter(os.path.join(path, fileName+'.xlsx'), engine='xlsxwriter')
+
 
             for i in range(len(dataFrameList)):
 
