@@ -165,6 +165,7 @@ GroupBox {
                 for (var i = 0; i < node.nodeParams.count; ++i) {
                     list.append({
                         channelName: node.nodeParams.get(i).channelName,
+                        objectId: node.nodeParams.get(i).objectId,
                         volume: node.nodeParams.get(i).volume,
                         sumIntensity: node.nodeParams.get(i).sumIntensity,
                         meanIntensity: node.nodeParams.get(i).meanIntensity,
@@ -190,6 +191,7 @@ GroupBox {
                 selectionMode: SelectionMode.ExtendedSelection
 
                 TableViewColumn{ role: "channelName"; title: "channelName" }
+                TableViewColumn{ role: "objectId"; title: "objectId" }
                 TableViewColumn{ role: "volume"; title: "volume" }
                 TableViewColumn{ role: "sumIntensity"; title: "sumIntensity" }
                 TableViewColumn{ role: "meanIntensity"; title: "meanIntensity" }

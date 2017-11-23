@@ -266,6 +266,7 @@ QVariantList VolumetricDataManager::runAnalysis(
     for (const auto &item : statList0) {
         QVariantMap vmap;
         vmap.insert("channelName", data0->dataName());
+        vmap.insert("objectId", item.first);
         INSERT(volume)
         INSERT(sumIntensity)
         INSERT(meanIntensity)
@@ -283,6 +284,7 @@ QVariantList VolumetricDataManager::runAnalysis(
     for (const auto &item : statList1) {
         QVariantMap vmap;
         vmap.insert("channelName", data1->dataName());
+        vmap.insert("objectId", item.first);
         INSERT(volume)
         INSERT(sumIntensity)
         INSERT(meanIntensity)
@@ -315,8 +317,8 @@ void VolumetricDataManager::saveCsv(const QVariantList &list, const QStringList 
 
     for (auto &item : list) {
         QStringList sl;
-        for (auto &mapItem : item.toMap()) {
-            sl.append(mapItem.toString());
+        for (auto &key : heads) {
+            sl.append(item.toMap()[key].toString());
         }
         sl.append(m_source.fileName());
         csvFile << sl.join(";").toStdString() << endl;

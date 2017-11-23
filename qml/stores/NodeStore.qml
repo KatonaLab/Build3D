@@ -184,6 +184,7 @@ Item {
         for (var i = 0; i < node.nodeParams.count; ++i) {
             table.push({
                 channelName: node.nodeParams.get(i).channelName,
+                objectId: node.nodeParams.get(i).objectId,
                 volume: node.nodeParams.get(i).volume,
                 sumIntensity: node.nodeParams.get(i).sumIntensity,
                 meanIntensity: node.nodeParams.get(i).meanIntensity,
@@ -198,7 +199,9 @@ Item {
             });
         }
         console.log(url);
-        dataManager.saveCsv(table, ["channelName",
+        dataManager.saveCsv(table, [
+            "channelName",
+            "objectId",
             "volume",
             "sumIntensity",
             "meanIntensity",
