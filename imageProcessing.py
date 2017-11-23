@@ -120,8 +120,8 @@ class Main(object):
         sourceDictList=[]
         # Channel 1
 
-        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
-        ch1Path = ('F:/Workspace/TestImages/test_1.tif')
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
+        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -132,8 +132,8 @@ class Main(object):
 
 
         # Channel 2
-        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
-        ch2Path =('F:/Workspace/TestImages/test_2.tif')
+        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
 
@@ -145,16 +145,16 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        #ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
+        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
         #ch3Path =('F:/Workspace/TestImages/test_3.tif')
-        #ch3Img = Processor.load_image(ch3Path)
+        ch3Img = Processor.load_image(ch3Path)
 
-        #ch3Dict={'name': 'RawImage1',
-                 #'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
-                 #'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
+        ch3Dict={'name': 'RawImage1',
+                 'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
+                 'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
 
-        #sourceImageList.append(ch3Img)
-        #sourceDictList.append(ch3Dict)
+        sourceImageList.append(ch3Img)
+        sourceDictList.append(ch3Dict)
         #############################################################################################################
 
 
@@ -189,15 +189,15 @@ class Main(object):
         taggedDictList.append(taggedDict2)
 
         # Channel 3
-        #thresholdedImage3 = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
-        #taggedImage3 = Segmentation.tag_image(thresholdedImage3)
+        thresholdedImage3 = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
+        taggedImage3 = Segmentation.tag_image(thresholdedImage3)
 
-        #taggedDict3 =sourceDictList[2]
-        #taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList)
-        #taggedDict3['name'] = 'Channel3'
+        taggedDict3 =sourceDictList[2]
+        taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList)
+        taggedDict3['name'] = 'Channel3'
 
-        #taggedImageList.append(taggedImage3)
-        #taggedDictList.append(taggedDict3)
+        taggedImageList.append(taggedImage3)
+        taggedDictList.append(taggedDict3)
         #############################################################################################################
 
         #############################################Analysis Images####################################################
@@ -207,18 +207,21 @@ class Main(object):
 
 
         #dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
-        print(taggedDictList[0]['dataBase']['volume'])
-        taggedDictList[0]=Measurement.filter_dataBase(taggedDictList[0], {'volume':{'min':5,'max':10}}) #'ellipsoidDiameter':{'min':2,'max':3}})
-        print(taggedDictList[0]['dataBase']['volume'])
-        print(taggedDictList[0]['dataBase']['filter'])
+        #print(taggedDictList[0]['dataBase'])
+        #taggedDictList[0]=Measurement.filter_dataBase(taggedDictList[0], {'volume':{'min':1,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
+        #print(taggedDictList[0]['dataBase'])
+        #print(taggedDictList[0]['dataBase'])
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
 
+        #print(overlappingDataBase['dataBase'].keys())
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-        dataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
 
+
+        dataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
+        #print(dataBaseList)
 
         dataBaseList.append(overlappingDataBase)
-        #save(dataBaseList, "D:/OneDrive - MTA KOKI/Workspace/")
+        save(dataBaseList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
         #filteredDict2=Measurement.filter_dataBase(taggedDict2, {'mean in Channel1':{'min':2,'max':3}, 'ellipsoidDiameter':{'min':2,'max':3}})
 
 
@@ -269,7 +272,8 @@ class Measurement(object):
 
         #Create Overlapping Image
         overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
-        # Create Overlapping Dictionary
+        # Create Overlapping dataBase
+        overlappingDataBase={}
         if name==None:
             name='Overlapping'
             for dict in taggedDictList:
@@ -286,9 +290,9 @@ class Measurement(object):
     @staticmethod
     def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
 
-
+        #print(overlappingDataBase['dataBase'].keys())
         # Generate array lists and name lists
-        taggedArrayList = [x.flatten() for x in taggedImgList]
+
         nameList = [x['name'] for x in dataBaseList]
 
         for i in range(len(taggedImgList)):
@@ -369,27 +373,18 @@ class Measurement(object):
                         outputList[i]['objects in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j]])
 
 
-
-
-
         for i in range(NbOfInputElements):
             for key in outputList[i]:
                 dictionaryList[i]['dataBase'][key]=outputList[i][key]
 
-        return dictionaryList, overlappingDataBase
+                overlappingDictionary['dataBase']=overlappingDataBase
+
+        return dictionaryList, overlappingDictionary
 
     @staticmethod
     def colocalizaion_analysis2( taggedImgList, dataBaseList, overlappingImage, overlappingDataBase):
 
-        # Generate array lists and name lists
-
-        #print(dataBaseList[0])
-        #print(dataBaseList[1])
-        #print(dataBaseList[2])
         nameList = [x['name'] for x in dataBaseList]
-        #isFiltered=[('filter' in x['dataBase'].keys()) for x in dataBaseList]
-        #isFiltered.append('filter' in overlappingDataBase.keys())
-        #print(isFiltered)
 
         # Update dataBase for segmented images
         for i in range(len(dataBaseList)):
@@ -496,7 +491,7 @@ class Measurement(object):
         if 'filter' in dictionary['dataBase'].keys():
             originalFilter = dictionary['dataBase']['filter']
 
-        #print(dataFrame)
+        #Only run filter if key has numerical value
         for key in filterDict:
 
             if dataFrame[key].dtype in [int, float, bool, complex]:
@@ -517,35 +512,99 @@ class Measurement(object):
     @staticmethod
     def save(dictionaryList, path, fileName='output', toText=False):
 
+
+        dataFrameList=[]
+        keyOrderList=[]
+        columnWidthsList=[]
+        nameList = [x['name'] for x in dictionaryList]
+
+        for dict in  dictionaryList:
+
+            if 'dataBase' in dict.keys():
+
+                # Convert to Pandas dataframe
+                dataFrame=pd.DataFrame(dict['dataBase'])
+
+                dataFrameList.append(dataFrame)
+
+                # Sort dictionary with numerical types first (tag, volume, voxelCount,  first) and all others after (centroid, center of mass, bounding box first)
+                numericalKeys = []
+                otherKeys = []
+
+                for key in dict['dataBase'].keys():
+
+                    if str(dataFrame[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64'
+                        ,'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
+                        numericalKeys.append(key)
+
+                    else:
+                        otherKeys.append(key)
+
+                #Rearange keylist
+                presetOrder=['tag', 'volume', 'voxelCount']
+                numericalKeys=Measurement.reorderList(numericalKeys,presetOrder)
+                presetOrder = ['centroid']
+                otherKeys=Measurement.reorderList(otherKeys,presetOrder)
+                keyOrderList.append(numericalKeys+otherKeys)
+
+                # Measure the column widths based on header
+                columnWidth=0
+                for i in range(len(keyOrderList)):
+                    for j in range(len(keyOrderList[i])):
+                        w=len(keyOrderList[i][j])
+                        if w>columnWidth:
+                            columnWidth=w
+                columnWidthsList.append(columnWidth)
+
+
         if toText==False:
 
             # Create a Pandas Excel writer using XlsxWriter as the engine.
-            writer = pd.ExcelWriter(os.path.join(path, fileName+'.xls'), engine='xlsxwriter')
+            writer = pd.ExcelWriter(os.path.join(path, fileName), engine='xlsxwriter')
 
-            for dict in dictionaryList:
-                if 'dataBase' in dict:
-                    dataFrame = pd.DataFrame(dict['dataBase'])
+            for i in range(len(dataFrameList)):
 
-                    # Convert the dataframe to an XlsxWriter Excel object.
-                    dataFrame.to_excel(writer, sheet_name=dict['name'])
+                # Convert the dataframe to an XlsxWriter Excel object. Crop worksheet name if too long
+                name =str(nameList[i])
+                if len(name) > 30:
+                    name=(str(nameList[i])[:30] + '_')
+                dataFrameList[i].to_excel(writer, sheet_name=name, columns=keyOrderList[i], header=True)
 
-            # Close the Pandas Excel writer and output the Excel file.
+                #Get workbook, worksheet and format
+                workbook = writer.book
+                format=workbook.add_format()
+                format.set_shrink('auto')
+                format.set_align('center')
+                format.set_text_wrap()
+
+                worksheet=writer.sheets[name]
+                worksheet.set_zoom(90)
+                worksheet.set_column(j, 1, columnWidthsList[i]*0.6, format)
+
+            # Close the Pandas Excel writer and save Excel file.
             writer.save()
 
         elif toText==True:
 
             with open(os.path.join(path, fileName + '.txt'), 'w') as outputFile:
 
-                for dict in dictionaryList:
-                    if 'dataBase' in dict:
-                        dataFrame = pd.DataFrame(dict['dataBase'])
+                for i in range(len(dataFrameList)):
+                    if dataFrameList[i] != None:
 
-                        outputFile.write('name= '+dict['name']+'\n')
-                        outputFile.write(dataFrame.to_csv(sep='\t', index=False, header=True))
+                        outputFile.write('name= '+nameList[i]+'\n')
+                        outputFile.write(dataFrameList[i].to_csv(sep='\t', columns=keyOrderList[i], index=False, header=True))
 
         return 0
 
+    @staticmethod
+    def reorderList(list, valueList):
 
+        for element in reversed(valueList):
+            if element in list:
+                list.remove(element)
+                list.insert(0, element)
+
+        return list
 
     @staticmethod
     def isOnEdge(tinyImg_tagged):
@@ -822,7 +881,6 @@ class Processor(object):
     @staticmethod
     def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
 
-        print(overlappingDataBase)
         # Generate array lists and name lists
         taggedArrayList = [x.flatten() for x in taggedImgList]
         nameList = [x['Name'] for x in dataBaseList]
