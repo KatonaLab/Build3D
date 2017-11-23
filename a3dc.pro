@@ -18,7 +18,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-system(cp lib/libics/libics_conf.h.in lib/libics/libics_conf.h)
+macx {
+    system(cp $${PWD}/lib/libics/libics_conf.h.in $${PWD}/lib/libics/libics_conf.h)
+}
+
+win32 {
+    # TODO:
+    #message(copy $${PWD}lib/libics/ibics_conf.h.in $${PWD}/lib/libics/libics_conf.h)
+    #system(cmd /c copy /y "$${PWD}lib/libics/ibics_conf.h.in" "$${PWD}/lib/libics/libics_conf.h")
+}
 
 SOURCES +=  \
     src/volumetric.cpp \
@@ -66,7 +74,8 @@ macx {
 }
 
 win32 {
-
+    LIBS += -Lc:/python27/libs -lpython27
+    INCLUDEPATH += c:/python27/include
 }
 
 #LIBS += -L build_ics -llibics_static
