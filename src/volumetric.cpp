@@ -12,8 +12,8 @@
 #include <thread>
 #include <algorithm>
 
-#include <pybind11/embed.h> // everything needed for embedding
-namespace py = pybind11;
+//#include <pybind11/embed.h> // everything needed for embedding
+//namespace py = pybind11;
 
 using namespace std;
 using namespace Qt3DCore;
@@ -46,9 +46,27 @@ ICSFile::ICSFile(std::string filename) : filename(filename)
         char label[ICS_STRLEN_TOKEN];
         ICS_EC(IcsGetOrder(ip, i, order, label));
         channelLabels.push_back(label);
-   }
+        orderLabels.push_back(order);
+    }
 
-    fillChannelData();
+    if (orderLabels[0] == "x") {
+        cout << "x is the first dimension" << endl;
+        fillChannelData();
+    } else if (orderLabels[0] == "ch") {
+        cout << "ch is the first dimension" << endl;
+        // ch, x, y, z
+        swap(dims[0], dims[3]); // z, x, y, ch
+        swap(dims[0], dims[2]); // y, x, z, ch
+        swap(dims[0], dims[1]); // x, y, z, ch
+
+        swap(channelLabels[0], channelLabels[3]);
+        swap(channelLabels[0], channelLabels[2]);
+        swap(channelLabels[0], channelLabels[1]);
+
+        fillChannelDataWithChannelFirstDim();
+    } else {
+        throw ICSError("not supported data dimension order");
+    }
 }
 
 std::string ICSFile::getChannelLabel(int channel)
@@ -75,6 +93,34 @@ void ICSFile::fillChannelData()
         size_t offset = n * k;
         for (size_t i = 0; i < n; ++i) {
             channelData[k].get()[i] = cast(buffer.get() + (i + offset) * bytes);
+        }
+    }
+}
+
+// TODO: it is a quick hack to support another dim order
+// should be refactored and support arbitrary dim order
+void ICSFile::fillChannelDataWithChannelFirstDim()
+{
+    size_t size = IcsGetDataSize(ip);
+    shared_ptr<char> buffer(new char[size], default_delete<char[]>());
+    ICS_EC(IcsGetData(ip, buffer.get(), size));
+
+    cout << width() << " " << height() << " " << depth() << " " << channels() << endl;
+
+    size_t n = width() * height() * depth();
+    size_t c = channels();
+    for (size_t k = 0; k < c; ++k) {
+        // TODO: consider converting to int32/64 instead of float
+        channelData.emplace_back(new float[n], default_delete<float[]>());
+    }
+
+    auto cast = bind(&TypeInfoBase::cast, typeMap.at(dt), std::placeholders::_1);
+    size_t bytes = typeMap.at(dt)->bytes();
+    // TODO: this is the change
+    for (size_t i = 0; i < n; ++i) {
+        for (int k = 0; k < c; ++k) {
+            // TODO: this is the change
+            channelData[k].get()[i] = cast(buffer.get() + (i * c + k)* bytes);
         }
     }
 }
@@ -207,11 +253,11 @@ VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString
 void VolumetricDataManager::runSegmentation(VolumetricData *data, 
         VolumetricData *output, QString method, float p0, float p1)
 {
-    py::scoped_interpreter guard{}; // start the interpreter and keep it alive
+    // py::scoped_interpreter guard{}; // start the interpreter and keep it alive
 
-    py::module sys = py::module::import("sys");
-    py::print(sys.attr("path"));
-    py::print("Hello, World!"); // use the Python API
+    // py::module sys = py::module::import("sys");
+    // py::print(sys.attr("path"));
+    // py::print("Hello, World!"); // use the Python API
 
     if (data->sizeInPixels() != output->sizeInPixels()) {
         // TODO throw error

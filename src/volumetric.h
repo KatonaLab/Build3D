@@ -62,10 +62,12 @@ private:
     size_t dims[ICS_MAXDIM];
     std::vector<std::shared_ptr<float>> channelData;
     std::vector<std::string> channelLabels;
+    std::vector<std::string> orderLabels;
     static const std::map<Ics_DataType, TypeInfoBasePtr> typeMap;
 
 private:
     void fillChannelData();
+    void fillChannelDataWithChannelFirstDim();
     void errorCheck(Ics_Error error, const std::string message);
     template <typename T> static TypeInfoBasePtr ti() { return std::make_shared<TypeInfo<T>>(); }
 };

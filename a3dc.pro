@@ -68,14 +68,14 @@ INCLUDEPATH += \
     lib/libics \
     lib/pybind11/include
 
-macx {
-    LIBS += -lpython2.7
-    INCLUDEPATH += /usr/local/Cellar/python/2.7.13_1/Frameworks/Python.framework/Versions/2.7/include/python2.7
-}
+#macx {
+#    LIBS += -lpython2.7
+#    INCLUDEPATH += /usr/local/Cellar/python/2.7.13_1/Frameworks/Python.framework/Versions/2.7/include/python2.7
+#}
 
-win32 {
-    LIBS += -Lc:/python27/libs -lpython27
-    INCLUDEPATH += c:/python27/include
-}
+#win32 {
+#    LIBS += -Lc:/python27/libs -lpython27
+#    INCLUDEPATH += c:/python27/include
+#}
 
 #LIBS += -L build_ics -llibics_static

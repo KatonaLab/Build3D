@@ -28,7 +28,7 @@ Middleware {
         selectMultiple: false
         nameFilters: [ "Image Cytometry Standard (*.ics)" ]
         onAccepted: {
-            console.log(openDialog.openUrls[0]);
+            console.log(openDialog.fileUrl);
             next(ActionTypes.importIcsFile, {url: openDialog.fileUrl});
         }
     }
@@ -43,7 +43,7 @@ Middleware {
         selectExisting: false
         selectMultiple: false
         onAccepted: {
-            console.log(saveDialog.fileUrls[0]);
+            console.log(saveDialog.fileUrl);
             next(ActionTypes.saveAnalysisCsv, {uid: uid, url: saveDialog.fileUrl});
         }
     }
