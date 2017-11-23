@@ -260,21 +260,44 @@ QVariantList VolumetricDataManager::runAnalysis(
         = dataStatistics(data1, label1, intersect);
 
     QVariantList vlist;
+
+    #define INSERT(name) vmap.insert(#name, item.second. name);
+
     for (const auto &item : statList0) {
         QVariantMap vmap;
-        vmap.insert("intensity", item.second.intensity);
-        vmap.insert("volume", item.second.volume);
-        vmap.insert("overlapRatio", item.second.overlapRatio);
+        vmap.insert("channelName", data0->dataName());
+        INSERT(volume)
+        INSERT(sumIntensity)
+        INSERT(meanIntensity)
+        INSERT(overlapRatio)
+        INSERT(intersectingVolume)
+        INSERT(centerX)
+        INSERT(centerY)
+        INSERT(centerZ)
+        INSERT(intensityWeightCenterX)
+        INSERT(intensityWeightCenterY)
+        INSERT(intensityWeightCenterZ)
         vlist << vmap;
     }
 
     for (const auto &item : statList1) {
         QVariantMap vmap;
-        vmap.insert("intensity", item.second.intensity);
-        vmap.insert("volume", item.second.volume);
-        vmap.insert("overlapRatio", item.second.overlapRatio);
+        vmap.insert("channelName", data1->dataName());
+        INSERT(volume)
+        INSERT(sumIntensity)
+        INSERT(meanIntensity)
+        INSERT(overlapRatio)
+        INSERT(intersectingVolume)
+        INSERT(centerX)
+        INSERT(centerY)
+        INSERT(centerZ)
+        INSERT(intensityWeightCenterX)
+        INSERT(intensityWeightCenterY)
+        INSERT(intensityWeightCenterZ)
         vlist << vmap;
     }
+
+    #undef INSERT
 
     output->m_dataLimitsReady = false;
     return vlist;
@@ -318,11 +341,28 @@ void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *dat
 }
 
 std::map<float, VolumetricDataManager::StatRecord>
-VolumetricDataManager::dataStatistics(VolumetricData *data,
-                                           VolumetricData *labelData,
-                                           VolumetricData *segIntersect)
+VolumetricDataManager::dataStatistics(VolumetricData *data, 
+    VolumetricData *labelData,
+    VolumetricData *segIntersect)
 {
     // TODO: size check
+
+    std::shared_ptr<array<int, 3>> coordinates(new array<int, 3>[data->sizeInPixels()], default_delete<array<int, 3>>());
+
+    // TODO: refactor
+
+    auto getIndex = [&data](int x, int y, int z)
+    {
+        return x * (data->height() * data->depth()) + y * (data->depth()) + z;
+    };
+
+    for (int x = 0; x < data->width(); ++x) {
+        for (int y = 0; y < data->height(); ++y) {
+            for (int z = 0; z < data->depth(); ++z) {
+                coordinates.get()[getIndex(x, y, z)] = {x, y, z};
+            }
+        }
+    }
 
     map<float, StatRecord> statMap;
 
@@ -331,20 +371,33 @@ VolumetricDataManager::dataStatistics(VolumetricData *data,
         float label = labelData->m_data.get()[i];
         float coloc = segIntersect->m_data.get()[i];
         if (label != 0.0f) {
-            statMap[label].volume++;
-            statMap[label].intensity += value;
+            statMap[label].volume += 1.0f;
+            statMap[label].sumIntensity += value;
+            
+            statMap[label].centerX += coordinates.get()[i][0];
+            statMap[label].centerY += coordinates.get()[i][1];
+            statMap[label].centerZ += coordinates.get()[i][2];
+            
+            statMap[label].intensityWeightCenterX += coordinates.get()[i][0] * value;
+            statMap[label].intensityWeightCenterY += coordinates.get()[i][1] * value;
+            statMap[label].intensityWeightCenterZ += coordinates.get()[i][2] * value;
+
             if (coloc != 0.0f) {
-                statMap[label].intersectVolume++;
+                statMap[label].intersectingVolume++;
             }
         }
     }
     for (auto &item : statMap) {
-        item.second.intensity /= item.second.volume;
-        item.second.overlapRatio = item.second.intersectVolume / item.second.volume;
-        cout << item.first << ": "
-            << item.second.intensity << " "
-            << item.second.volume << " "
-            << item.second.overlapRatio << endl;
+        item.second.meanIntensity = item.second.sumIntensity / item.second.volume;
+        item.second.overlapRatio = item.second.intersectingVolume / item.second.volume;
+        
+        item.second.centerX /= item.second.volume;
+        item.second.centerY /= item.second.volume;
+        item.second.centerZ /= item.second.volume;
+
+        item.second.intensityWeightCenterX /= item.second.sumIntensity;
+        item.second.intensityWeightCenterY /= item.second.sumIntensity;
+        item.second.intensityWeightCenterZ /= item.second.sumIntensity;
     }
     return statMap;
 }

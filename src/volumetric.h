@@ -116,9 +116,16 @@ private:
 private:
     struct StatRecord {
         float volume = 0.0;
-        float intensity = 0.0;
+        float sumIntensity = 0.0;
+        float meanIntensity = 0.0;
         float overlapRatio = 0.0;
-        float intersectVolume = 0.0;
+        float intersectingVolume = 0.0;
+        float centerX = 0.0;
+        float centerY = 0.0;
+        float centerZ = 0.0;
+        float intensityWeightCenterX = 0.0;
+        float intensityWeightCenterY = 0.0;
+        float intensityWeightCenterZ = 0.0;
     };
 
     void dataOpAnd(VolumetricData *data0,
@@ -133,35 +140,11 @@ public:
     QVector<VolumetricDataPtr> m_dataList;
 };
 
-//------------------------------------------------------------------------------
-
-//class Node;
-//
-//class NodeFactory: public QObject {
-//    Q_OBJECT
-//
-//public:
-//    Q_INVOKABLE void importICS(const QUrl &url);
-//signals:
-//
-//}
-
-//------------------------------------------------------------------------------
-
 class Node: public QObject {
     Q_OBJECT
 public:
     Node(QObject *parent = Q_NULLPTR): QObject(parent) {}
 };
-
-//class SourceNode: public Node {
-//    Q_OBJECT
-//    Q_PROPERTY(VolumetricData* output READ output NOTIFY outputChanged)
-//public:
-//    SourceNode(VolumetricDataPtr source, QObject *parent = Q_NULLPTR): Node(parent) {}
-//private:
-//    VolumetricDataPtr m_dataPtr;
-//}
 
 class SegmentationNode: public Node {
     Q_OBJECT
@@ -245,7 +228,7 @@ class VolumetricTextureImage : public Qt3DRender::QAbstractTextureImage {
     Q_OBJECT
 public:
     explicit VolumetricTextureImage(const VolumetricData* data,
-                                    Qt3DCore::QNode *parent = nullptr);
+        Qt3DCore::QNode *parent = nullptr);
     virtual ~VolumetricTextureImage();
 
 protected:

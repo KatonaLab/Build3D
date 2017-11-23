@@ -183,13 +183,33 @@ Item {
         var table = [];
         for (var i = 0; i < node.nodeParams.count; ++i) {
             table.push({
-                intensity: node.nodeParams.get(i).intensity,
+                channelName: node.nodeParams.get(i).channelName,
                 volume: node.nodeParams.get(i).volume,
-                overlapRatio: node.nodeParams.get(i).overlapRatio
-                })
+                sumIntensity: node.nodeParams.get(i).sumIntensity,
+                meanIntensity: node.nodeParams.get(i).meanIntensity,
+                overlapRatio: node.nodeParams.get(i).overlapRatio,
+                intersectingVolume: node.nodeParams.get(i).intersectingVolume,
+                centerX: node.nodeParams.get(i).centerX,
+                centerY: node.nodeParams.get(i).centerY,
+                centerZ: node.nodeParams.get(i).centerZ,
+                intensityWeightCenterX: node.nodeParams.get(i).intensityWeightCenterX,
+                intensityWeightCenterY: node.nodeParams.get(i).intensityWeightCenterY,
+                intensityWeightCenterZ: node.nodeParams.get(i).intensityWeightCenterZ
+            });
         }
         console.log(url);
-        dataManager.saveCsv(table, ["intensity", "volume", "overlapRatio"], url);
+        dataManager.saveCsv(table, ["channelName",
+            "volume",
+            "sumIntensity",
+            "meanIntensity",
+            "overlapRatio",
+            "intersectingVolume",
+            "centerX",
+            "centerY",
+            "centerZ",
+            "intensityWeightCenterX",
+            "intensityWeightCenterY",
+            "intensityWeightCenterZ"], url);
     }
 
     function randomColor() {
