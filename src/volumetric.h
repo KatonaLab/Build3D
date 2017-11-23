@@ -100,7 +100,7 @@ public:
         VolumetricData *segData0,
         VolumetricData *segData1,
         VolumetricData *output);
-    Q_INVOKABLE void saveCsv(const QVariantList &list, QString filename);
+    Q_INVOKABLE void saveCsv(const QVariantList &list, const QStringList &heads, QUrl filename);
 
 Q_SIGNALS:
     void sourceChanged();

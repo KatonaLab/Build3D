@@ -280,22 +280,28 @@ QVariantList VolumetricDataManager::runAnalysis(
     return vlist;
 }
 
-void VolumetricDataManager::saveCsv(const QVariantList &list, QString filename)
+void VolumetricDataManager::saveCsv(const QVariantList &list, const QStringList &heads, QUrl filename)
 {
     ofstream csvFile;
-    csvFile.open(filename.toStdString());
+    csvFile.open(filename.toLocalFile().toStdString());
 
-    cout << "list size " << list.size() << endl;
+    QStringList modifiedHead(heads);
+    modifiedHead.append("filename");
+
+    csvFile << modifiedHead.join(";").toStdString() << endl;
 
     for (auto &item : list) {
-        cout << "aaa" << endl; 
+        QStringList sl;
         for (auto &mapItem : item.toMap()) {
-            csvFile << mapItem.toString().toStdString() << ";";
+            sl.append(mapItem.toString());
         }
-        csvFile << endl;
+        sl.append(m_source.fileName());
+        csvFile << sl.join(";").toStdString() << endl;
     }
 
     csvFile.close();
+
+    cout << "wrote to " << filename.toLocalFile().toStdString() << endl;
 }
 
 void VolumetricDataManager::dataOpAnd(VolumetricData *data0, VolumetricData *data1,

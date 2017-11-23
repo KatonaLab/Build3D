@@ -44,7 +44,7 @@ Item {
                 applyAnalysisNode(args.uid, args.parameters);
                 break;
             case ActionTypes.saveAnalysisCsv:
-                saveAnalysisCsv(args.uid);
+                saveAnalysisCsv(args.uid, args.url);
                 break;
             // TODO: cleanWorkspace
         }
@@ -174,7 +174,7 @@ Item {
         node.nodeApplied = true;
     }
 
-    function saveAnalysisCsv(uid) {
+    function saveAnalysisCsv(uid, url) {
         var node = getNode(uid);
         if (node == null) {
             consol.log("saveAnalysisCsv: no uid, analysis", uid);
@@ -188,7 +188,8 @@ Item {
                 overlapRatio: node.nodeParams.get(i).overlapRatio
                 })
         }
-        dataManager.saveCsv(table, "save.csv");
+        console.log(url);
+        dataManager.saveCsv(table, ["intensity", "volume", "overlapRatio"], url);
     }
 
     function randomColor() {

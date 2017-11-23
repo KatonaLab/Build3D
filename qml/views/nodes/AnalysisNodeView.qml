@@ -145,11 +145,11 @@ GroupBox {
         }
 
         Button {
-            text: "Save to CSV" 
+            text: "Save as CSV" 
             enabled: nodeApplied
             Layout.fillWidth: true
             onClicked: {
-                AppActions.saveAnalysisCsv(box.uid);
+                AppActions.saveAnalysisCsv(box.uid, "defaultname.csv");
             }
         }
 
@@ -161,9 +161,6 @@ GroupBox {
 
             function updateTable() {
                 var node = MainStore.nodeStore.getNode(box.uid);
-                console.log("updateTable");
-                console.log(node);
-                console.log(node.nodeParams);
                 list.clear();
                 for (var i = 0; i < node.nodeParams.count; ++i) {
                     list.append({intensity: node.nodeParams.get(i).intensity,
@@ -171,8 +168,6 @@ GroupBox {
                         overlapRatio: node.nodeParams.get(i).overlapRatio})
                 }
             }
-
-            //Component.onCompleted: updateTable()
 
             ListModel {
                 id: list

@@ -13,10 +13,11 @@ Middleware {
             openDialog.open();
             return;
         }
-        // if (actionType == ActionTypes.saveAnalysisCsv) {
-        //     saveDialog.open();
-        //     return;
-        // }
+        if (actionType == ActionTypes.saveAnalysisCsv) {
+            saveDialog.uid = parameters.uid;
+            saveDialog.open();
+            return;
+        }
         next(actionType, parameters);
     }
 
@@ -24,19 +25,26 @@ Middleware {
         id: openDialog
         title: "Import"
         folder: middleware.folder
+        selectMultiple: false
+        nameFilters: [ "Image Cytometry Standard (*.ics)" ]
         onAccepted: {
             console.log(openDialog.openUrls[0]);
-            next(ActionTypes.importIcsFile, {url: openDialog.fileUrls[0]});
+            next(ActionTypes.importIcsFile, {url: openDialog.fileUrl});
         }
     }
 
-    // FileDialog {
-    //     id: saveDialog
-    //     title: "Save"
-    //     folder: middleware.folder
-    //     onAccepted: {
-    //         console.log(saveDialog.fileUrls[0]);
-    //         next(ActionTypes.saveAnalysisCsv, {url: saveDialog.fileUrls[0]});
-    //     }
-    // }
+    FileDialog {
+        property int uid: -1;
+
+        id: saveDialog
+        title: "Save"
+        folder: middleware.folder
+        nameFilters: [ "CSV (*.csv)" ]
+        selectExisting: false
+        selectMultiple: false
+        onAccepted: {
+            console.log(saveDialog.fileUrls[0]);
+            next(ActionTypes.saveAnalysisCsv, {uid: uid, url: saveDialog.fileUrl});
+        }
+    }
 }
