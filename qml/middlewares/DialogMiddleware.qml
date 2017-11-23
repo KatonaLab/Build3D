@@ -4,22 +4,39 @@ import QtQuick.Dialogs 1.2
 import "../actions"
 
 Middleware {
+    id: middleware
+
+    property url folder: "."
 
     function dispatch(actionType, parameters) {
         if (actionType == ActionTypes.importIcsFile) {
-            fileDialog.open();
+            openDialog.open();
             return;
         }
+        // if (actionType == ActionTypes.saveAnalysisCsv) {
+        //     saveDialog.open();
+        //     return;
+        // }
         next(actionType, parameters);
     }
 
     FileDialog {
-        id: fileDialog
+        id: openDialog
         title: "Import"
-        folder: shortcuts.home
+        folder: middleware.folder
         onAccepted: {
-            console.log(fileDialog.fileUrls[0]);
-            next(ActionTypes.importIcsFile, {url: fileDialog.fileUrls[0]});
+            console.log(openDialog.openUrls[0]);
+            next(ActionTypes.importIcsFile, {url: openDialog.fileUrls[0]});
         }
     }
+
+    // FileDialog {
+    //     id: saveDialog
+    //     title: "Save"
+    //     folder: middleware.folder
+    //     onAccepted: {
+    //         console.log(saveDialog.fileUrls[0]);
+    //         next(ActionTypes.saveAnalysisCsv, {url: saveDialog.fileUrls[0]});
+    //     }
+    // }
 }

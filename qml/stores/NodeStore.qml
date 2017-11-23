@@ -156,10 +156,7 @@ Item {
         if (sceneNode == null) {
             outputData = dataManager.newDataLike(args.segData0, node.nodeName);
         }
-        console.log("nodestore sending");
         node.nodeParams = dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
-        console.log(node.nodeParams);
-        console.log("nodestore sent");
         if (sceneNode == null) {
             var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
             var sceneItem = {
@@ -183,8 +180,15 @@ Item {
             consol.log("saveAnalysisCsv: no uid, analysis", uid);
             return;
         }
-        console.log(node.nodeParams.count);
-        dataManager.saveCsv(node.nodeParams, "save.csv");
+        var table = [];
+        for (var i = 0; i < node.nodeParams.count; ++i) {
+            table.push({
+                intensity: node.nodeParams.get(i).intensity,
+                volume: node.nodeParams.get(i).volume,
+                overlapRatio: node.nodeParams.get(i).overlapRatio
+                })
+        }
+        dataManager.saveCsv(table, "save.csv");
     }
 
     function randomColor() {

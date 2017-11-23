@@ -96,11 +96,11 @@ public:
         VolumetricData *output, QString method, float p0, float p1);
     Q_INVOKABLE QVariantList runAnalysis(
         VolumetricData *data0,
-        VolumetricData *data1, 
+        VolumetricData *data1,
         VolumetricData *segData0,
         VolumetricData *segData1,
         VolumetricData *output);
-    Q_INVOKABLE void saveCsv(QVariant list, QString filename);
+    Q_INVOKABLE void saveCsv(const QVariantList &list, QString filename);
 
 Q_SIGNALS:
     void sourceChanged();
@@ -124,7 +124,7 @@ private:
     void dataOpAnd(VolumetricData *data0,
         VolumetricData *data1, VolumetricData *output);
     void dataLabel(VolumetricData *data, VolumetricData *output);
-
+ 
     std::map<float, VolumetricDataManager::StatRecord>
     dataStatistics(VolumetricData *data, VolumetricData *labelData, VolumetricData *segIntersect);
 

@@ -234,13 +234,9 @@ QVariantList VolumetricDataManager::runAnalysis(
     VolumetricData *output)
 {
     // TODO: size check
-    cout << "analysis 1" << endl;
     VolumetricData* label0 = newDataLike(segData0, "");
-    cout << "analysis 2" << endl;
     VolumetricData* label1 = newDataLike(segData1, "");
-    cout << "analysis 3" << endl;
     dataLabel(segData0, label0);
-    cout << "analysis 4" << endl;
     dataLabel(segData1, label1);
 
 //    float minVolume0 = 0.0;
@@ -252,13 +248,9 @@ QVariantList VolumetricDataManager::runAnalysis(
 //    dataFilter(tmp1, data1, tmp1, minVolume1, maxVolume1);
 
     VolumetricData* intersect = newDataLike(segData1, "");
-    cout << "analysis 5" << endl;
     dataOpAnd(segData0, segData1, intersect);
-    cout << "analysis 6" << endl;
-    VolumetricData* intersectLabel = newDataLike(segData1, "");
-    cout << "analysis 7" << endl;
-    dataLabel(intersect, output);
-    cout << "analysis 8" << endl;
+    // VolumetricData* intersectLabel = newDataLike(segData1, "");
+    // dataLabel(intersect, output);
 
 //    dataFilter(output, )
 
@@ -288,26 +280,21 @@ QVariantList VolumetricDataManager::runAnalysis(
     return vlist;
 }
 
-void VolumetricDataManager::saveCsv(QVariant list, QString filename)
+void VolumetricDataManager::saveCsv(const QVariantList &list, QString filename)
 {
     ofstream csvFile;
     csvFile.open(filename.toStdString());
-    // cout << list.typeName() << endl;
-    // cout << "list size " << list.toList().size() << endl;
-    // QVariantList =
-    // for (auto &item : list.value<) {
-    //     cout << "aaa" << endl; 
-    //     for (auto &mapItem : item.toMap()) {
-    //         csvFile << mapItem.toString().toStdString() << ";";
-    //     }
-    //     csvFile << endl;
-    // }
 
-    // myfile << "This is the first cell in the first column.\n";
-    // myfile << "a,b,c,\n";
-    // myfile << "c,s,v,\n";
-    // myfile << "1,2,3.456\n";
-    // myfile << "semi;colon";
+    cout << "list size " << list.size() << endl;
+
+    for (auto &item : list) {
+        cout << "aaa" << endl; 
+        for (auto &mapItem : item.toMap()) {
+            csvFile << mapItem.toString().toStdString() << ";";
+        }
+        csvFile << endl;
+    }
+
     csvFile.close();
 }
 
