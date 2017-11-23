@@ -260,7 +260,7 @@ class Measurement(object):
         return outputImage
 
 
-
+    #print(a)
 
     @staticmethod
     def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
