@@ -2,8 +2,9 @@ import SimpleITK as sitk
 import cv2
 import numpy as np
 from math import pow
+from skimage import img_as_ubyte, exposure
 from skimage.external.tifffile import imread, imsave
-from skimage.filters import  threshold_li, threshold_local
+from skimage.filters import threshold_local
 import pandas as pd
 from scipy.ndimage.filters import convolve
 import time
@@ -115,13 +116,14 @@ class Main(object):
 
         tstart = time.clock()
 
+
         #############################################Load Images####################################################
         sourceImageList=[]
         sourceDictList=[]
         # Channel 1
 
-        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
-        ch1Path = ('F:/Workspace/TestImages/test_1.tif')
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
+        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -132,10 +134,20 @@ class Main(object):
 
 
         # Channel 2
-        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
-        ch2Path =('F:/Workspace/TestImages/test_2.tif')
+        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
+
+        #b=np.array([65535,65535/2, 50], dtype=np.uint16)
+        #b=exposure.rescale_intensity(b,out_range='uint8')
+        b = img_as_ubyte(ch2Img)
+        #exposure.equalize_hist(b)
+        b=Segmentation.threshold_adaptive(b[0], 'Adaptive Gaussian', blockSize=5, offSet=0)
+        print(b)
+        print(len(1))
+
+
 
         ch2Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -145,8 +157,8 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        #ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
-        ch3Path =('F:/Workspace/TestImages/test_3.tif')
+        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
+        #ch3Path =('F:/Workspace/TestImages/test_3.tif')
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -619,7 +631,7 @@ class Segmentation(object):
 
 
     @staticmethod
-    def threshold_auto(img, method):
+    def threshold_auto(img, method,):
         '''
         Apply autothreshold slice by slice
         Run autothreshold on image
@@ -684,13 +696,13 @@ class Segmentation(object):
 
     @staticmethod
     def threshold_adaptive(image, method, blockSize=5, offSet=0):
+        print(type(image[0][0]))
+        if method == 'Adaptive Mean':
+            outputImage = threshold_local(image, blockSize, offSet)
 
-        if method == 'adaptiveMean':
-            outputImage = threshold_adaptive(image, blockSize, offSet)
 
-
-        elif method == 'adaptiveGaussian':
-            outputImage = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, offSet)
+        elif method == 'Adaptive Gaussian':
+            outputImage = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, blockSize, offSet)
 
 
         return outputImage
@@ -718,13 +730,14 @@ class Segmentation(object):
 
         stack = []
         for i in range(len(img)):
+
             segmentedImage, _ =Segmentation.threshold_auto(img[i], method)
             stack.append(segmentedImage)
 
         return stack
 
     @staticmethod
-    def threshold2DMean_auto(img, method, filter='Median'):
+    def threshold2DMean_auto(img, method, filter='Median', blockSize=5, offSet=0 ):
         '''
         Apply autothreshold slice by slice
         :param img: nd array
@@ -744,7 +757,7 @@ class Segmentation(object):
 
         thresholdArray=np.zeros(len(img))
         for i in range(len(img)):
-            _, threshold = Segmentation.threshold_auto(img[i], method)
+            _, threshold = Segmentation.threshold_auto(img[i], method, blockSize, offSet)
 
             thresholdArray[i]=threshold
 
@@ -768,25 +781,7 @@ class Segmentation(object):
 
         return sitk.GetArrayFromImage(tagged_image)
 
-    @staticmethod
-    def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, multiplier=2.5, NbrOfIterations=5, replaceValue=255):
 
-        itkImage = sitk.GetImageFromArray(image)
-        pixelType = itkImage.GetPixelID()
-
-        filter = sitk.ConfidenceConnectedImageFilter()
-        filter.SetSeedList(seedList)
-        filter.SetMultiplier(multiplier)
-        filter.SetNumberOfIterations(NbrOfIterations)
-        filter.SetReplaceValue(replaceValue)
-        filter.SetInitialNeighborhoodRadius(initialNeighborhoodRadius)
-        itkImage = filter.Execute(itkImage)
-
-
-        caster = sitk.CastImageFilter()
-        caster.SetOutputPixelType(pixelType)
-
-        return sitk.GetArrayFromImage(caster.Execute(itkImage))
 
 
 ###############################################Class that contain main functions for A3DC####################################################
@@ -835,6 +830,31 @@ class Segmentation(object):
             caster.SetOutputPixelType(pixelType)
 
             return sitk.GetArrayFromImage(caster.Execute(itkImage))
+
+        @staticmethod
+        def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, multiplier=2.5, NbrOfIterations=5,
+                                      replaceValue=255):
+            itkImage = sitk.GetImageFromArray(image)
+
+
+            filter = sitk.ConfidenceConnectedImageFilter()
+            filter.SetSeedList(seedList)
+            filter.SetMultiplier(multiplier)
+            filter.SetNumberOfIterations(NbrOfIterations)
+            filter.SetReplaceValue(replaceValue)
+            filter.SetInitialNeighborhoodRadius(initialNeighborhoodRadius)
+            itkImage = filter.Execute(itkImage)
+
+
+            return sitk.GetArrayFromImage(itkImage)
+
+        #Ideas:
+           # Histogram equilization, depth correction: itk.AdaptiveHistogramEqualizationImageFilter, equalize_adapthist, equalize_hist¶
+            #Seed based segmentation: skimage.segmentation.random_walker, watershed voronoi
+            #Geodescic active contour itk, skimage.segmentation.morphological_geodesic_active_contour
+            #Add, subtract ,multiply
+            #close, open, dilate,erode, local maxima/minima, thinning?
+            #Denoising:denoise_wavelet¶
 
 ############################################Helper Functions for testing in python###################################
 class Processor(object):
