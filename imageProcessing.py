@@ -122,8 +122,8 @@ class Main(object):
         sourceDictList=[]
         # Channel 1
 
-        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
-        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
+        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
+        ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -134,8 +134,8 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
-        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
+        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
+        ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
 
@@ -156,8 +156,8 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
-        #ch3Path =('F:/Workspace/TestImages/test_3.tif')
+        #ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
+        ch3Path =('F:/Workspace/TestImages/test_3.tif')
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -587,6 +587,63 @@ class Measurement(object):
 #############################################Class that contain main functions for A3DC####################################################
 class Segmentation(object):
 
+    @staticmethod
+    def threshold_auto(image, method="Otsu", mode="2D"):
+
+        '''
+        Apply autothreshold slice by slice
+        :param img: nd array
+        :param thresholdMethod: threshold method name as string
+                * 'Otsu'
+                * 'Huang'
+                * 'IsoData'
+                * 'Li'
+                * 'MaxEntropy'
+                * 'KittlerIllingworth'
+                * 'Moments'
+                * 'Yen'
+                * 'RenyiEntropy'
+                * 'Shanbhag'
+        :return: nd array
+        '''
+
+        if mode=="3D":
+            outputImage, _=itkThresholder(image, method)
+
+        elif mode=="2D":
+
+            outputImage = []
+            for i in range(len(image)):
+                segmentedImage, _ = Segmentation.threshold_auto(image[i], method)
+                outputImage.append(segmentedImage)
+
+        return outputImage
+
+    @staticmethod
+    def itkThresholder(image, method):
+
+        itkThresholdDict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
+                                'Huang': sitk.HuangThresholdImageFilter(),
+                                'MaxEntropy': sitk.MaximumEntropyThresholdImageFilter(),
+                                'Li': sitk.LiThresholdImageFilter(),
+                                'RenyiEntropy': sitk.RenyiEntropyThresholdImageFilter(),
+                                'KittlerIllingworth': sitk.KittlerIllingworthThresholdImageFilter(),
+                                'Moments': sitk.MomentsThresholdImageFilter(), 'Yen': sitk.YenThresholdImageFilter(),
+                                'Shanbhag': sitk.ShanbhagThresholdImageFilter()}
+        #Create ITK image
+        itkImage = sitk.GetImageFromArray(img)
+        #Create ITK FIlter object
+        itkThresholdDict[method](image)
+        # Get and apply threshold and invert
+        segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
+        threshold = threshold.GetThreshold()
+
+        return segmentedImage, threshold
+
+
+
+
+
 
     @staticmethod
     def create_overlappingImage(taggedImageList):
@@ -629,161 +686,33 @@ class Segmentation(object):
         return sitk.GetArrayFromImage(sitk.InvertIntensity(segmentedImage, 1))
 
 
-    @staticmethod
-    def threshold_auto(img, method,):
-        '''
-        Apply autothreshold slice by slice
-        Run autothreshold on image
-        :param img: nd array
-        :param thresholdMethod: threshold method name as string
-            * 'Otsu'
-            * 'Huang'
-            * 'IsoData'
-            * 'Li'
-            * 'MaxEntropy'
-            * 'KittlerIllingworth'
-            * 'Moments'
-            * 'Yen'
-            * 'RenyiEntropy'
-            * 'Shanbhag'
-        :return: nd array
-        '''
 
-        #Convert nd Image to ITK image
-        itkImage = sitk.GetImageFromArray(img)
-
-        # Get threshold value
-        if method == 'IsoData':
-            threshold = sitk.IsoDataThresholdImageFilter()
-
-        elif method == 'Otsu':
-            threshold = sitk.OtsuThresholdImageFilter()
-
-        elif method == 'Huang':
-            threshold = sitk.HuangThresholdImageFilter()
-
-        elif method == 'MaxEntropy':
-            threshold = sitk.MaximumEntropyThresholdImageFilter()
-
-        elif method == 'Li':
-            threshold = sitk.LiThresholdImageFilter()
-
-        elif method == 'RenyiEntropy':
-            threshold = sitk.RenyiEntropyThresholdImageFilter()
-
-        elif method == 'KittlerIllingworth':
-            threshold = sitk.KittlerIllingworthThresholdImageFilter()
-
-        elif method == 'Moments':
-            threshold = sitk.MomentsThresholdImageFilter()
-
-        elif method == 'Yen':
-            threshold = sitk.YenThresholdImageFilter()
-
-        elif method == 'Shanbhag':
-            threshold = sitk.ShanbhagThresholdImageFilter()
-
-        else:
-            raise LookupError('Not a valid Auto Threshold method!')
-
-        # Get and apply threshold and invert
-        segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
-        threshold = threshold.GetThreshold()
-
-
-        return sitk.GetArrayFromImage(segmentedImage), threshold
 
     @staticmethod
     def threshold_adaptive(image, method, blockSize=5, offSet=0):
 
-        convertedImage=img_as_ubyte(image)
+        #Cast to 8-bit
+        convertedImage = img_as_ubyte(image)
 
-        if method == 'Adaptive Mean':
-            outputImage = threshold_local(convertedImage, blockSize, offSet)
+        #Cycle through image
+        outputImage = []
+        for i in range(len(image)):
+            if method == 'Adaptive Mean':
+                outputImage.append(threshold_local(convertedImage, blockSize, offSet))
 
-
-        elif method == 'Adaptive Gaussian':
-            outputImage = cv2.adaptiveThreshold(convertedImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, offSet)
+            elif method == 'Adaptive Gaussian':
+                outputImage.append(cv2.adaptiveThreshold(convertedImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                                    cv2.THRESH_BINARY, blockSize, offSet))
+            else:
+                raise LookupError('Not a valid method!')
+                break
 
 
         return outputImage
 
 
 
-    @staticmethod
-    def threshold2D_auto(img, method):
-        '''
-        Apply autothreshold slice by slice
-        :param img: nd array
-        :param thresholdMethod: threshold method name as string
-            * 'Otsu'
-            * 'Huang'
-            * 'IsoData'
-            * 'Li'
-            * 'MaxEntropy'
-            * 'KittlerIllingworth'
-            * 'Moments'
-            * 'Yen'
-            * 'RenyiEntropy'
-            * 'Shanbhag'
-        :return: nd array
-        '''
-
-        stack = []
-        for i in range(len(img)):
-
-            segmentedImage, _ =Segmentation.threshold_auto(img[i], method)
-            stack.append(segmentedImage)
-
-        return stack
-
-    @staticmethod
-    def threshold2DMean_auto(img, method, filter='Median', blockSize=5, offSet=0 ):
-        '''
-        Apply autothreshold slice by slice
-        :param img: nd array
-        :param thresholdMethod: threshold method name as string
-            * 'Otsu'
-            * 'Huang'
-            * 'IsoData'
-            * 'Li'
-            * 'MaxEntropy'
-            * 'KittlerIllingworth'
-            * 'Moments'
-            * 'Yen'
-            * 'RenyiEntropy'
-            * 'Shanbhag'
-        :return: nd array
-        '''
-
-        thresholdArray=np.zeros(len(img))
-        for i in range(len(img)):
-            _, threshold = Segmentation.threshold_auto(img[i], method, blockSize, offSet)
-
-            thresholdArray[i]=threshold
-
-        #Calculate final threshold
-        if filter=='Mean':
-            finalThreshold=np.median(thresholdArray)
-        elif filter=='Median':
-            finalThreshold = np.mean(thresholdArray)
-        else:
-            raise LookupError('Not a valid method!')
-
-
-        #Apply threshold
-        return Segmentation.threshold_manual(img, lowerThreshold=0, upperThreshold=finalThreshold)
-
-    @staticmethod
-    def tag_image(img):
-        # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
-        itk_image=sitk.GetImageFromArray(img)
-        tagged_image = sitk.ConnectedComponent(itk_image, fullyConnected=True)
-
-        return sitk.GetArrayFromImage(tagged_image)
-
-
-
+    
 
 ###############################################Class that contain main functions for A3DC####################################################
     class ImageProcessing(object):
