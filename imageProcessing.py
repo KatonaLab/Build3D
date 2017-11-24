@@ -145,7 +145,6 @@ class Main(object):
         #exposure.equalize_hist(b)
         b=Segmentation.threshold_adaptive(ch2Img[0], 'Adaptive Gaussian', blockSize=5, offSet=0)
 
-        (print(b))
 
 
         ch2Dict={'name': 'RawImage1',
@@ -174,19 +173,21 @@ class Main(object):
         taggedDictList = []
 
         # Channel 1
-        thresholdedImage1=Segmentation.threshold2D_auto(sourceImageList[0], "Otsu")
+        thresholdedImage1=Segmentation.threshold_auto(sourceImageList[0], method="MaxEntropy", mode="3D")
         taggedImage1=Segmentation.tag_image(thresholdedImage1)
 
         taggedDict1=sourceDictList[0]
         taggedDict1=Measurement.analyze(taggedImage1, taggedDict1, imageList=sourceImageList, dictionaryList=sourceDictList)
         taggedDict1['name']='Channel1'
 
+        print(taggedDict1['dataBase'])
+
         taggedImageList.append(taggedImage1)
         taggedDictList.append(taggedDict1)
 
 
         # Channel 2
-        thresholdedImage2 = Segmentation.threshold2D_auto(sourceImageList[1], "MaxEntropy")
+        thresholdedImage2 = Segmentation.threshold_auto(sourceImageList[1], method="MaxEntropy", mode="3D")
         taggedImage2 = Segmentation.tag_image(thresholdedImage2)
 
 
@@ -200,7 +201,7 @@ class Main(object):
         taggedDictList.append(taggedDict2)
 
         # Channel 3
-        thresholdedImage3 = Segmentation.threshold2D_auto(sourceImageList[2], "MaxEntropy")
+        thresholdedImage3 = Segmentation.threshold_auto(sourceImageList[2], method="Otsu", mode="2D")
         taggedImage3 = Segmentation.tag_image(thresholdedImage3)
 
         taggedDict3 =sourceDictList[2]
@@ -387,12 +388,15 @@ class Measurement(object):
     @staticmethod
     def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
 
-        if imageList==[]:
-            imageList.append(taggedImage)
-            dictionaryList.append(dictionary)
+
+        #dataBase dictionary to store results
 
         dataBase = {'tag': [], 'volume': [], 'voxelCount': [], 'centroid': [], 'ellipsoidDiameter': [],
                     'boundingBox': []}
+        #Cycle through images to measure parameters
+        if imageList == []:
+            imageList.append(taggedImage)
+            dictionaryList.append(dictionary)
 
         for i in range(len(imageList)):
 
@@ -401,9 +405,11 @@ class Measurement(object):
             # Measurements for parameters that do not need two images (data like volume, centroid etc.)  in ITK can
             # can be done with itkFilter = sitk.LabelShapeStatisticsImageFilter()!!!!
 
+            #Run LabelIntensityStatisticsImageFilter and get results
             itkFilter = sitk.LabelIntensityStatisticsImageFilter()
             itkFilter.Execute(itkImage, itkRaw)
             data = itkFilter.GetLabels()
+
 
             dataBase['pixel in '+dictionaryList[i]['name']]= []
             dataBase['mean in ' + dictionaryList[i]['name']]=[]
@@ -608,13 +614,13 @@ class Segmentation(object):
         '''
 
         if mode=="3D":
-            outputImage, _=itkThresholder(image, method)
+            outputImage, _=Segmentation.itkThresholder(image, method)
 
         elif mode=="2D":
 
             outputImage = []
             for i in range(len(image)):
-                segmentedImage, _ = Segmentation.threshold_auto(image[i], method)
+                segmentedImage, _ = Segmentation.itkThresholder(image[i], method)
                 outputImage.append(segmentedImage)
 
         return outputImage
@@ -631,17 +637,14 @@ class Segmentation(object):
                                 'Moments': sitk.MomentsThresholdImageFilter(), 'Yen': sitk.YenThresholdImageFilter(),
                                 'Shanbhag': sitk.ShanbhagThresholdImageFilter()}
         #Create ITK image
-        itkImage = sitk.GetImageFromArray(img)
+        itkImage = sitk.GetImageFromArray(image)
         #Create ITK FIlter object
-        itkThresholdDict[method](image)
+        threshold=itkThresholdDict[method]
         # Get and apply threshold and invert
         segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
         threshold = threshold.GetThreshold()
 
-        return segmentedImage, threshold
-
-
-
+        return sitk.GetArrayFromImage(segmentedImage), threshold
 
 
 
@@ -658,6 +661,7 @@ class Segmentation(object):
 
     @staticmethod
     def tag_image(image):
+
         # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
         itk_image = sitk.GetImageFromArray(image)
         tagged_image = sitk.ConnectedComponent(itk_image, fullyConnected=True)
@@ -712,7 +716,7 @@ class Segmentation(object):
 
 
 
-    
+
 
 ###############################################Class that contain main functions for A3DC####################################################
     class ImageProcessing(object):
