@@ -141,12 +141,11 @@ class Main(object):
 
         #b=np.array([65535,65535/2, 50], dtype=np.uint16)
         #b=exposure.rescale_intensity(b,out_range='uint8')
-        b = img_as_ubyte(ch2Img)
+        #b = img_as_ubyte(ch2Img)
         #exposure.equalize_hist(b)
-        b=Segmentation.threshold_adaptive(b[0], 'Adaptive Gaussian', blockSize=5, offSet=0)
-        print(b)
-        print(len(1))
+        b=Segmentation.threshold_adaptive(ch2Img[0], 'Adaptive Gaussian', blockSize=5, offSet=0)
 
+        (print(b))
 
 
         ch2Dict={'name': 'RawImage1',
@@ -696,13 +695,15 @@ class Segmentation(object):
 
     @staticmethod
     def threshold_adaptive(image, method, blockSize=5, offSet=0):
-        print(type(image[0][0]))
+
+        convertedImage=img_as_ubyte(image)
+
         if method == 'Adaptive Mean':
-            outputImage = threshold_local(image, blockSize, offSet)
+            outputImage = threshold_local(convertedImage, blockSize, offSet)
 
 
         elif method == 'Adaptive Gaussian':
-            outputImage = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, blockSize, offSet)
+            outputImage = cv2.adaptiveThreshold(convertedImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, offSet)
 
 
         return outputImage
