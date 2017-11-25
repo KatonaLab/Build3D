@@ -195,7 +195,6 @@ class Main(object):
         thresholdedImage2 = Segmentation.threshold_auto(sourceImageList[1], method="MaxEntropy", mode="3D")
         taggedImage2 = Segmentation.tag_image(thresholdedImage2)
 
-        print(Measurement.isOnEdge(taggedImage2))
 
         taggedDict2=sourceDictList[1]
         taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=[sourceImageList[1]], dictionaryList=sourceDictList)
@@ -387,11 +386,12 @@ class Measurement(object):
 
 
     @staticmethod
-    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[]):
+    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[],surface=True):
 
         #dataBase dictionary to store results
         dataBase = {'tag': [], 'volume': [], 'voxelCount': [], 'centroid': [], 'ellipsoidDiameter': [],
-                    'boundingBox': []}
+                    'boundingBox': [], 'isOnEdge':[]}
+
         #Cycle through images to measure parameters
         if imageList == []:
             imageList.append(taggedImage)
@@ -421,13 +421,31 @@ class Measurement(object):
                     dataBase['centroid'].append(itkFilter.GetCentroid(label))
                     dataBase['ellipsoidDiameter'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
                     dataBase['boundingBox'].append(itkFilter.GetBoundingBox(label))
+                    dataBase['isOnEdge'].append( True if itkFilter.GetNumberOfPixelsOnBorder(label)>0  else False)
+
 
                 dataBase['mean in '+dictionaryList[i]['name']].append(itkFilter.GetMean(label))
                 dataBase['pixel in '+dictionaryList[i]['name']].append(itkFilter.GetMaximumIndex(label))
                 dataBase['centerOfMass in '+dictionaryList[i]['name']].append(itkFilter.GetCenterOfGravity(label))
 
-        dictionary['dataBase']=dataBase
 
+        if surface==True:
+            #Create Surface Image
+            surface=Segmentation.create_surfaceImage(taggedImage)
+            surfaceItkImage=sitk.GetImageFromArray(surface)
+            #
+            surfaceFilter=sitk.LabelShapeStatisticsImageFilter()
+            surfaceFilter.Execute(surfaceItkImage)
+            surfaceData=surfaceFilter.GetLabels()
+
+            dataBase['surface']=[]
+            for label in surfaceData:
+                dataBase['surface'].append(itkFilter.GetNumberOfPixels(label))
+
+
+
+        dictionary['dataBase']=dataBase
+        print(dictionary)
         return dictionary
 
 
@@ -553,55 +571,7 @@ class Measurement(object):
 
         return list
 
-    @staticmethod
-    def isOnEdge(taggedImage):
 
-        itk_image = sitk.GetImageFromArray(taggedImage)
-
-
-
-        #Create instance of
-        itkFilter=sitk.BinaryContourImageFilter()
-        itkFilter.SetFullyConnected(False)
-        itk_image = sitk.BinaryThreshold(itk_image, 0, 1, 0, 1)
-
-        itk_image = itkFilter.Execute(itk_image)
-
-        #return sitk.GetArrayFromImage(itk_image )
-
-        # itkFilter=sitk.BinaryGrindPeakImageFilter()
-        # itkFilter.SetFullyConnected(False)
-        #itkFilter.Execute(itk_image)
-
-        #sitk.Show(borderImage * 255)
-        #borderImage= sitk.BinaryMorphologicalClosing(borderImage, 1)
-        #print(sitk.GetArrayFromImage(borderImage))
-        #borderImage=sitk.BinaryGrindPeakImageFilter(borderImage)
-
-        #caster = sitk.CastImageFilter()
-        #caster.SetOutputPixelType(pixelType)
-        #borderImage=caster.Execute(borderImage)
-        borderImage = itkFilter.Execute(itk_image)
-        outputImage = sitk.GetArrayFromImage(borderImage )
-
-        '''
-        shape = tinyImg_tagged.shape
-        NbOverlappingObj = np.amax(tinyImg_tagged)
-        matrixShape = shape
-        sidePixelList = [tinyImg_tagged[0, :, :], tinyImg_tagged[-1, :, :], tinyImg_tagged[1:matrixShape[0] - 1, 0, :],
-                         tinyImg_tagged[1:matrixShape[0] - 1, matrixShape[1] - 1, :],
-                         tinyImg_tagged[1:matrixShape[0] - 1, 1:matrixShape[0] - 2, 0],
-                         tinyImg_tagged[1:matrixShape[0] - 1, 1:matrixShape[0] - 2, matrixShape[2] - 1]]
-
-        isOnEdgeList = [False for i in range(0, NbOverlappingObj)]
-        for i in range(0, len(sidePixelList)):
-            for pix in sidePixelList[i].flatten():
-                if pix > 0:
-                    isOnEdgeList[pix - 1] = True
-        '''
-
-
-        return sitk.GetArrayFromImage(itk_image)
 
     @staticmethod
     def measure_volume(objectList):
@@ -673,12 +643,18 @@ class Segmentation(object):
 
     @staticmethod
     def create_surfaceImage(taggedImage):
-        
-        #Convert nd array to itk image
-        itk_image = sitk.GetImageFromArray(taggedImage)
+
+
+
 
         #Run binary threshold
-        itk_image = sitk.BinaryThreshold(itk_image, 0, 1, 0, 1)
+        #itk_image = sitk.BinaryThreshold(itk_image, 0, 1, 0, 1)
+
+        # Convert nd array to itk image
+
+        itk_image = sitk.GetImageFromArray(taggedImage)
+        print('Inside')
+        print(sitk.GetArrayFromImage(itk_image))
 
         # Create an parametrize instance ofBinaryContourImageFilter()
         itkFilter = sitk.BinaryContourImageFilter()
