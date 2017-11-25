@@ -297,9 +297,7 @@ class Measurement(object):
     @staticmethod
     def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
 
-
         # Generate array lists and name lists
-
         nameList = [x['name'] for x in dataBaseList]
 
         for i in range(len(taggedImgList)):
@@ -365,16 +363,12 @@ class Measurement(object):
             if flag==True:
                 for i in range(NbOfInputElements):
 
-                    #currentTag = overlappingDataBase['object in ' + nameList[i]][j]
-                    #currentPosition = dataBaseList[i]['tag'].index(currentTag)
-
                     outputList[i]['colocalizationCount'][currentPositionList[i]]+=1
                     outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j]
 
                     positionList = [x for x in range(NbOfInputElements) if x != i]
                     for j in range(len(positionList)):
                         outputList[i]['objects in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j]])
-
 
         for i in range(NbOfInputElements):
             for key in outputList[i]:
@@ -401,8 +395,6 @@ class Measurement(object):
 
             itkImage = sitk.GetImageFromArray(taggedImage)
             itkRaw = sitk.GetImageFromArray(imageList[0])
-            # Measurements for parameters that do not need two images (data like volume, centroid etc.)  in ITK can
-            # can be done with itkFilter = sitk.LabelShapeStatisticsImageFilter()!!!!
 
             #Run LabelIntensityStatisticsImageFilter and get results
             itkFilter = sitk.LabelIntensityStatisticsImageFilter()
@@ -423,29 +415,25 @@ class Measurement(object):
                     dataBase['boundingBox'].append(itkFilter.GetBoundingBox(label))
                     dataBase['isOnEdge'].append( True if itkFilter.GetNumberOfPixelsOnBorder(label)>0  else False)
 
-
                 dataBase['mean in '+dictionaryList[i]['name']].append(itkFilter.GetMean(label))
                 dataBase['pixel in '+dictionaryList[i]['name']].append(itkFilter.GetMaximumIndex(label))
                 dataBase['centerOfMass in '+dictionaryList[i]['name']].append(itkFilter.GetCenterOfGravity(label))
 
-
         if surface==True:
-            #Create Surface Image
+            #Create and measure Surface Image
             surface=Segmentation.create_surfaceImage(taggedImage)
             surfaceItkImage=sitk.GetImageFromArray(surface)
-            #
+
             surfaceFilter=sitk.LabelShapeStatisticsImageFilter()
             surfaceFilter.Execute(surfaceItkImage)
             surfaceData=surfaceFilter.GetLabels()
 
             dataBase['surface']=[]
             for label in surfaceData:
-                dataBase['surface'].append(itkFilter.GetNumberOfPixels(label))
-
-
+                dataBase['surface'].append(surfaceFilter.GetNumberOfPixels(label))
 
         dictionary['dataBase']=dataBase
-        print(dictionary)
+
         return dictionary
 
 
@@ -644,24 +632,26 @@ class Segmentation(object):
     @staticmethod
     def create_surfaceImage(taggedImage):
 
-
-
-
-        #Run binary threshold
-        #itk_image = sitk.BinaryThreshold(itk_image, 0, 1, 0, 1)
-
         # Convert nd array to itk image
+        itkImage = sitk.GetImageFromArray(taggedImage)
+        pixelType = itkImage.GetPixelID()
+        # Run binary threshold
+        thresholdedItkImage = sitk.BinaryThreshold(itkImage, 0, 0, 0, 1)
 
-        itk_image = sitk.GetImageFromArray(taggedImage)
-        print('Inside')
-        print(sitk.GetArrayFromImage(itk_image))
+
 
         # Create an parametrize instance ofBinaryContourImageFilter()
         itkFilter = sitk.BinaryContourImageFilter()
         itkFilter.SetFullyConnected(False)
-        itk_image = itkFilter.Execute(itk_image)
+        #Execute to get a surface mask
+        output = itkFilter.Execute(thresholdedItkImage)
 
-        return sitk.GetArrayFromImage(itk_image)
+        # Change pixeltype of the object map to be the same as the input image
+        caster = sitk.CastImageFilter()
+        caster.SetOutputPixelType(pixelType)
+        output=caster.Execute(output)*itkImage
+
+        return sitk.GetArrayFromImage(output)
 
     @staticmethod
     def create_overlappingImage(taggedImageList):
@@ -684,13 +674,7 @@ class Segmentation(object):
         return sitk.GetArrayFromImage(tagged_image)
 
     @staticmethod
-    def threshold_manual(img, lowerThreshold=None, upperThreshold=None):
-
-        if lowerThreshold==None:
-            lowerThreshold=np.amin(img)
-
-        if upperThreshold == None:
-            upperThreshold = np.amax(img)
+    def threshold_manual(img, lowerThreshold, upperThreshold):
 
         # Convert nd Image to ITK image
         itkImage = sitk.GetImageFromArray(img)
