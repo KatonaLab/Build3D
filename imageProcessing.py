@@ -399,7 +399,31 @@ class Measurement(object):
             #Run LabelIntensityStatisticsImageFilter and get results
             itkFilter = sitk.LabelIntensityStatisticsImageFilter()
             itkFilter.Execute(itkImage, itkRaw)
-            data = itkFilter.GetLabels()
+            data=itkFilter.GetLabels()
+
+            descriptor=['volume','voxelCount']
+
+            #finctionDict={'voxelCount':itkFilter.GetNumberOfPixels(), 'volume':itkFilter.GetPhysicalSize()}
+
+            #
+            singleChannelFunctionDict={'volume': Measurement.getVolume, 'voxelCount': Measurement.getVoxelCount,
+                 'centroid': Measurement.getCentroid, 'ellipsoidDiameter': Measurement.getEquivalentEllipsoidDiameter,
+                'boundingBox': Measurement.getBoundingBox, 'isOnEdge':Measurement.isOnEdge, 'numberOfPixelsOnBorder':Measurement.getNumberOfPixelsOnBorder,
+                'getElongation':Measurement.getElongation,'getEquivalentSphericalRadius':Measurement.getEquivalentSphericalRadius,
+                'getFlatness':Measurement.getFlatness,'getKurtosis':Measurement.getKurtosis, 'getMaximum':Measurement.getMaximum,
+                'getMedian':Measurement.getMedian,'getMinimum':Measurement.getMinimum,'getPrincipalAxes':Measurement.getPrincipalAxes,
+                'getPrincipalMoments':Measurement.getPrincipalMoments,'getPrincipalMoments':Measurement.getPrincipalMoments,'getRoundness':Measurement.getRoundness,
+                'getRoundness':Measurement.getRoundness,'getSkewness':Measurement.getSkewness,'getStandardDeviation':Measurement.getStandardDeviation,
+                'getSum':Measurement.getSum, 'getVariance':Measurement.getVariance,'getPrincipalAxes':Measurement.getPrincipalAxes, 'getWeightedElongation':Measurement.getWeightedElongation,
+                 'getWeightedFlatness':Measurement.getWeightedFlatness   }
+
+            doubleChannelFunctionDict={'mean':Measurement.getMean, 'maximumIndex':Measurement.getMaximumIndex, 'centerOfMass':Measurement.getCenterOfGravity,
+                                       'getWeightedElongation':Measurement.getWeightedElongation, 'getWeightedFlatness':Measurement.getWeightedFlatness, 'getWeightedPrincipalAxes':Measurement.getWeightedPrincipalAxes,
+                                       'getWeightedPrincipalMoments':Measurement.getWeightedPrincipalMoments}
+
+            other={'getFeretDiameter':Measurement.getFeretDiameter,'getPerimeter':Measurement.getPerimeter,'getPerimeterOnBorder':Measurement.getPerimeterOnBorder, 'getPerimeterOnBorderRatio':Measurement.getPerimeterOnBorderRatio, 'getEquivalentSphericalPerimeter':Measurement.getEquivalentSphericalPerimeter  }
+
+
 
             dataBase['pixel in '+dictionaryList[i]['name']]= []
             dataBase['mean in ' + dictionaryList[i]['name']]=[]
@@ -560,7 +584,8 @@ class Measurement(object):
         return list
 
 
-
+    #######################################################################################################################################
+    ####################################################################Helper Functions###################################################
     @staticmethod
     def measure_volume(objectList):
 
@@ -571,6 +596,147 @@ class Measurement(object):
 
         return volumes
 
+    @staticmethod
+    def getVolume(itkFilter, label):
+        return itkFilter.GetNumberOfPixels(label)
+
+    @staticmethod
+    def getVoxelCount(itkFilter, label):
+        return itkFilter.GetNumberOfPixels(label)
+
+    @staticmethod
+    def getCentroid(itkFilter, label):
+        return itkFilter.GetCentroid(label)
+
+    @staticmethod
+    def getEquivalentEllipsoidDiameter(itkFilter, label):
+        return itkFilter.GetEquivalentEllipsoidDiameter(label)
+
+    @staticmethod
+    def getBoundingBox(itkFilter, label):
+        return itkFilter.GetBoundingBox(label)
+
+    @staticmethod
+    def isOnEdge(itkFilter, label):
+        value = True if itkFilter.GetNumberOfPixelsOnBorder(label) > 0  else False
+        return value
+
+    @staticmethod
+    def getNumberOfPixelsOnBorder(itkFilter, label):
+        return itkFilter.GetNumberOfPixelsOnBorder(label)
+
+    @staticmethod
+    def getMean(itkFilter, label):
+        return itkFilter.GetMean(label)
+
+    @staticmethod
+    def getMaximumIndex(itkFilter, label):
+        return itkFilter.GetMaximumIndex(label)
+
+    @staticmethod
+    def getCenterOfGravity(itkFilter, label):
+        return itkFilter.GetCenterOfGravity(label)
+
+    @staticmethod
+    def getElongation(itkFilter, label):
+        return itkFilter.GetElongation(label)
+
+    @staticmethod
+    def getEquivalentSphericalRadius(itkFilter, label):
+        return itkFilter.GetEquivalentSphericalRadius(label)
+
+    @staticmethod
+    def getFlatness(itkFilter, label):
+        return itkFilter.getFlatness(label)
+
+    @staticmethod
+    def getKurtosis(itkFilter, label):
+        return itkFilter.GetKurtosis(label)
+
+    @staticmethod
+    def getMaximum(itkFilter, label):
+        return itkFilter.GetMaximum(label)
+
+    @staticmethod
+    def getMedian(itkFilter, label):
+        return itkFilter.GetMedian(label)
+
+    @staticmethod
+    def getMinimum(itkFilter, label):
+        return itkFilter.GetMinimum(label)
+
+    @staticmethod
+    def getPrincipalMoments(itkFilter, label):
+        return itkFilter.GetPrincipalMoments(label)
+
+    @staticmethod
+    def getRoundness(itkFilter, label):
+        return itkFilter.GetRoundness(label)
+
+    @staticmethod
+    def getSkewness(itkFilter, label):
+        return itkFilter.GetSkewness(label)
+
+    @staticmethod
+    def getStandardDeviation(itkFilter, label):
+        return itkFilter.GetStandardDeviation(label)
+
+    @staticmethod
+    def getSum(itkFilter, label):
+        return itkFilter.GetSum(label)
+
+    @staticmethod
+    def getVariance(itkFilter, label):
+        return itkFilter.GetVariance(label)
+
+    @staticmethod
+    def getPrincipalAxes(itkFilter, label):
+        return itkFilter.GetPrincipalAxes(label)
+
+    @staticmethod
+    def getWeightedElongation(itkFilter, label):
+        return itkFilter.GetWeightedElongation(label)
+
+    @staticmethod
+    def getWeightedFlatness(itkFilter, label):
+        return itkFilter.GetWeightedFlatness(label)
+
+    @staticmethod
+    def getWeightedPrincipalAxes(itkFilter, label):
+        return itkFilter.GetWeightedPrincipalAxes(label)
+
+    @staticmethod
+    def getWeightedPrincipalMoments(itkFilter, label):
+        return itkFilter.GetWeightedPrincipalMoments(label)
+
+
+
+
+
+    @staticmethod
+    def getEquivalentSphericalPerimeter(itkFilter, label):
+        value = itkFilter.GetEquivalentSphericalPerimeter(label) if itkFilter.GetComputePerimeter() == True  else None
+        return value
+
+    @staticmethod
+    def getFeretDiameter(itkFilter, label):
+        value = itkFilter.GetFeretDiameter(label) if itkFilter.GetComputeFeretDiameter() == True  else None
+        return
+
+    @staticmethod
+    def getPerimeter(itkFilter, label):
+        value = itkFilter.GetPerimeter(label) if itkFilter.GetComputePerimeter() == True  else None
+        return value
+
+    @staticmethod
+    def getPerimeterOnBorder(itkFilter, label):
+        value = itkFilter.GetPerimeterOnBorder(label) if itkFilter.GetComputePerimeter() == True  else None
+        return value
+
+    @staticmethod
+    def getPerimeterOnBorderRatio(itkFilter, label):
+        value = itkFilter.GetPerimeterOnBorder(label) if itkFilter.GetComputePerimeter() == True  else None
+        return value
 
 
 #############################################Class that contain main functions for A3DC####################################################
@@ -710,6 +876,7 @@ class Segmentation(object):
 
 
         return outputImage
+
 
 
 
