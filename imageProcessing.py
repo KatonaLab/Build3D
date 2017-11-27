@@ -122,8 +122,8 @@ class Main(object):
         sourceDictList=[]
         # Channel 1
 
-        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_1.tif")
-        ch1Path = ('F:/Workspace/TestImages/test_1.tif')
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
@@ -134,8 +134,8 @@ class Main(object):
 
 
         # Channel 2
-        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_2.tif")
-        ch2Path =('F:/Workspace/TestImages/test_2.tif')
+        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
 
@@ -155,8 +155,8 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        #ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/test7_3.tif")
-        ch3Path =('F:/Workspace/TestImages/test_3.tif')
+        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        #ch3Path =('F:/Workspace/TestImages/test_3.tif')
         ch3Img = Processor.load_image(ch3Path)
 
         ch3Dict={'name': 'RawImage1',
@@ -180,13 +180,6 @@ class Main(object):
         taggedDict1=Measurement.analyze(taggedImage1, taggedDict1, imageList=sourceImageList, dictionaryList=sourceDictList)
         taggedDict1['name']='Channel1'
 
-        print(taggedDict1['dataBase'])
-
-
-
-
-
-
         taggedImageList.append(taggedImage1)
         taggedDictList.append(taggedDict1)
 
@@ -195,11 +188,9 @@ class Main(object):
         thresholdedImage2 = Segmentation.threshold_auto(sourceImageList[1], method="MaxEntropy", mode="3D")
         taggedImage2 = Segmentation.tag_image(thresholdedImage2)
 
-
         taggedDict2=sourceDictList[1]
         taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=[sourceImageList[1]], dictionaryList=sourceDictList)
         taggedDict2['name']='Channel2'
-
 
         taggedImageList.append(taggedImage2)
         taggedDictList.append(taggedDict2)
@@ -220,7 +211,8 @@ class Main(object):
 
         #Filter database
         #dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
-        taggedDictList[1]=Measurement.filter_dataBase(taggedDictList[1], {'tag':{'min':2,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
+
+        #taggedDictList[1]=Measurement.filter_dataBase(taggedDictList[1], {'tag':{'min':2,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
 
 
         #Colocalization analysis
@@ -228,9 +220,11 @@ class Main(object):
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
         taggedImageList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
 
+        #print(overlappingDataBase)
+
         #Save results
         #taggedImageList.append(overlappingDataBase)
-        #save(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
+        save(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
 
 
 
@@ -279,8 +273,8 @@ class Measurement(object):
 
         #Create Overlapping Image
         overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
+
         # Create Overlapping dataBase
-        overlappingDataBase={}
         if name==None:
             name='Overlapping'
             for dict in taggedDictList:
@@ -303,7 +297,8 @@ class Measurement(object):
         for i in range(len(taggedImgList)):
             itk_image = sitk.GetImageFromArray(taggedImgList[i])
 
-            overlappingPixels=overlappingDataBase['dataBase']['pixel in '+overlappingDataBase['name']]
+            #Get pixel from database
+            overlappingPixels=overlappingDataBase['dataBase']['maximumPixel in '+overlappingDataBase['name']]
 
             objectList = [None for i in range(len(overlappingPixels))]
             ovlRatioList = [None for i in range(len(overlappingPixels))]
@@ -311,7 +306,7 @@ class Measurement(object):
             for j in range(len(overlappingPixels)):
                 ovlPosition = overlappingPixels[j]
                 objectList[j] = itk_image.GetPixel(ovlPosition)
-                ovlRatioList[j] = overlappingDataBase['dataBase']['volume'][j] / dataBaseList[i]['dataBase']['volume'][objectList[j] - 1]
+                ovlRatioList[j] = overlappingDataBase['dataBase']['voxelCount'][j] / dataBaseList[i]['dataBase']['voxelCount'][objectList[j] - 1]
 
             overlappingDataBase['dataBase']['object in ' + nameList[i]] = objectList
             overlappingDataBase['dataBase']['overlappingRatio in ' + nameList[i]] = ovlRatioList
@@ -380,11 +375,74 @@ class Measurement(object):
 
 
     @staticmethod
-    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[],surface=True):
+    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[], measurementInput = ['surface']):
 
-        #dataBase dictionary to store results
-        dataBase = {'tag': [], 'volume': [], 'voxelCount': [], 'centroid': [], 'ellipsoidDiameter': [],
-                    'boundingBox': [], 'isOnEdge':[]}
+
+
+        #Convert tagged image to ITK image
+        itkImage = sitk.GetImageFromArray(taggedImage)
+
+        # Instatiate ITK LabelIntensityStatisticsImageFilter()
+        itkFilter = sitk.LabelIntensityStatisticsImageFilter()
+
+        singleChannelFunctionDict = {'volume': itkFilter.GetPhysicalSize,
+                                     'voxelCount': itkFilter.GetNumberOfPixels,
+                                     'centroid': itkFilter.GetCentroid,
+                                     'ellipsoidDiameter': itkFilter.GetEquivalentEllipsoidDiameter,
+                                     'boundingBox': itkFilter.GetBoundingBox,
+                                     'pixelsOnBorder': itkFilter.GetNumberOfPixelsOnBorder,
+                                     'getElongation': itkFilter.GetElongation,
+                                     'getEquivalentSphericalRadius': itkFilter.GetEquivalentSphericalRadius,
+                                     'getFlatness': itkFilter.GetFlatness,
+                                     'getPrincipalAxes': itkFilter.GetPrincipalAxes,
+                                     'getPrincipalMoments': itkFilter.GetPrincipalMoments,
+                                     'getRoundness': itkFilter.GetRoundness,
+                                     'getPrincipalAxes': itkFilter.GetPrincipalAxes,
+                                     'getFeretDiameter': itkFilter.GetFeretDiameter,
+                                     'getPerimeter': itkFilter.GetPerimeter,
+                                     'getPerimeterOnBorder': itkFilter.GetPerimeterOnBorder,
+                                     'getPerimeterOnBorderRatio': itkFilter.GetPerimeterOnBorderRatio,
+                                     'getEquivalentSphericalPerimeter': itkFilter.GetEquivalentSphericalPerimeter}
+
+        dualChannelFunctionDict = {'meanIntensity': itkFilter.GetMean,
+                                   'medianIntensity': itkFilter.GetMedian,
+                                   'skewness': itkFilter.GetSkewness,
+                                   'kurtosis': itkFilter.GetKurtosis,
+                                   'variance': itkFilter.GetVariance,
+                                   'maximumPixel': itkFilter.GetMaximumIndex,
+                                   'maximumValue': itkFilter.GetMaximum,
+                                   'minimumValue': itkFilter.GetMinimum,
+                                   'minimumPixel': itkFilter.GetMaximumIndex,
+                                   'centerOfMass': itkFilter.GetCenterOfGravity,
+                                   'standardDeviation': itkFilter.GetStandardDeviation,
+                                   'cumulativeIntensity': itkFilter.GetSum,
+                                   'getWeightedElongation': itkFilter.GetWeightedElongation,
+                                   'getWeightedFlatness': itkFilter.GetWeightedFlatness,
+                                   'getWeightedPrincipalAxes': itkFilter.GetWeightedPrincipalAxes,
+                                   'getWeightedPrincipalMoments': itkFilter.GetWeightedPrincipalMoments}
+
+        singleChMeasurementList = ['voxelCount', 'pixelsOnBorder', 'centroid']
+        dualChMeasurementList = ['meanIntensity', 'maximumPixel']
+        for key in measurementInput:
+            if key == 'getFeretDiameter':
+                itkFilter.ComputeFeretDiameterOn()
+
+            if key in ['getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio',
+                       'getEquivalentSphericalPerimeter']:
+                itkFilter.ComputePerimeterOn()
+
+            if key in singleChannelFunctionDict.keys() and not singleChMeasurementList:
+                singleChMeasurementList.append(key)
+
+            if key in dualChannelFunctionDict.keys() and not dualChMeasurementList:
+                dualChMeasurementList.append(key)
+                # main_list = [item for item in list_2 if item not in list_1]
+
+        # dataBase dictionary to store results
+        dataBase = {'tag': [], }
+
+        for key in singleChMeasurementList:
+            dataBase[key] = []
 
         #Cycle through images to measure parameters
         if imageList == []:
@@ -393,68 +451,37 @@ class Measurement(object):
 
         for i in range(len(imageList)):
 
-            itkImage = sitk.GetImageFromArray(taggedImage)
+
             itkRaw = sitk.GetImageFromArray(imageList[0])
 
-            #Run LabelIntensityStatisticsImageFilter and get results
-            itkFilter = sitk.LabelIntensityStatisticsImageFilter()
+            for key in dualChMeasurementList:
+                dataBase[key+' in '+dictionaryList[i]['name']] = []
+
+            #Execute Filter and get database
             itkFilter.Execute(itkImage, itkRaw)
             data=itkFilter.GetLabels()
-
-            descriptor=['volume','voxelCount']
-
-            #finctionDict={'voxelCount':itkFilter.GetNumberOfPixels(), 'volume':itkFilter.GetPhysicalSize()}
-
-            #
-            singleChannelFunctionDict={'volume': Measurement.getVolume, 'voxelCount': Measurement.getVoxelCount,
-                 'centroid': Measurement.getCentroid, 'ellipsoidDiameter': Measurement.getEquivalentEllipsoidDiameter,
-                'boundingBox': Measurement.getBoundingBox, 'isOnEdge':Measurement.isOnEdge, 'numberOfPixelsOnBorder':Measurement.getNumberOfPixelsOnBorder,
-                'getElongation':Measurement.getElongation,'getEquivalentSphericalRadius':Measurement.getEquivalentSphericalRadius,
-                'getFlatness':Measurement.getFlatness,'getKurtosis':Measurement.getKurtosis, 'getMaximum':Measurement.getMaximum,
-                'getMedian':Measurement.getMedian,'getMinimum':Measurement.getMinimum,'getPrincipalAxes':Measurement.getPrincipalAxes,
-                'getPrincipalMoments':Measurement.getPrincipalMoments,'getPrincipalMoments':Measurement.getPrincipalMoments,'getRoundness':Measurement.getRoundness,
-                'getRoundness':Measurement.getRoundness,'getSkewness':Measurement.getSkewness,'getStandardDeviation':Measurement.getStandardDeviation,
-                'getSum':Measurement.getSum, 'getVariance':Measurement.getVariance,'getPrincipalAxes':Measurement.getPrincipalAxes, 'getWeightedElongation':Measurement.getWeightedElongation,
-                 'getWeightedFlatness':Measurement.getWeightedFlatness   }
-
-            doubleChannelFunctionDict={'mean':Measurement.getMean, 'maximumIndex':Measurement.getMaximumIndex, 'centerOfMass':Measurement.getCenterOfGravity,
-                                       'getWeightedElongation':Measurement.getWeightedElongation, 'getWeightedFlatness':Measurement.getWeightedFlatness, 'getWeightedPrincipalAxes':Measurement.getWeightedPrincipalAxes,
-                                       'getWeightedPrincipalMoments':Measurement.getWeightedPrincipalMoments}
-
-            other={'getFeretDiameter':Measurement.getFeretDiameter,'getPerimeter':Measurement.getPerimeter,'getPerimeterOnBorder':Measurement.getPerimeterOnBorder, 'getPerimeterOnBorderRatio':Measurement.getPerimeterOnBorderRatio, 'getEquivalentSphericalPerimeter':Measurement.getEquivalentSphericalPerimeter  }
-
-
-
-            dataBase['pixel in '+dictionaryList[i]['name']]= []
-            dataBase['mean in ' + dictionaryList[i]['name']]=[]
-            dataBase['centerOfMass in ' + dictionaryList[i]['name']]=[]
 
             for label in data:
                 if i==0:
                     dataBase['tag'].append(label)
-                    dataBase['volume'].append(itkFilter.GetPhysicalSize(label))
-                    dataBase['voxelCount'].append(itkFilter.GetNumberOfPixels(label))
-                    dataBase['centroid'].append(itkFilter.GetCentroid(label))
-                    dataBase['ellipsoidDiameter'].append(itkFilter.GetEquivalentEllipsoidDiameter(label))
-                    dataBase['boundingBox'].append(itkFilter.GetBoundingBox(label))
-                    dataBase['isOnEdge'].append( True if itkFilter.GetNumberOfPixelsOnBorder(label)>0  else False)
+                    for key in singleChMeasurementList:
+                        dataBase[key].append(singleChannelFunctionDict[key](label))
 
-                dataBase['mean in '+dictionaryList[i]['name']].append(itkFilter.GetMean(label))
-                dataBase['pixel in '+dictionaryList[i]['name']].append(itkFilter.GetMaximumIndex(label))
-                dataBase['centerOfMass in '+dictionaryList[i]['name']].append(itkFilter.GetCenterOfGravity(label))
+                for key in dualChMeasurementList:
+                    dataBase[key+' in '+dictionaryList[i]['name']].append(dualChannelFunctionDict[key](label))
 
-        if surface==True:
+        if 'surface' in measurementInput:
             #Create and measure Surface Image
             surface=Segmentation.create_surfaceImage(taggedImage)
             surfaceItkImage=sitk.GetImageFromArray(surface)
 
-            surfaceFilter=sitk.LabelShapeStatisticsImageFilter()
-            surfaceFilter.Execute(surfaceItkImage)
-            surfaceData=surfaceFilter.GetLabels()
+            itkFilter=sitk.LabelShapeStatisticsImageFilter()
+            itkFilter.Execute(surfaceItkImage)
+            surfaceData=itkFilter.GetLabels()
 
             dataBase['surface']=[]
             for label in surfaceData:
-                dataBase['surface'].append(surfaceFilter.GetNumberOfPixels(label))
+                dataBase['surface'].append(singleChannelFunctionDict['voxelCount'](label))
 
         dictionary['dataBase']=dataBase
 
@@ -597,146 +624,11 @@ class Measurement(object):
         return volumes
 
     @staticmethod
-    def getVolume(itkFilter, label):
-        return itkFilter.GetNumberOfPixels(label)
-
-    @staticmethod
-    def getVoxelCount(itkFilter, label):
-        return itkFilter.GetNumberOfPixels(label)
-
-    @staticmethod
-    def getCentroid(itkFilter, label):
-        return itkFilter.GetCentroid(label)
-
-    @staticmethod
-    def getEquivalentEllipsoidDiameter(itkFilter, label):
-        return itkFilter.GetEquivalentEllipsoidDiameter(label)
-
-    @staticmethod
-    def getBoundingBox(itkFilter, label):
-        return itkFilter.GetBoundingBox(label)
-
-    @staticmethod
     def isOnEdge(itkFilter, label):
         value = True if itkFilter.GetNumberOfPixelsOnBorder(label) > 0  else False
         return value
 
-    @staticmethod
-    def getNumberOfPixelsOnBorder(itkFilter, label):
-        return itkFilter.GetNumberOfPixelsOnBorder(label)
 
-    @staticmethod
-    def getMean(itkFilter, label):
-        return itkFilter.GetMean(label)
-
-    @staticmethod
-    def getMaximumIndex(itkFilter, label):
-        return itkFilter.GetMaximumIndex(label)
-
-    @staticmethod
-    def getCenterOfGravity(itkFilter, label):
-        return itkFilter.GetCenterOfGravity(label)
-
-    @staticmethod
-    def getElongation(itkFilter, label):
-        return itkFilter.GetElongation(label)
-
-    @staticmethod
-    def getEquivalentSphericalRadius(itkFilter, label):
-        return itkFilter.GetEquivalentSphericalRadius(label)
-
-    @staticmethod
-    def getFlatness(itkFilter, label):
-        return itkFilter.getFlatness(label)
-
-    @staticmethod
-    def getKurtosis(itkFilter, label):
-        return itkFilter.GetKurtosis(label)
-
-    @staticmethod
-    def getMaximum(itkFilter, label):
-        return itkFilter.GetMaximum(label)
-
-    @staticmethod
-    def getMedian(itkFilter, label):
-        return itkFilter.GetMedian(label)
-
-    @staticmethod
-    def getMinimum(itkFilter, label):
-        return itkFilter.GetMinimum(label)
-
-    @staticmethod
-    def getPrincipalMoments(itkFilter, label):
-        return itkFilter.GetPrincipalMoments(label)
-
-    @staticmethod
-    def getRoundness(itkFilter, label):
-        return itkFilter.GetRoundness(label)
-
-    @staticmethod
-    def getSkewness(itkFilter, label):
-        return itkFilter.GetSkewness(label)
-
-    @staticmethod
-    def getStandardDeviation(itkFilter, label):
-        return itkFilter.GetStandardDeviation(label)
-
-    @staticmethod
-    def getSum(itkFilter, label):
-        return itkFilter.GetSum(label)
-
-    @staticmethod
-    def getVariance(itkFilter, label):
-        return itkFilter.GetVariance(label)
-
-    @staticmethod
-    def getPrincipalAxes(itkFilter, label):
-        return itkFilter.GetPrincipalAxes(label)
-
-    @staticmethod
-    def getWeightedElongation(itkFilter, label):
-        return itkFilter.GetWeightedElongation(label)
-
-    @staticmethod
-    def getWeightedFlatness(itkFilter, label):
-        return itkFilter.GetWeightedFlatness(label)
-
-    @staticmethod
-    def getWeightedPrincipalAxes(itkFilter, label):
-        return itkFilter.GetWeightedPrincipalAxes(label)
-
-    @staticmethod
-    def getWeightedPrincipalMoments(itkFilter, label):
-        return itkFilter.GetWeightedPrincipalMoments(label)
-
-
-
-
-
-    @staticmethod
-    def getEquivalentSphericalPerimeter(itkFilter, label):
-        value = itkFilter.GetEquivalentSphericalPerimeter(label) if itkFilter.GetComputePerimeter() == True  else None
-        return value
-
-    @staticmethod
-    def getFeretDiameter(itkFilter, label):
-        value = itkFilter.GetFeretDiameter(label) if itkFilter.GetComputeFeretDiameter() == True  else None
-        return
-
-    @staticmethod
-    def getPerimeter(itkFilter, label):
-        value = itkFilter.GetPerimeter(label) if itkFilter.GetComputePerimeter() == True  else None
-        return value
-
-    @staticmethod
-    def getPerimeterOnBorder(itkFilter, label):
-        value = itkFilter.GetPerimeterOnBorder(label) if itkFilter.GetComputePerimeter() == True  else None
-        return value
-
-    @staticmethod
-    def getPerimeterOnBorderRatio(itkFilter, label):
-        value = itkFilter.GetPerimeterOnBorder(label) if itkFilter.GetComputePerimeter() == True  else None
-        return value
 
 
 #############################################Class that contain main functions for A3DC####################################################
