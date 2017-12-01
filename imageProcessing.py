@@ -676,7 +676,8 @@ class Segmentation(object):
                                 'RenyiEntropy': sitk.RenyiEntropyThresholdImageFilter(),
                                 'KittlerIllingworth': sitk.KittlerIllingworthThresholdImageFilter(),
                                 'Moments': sitk.MomentsThresholdImageFilter(), 'Yen': sitk.YenThresholdImageFilter(),
-                                'Shanbhag': sitk.ShanbhagThresholdImageFilter()}
+                                'Shanbhag': sitk.ShanbhagThresholdImageFilter(),
+                            'Triangle': sitk.TriangleThresholdImageFilter()}
         #Create ITK image
         itkImage = sitk.GetImageFromArray(image)
         #Create ITK FIlter object
