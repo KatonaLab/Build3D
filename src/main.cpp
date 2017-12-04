@@ -1,46 +1,56 @@
 #include <iostream>
-//#include <python/Python.h>
-//#include <numpy/arrayobject.h>
-
 #include <string>
-
-//#ifdef QT_STATICPLUGIN
-//    #include <QtPlugin>
-    // #include <QQmlExtensionPlugin>
-//    Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-    // Q_IMPORT_PLUGIN(QtQuick2Plugin)
-    // Q_IMPORT_PLUGIN(QtQuick2Plugin)
-    // Q_IMPORT_PLUGIN(Qml)
-    // Q_IMPORT_PLUGIN(Quick)
-    // Q_IMPORT_PLUGIN(QuickControls2)
-//#endif
+#include <vector>
+#include <memory>
 
 #include <QApplication>
-//#include <QVector>
-#include <QQuickView>
-#include <QStyleFactory>
-
 #include <QOpenGLContext>
-#include <Qt3DInput/QInputSettings>
 #include <QQmlApplicationEngine>
 #include <QFontDatabase>
 
-//#include <Qt3DRender/QTexture>
-//#include <Qt3DRender/QTextureImage>
-//#include <Qt3DRender/QTextureImageData>
-//#include <Qt3DRender/QTextureImageDataGenerator>
-
-#include <QQmlDebuggingEnabler>
+#include "client/crashpad_client.h"
+#include "client/crash_report_database.h"
+#include "client/settings.h"
 
 #include "volumetric.h"
 
-//#include <functional>
-//#include <array>
-
 using namespace std;
+using namespace crashpad;
 
-//VolumetricDataPtr filterDemo(VolumetricDataPtr vd);
-//PyObject* vdToList(VolumetricDataPtr vd);
+static bool startCrashHandler()
+{
+    map<string, string> annotations;
+    vector<string> arguments;
+    CrashpadClient client;
+    bool rc;
+
+    string db_path("crashes/");
+    
+#ifdef _WIN32
+    string handler_path("./crashpad_handler.exe");
+#else
+    string handler_path("./crashpad_handler");
+#endif
+
+    string url("https://a3dc.sp.backtrace.io:6098");
+    annotations["token"] = "e8c10c5d9cd420229c8d21a7d6c365ea88a4dae0d79bc2cc8c4623b851d8bf02";
+    annotations["format"] = "minidump";
+
+    base::FilePath db(db_path);
+    base::FilePath handler(handler_path);
+
+    unique_ptr<CrashReportDatabase> database =
+        crashpad::CrashReportDatabase::Initialize(db);
+
+    if (database == nullptr || database->GetSettings() == NULL)
+        return false;
+
+    database->GetSettings()->SetUploadsEnabled(true);
+
+    rc = client.StartHandler(handler, db, db, url, annotations, arguments, true, false);
+
+    return rc;
+}
 
 void setSurfaceFormat()
 {
@@ -59,8 +69,11 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
-//    QQmlDebuggingEnabler enabler;
-    // QCoreApplication::addLibraryPath("./");
+    if (startCrashHandler() == false) {
+        cerr << "crash reporter could not start" << endl;
+        return -1;
+    }
+
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication app(argc, argv);
@@ -79,121 +92,7 @@ int main(int argc, char* argv[])
     }
 
     QQmlApplicationEngine engine;
-    // engine.addImportPath("qrc:/");
-    // engine.addImportPath(QStringLiteral("./qml"));
     engine.load(QUrl("qrc:/qml/main.qml"));
 
-//    if (engine.rootObjects().isEmpty()) {
-//        cerr << "qml error" << endl;
-//        return -1;
-//    }
-//
-////    "/Users/fodorbalint/projects/a3dc/example/K32_bassoon_TH_vGluT1_c01_cmle.ics"
-//    vector<VolumetricDataPtr> dataVec = VolumetricData::loadICS("/Users/fodorbalint/Desktop/test.ics");
-//
-//    VolumetricDataManager dm;
-//    dm.setSource(QUrl("file:///Users/fodorbalint/Desktop/K32_bassoon_TH_vGluT1_c01_cmle.ics"));
-//
-//    QList<QObject*> roots = engine.rootObjects();
-//    VolumetricTexture *tex = roots[0]->findChild<VolumetricTexture*>("objVol");
-//    tex->setData(dm.m_dataList[0].data());
-
     return app.exec();
-
-//    QQuickView view;
-//    view.resize(800, 800);
-//    view.setResizeMode(QQuickView::SizeRootObjectToView);
-//    view.setSource(QUrl("qml/main.qml"));
-//    view.show();
-
-//    Qt3DInput::QInputSettings *inputSettings = view.findChild<Qt3DInput::QInputSettings *>();
-//    if (inputSettings) {
-//        inputSettings->setEventSource(&view);
-//    } else {
-//        cerr << "No Input Settings found, keyboard and mouse events won't be handled";
-//    }
-
-//    return app.exec();
 }
-
-//void pythonTest()
-//{
-//    Py_SetProgramName((char *)"myPythonProgram");
-//    Py_Initialize();
-//    // parDict is a parameter to send to python function
-//    PyObject * parDict;
-//    parDict = PyDict_New();
-//    PyDict_SetItemString(parDict, "x0", PyFloat_FromDouble(1.0));
-//    // run python code to load functions
-//    PyRun_SimpleString("exec(open('scripts/cpptest.py').read())");
-//    // get function showval from __main__
-//    PyObject* main_module = PyImport_AddModule("__main__");
-//    PyObject* global_dict = PyModule_GetDict(main_module);
-//    PyObject* func = PyDict_GetItemString(global_dict, "showval");
-//    // parameter should be a tuple
-//    PyObject* par = PyTuple_Pack(1, parDict);
-//    // call the function
-//    PyObject_CallObject(func, par);
-//    Py_Finalize();
-//}
-
-//void init_numpy()
-//{
-//    import_array();
-//}
-
-//PyObject* vdToList(VolumetricDataPtr vd)
-//{
-//    size_t n = vd->getWidth() * vd->getHeight();
-//    PyObject* listObj = PyList_New(n);
-//    if (!listObj) throw logic_error("Unable to allocate memory for Python list");
-//    for (unsigned int i = 0; i < n; i++) {
-//        PyObject *num = PyFloat_FromDouble((double) vd->getConstData()[i]);
-//        if (!num) {
-//            Py_DECREF(listObj);
-//            throw logic_error("Unable to allocate memory for Python list");
-//        }
-//        PyList_SET_ITEM(listObj, i, num);
-//    }
-//    return listObj;
-//}
-//
-//void listToVd(PyObject* incoming, VolumetricDataPtr vd)
-//{
-//    if (PyList_Check(incoming)) {
-//        for (Py_ssize_t i = 0; i < PyList_Size(incoming); i++) {
-//            PyObject *value = PyList_GetItem(incoming, i);
-//            vd->getData()[i] = (uchar)PyFloat_AsDouble(value);
-//        }
-//    } else {
-//        cerr << "py return is not a list" << endl;
-//    }
-//}
-//
-//VolumetricDataPtr filterDemo(VolumetricDataPtr vd)
-//{
-//    Py_SetProgramName((char*)"myPythonProgram");
-//    Py_Initialize();
-//    // parDict is a parameter to send to python function
-//    PyObject * parDict;
-//    parDict = PyDict_New();
-//    PyDict_SetItemString(parDict, "data", vdToList(vd));
-//    PyDict_SetItemString(parDict, "width", PyFloat_FromDouble(vd->getWidth()));
-//    PyDict_SetItemString(parDict, "height", PyFloat_FromDouble(vd->getHeight()));
-//    // run python code to load functions
-//    PyRun_SimpleString("exec(open('scripts/cpptest.py').read())");
-//    // get function showval from __main__
-//    PyObject* main_module = PyImport_AddModule("__main__");
-//    PyObject* global_dict = PyModule_GetDict(main_module);
-//    PyObject* func = PyDict_GetItemString(global_dict, "filter");
-//    // parameter should be a tuple
-//    PyObject* par = PyTuple_Pack(1, parDict);
-//    // call the function
-//    PyObject *pValue;
-//    pValue = PyObject_CallObject(func, par);
-//    listToVd(pValue, vd);
-//    Py_Finalize();
-//
-//    return vd;
-//}
-
