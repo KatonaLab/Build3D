@@ -1,9 +1,10 @@
 import SimpleITK as sitk
+import sys
 import cv2
 import numpy as np
 from math import pow
 from skimage import img_as_ubyte, exposure
-from skimage.external.tifffile import imread, imsave
+from skimage.external.tifffile import imread, imsave, TiffWriter
 from skimage.filters import threshold_local
 import pandas as pd
 from scipy.ndimage.filters import convolve
@@ -15,6 +16,7 @@ from itertools import chain
 import matplotlib.pyplot as plt
 import pickle
 from operator import add
+import xml.etree.cElementTree as ET
 
 
 ####################################################Interface to call from C++####################################################
@@ -116,13 +118,36 @@ class Main(object):
 
         tstart = time.clock()
 
+        '''
+        Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/ImageTest/3ch_ome.tif")
+        img = sitk.ReadImage(Path)
+        metadataKeys=img.GetMetaDataKeys()
+        print(metadataKeys)
+        root = ET.fromstring(img.GetMetaData('ImageDescription'))
+        print(root)
+        for child in root:
+            print('child: ')
+            print(child)
+            for child2 in child:
+                print("################################################################################################")
+                print(child2.tag)
+                print(child2.attrib)
+
+        print(root.findall("item"))
+        #print(img.GetMetaData('ImageDescription'))
+        for key in metadataKeys:
+            print("################################################################################################")
+            #print(img.GetMetaData(key))
+        #img=Processor.load_image(Path)
+        #print(img[0])
+        '''
 
         #############################################Load Images####################################################
         sourceImageList=[]
         sourceDictList=[]
         # Channel 1
 
-        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_1.tif")
         #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
@@ -134,7 +159,7 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/img_2.tif")
         #ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
@@ -155,7 +180,7 @@ class Main(object):
         sourceDictList.append(ch2Dict)
 
         # Channel 3
-        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/large.tif")
+        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_3.tif")
         #ch3Path =('F:/Workspace/TestImages/test_3.tif')
         ch3Img = Processor.load_image(ch3Path)
 
@@ -218,13 +243,18 @@ class Main(object):
         #Colocalization analysis
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-        taggedImageList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
+        taggedDataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
 
         #print(overlappingDataBase)
 
         #Save results
-        #taggedImageList.append(overlappingDataBase)
-        save(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
+        taggedDictList.append(overlappingDataBase)
+        Measurement.saveData(taggedDictList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
+
+        taggedImageList.append(overlappingImage)
+        print(type(taggedImageList[0]))
+        print(taggedImageList)
+        Measurement.saveImage(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground")
 
 
 
@@ -359,11 +389,11 @@ class Measurement(object):
                 for i in range(NbOfInputElements):
 
                     outputList[i]['colocalizationCount'][currentPositionList[i]]+=1
-                    outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j]
+                    outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j-1]
 
                     positionList = [x for x in range(NbOfInputElements) if x != i]
                     for j in range(len(positionList)):
-                        outputList[i]['objects in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j]])
+                        outputList[i]['objects in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j-1]])
 
         for i in range(NbOfInputElements):
             for key in outputList[i]:
@@ -517,7 +547,7 @@ class Measurement(object):
         return dictionary
 
     @staticmethod
-    def save(dictionaryList, path, fileName='output', toText=False):
+    def saveData(dictionaryList, path, fileName='output', toText=False):
 
         dataFrameList=[]
         keyOrderList=[]
@@ -599,6 +629,19 @@ class Measurement(object):
                         outputFile.write(dataFrameList[i].to_csv(sep='\t', columns=keyOrderList[i], index=False, header=True))
 
         return 0
+
+    @staticmethod
+    def saveImage(imageList, path, fileName='output.tif', append=False, bigtiff=False, byteorder=None, software='A3DC', imagej=False, photometric=None, planarconfig=None, tile=None, contiguous=True, compress=0, colormap=None, description=None, datetime=None, resolution=None, metadata={}, extratags=()):
+
+        if byteorder is None:
+            byteorder = '<' if sys.byteorder == 'little' else '>'
+        print(byteorder)
+
+        with TiffWriter(os.path.join(path, fileName), append, bigtiff, byteorder, software, imagej) as tif:
+            for i in range(len(imageList[0])):
+                for image in imageList:
+                    print(type(image))
+                    tif.save(image[i],  photometric, planarconfig, tile, contiguous, compress, colormap, description, datetime, resolution, metadata, extratags)
 
     @staticmethod
     def reorderList(list, valueList):
