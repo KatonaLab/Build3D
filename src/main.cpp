@@ -12,6 +12,7 @@
 #include "client/crash_report_database.h"
 #include "client/settings.h"
 
+#include "version.h"
 #include "volumetric.h"
 
 using namespace std;
@@ -79,13 +80,14 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     app.setOrganizationName("MTA KOKI KatonaLab");
     app.setOrganizationDomain("koki.hu");
-    app.setApplicationName("A3DC");
+    app.setApplicationName("A3DC (" + QString(_A3DC_BUILD_GIT_SHA) + QString(_A3DC_BUILD_PLATFORM) + ")");
 
     setSurfaceFormat();
 
     qmlRegisterType<VolumetricData>("koki.katonalab.a3dc", 1, 0, "VolumetricData");
     qmlRegisterType<VolumetricDataManager>("koki.katonalab.a3dc", 1, 0, "VolumetricDataManager");
     qmlRegisterType<VolumetricTexture>("koki.katonalab.a3dc", 1, 0, "VolumetricTexture");
+    qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";

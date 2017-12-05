@@ -4,6 +4,7 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQuick.Scene3D 2.0
 import Qt.labs.settings 1.0
+import koki.katonalab.a3dc 1.0
 
 import "../actions"
 import "controls"
@@ -14,7 +15,7 @@ ApplicationWindow {
     width: 480
     height: 480
     visible: true
-    title: "A3DC - KatonaLab KOKI MTA"
+    title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version + ")"
 
     menuBar: MenuBar {
         Menu {

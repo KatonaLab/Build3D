@@ -1,6 +1,16 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++11
 
+DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --abbrev=8 --dirty --always --tags)
+
+win32 {
+    DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=win32
+}
+
+macx {
+    DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=macx
+}
+
 macx {
     system(cp $${PWD}/lib/libics/libics_conf.h.in $${PWD}/lib/libics/libics_conf.h)
 }
@@ -11,6 +21,7 @@ win32 {
 
 HEADERS += \
     src/volumetric.h \
+    src/version.h \
     lib/libics/libics_ll.h \
     lib/libics/libics_intern.h \
     lib/libics/libics.h \
@@ -18,6 +29,7 @@ HEADERS += \
 
 SOURCES +=  \
     src/volumetric.cpp \
+    src/version.cpp \
     src/main.cpp \
     lib/libics/libics_preview.c \
     lib/libics/libics_read.c \
