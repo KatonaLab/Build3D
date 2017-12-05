@@ -1,5 +1,5 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
-CONFIG += c++14
+CONFIG += c++11
 
 macx {
     system(cp $${PWD}/lib/libics/libics_conf.h.in $${PWD}/lib/libics/libics_conf.h)
@@ -47,21 +47,38 @@ macx {
     CONFIG(release, debug|release) {
         LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release"
     }
+
+    LIBS += -framework Cocoa -framework Security -lbsm
 }
 
 win32 {
     INCLUDEPATH += $$_PRO_FILE_PWD_/../tools/crashpad/crashpad
     INCLUDEPATH += $$_PRO_FILE_PWD_/../tools/crashpad/crashpad/third_party/mini_chromium/mini_chromium/
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../tools/crashpad/crashpad/third_party/zlib/zlib/
     CONFIG(debug, debug|release) {
         LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/client"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/compat"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/handler"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/minidump"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/third_party/mini_chromium/mini_chromium/base"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/third_party/zlib"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/tools"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Debug/obj/util"
     }
     CONFIG(release, debug|release) {
         LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/client"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/compat"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/handler"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/minidump"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/third_party/mini_chromium/mini_chromium/base"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/third_party/zlib"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/tools"
+        LIBS += -L"$$_PRO_FILE_PWD_/../tools/crashpad/crashpad/out/Release/obj/util"
     }
+
+    LIBS += -ladvapi32
 }
 
-LIBS += -lcrashpad_client -lbase -lcrashpad_handler_lib -lcrashpad_minidump -lcrashpad_util
-
-macx {
-    LIBS += -framework Cocoa -framework Security -lbsm
-}
+ LIBS += -lcrashpad_client -lbase -lcrashpad_handler_lib -lcrashpad_minidump -lcrashpad_util

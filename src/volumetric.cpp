@@ -216,6 +216,8 @@ void VolumetricDataManager::setSource(const QUrl& source)
     emit sourceChanged();
     setStatus(Status::Loading);
     bool success = loadICS(source.toLocalFile().toStdString());
+    cout << source.toLocalFile().toStdString() << " " << (int)success << endl;
+    cout << "volumes length " << this->m_dataList.size() << endl;
     setStatus(success ? Status::Ready : Status::Error);
 }
 
@@ -223,6 +225,7 @@ void VolumetricDataManager::setStatus(const Status &status)
 {
     m_status = status;
     emit statusChanged();
+    cout << "status " << status << " emitted" << endl;
 }
 
 VolumetricData* VolumetricDataManager::newDataLike(VolumetricData *data, QString name)
@@ -516,11 +519,12 @@ void VolumetricDataManager::dataLabel(VolumetricData *data, VolumetricData *outp
 
 QQmlListProperty<VolumetricData> VolumetricDataManager::volumes()
 {
-    QList<VolumetricData *> list;
+    m_qmlList.clear();
     for (auto &elem : m_dataList) {
-        list.append(elem.data());
+        m_qmlList.append(elem.data());
     }
-    return QQmlListProperty<VolumetricData>(this, list);
+    cout << m_qmlList.length() << endl;
+    return QQmlListProperty<VolumetricData>(this, m_qmlList);
 }
 //------------------------------------------------------------------------------
 

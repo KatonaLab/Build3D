@@ -24,12 +24,12 @@ static bool startCrashHandler()
     CrashpadClient client;
     bool rc;
 
-    string db_path("crashes/");
+    wstring db_path(L"crashes/");
     
 #ifdef _WIN32
-    string handler_path("./crashpad_handler.exe");
+    wstring handler_path(L"./crashpad_handler.exe");
 #else
-    string handler_path("./crashpad_handler");
+    wstring handler_path(L"./crashpad_handler");
 #endif
 
     string url("https://a3dc.sp.backtrace.io:6098");

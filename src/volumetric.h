@@ -137,6 +137,8 @@ private:
     std::map<float, VolumetricDataManager::StatRecord>
     dataStatistics(VolumetricData *data, VolumetricData *labelData, VolumetricData *segIntersect);
 
+    QList<VolumetricData *> m_qmlList;
+
 // FIXME:
 public:
     QVector<VolumetricDataPtr> m_dataList;

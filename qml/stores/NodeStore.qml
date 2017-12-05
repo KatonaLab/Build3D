@@ -271,9 +271,12 @@ Item {
     VolumetricDataManager {
         id: dataManager
         onStatusChanged: {
-            if (status == Component.Ready) {
+            console.log ('status change received', status);
+            if (status === Component.Ready) {
+                console.log(volumes.length);
                 for (var i = 0; i < volumes.length; ++i) {
                     AppActions.addSourceNode(AppActions.generateUid(), volumes[i]);
+                    console.log('addSourceNode', volumes[i]);
                 }
             }
         }
