@@ -255,6 +255,7 @@ class Main(object):
         print(type(taggedImageList[0]))
         print(taggedImageList)
         Measurement.saveImage(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground")
+       #Processor.imsave(path, nparray)
 
 
 
@@ -641,7 +642,7 @@ class Measurement(object):
             for i in range(len(imageList[0])):
                 for image in imageList:
                     print(type(image))
-                    tif.save(image[i],  photometric, planarconfig, tile, contiguous, compress, colormap, description, datetime, resolution, metadata, extratags)
+            tif.save( np.array(imageList),  photometric, planarconfig, tile, contiguous, compress, colormap, description, datetime, resolution, metadata, extratags)
 
     @staticmethod
     def reorderList(list, valueList):
