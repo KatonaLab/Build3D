@@ -23,13 +23,13 @@ static bool startCrashHandler()
     vector<string> arguments;
     CrashpadClient client;
     bool rc;
-
-    wstring db_path(L"crashes/");
     
 #ifdef _WIN32
+    wstring db_path(L"crashes/");
     wstring handler_path(L"./crashpad_handler.exe");
 #else
-    wstring handler_path(L"./crashpad_handler");
+    string db_path("crashes/");
+    string handler_path("./crashpad_handler");
 #endif
 
     string url("https://a3dc.sp.backtrace.io:6098");
