@@ -15,6 +15,13 @@
 #include "version.h"
 #include "volumetric.h"
 
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
+
+
 using namespace std;
 using namespace crashpad;
 
@@ -26,9 +33,15 @@ static bool startCrashHandler()
     bool rc;
     
 #ifdef _WIN32
-    wstring db_path(L"crashes/");
-    wstring handler_path(L"./crashpad_handler.exe");
+    wchar_t exePathChar[2048];
+    wstring exePath(exePathChar, GetModuleFileName(NULL, exePathChar, 2048));
+    exePath = exePath.substr(0, exePath.rfind('\\'));
+    // modify it to appdata
+    wstring db_path(exePath + L"\\crashes");
+    wstring handler_path(exePath + L"\\crashpad_handler.exe");
+    wcout << handler_path << endl;
 #else
+
     string db_path("crashes/");
     string handler_path("./crashpad_handler");
 #endif
@@ -39,6 +52,7 @@ static bool startCrashHandler()
 
     base::FilePath db(db_path);
     base::FilePath handler(handler_path);
+    arguments.push_back("--no-rate-limit");
 
     unique_ptr<CrashReportDatabase> database =
         crashpad::CrashReportDatabase::Initialize(db);
@@ -71,7 +85,7 @@ void setSurfaceFormat()
 int main(int argc, char* argv[])
 {
     if (startCrashHandler() == false) {
-        cerr << "crash reporter could not start" << endl;
+        cout << "crash reporter could not start" << endl;
         return -1;
     }
 
