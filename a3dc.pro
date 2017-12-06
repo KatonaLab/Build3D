@@ -1,5 +1,8 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++11
+# for crashpad
+CONFIG += force_debug_info
+CONFIG += separate_debug_info
 
 DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --abbrev=8 --dirty --always --tags)
 
@@ -93,4 +96,4 @@ win32 {
     LIBS += -ladvapi32
 }
 
- LIBS += -lcrashpad_client -lbase -lcrashpad_handler_lib -lcrashpad_minidump -lcrashpad_util
+LIBS += -lcrashpad_client -lbase -lcrashpad_handler_lib -lcrashpad_minidump -lcrashpad_util
