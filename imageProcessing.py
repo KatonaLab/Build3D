@@ -91,13 +91,30 @@ def filter(inputImage ,inputDictionary, outputImage, outputDictionary, filterDic
         outputImage=inputImage
 
 
-def colocalization(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
-    #Create overlapping image and overlapping dictionary
-    overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImgList, taggedDictList, sourceImageList, sourceDictionayList, name)
-    #Filter overlapping image/dictionary
+def colocalization(taggedImageList, taggedDictList, sourceImageList=[], overlappingFilterList=[], filterImage=True):
+    '''
 
-    overlappingDataBase=Measurement.colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase)
-    dataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImgList, dataBaseList, overlappingImage, overlappingDataBase)
+    :param taggedImageList:
+    :param taggedDictList:
+    :param sourceImageList:
+    :param overlappingFilterList:
+    :param filterImage:
+    :return:
+    '''
+
+    # Create overlapping Image and overlapping Database
+    overlappingImage, overlappingDataBase = Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
+    # Determine connectivity data
+    overlappingDataBase = Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
+    # Filter dataBase
+    outputDictionary = Measurement.filter_dataBase(taggedDictList[1], overlappingFilterList)
+    # Filter image
+    if filterImage == True:
+        overlappingImage = Measurement.filter_image(overlappingImage, outputDictionary)
+    # Analyze colocalization
+    taggedDataBaseList, overlappingDataBase = Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
+
+    return overlappingImage, overlappingDataBase, taggedDataBaseList
 
 
 def save(inputDictionaryList, path, fileName='output', toText=True):
@@ -147,7 +164,8 @@ class Main(object):
         sourceDictList=[]
         # Channel 1
 
-        ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_1.tif")
+        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_1.tif")
+        ch1Path = 'D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512x512/c1.tif'
         #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
         ch1Img=Processor.load_image(ch1Path)
         ch1Dict={'name': 'RawImage1',
@@ -159,7 +177,8 @@ class Main(object):
 
 
         # Channel 2
-        ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/img_2.tif")
+        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/img_2.tif")
+        ch2Path = 'D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512x512/c2.tif'
         #ch2Path =('F:/Workspace/TestImages/test_2.tif')
 
         ch2Img = Processor.load_image(ch2Path)
@@ -170,8 +189,6 @@ class Main(object):
         #exposure.equalize_hist(b)
         b=Segmentation.threshold_adaptive(ch2Img[0], 'Adaptive Gaussian', blockSize=5, offSet=0)
 
-
-
         ch2Dict={'name': 'RawImage1',
                  'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
                  'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
@@ -181,6 +198,7 @@ class Main(object):
 
         # Channel 3
         ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_3.tif")
+        ch3Path = 'D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512x512/c3.tif'
         #ch3Path =('F:/Workspace/TestImages/test_3.tif')
         ch3Img = Processor.load_image(ch3Path)
 
@@ -197,12 +215,31 @@ class Main(object):
         taggedImageList = []
         taggedDictList = []
 
+        #measurementKeys = ['volume', 'surface', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox',
+                           #'pixelsOnBorder', 'getElongation', 'getEquivalentSphericalRadius', 'getFlatness',
+                           #'getPrincipalAxes', 'getPrincipalMoments', 'getRoundness', 'getPrincipalAxes',
+                           #'getFeretDiameter', 'getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio',
+                           #'getEquivalentSphericalPerimeter''meanIntensity', 'medianIntensity', 'skewness', 'kurtosis',
+                           #'variance', 'maximumPixel', 'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass',
+                           #'standardDeviation', 'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
+                           #'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
+        #measurementKeys = ['volume', 'surface', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox',
+                           #'pixelsOnBorder', 'getElongation', 'getEquivalentSphericalRadius', 'getFlatness',
+                           #'getPrincipalAxes', 'getPrincipalMoments', 'getRoundness', 'getPrincipalAxes',
+                           #'getFeretDiameter', 'getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio',
+                           #'getEquivalentSphericalPerimeter''meanIntensity', 'medianIntensity', 'skewness', 'kurtosis',
+                           #'variance', 'maximumPixel', 'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass',
+                           #'standardDeviation', 'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
+                           #'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
+        measurementKeys = []
+
         # Channel 1
         thresholdedImage1=Segmentation.threshold_auto(sourceImageList[0], method="MaxEntropy", mode="3D")
         taggedImage1=Segmentation.tag_image(thresholdedImage1)
 
         taggedDict1=sourceDictList[0]
-        taggedDict1=Measurement.analyze(taggedImage1, taggedDict1, imageList=sourceImageList, dictionaryList=sourceDictList)
+        taggedDict1=Measurement.analyze(taggedImage1, taggedDict1, imageList=sourceImageList, dictionaryList=sourceDictList, measurementInput=measurementKeys)
+
         taggedDict1['name']='Channel1'
 
         taggedImageList.append(taggedImage1)
@@ -214,7 +251,7 @@ class Main(object):
         taggedImage2 = Segmentation.tag_image(thresholdedImage2)
 
         taggedDict2=sourceDictList[1]
-        taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=[sourceImageList[1]], dictionaryList=sourceDictList)
+        taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=[sourceImageList[1]], dictionaryList=sourceDictList, measurementInput=measurementKeys)
         taggedDict2['name']='Channel2'
 
         taggedImageList.append(taggedImage2)
@@ -225,7 +262,7 @@ class Main(object):
         taggedImage3 = Segmentation.tag_image(thresholdedImage3)
 
         taggedDict3 =sourceDictList[2]
-        taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList)
+        taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList, measurementInput=measurementKeys)
         taggedDict3['name'] = 'Channel3'
 
         taggedImageList.append(taggedImage3)
@@ -243,17 +280,18 @@ class Main(object):
         #Colocalization analysis
         overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
         overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-        taggedDataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
+        taggedDataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis( taggedDictList, overlappingDataBase)
 
         #print(overlappingDataBase)
 
         #Save results
         taggedDictList.append(overlappingDataBase)
+        #print(taggedDictList)
         Measurement.saveData(taggedDictList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
 
         taggedImageList.append(overlappingImage)
-        print(type(taggedImageList[0]))
-        print(taggedImageList)
+        #print(type(taggedImageList[0]))
+        #print(taggedImageList)
         Measurement.saveImage(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground")
        #Processor.imsave(path, nparray)
 
@@ -295,8 +333,6 @@ class Measurement(object):
             outputImage = taggedImg
 
         return outputImage
-
-
 
 
     @staticmethod
@@ -345,7 +381,7 @@ class Measurement(object):
         return overlappingDataBase
 
     @staticmethod
-    def colocalizaion_analysis( taggedImgList, dictionaryList, overlappingImage, overlappingDictionary):
+    def colocalizaion_analysis( dictionaryList, overlappingDictionary):
 
         dataBaseList=[x['dataBase'] for x in dictionaryList]
         overlappingDataBase=overlappingDictionary['dataBase']
@@ -406,8 +442,7 @@ class Measurement(object):
 
 
     @staticmethod
-    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[], measurementInput = ['surface']):
-
+    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[], measurementInput = []):
 
 
         #Convert tagged image to ITK image
@@ -454,20 +489,24 @@ class Measurement(object):
 
         singleChMeasurementList = ['voxelCount', 'pixelsOnBorder', 'centroid']
         dualChMeasurementList = ['meanIntensity', 'maximumPixel']
+
         for key in measurementInput:
+
             if key == 'getFeretDiameter':
                 itkFilter.ComputeFeretDiameterOn()
 
-            if key in ['getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio',
-                       'getEquivalentSphericalPerimeter']:
+            if key in ['getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio','getEquivalentSphericalPerimeter']:
                 itkFilter.ComputePerimeterOn()
 
-            if key in singleChannelFunctionDict.keys() and not singleChMeasurementList:
+            if (key in singleChannelFunctionDict.keys()) and (key not in singleChMeasurementList):
                 singleChMeasurementList.append(key)
 
-            if key in dualChannelFunctionDict.keys() and not dualChMeasurementList:
+            elif (key in dualChannelFunctionDict.keys()) and (key not in dualChMeasurementList):
                 dualChMeasurementList.append(key)
-                # main_list = [item for item in list_2 if item not in list_1]
+
+            else:
+                pass
+
 
         # dataBase dictionary to store results
         dataBase = {'tag': [], }
@@ -481,7 +520,6 @@ class Measurement(object):
             dictionaryList.append(dictionary)
 
         for i in range(len(imageList)):
-
 
             itkRaw = sitk.GetImageFromArray(imageList[0])
 
@@ -555,11 +593,15 @@ class Measurement(object):
         columnWidthsList=[]
         nameList = [x['name'] for x in dictionaryList]
 
+
         for dict in  dictionaryList:
 
             if 'dataBase' in dict.keys():
 
+                #for key in dict['dataBase'].keys():
+                    #print(key+' has '+str(len(dict['dataBase'][key]))+' elements!!!!!!!!!')
                 # Convert to Pandas dataframe
+
                 dataFrame=pd.DataFrame(dict['dataBase'])
 
                 dataFrameList.append(dataFrame)
@@ -568,7 +610,8 @@ class Measurement(object):
                 numericalKeys = []
                 otherKeys = []
 
-                for key in dict['dataBase'].keys():
+                list(dict['dataBase'].keys())
+                for key in list(dict['dataBase'].keys()):
 
                     if str(dataFrame[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64'
                         ,'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
@@ -598,6 +641,8 @@ class Measurement(object):
             writer = pd.ExcelWriter(os.path.join(path, fileName+'.xlsx'), engine='xlsxwriter')
 
             for i in range(len(dataFrameList)):
+
+
 
                 # Convert the dataframe to an XlsxWriter Excel object. Crop worksheet name if too long
                 name =str(nameList[i])
@@ -636,12 +681,8 @@ class Measurement(object):
 
         if byteorder is None:
             byteorder = '<' if sys.byteorder == 'little' else '>'
-        print(byteorder)
 
         with TiffWriter(os.path.join(path, fileName), append, bigtiff, byteorder, software, imagej) as tif:
-            for i in range(len(imageList[0])):
-                for image in imageList:
-                    print(type(image))
             tif.save( np.array(imageList),  photometric, planarconfig, tile, contiguous, compress, colormap, description, datetime, resolution, metadata, extratags)
 
     @staticmethod
