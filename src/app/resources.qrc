@@ -1,6 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>assets/fonts/fontello.ttf</file>
+    <file>../../assets/fonts/fontello.ttf</file>
     
     <file>qml/actions/ActionTypes.qml</file>
     <file>qml/actions/AppActions.qml</file>
