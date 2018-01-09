@@ -1,6 +1,9 @@
 TARGET = test
-SOURCES += test.cpp \
-    test-NodeBase.cpp
+SOURCES += \
+    test.cpp \
+    forward_network.cpp
 
 CONFIG -= app_bundle
-INCLUDEPATH += ../util
+INCLUDEPATH += \
+    ../util \
+    ../
