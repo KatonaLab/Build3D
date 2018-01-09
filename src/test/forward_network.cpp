@@ -1,16 +1,17 @@
 #include "catch.hpp"
 
 #include <algorithm>
+#include <list>
 #include <string>
 
 #include <core/forward_network/ForwardNetwork.h>
 #include <core/forward_network/Group.h>
 #include <core/forward_network/Node.h>
 
+using namespace core;
+
 SCENARIO("nodes can be added and removed", "[core/forward_network]")
 {
-    using namespace core;
-
     GIVEN("an empty network") {
         ForwardNetwork net;
 
@@ -58,8 +59,6 @@ SCENARIO("nodes can be added and removed", "[core/forward_network]")
 
 SCENARIO("node groups can be managed", "[core/forward_network]")
 {
-    using namespace core;
-
     GIVEN("a network without any node groups") {
         ForwardNetwork net;
         NodePtr node1 = net.addNode();
@@ -100,7 +99,7 @@ SCENARIO("node groups can be managed", "[core/forward_network]")
         REQUIRE(group->empty() == true);
 
         WHEN("a group is populated with a node") {
-            NodePtr node = group.addNode();
+            NodePtr node = group->addNode();
             
             THEN("the net size is increased") {
                 REQUIRE(net.size() == 4);
@@ -127,7 +126,7 @@ SCENARIO("node groups can be managed", "[core/forward_network]")
         }
 
         WHEN("a group is populated with a group node") {
-            GroupPtr subgroup = group.addGroup();
+            GroupPtr subgroup = group->addGroup();
             
             THEN("the net size is increased") {
                 REQUIRE(net.size() == 4);
@@ -162,20 +161,20 @@ SCENARIO("nodes can be connected", "[core/forward_network]")
         NodePtr node1 = net.addNode("node #1");
         NodePtr node2 = net.addNode("node #2");
         GroupPtr group1 = net.addGroup("group #1");
-        NodePtr node3 = group1.addNode("node #3");
+        NodePtr node3 = group1->addNode("node #3");
         GroupPtr group2 = net.addGroup("group #2");
-        GroupPtr group3 = group2.addGroup("group #3");
-        NodePtr node4 = group3.addNode("node #4");
+        GroupPtr group3 = group2->addGroup("group #3");
+        NodePtr node4 = group3->addNode("node #4");
 
         WHEN("two nodes in the same group connected") {
             REQUIRE(net.connect(node1, node2) == true);
 
             THEN("the first node has the second one in its output list") {
-                REQUIRE(node1->outputs[0] == node2);
+                REQUIRE(node1->outputs()[0] == node2);
             }
 
             AND_THEN("the second node has the first one in its input list") {
-                REQUIRE(node2->inputs[0] == node1);
+                REQUIRE(node2->inputs()[0] == node1);
             }
         }
 
@@ -184,13 +183,13 @@ SCENARIO("nodes can be connected", "[core/forward_network]")
             REQUIRE(net.connect(node1, node3) == true);
 
             THEN("the first node has the second one in its output list") {
-                REQUIRE(node1->outputs[0] == node2);
-                REQUIRE(node1->outputs[1]== node3);
+                REQUIRE(node1->outputs()[0] == node2);
+                REQUIRE(node1->outputs()[1] == node3);
             }
 
             AND_THEN("the second node has the first one in its input list") {
-                REQUIRE(node2->inputs[0] == node1);
-                REQUIRE(node3->inputs[0] == node1);
+                REQUIRE(node2->inputs()[0] == node1);
+                REQUIRE(node3->inputs()[0] == node1);
             }
         }
     }
@@ -204,7 +203,7 @@ SCENARIO("forward network can detect cycles", "[core/forward_network]")
         NodePtr node2 = net.addNode();
         NodePtr node3 = net.addNode();
         GroupPtr group1 = net.addGroup();
-        NodePtr node4 = group1.addNode();
+        NodePtr node4 = group1->addNode();
 
         REQUIRE(net.connect(node1, node2) == true);
         REQUIRE(net.connect(node2, node3) == true);
@@ -213,50 +212,50 @@ SCENARIO("forward network can detect cycles", "[core/forward_network]")
         WHEN("trying to do a trivial cycle") {
             REQUIRE(net.connect(node2, node1) == false);
             THEN("nothing happens") {
-                REQUIRE(node1->outputs[0] == node2);
-                REQUIRE(node2->inputs[0] == node1);
+                REQUIRE(node1->outputs()[0] == node2);
+                REQUIRE(node2->inputs()[0] == node1);
             }
         }
 
         WHEN("trying to do a cycle in the same group") {
             REQUIRE(net.connect(node3, node1) == false);
             THEN("nothing happens") {
-                REQUIRE(node1->inputs.size() == 0);
-                REQUIRE(node1->outputs.size() == 1);
-                REQUIRE(node2->inputs.size() == 1);
-                REQUIRE(node2->outputs.size() == 1);
-                REQUIRE(node3->inputs.size() == 1);
-                REQUIRE(node3->outputs.size() == 1);
-                REQUIRE(node4->inputs.size() == 1);
-                REQUIRE(node4->outputs.size() == 0);
+                REQUIRE(node1->inputs().size() == 0);
+                REQUIRE(node1->outputs().size() == 1);
+                REQUIRE(node2->inputs().size() == 1);
+                REQUIRE(node2->outputs().size() == 1);
+                REQUIRE(node3->inputs().size() == 1);
+                REQUIRE(node3->outputs().size() == 1);
+                REQUIRE(node4->inputs().size() == 1);
+                REQUIRE(node4->outputs().size() == 0);
 
-                REQUIRE(node1->outputs[0] == node2);
-                REQUIRE(node2->inputs[0] == node1);
-                REQUIRE(node2->outputs[0] == node3);
-                REQUIRE(node3->inputs[0] == node2);
-                REQUIRE(node3->outputs[0] == node4);
-                REQUIRE(node4->inputs[0] == node3);
+                REQUIRE(node1->outputs()[0] == node2);
+                REQUIRE(node2->inputs()[0] == node1);
+                REQUIRE(node2->outputs()[0] == node3);
+                REQUIRE(node3->inputs()[0] == node2);
+                REQUIRE(node3->outputs()[0] == node4);
+                REQUIRE(node4->inputs()[0] == node3);
             }
         }
 
         WHEN("trying to do a cycle with nodes in different groups") {
             REQUIRE(net.connect(node4, node1) == false);
             THEN("nothing happens") {
-                REQUIRE(node1->inputs.size() == 0);
-                REQUIRE(node1->outputs.size() == 1);
-                REQUIRE(node2->inputs.size() == 1);
-                REQUIRE(node2->outputs.size() == 1);
-                REQUIRE(node3->inputs.size() == 1);
-                REQUIRE(node3->outputs.size() == 1);
-                REQUIRE(node4->inputs.size() == 1);
-                REQUIRE(node4->outputs.size() == 0);
+                REQUIRE(node1->inputs().size() == 0);
+                REQUIRE(node1->outputs().size() == 1);
+                REQUIRE(node2->inputs().size() == 1);
+                REQUIRE(node2->outputs().size() == 1);
+                REQUIRE(node3->inputs().size() == 1);
+                REQUIRE(node3->outputs().size() == 1);
+                REQUIRE(node4->inputs().size() == 1);
+                REQUIRE(node4->outputs().size() == 0);
 
-                REQUIRE(node1->outputs[0] == node2);
-                REQUIRE(node2->inputs[0] == node1);
-                REQUIRE(node2->outputs[0] == node3);
-                REQUIRE(node3->inputs[0] == node2);
-                REQUIRE(node3->outputs[0] == node4);
-                REQUIRE(node4->inputs[0] == node3);
+                REQUIRE(node1->outputs()[0] == node2);
+                REQUIRE(node2->inputs()[0] == node1);
+                REQUIRE(node2->outputs()[0] == node3);
+                REQUIRE(node3->inputs()[0] == node2);
+                REQUIRE(node3->outputs()[0] == node4);
+                REQUIRE(node4->inputs()[0] == node3);
             }
         }
     }
@@ -274,10 +273,10 @@ SCENARIO("forward network can be traversed", "[core/forward_network]")
         for (int i = 0; i < 3; ++i) {
             groups[i] = net.addGroup("group " + std::to_string(i));
         }
-        nodes[9] = groups[0].addNode("node 9");
-        nodes[10] = groups[0].addNode("node 10");
-        nodes[8] = groups[1].addNode("node 8");
-        nodes[11] = groups[2].addNode("node 11");
+        nodes[9] = groups[0]->addNode("node 9");
+        nodes[10] = groups[0]->addNode("node 10");
+        nodes[8] = groups[1]->addNode("node 8");
+        nodes[11] = groups[2]->addNode("node 11");
         nodes[12] = net.addNode("node 12");
         nodes[13] = net.addNode("node 13");
 
@@ -295,7 +294,7 @@ SCENARIO("forward network can be traversed", "[core/forward_network]")
 
         WHEN("walking the graph") {
             std::list<std::string> output;
-            net.walk([output&](NodePtr node) { output.push_back(node->name()); });
+            net.walk([&output](NodePtr node) { output.push_back(node->name()); });
             THEN("the order is correct") {
                 REQUIRE(output.size() == 11);
                 std::list<std::string> order = {

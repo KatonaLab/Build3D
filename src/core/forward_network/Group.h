@@ -13,10 +13,15 @@ namespace core {
 
     class Group {
     public:
+        Group(std::string name = "");
         bool empty() const;
         size_t size() const;
         NodePtr addNode(const std::string &name = "");
         GroupPtr addGroup(const std::string &name = "");
+        void remove(const NodePtr &node);
+        void remove(const GroupPtr &node);
+        void clear();
+        bool valid() const;
     };   
 }
 

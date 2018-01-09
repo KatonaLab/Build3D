@@ -3,11 +3,15 @@
 
 #include "Group.h"
 
+#include <functional>
+
 namespace core {
     
     class ForwardNetwork : public Group {
     public:
-
+        ForwardNetwork(std::string name = "");
+        bool connect(NodePtr &from, NodePtr &to);
+        void walk(std::function<void(const NodePtr &)>);
     };
 }
 

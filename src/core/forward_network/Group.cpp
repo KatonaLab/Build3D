@@ -2,6 +2,11 @@
 
 using namespace core;
 
+Group::Group(std::string name)
+{
+
+}
+
 bool Group::empty() const
 {
     // TODO
@@ -11,7 +16,7 @@ bool Group::empty() const
 size_t Group::size() const
 {
     // TODO
-    return 0
+    return 0;
 }
 
 NodePtr Group::addNode(const std::string &name)
@@ -24,4 +29,24 @@ GroupPtr Group::addGroup(const std::string &name)
 {
     GroupPtr ptr;
     return ptr;
+}
+
+void Group::remove(const NodePtr &node)
+{
+
+}
+
+void Group::remove(const GroupPtr &node)
+{
+
+}
+
+void Group::clear()
+{
+
+}
+
+bool Group::valid() const
+{
+
 }
