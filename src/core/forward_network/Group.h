@@ -1,28 +1,42 @@
-#ifndef _core_Group_h_
-#define _core_Group_h_
+#ifndef _core_forward_network_Group_h_
+#define _core_forward_network_Group_h_
 
 #include <cstddef>
+#include <memory>
 #include <string>
-
-#include "Node.h"
+#include <vector>
 
 namespace core {
-    
-    class Group;
-    typedef std::shared_ptr<Group> GroupPtr;
 
-    class Group {
+    class Node;
+
+    class Group : public std::enable_shared_from_this<Group> {
     public:
-        Group(std::string name = "");
+        typedef std::shared_ptr<Group> Ptr;
+    private:
+        typedef std::shared_ptr<Node> NodePtr;
+    public:
+        NodePtr addNode(const std::string& name = "");
+        Ptr addGroup(const std::string& name = "");
+        static Ptr create(const std::string& name = "");
         bool empty() const;
         size_t size() const;
-        NodePtr addNode(const std::string &name = "");
-        GroupPtr addGroup(const std::string &name = "");
-        void remove(const NodePtr &node);
-        void remove(const GroupPtr &node);
+        void remove(const NodePtr& node);
+        void remove(const Ptr& group);
         void clear();
-        bool valid() const;
-    };   
+        virtual bool valid() const;
+        std::string name() const;
+        virtual ~Group();
+        const std::vector<NodePtr>& nodes() const;
+        const std::vector<Ptr>& groups() const;
+    protected:
+        Group(const std::string& name = "");
+    private:
+        std::string m_name;
+        std::vector<NodePtr> m_nodes;
+        std::vector<Ptr> m_groups;
+        std::weak_ptr<Group> m_parent;
+    };
 }
 
 #endif
