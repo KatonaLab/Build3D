@@ -54,11 +54,12 @@ namespace directed_acyclic_graph {
         virtual ~Node();
     protected:
         Node(const std::string& name = "");
+    private:
         std::vector<NodePtr>::iterator findOutputIterator(const ConstNodePtr& node);
         std::vector<WeakNodePtr>::iterator findInputIterator(const ConstNodePtr& node);
         std::vector<NodePtr>::const_iterator findOutputConstIterator(const ConstNodePtr& node) const;
         std::vector<WeakNodePtr>::const_iterator findInputConstIterator(const ConstNodePtr& node) const;
-    private:
+
         std::string m_name;
         WeakGraphPtr m_owner;
         std::vector<WeakNodePtr> m_inputs;

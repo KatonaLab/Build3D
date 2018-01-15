@@ -3,67 +3,78 @@
 #include <memory>
 #include <tuple>
 
-#include <core/compute_layer/ComputeNode.h>
-#include <core/compute_layer/Buffer.h>
+// #include <core/compute_layer/ComputeNode.h>
+// #include <core/compute_layer/Buffer.h>
 
-using namespace core;
+// using namespace core;
 using namespace std;
 
-template <typename ...T>
-class OutputPorts {
-protected:
-    std::tuple<const std::unique_ptr<T>...> outputs;
-};
+// class ComputeModule {};
 
-template <typename ...T>
-class InputPorts {
-protected:
-    std::tuple<std::unique_ptr<T>...> inputs;
-};
-
-class DummyData {
+class OutputBufferPort {
 public:
+    virtual ~OutputBufferPort() {}
+};
+
+class InputPort {
+public:
+    virtual void set(OutputBufferPort& port) = 0;
+    virtual ~InputPort() {}
+};
+
+template <typename T>
+class TypedOutputBufferPort : public OutputBufferPort {
+public:
+    std::shared_ptr<T> m_data;
+};
+
+template <typename T>
+class TypedInputPort : public InputPort {
+public:
+    bool set(OutputBufferPort& port) override
+    {
+         if (dynamic_cast<TypedOutputBufferPort<T>*>(&port) != nullptr) {
+             m_ptr = ((TypedOutputBufferPort<T>*)(&port))->m_data;
+             return true;
+         }
+         return false;
+    }
+private:
+    std::weak_ptr<T> m_ptr;
+};
+
+struct Data {
     int a, b, c;
 };
 
-class DummySourceNode : public ComputeNode, 
-    public OutputPorts<int, DummyData> {
-public:
-    
-protected:
-    //void execute() override;
-};
+// class DummyModule : public ComputeModule,
+//     public InputPorts<DummyModule, int, Data>,
+//     public OutputPorts<DummyModule, int, Data> {
+// public:
+//     void execute() override
+//     {
+//         output<0>() = input<0>() + input<1>().a;
+//         input<1>().b = input<1>().a + input<1>().c;
+//         output<1>() = input<0>() + input<1>().b;
+//     }
+// };
 
-class DummyNode : public ComputeNode, 
-    public InputPorts<int, DummyData>,
-    public OutputPorts<int, DummyData> {
-public:
-protected:
-};
-
-class DummySinkNode : public ComputeNode, 
-    public InputPorts<int, DummyData> {
-public:
-protected:
-};
-
-SCENARIO("buffers working")
+SCENARIO("intuitive usage", "[core/compute_platform]")
 {
-    GIVEN("a simple compute platform") {
-        // ComputePlatform platform;
-        
-        DummySourceNode source;
-        DummyNode node;
-        DummySinkNode sink;
+    // GIVEN("some dummy compute module") {
+    //     ComputePlatform platform;
 
-        std::vector<ComputeNode*> vec;
-        vec.push_back(&source);
-        vec.push_back(&sink);
-        vec.push_back(&node);
-        
-        // platform.connect(source.output<PORT0, int>(), node.input<PORT0, int>());
-        // platform.connect(source.output<PORT1, DummyData>(), node.input<PORT1, DummyData>());
-        // platform.connect(node.output<PORT0, int>(), sink.input<PORT0, int>());
-        // platform.connect(node.output<PORT1, DummyData>(), sink.input<PORT1, DummyData>());
-    }
+    //     DummySourceInt intSource(platform);
+    //     DummySourceData dataSource(platform);
+    //     DummyModule module(platform);
+    //     DummySink sink(platform);
+
+    //     module.inputPort(0).set(intSource.outBufferPort(0));
+    //     module.inputPort(1).set(dataSource.outBufferPort(0))
+    //     sink.inputPort(0).set(module.outBufferPort(0));
+    //     sink.inputPort(1).set(module.outBufferPort(1));
+
+    //     platform.initialize();
+    //     platform.process();
+    // }
 }
