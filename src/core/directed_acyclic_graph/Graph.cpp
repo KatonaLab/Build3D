@@ -5,6 +5,7 @@
 #include <iterator>
 #include <numeric>
 #include <list>
+#include <stdexcept>
 
 #include "Node.h"
 
@@ -93,4 +94,57 @@ std::string Graph::name() const
 Graph::~Graph()
 {
     clear();
+}
+
+DependencyTraversal Graph::traverse()
+{
+    return DependencyTraversal(shared_from_this());
+}
+
+DependencyTraversal::DependencyTraversal(GraphPtr graph) : m_graph(graph)
+{
+    for (NodePtr n : m_graph->m_nodes) {
+        n->m_ready = n->m_inputs.empty();
+        if (n->m_ready) {
+            m_readyList.push_back(n);
+        } else {
+            m_waitingList.insert(n);
+        }
+    }
+}
+
+bool DependencyTraversal::hasNext()
+{
+    return !m_readyList.empty();
+}
+
+NodePtr DependencyTraversal::next()
+{
+    if (m_readyList.empty()) {
+        return NodePtr();
+    }
+
+    NodePtr current = m_readyList.front();
+    m_readyList.pop_front();
+    current->m_ready = true;
+    current->notified();
+
+    for (NodePtr n : current->m_outputs) {
+        auto it = find(m_waitingList.begin(), m_waitingList.end(), n);
+        if (it == m_waitingList.end()) {
+            continue;
+        }
+
+        bool ready = all_of(n->m_inputs.begin(), n->m_inputs.end(),
+            [](const WeakNodePtr& w) {
+                return w.lock()->m_ready;
+            });
+
+        if (ready) {
+            m_readyList.push_back(n);
+            m_waitingList.erase(it);
+        }
+    }
+
+    return current;
 }

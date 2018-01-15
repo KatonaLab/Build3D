@@ -144,15 +144,6 @@ void Node::disconnect(NodePtr &with)
     }
 }
 
-bool Node::ready() const
-{
-    return all_of(m_inputs.begin(), m_inputs.end(),
-        [](const WeakNodePtr& w)
-        {
-            return w.lock()->m_ready;
-        });
-}
-
 void Node::notified()
 {}
 

@@ -27,10 +27,13 @@ namespace directed_acyclic_graph {
     typedef TraversalTmpl<NodePtr> Traversal;
     typedef TraversalTmpl<ConstNodePtr> ConstTraversal;
 
+    class DependencyTraversal;
+
     class Node : public std::enable_shared_from_this<Node> {
         friend class Graph;
         friend class TraversalTmpl<NodePtr>;
         friend class TraversalTmpl<ConstNodePtr>;
+        friend class DependencyTraversal;
     public:
         static NodePtr create(const std::string& name = "");
         NodePtr input(size_t k);
@@ -47,7 +50,6 @@ namespace directed_acyclic_graph {
         const std::string& name() const;
         bool connect(NodePtr &to);
         void disconnect(NodePtr &with);
-        bool ready() const;
         virtual void notified();
         virtual ~Node();
     protected:

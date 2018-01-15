@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <string>
@@ -344,7 +345,7 @@ SCENARIO("graph can be walked", "[core/directed_acyclic_graph]")
         GraphPtr g = Graph::create();
         NodePtr nodes[6];
         for (int i = 0; i < 6; ++i) {
-            nodes[i] = g->add();
+            nodes[i] = g->add(to_string(i));
         }
         nodes[0]->connect(nodes[1]);
         nodes[1]->connect(nodes[2]);
@@ -354,8 +355,8 @@ SCENARIO("graph can be walked", "[core/directed_acyclic_graph]")
         nodes[5]->connect(nodes[3]);
         nodes[3]->connect(nodes[2]);
         WHEN("traversing") {
-            std::vector<int> order {0, 1, 5, 3, 2, 4};
-            DependencyTraverse t(g);
+            std::vector<int> order {0, 1, 5, 3, 4, 2};
+            DependencyTraversal t(g);
             int i = 0;
             while (t.hasNext()) {
                 NodePtr node = t.next();
