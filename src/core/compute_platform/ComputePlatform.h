@@ -1,4 +1,0 @@
-#ifndef _core_compute_layer_ComputePlatform_h_
-#define _core_compute_layer_ComputePlatform_h_
-
-#endif
