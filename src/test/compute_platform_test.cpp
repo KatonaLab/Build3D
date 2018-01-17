@@ -4,48 +4,93 @@
 #include <memory>
 #include <tuple>
 
-#include <core/compute_platform/ports.hpp>
+#include <core/compute_platform/ports.h>
+#include <core/compute_platform/port_utils.hpp>
+#include <core/compute_platform/ComputeModule.h>
+#include <core/compute_platform/ComputePlatform.h>
 
 using namespace core::compute_platform;
 using namespace std;
 
-class ComputeModule {};
-
-struct Data {
-    int a, b, c;
+class DataSource : public ComputeModule {
+public:
+    DataSource(ComputePlatform& parent)
+        : ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        // m_outputs.output<0>() = m_seed;
+    }
+    void setData(int x)
+    {
+        m_seed = x;
+    }
+protected:
+    int m_seed = 0;
+    InputPortCollection m_inputs;
+    TypedOutputPortCollection<int> m_outputs;
 };
 
-class DummyModule : public ComputeModule,
-    public InputPortCollection<int, Data> {
+class PlusOne : public ComputeModule {
 public:
-//     void execute() override
-//     {
-//         output<0>() = input<0>() + input<1>().a;
-//         input<1>().b = input<1>().a + input<1>().c;
-//         output<1>() = input<0>() + input<1>().b;
-//     }
+    PlusOne(ComputePlatform& parent)
+        : ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        // m_outputs.output<0>() = m_inputs.input<0>() + 1;
+    }
+protected:
+    TypedInputPortCollection<int> m_inputs;
+    TypedOutputPortCollection<int> m_outputs;
+};
+
+class DataDestination : public ComputeModule {
+public:
+    DataDestination(ComputePlatform& parent)
+        : ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        // m_store = m_inputs.input<0>();
+    }
+    int getResult()
+    {
+        return m_store;
+    }
+protected:
+    TypedInputPortCollection<int> m_inputs;
+    OutputPortCollection m_outputs;
+    int m_store;
 };
 
 SCENARIO("intuitive usage", "[core/compute_platform]")
 {
-    DummyModule module;
-    cout << module.input(0)->type() << endl;
-    cout << module.input(1)->type() << endl;
+    GIVEN("a simple net") {
+        ComputePlatform p;
+        
+        DataSource ds(p);
+        PlusOne po(p);
+        DataDestination dd(p);
 
-    // GIVEN("some dummy compute module") {
-    //     ComputePlatform platform;
+        REQUIRE(p.size() == 3);
 
-    //     DummySourceInt intSource(platform);
-    //     DummySourceData dataSource(platform);
-    //     DummyModule module(platform);
-    //     DummySink sink(platform);
+        REQUIRE(ds.outputPort(0).lock()->bind(po.inputPort(0)) == true);
+        REQUIRE(po.outputPort(0).lock()->bind(dd.inputPort(0)) == true);
 
-    //     module.inputPort(0).set(intSource.outBufferPort(0));
-    //     module.inputPort(1).set(dataSource.outBufferPort(0))
-    //     sink.inputPort(0).set(module.outBufferPort(0));
-    //     sink.inputPort(1).set(module.outBufferPort(1));
+        ds.setData(42);
 
-    //     platform.initialize();
-    //     platform.process();
-    // }
+        WHEN("run") {
+            p.run();
+            THEN("it outputs the correct result") {
+                REQUIRE(dd.getResult() == 43);
+            }
+        }
+    }
 }
