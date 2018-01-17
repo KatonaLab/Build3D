@@ -1,14 +1,15 @@
 
 template <typename T>
 inline
-TypedOutputPort<T>::TypedOutputPort(ComputeModule& parent) : OutputPort(parent)
+TypedOutputPort<T>::TypedOutputPort(ComputeModule& parent)
+    : OutputPort(parent), m_original(std::make_shared<T>())
 {}
 
 template <typename T>
 inline
 bool TypedOutputPort<T>::compatible(std::weak_ptr<InputPort> input) const
 {
-    return dynamic_cast<TypedOutputPort<T>*>(input.lock().get()) != nullptr;
+    return dynamic_cast<TypedInputPort<T>*>(input.lock().get()) != nullptr;
 }
 
 template <typename T>
@@ -25,6 +26,13 @@ std::weak_ptr<T> TypedOutputPort<T>::serve()
     }
     // m_numInputServed > m_numBinds
     throw std::runtime_error("more serve requests arrived than the number of the bindings");
+}
+
+template <typename T>
+inline
+T& TypedOutputPort<T>::value()
+{
+    return *m_original;
 }
 
 template <typename T>
@@ -53,6 +61,13 @@ void TypedInputPort<T>::fetch()
     }
 
     m_ptr = source->serve();
+}
+
+template <typename T>
+inline
+T& TypedInputPort<T>::value()
+{
+    return *(m_ptr.lock());
 }
 
 template <typename T, typename ...Ts>
@@ -90,6 +105,14 @@ size_t TypedInputPortCollection<T, Ts...>::size() const
 }
 
 template <typename T, typename ...Ts>
+template <std::size_t N>
+typename std::tuple_element<N, typename TypedInputPortCollection<T, Ts...>::TypeTuple>::type&
+TypedInputPortCollection<T, Ts...>::input()
+{
+    return std::get<N>(m_inputPorts)->value();
+}
+
+template <typename T, typename ...Ts>
 inline TypedOutputPortCollection<T, Ts...>::TypedOutputPortCollection(ComputeModule& parent)
     : OutputPortCollection(parent),
     m_outputPorts(std::make_shared<TypedOutputPort<T>>(parent),
@@ -111,6 +134,14 @@ inline
 size_t TypedOutputPortCollection<T, Ts...>::size() const
 {
     return m_typelessPorts.size();
+}
+
+template <typename T, typename ...Ts>
+template <std::size_t N>
+typename std::tuple_element<N, typename TypedOutputPortCollection<T, Ts...>::TypeTuple>::type& 
+TypedOutputPortCollection<T, Ts...>::output()
+{
+    return std::get<N>(m_outputPorts)->value();
 }
 
 namespace detail {

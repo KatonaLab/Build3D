@@ -13,8 +13,8 @@ bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
     if (compatible(inputPort)) {
         // bool canConnect = m_parent.node().connect(inputPort.lock()->m_parent.node());
         // if (canConnect) {
-        //     m_numBinds++;
-        //      return true;
+            m_numBinds++;
+            return true;
         // }
     }
     return false;

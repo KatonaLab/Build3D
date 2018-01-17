@@ -16,6 +16,7 @@ class TypedOutputPort : public OutputPort {
 public:
     TypedOutputPort(ComputeModule& parent);
     std::weak_ptr<T> serve();
+    T& value();
 protected:
     virtual bool compatible(std::weak_ptr<InputPort> input) const;
     virtual void cleanOnReset();
@@ -29,34 +30,41 @@ class TypedInputPort : public InputPort {
 public:
     TypedInputPort(ComputeModule& parent);
     virtual void fetch();
+    T& value();
 private:
     std::weak_ptr<T> m_ptr;
 };
 
 template <typename T, typename ...Ts>
 class TypedInputPortCollection : public InputPortCollection {
+    using PortTuple = std::tuple<
+        std::shared_ptr<TypedInputPort<T>>,
+        std::shared_ptr<TypedInputPort<Ts>>...>;
+    using TypeTuple = std::tuple<T, Ts...>;
 public:
     TypedInputPortCollection(ComputeModule& parent);
     virtual void fetch();
     virtual std::weak_ptr<InputPort> get(size_t portId);
     virtual size_t size() const;
+    template <std::size_t N> typename std::tuple_element<N, TypeTuple>::type& input();
 private:
-    std::tuple<
-        std::shared_ptr<TypedInputPort<T>>,
-        std::shared_ptr<TypedInputPort<Ts>>...> m_inputPorts;
+    PortTuple m_inputPorts;
     std::vector<std::weak_ptr<InputPort>> m_typelessPorts;
 };
 
 template <typename T, typename ...Ts>
 class TypedOutputPortCollection : public OutputPortCollection {
+    using PortTuple = std::tuple<
+        std::shared_ptr<TypedOutputPort<T>>,
+        std::shared_ptr<TypedOutputPort<Ts>>...>;
+    using TypeTuple = std::tuple<T, Ts...>;
 public:
     TypedOutputPortCollection(ComputeModule& parent);
     virtual std::weak_ptr<OutputPort> get(size_t portId);
     virtual size_t size() const;
+    template <std::size_t N> typename std::tuple_element<N, TypeTuple>::type& output();
 private:
-    std::tuple<
-        std::shared_ptr<TypedOutputPort<T>>,
-        std::shared_ptr<TypedOutputPort<Ts>>...> m_outputPorts;
+    PortTuple m_outputPorts;
     std::vector<std::weak_ptr<OutputPort>> m_typelessPorts;
 };
 

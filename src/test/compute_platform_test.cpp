@@ -21,7 +21,7 @@ public:
     {}
     void execute() override
     {
-        // m_outputs.output<0>() = m_seed;
+        m_outputs.output<0>() = m_seed;
     }
     void setData(int x)
     {
@@ -42,7 +42,7 @@ public:
     {}
     void execute() override
     {
-        // m_outputs.output<0>() = m_inputs.input<0>() + 1;
+        m_outputs.output<0>() = m_inputs.input<0>() + 1;
     }
 protected:
     TypedInputPortCollection<int> m_inputs;
@@ -58,7 +58,7 @@ public:
     {}
     void execute() override
     {
-        // m_store = m_inputs.input<0>();
+        m_store = m_inputs.input<0>();
     }
     int getResult()
     {
