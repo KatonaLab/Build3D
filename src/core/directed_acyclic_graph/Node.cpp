@@ -75,7 +75,7 @@ bool Node::nodeInSubgraph(const ConstNodePtr& targetNode, TraversalMode mode) co
     return false;
 }
 
-bool Node::connect(NodePtr &to)
+bool Node::connect(NodePtr to)
 {
     if (nodeInOutputs(to)) {
         return true;
@@ -125,7 +125,7 @@ std::vector<WeakNodePtr>::const_iterator Node::findInputConstIterator(const Cons
     return it;
 }
 
-void Node::disconnect(NodePtr &with)
+void Node::disconnect(NodePtr with)
 {
     auto outIt = findOutputIterator(with);
     if (outIt != m_outputs.end()) {

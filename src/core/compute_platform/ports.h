@@ -9,12 +9,13 @@ namespace compute_platform {
 class InputPort;
 class ComputeModule;
 
-class OutputPort {
+class OutputPort : public std::enable_shared_from_this<OutputPort> {
 public:
     OutputPort(ComputeModule& parent);
     bool bind(std::weak_ptr<InputPort> inputPort); // add to m_targets if compatible
     size_t numBinds() const;
     void reset();
+    ComputeModule& parent();
     virtual ~OutputPort();
 protected:
     virtual bool compatible(std::weak_ptr<InputPort> input) const = 0;
@@ -25,9 +26,11 @@ protected:
 };
 
 class InputPort {
+    friend class OutputPort;
 public:
     InputPort(ComputeModule& parent);
     virtual void fetch() = 0;
+    ComputeModule& parent();
     virtual ~InputPort();
 protected:
     std::weak_ptr<OutputPort> m_source;

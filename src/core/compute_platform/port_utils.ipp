@@ -9,7 +9,10 @@ template <typename T>
 inline
 bool TypedOutputPort<T>::compatible(std::weak_ptr<InputPort> input) const
 {
-    return dynamic_cast<TypedInputPort<T>*>(input.lock().get()) != nullptr;
+    if (auto ptr = input.lock()) {
+        return dynamic_cast<TypedInputPort<T>*>(ptr.get()) != nullptr;
+    }
+    return false;
 }
 
 template <typename T>
@@ -51,23 +54,25 @@ template <typename T>
 inline
 void TypedInputPort<T>::fetch()
 {
-    if (m_source.expired() || m_source.lock() == nullptr) {
+    if (auto sourcePtr = m_source.lock()) {
+        auto source = dynamic_cast<TypedOutputPort<T>*>(sourcePtr.get());
+        if (source == nullptr) {
+            throw std::runtime_error("input type differs from the output type");
+        }
+        m_ptr = source->serve();
+    } else {
         throw std::runtime_error("input not connected to an output");
     }
-    
-    TypedOutputPort<T>* source = dynamic_cast<TypedOutputPort<T>*>(m_source.lock().get());
-    if (source == nullptr) {
-        throw std::runtime_error("input type differs from the output type");
-    }
-
-    m_ptr = source->serve();
 }
 
 template <typename T>
 inline
 T& TypedInputPort<T>::value()
 {
-    return *(m_ptr.lock());
+    if (auto ptr = m_ptr.lock()) {
+        return *ptr;
+    }
+    throw std::runtime_error("tried to get the value of an unconnected input");
 }
 
 template <typename T, typename ...Ts>
@@ -86,7 +91,11 @@ inline
 void TypedInputPortCollection<T, Ts...>::fetch()
 {
     for (auto p : m_typelessPorts) {
-        p.lock()->fetch();
+        if (auto ptr = p.lock()) {
+            ptr->fetch();
+        } else {
+            throw std::runtime_error("tried to fetch with nullptr port");
+        }
     }
 }
 

@@ -11,11 +11,14 @@ OutputPort::OutputPort(ComputeModule& parent) : m_parent(parent)
 bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
 {
     if (compatible(inputPort)) {
-        // bool canConnect = m_parent.node().connect(inputPort.lock()->m_parent.node());
-        // if (canConnect) {
-            m_numBinds++;
-            return true;
-        // }
+        if (auto ptr = inputPort.lock()) {
+            bool canConnect = m_parent.node()->connect(ptr->parent().node());
+            if (canConnect) {
+                m_numBinds++;
+                ptr->m_source = shared_from_this();
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -31,11 +34,21 @@ void OutputPort::reset()
     m_numInputServed = 0;
 }
 
+ComputeModule& OutputPort::parent()
+{
+    return m_parent;
+}
+
 OutputPort::~OutputPort()
 {}
 
 InputPort::InputPort(ComputeModule& parent) : m_parent(parent)
 {}
+
+ComputeModule& InputPort::parent()
+{
+    return m_parent;
+}
 
 InputPort::~InputPort()
 {}

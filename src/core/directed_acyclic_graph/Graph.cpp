@@ -127,7 +127,6 @@ NodePtr DependencyTraversal::next()
     NodePtr current = m_readyList.front();
     m_readyList.pop_front();
     current->m_ready = true;
-    current->notified();
 
     for (NodePtr n : current->m_outputs) {
         auto it = find(m_waitingList.begin(), m_waitingList.end(), n);

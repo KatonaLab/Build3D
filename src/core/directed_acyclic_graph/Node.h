@@ -48,8 +48,8 @@ namespace directed_acyclic_graph {
         ConstTraversal constTraverse(TraversalMode mode) const;
         WeakGraphPtr& owner();
         const std::string& name() const;
-        bool connect(NodePtr &to);
-        void disconnect(NodePtr &with);
+        bool connect(NodePtr to);
+        void disconnect(NodePtr with);
         virtual void notified();
         virtual ~Node();
     protected:

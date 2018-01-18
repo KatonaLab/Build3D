@@ -3,6 +3,16 @@
 #include "ComputePlatform.h"
 
 using namespace core::compute_platform;
+using namespace core::directed_acyclic_graph;
+
+TriggerNode::TriggerNode(ComputeModule& parent)
+: m_parent(parent)
+{}
+
+void TriggerNode::notified()
+{
+    m_parent.evaluate();
+}
 
 void ComputeModule::evaluate()
 {
@@ -33,7 +43,21 @@ std::weak_ptr<OutputPort> ComputeModule::outputPort(size_t id)
 ComputeModule::ComputeModule(ComputePlatform& parent,
     InputPortCollection& inputs,
     OutputPortCollection& outputs)
-    : m_parent(parent), m_inputs(inputs), m_outputs(outputs)
+    : m_parent(parent), m_inputs(inputs),
+    m_outputs(outputs)
 {
-    m_parent.addModule(this);
+    m_node = std::make_shared<TriggerNode>(*this);
+    m_parent.addModule(*this, m_node);
+}
+
+NodePtr ComputeModule::node()
+{
+    return m_node;
+}
+
+void ComputeModule::reset()
+{
+    for (size_t i = 0; i < m_outputs.size(); ++i) {
+        m_outputs.get(i).lock()->reset();
+    }
 }

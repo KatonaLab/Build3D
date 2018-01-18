@@ -92,5 +92,12 @@ SCENARIO("intuitive usage", "[core/compute_platform]")
                 REQUIRE(dd.getResult() == 43);
             }
         }
+
+        AND_WHEN("run again") {
+            p.run();
+            THEN("it outputs the correct result") {
+                REQUIRE(dd.getResult() == 43);
+            }
+        }
     }
 }

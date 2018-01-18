@@ -12,11 +12,13 @@ class ComputeModule;
 
 class ComputePlatform {
 public:
-    void addModule(ComputeModule* module);
+    ComputePlatform();
+    void addModule(ComputeModule& module,
+        core::directed_acyclic_graph::NodePtr node);
     size_t size() const;
     void run();
 private:
-    std::list<ComputeModule*> m_modules;
+    std::list<std::reference_wrapper<ComputeModule>> m_modules;
     core::directed_acyclic_graph::GraphPtr m_graph;
 };
 

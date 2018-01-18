@@ -3,8 +3,18 @@
 
 #include "ports.h"
 
+#include <core/directed_acyclic_graph/Node.h>
+
 namespace core {
 namespace compute_platform {
+
+    class TriggerNode : public core::directed_acyclic_graph::Node {
+    public:
+        TriggerNode(ComputeModule& parent);
+        void notified() override;
+    private:
+        ComputeModule& m_parent;
+    };
 
     class ComputePlatform;
 
@@ -15,6 +25,8 @@ namespace compute_platform {
         size_t numOutputs() const;
         std::weak_ptr<InputPort> inputPort(size_t id);
         std::weak_ptr<OutputPort> outputPort(size_t id);
+        core::directed_acyclic_graph::NodePtr node();
+        void reset();
     protected:
         ComputeModule(ComputePlatform& parent,
             InputPortCollection& inputs,
@@ -24,6 +36,7 @@ namespace compute_platform {
         ComputePlatform& m_parent;
         InputPortCollection& m_inputs;
         OutputPortCollection& m_outputs;
+        std::shared_ptr<TriggerNode> m_node;
     };
     
 }}
