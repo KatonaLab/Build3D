@@ -354,15 +354,31 @@ SCENARIO("graph can be walked", "[core/directed_acyclic_graph]")
         nodes[0]->connect(nodes[5]);
         nodes[5]->connect(nodes[3]);
         nodes[3]->connect(nodes[2]);
+
+        std::vector<int> order {0, 1, 5, 3, 4, 2};
+
         WHEN("traversing") {
-            std::vector<int> order {0, 1, 5, 3, 4, 2};
             DependencyTraversal t(g);
-            int i = 0;
-            while (t.hasNext()) {
-                NodePtr node = t.next();
-                REQUIRE(node == nodes[order[i++]]);
+            THEN("the node order is as expected") {
+                int i = 0;
+                while (t.hasNext()) {
+                    NodePtr node = t.next();
+                    REQUIRE(node == nodes[order[i++]]);
+                }
+                REQUIRE((size_t)i == order.size());
             }
-            REQUIRE((size_t)i == order.size());
+        }
+
+        WHEN("traversing again") {
+            DependencyTraversal t(g);
+            THEN("the node order is as expected again") {
+                int i = 0;
+                while (t.hasNext()) {
+                    NodePtr node = t.next();
+                    REQUIRE(node == nodes[order[i++]]);
+                }
+                REQUIRE((size_t)i == order.size());
+            }
         }
     }
 }
