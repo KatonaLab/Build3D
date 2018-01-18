@@ -5,6 +5,7 @@
 
 #include <list>
 #include <memory>
+#include <typeinfo>
 
 namespace core {
 namespace compute_platform {
@@ -12,11 +13,17 @@ namespace compute_platform {
 class ComputeModule;
 
 template <typename T>
+class TypedInputPort;
+
+template <typename T>
 class TypedOutputPort : public OutputPort {
 public:
     TypedOutputPort(ComputeModule& parent);
     std::weak_ptr<T> serve();
+    virtual size_t typeHash() const;
     T& value();
+    void forwardFromInput(std::weak_ptr<TypedInputPort<T>> input);
+    void forwardFromSharedPtr(std::shared_ptr<T> data);
 protected:
     virtual bool compatible(std::weak_ptr<InputPort> input) const;
     virtual void cleanOnReset();
@@ -27,9 +34,11 @@ private:
 
 template <typename T>
 class TypedInputPort : public InputPort {
+    friend class TypedOutputPort<T>;
 public:
     TypedInputPort(ComputeModule& parent);
     virtual void fetch();
+    virtual size_t typeHash() const;
     T& value();
 private:
     std::weak_ptr<T> m_ptr;
@@ -46,7 +55,7 @@ public:
     virtual void fetch();
     virtual std::weak_ptr<InputPort> get(size_t portId);
     virtual size_t size() const;
-    template <std::size_t N> typename std::tuple_element<N, TypeTuple>::type& input();
+    template <std::size_t N> typename std::tuple_element<N, PortTuple>::type input();
 private:
     PortTuple m_inputPorts;
     std::vector<std::weak_ptr<InputPort>> m_typelessPorts;
@@ -62,7 +71,7 @@ public:
     TypedOutputPortCollection(ComputeModule& parent);
     virtual std::weak_ptr<OutputPort> get(size_t portId);
     virtual size_t size() const;
-    template <std::size_t N> typename std::tuple_element<N, TypeTuple>::type& output();
+    template <std::size_t N> typename std::tuple_element<N, PortTuple>::type output();
 private:
     PortTuple m_outputPorts;
     std::vector<std::weak_ptr<OutputPort>> m_typelessPorts;

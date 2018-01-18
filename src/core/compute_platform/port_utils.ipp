@@ -2,7 +2,7 @@
 template <typename T>
 inline
 TypedOutputPort<T>::TypedOutputPort(ComputeModule& parent)
-    : OutputPort(parent), m_original(std::make_shared<T>())
+    : OutputPort(parent)
 {}
 
 template <typename T>
@@ -10,7 +10,7 @@ inline
 bool TypedOutputPort<T>::compatible(std::weak_ptr<InputPort> input) const
 {
     if (auto ptr = input.lock()) {
-        return dynamic_cast<TypedInputPort<T>*>(ptr.get()) != nullptr;
+        return ptr->typeHash() == typeHash();
     }
     return false;
 }
@@ -19,10 +19,11 @@ template <typename T>
 inline
 std::weak_ptr<T> TypedOutputPort<T>::serve()
 {
+    m_numInputServed++;
+
     if (m_numInputServed < m_numBinds) {
         // T's copy constructor should do a deep copy
         m_replicas.push_back(std::make_shared<T>(*m_original));
-        m_numInputServed++;
         return std::weak_ptr<T>(m_replicas.back());
     } else if (m_numInputServed == m_numBinds) {
         return std::weak_ptr<T>(m_original);
@@ -33,9 +34,42 @@ std::weak_ptr<T> TypedOutputPort<T>::serve()
 
 template <typename T>
 inline
+size_t TypedOutputPort<T>::typeHash() const
+{
+    return typeid(T).hash_code();
+}
+
+template <typename T>
+inline
 T& TypedOutputPort<T>::value()
 {
-    return *m_original;
+    if (m_original) {
+        return *m_original;
+    } else {
+        throw std::runtime_error("output port has no data");
+    }
+}
+
+template <typename T>
+inline
+void TypedOutputPort<T>::forwardFromInput(std::weak_ptr<TypedInputPort<T>> input)
+{
+    if (auto inputPtr = input.lock()) {
+        if (auto dataPtr = inputPtr->m_ptr.lock()) {
+            m_original = dataPtr;
+        } else {
+            throw std::runtime_error("can not forward empty input data");
+        }
+    } else {
+        throw std::runtime_error("can not forward an invalid input");
+    }
+}
+
+template <typename T>
+inline
+void TypedOutputPort<T>::forwardFromSharedPtr(std::shared_ptr<T> data)
+{
+    m_original = data;
 }
 
 template <typename T>
@@ -63,6 +97,13 @@ void TypedInputPort<T>::fetch()
     } else {
         throw std::runtime_error("input not connected to an output");
     }
+}
+
+template <typename T>
+inline
+size_t TypedInputPort<T>::typeHash() const
+{
+    return typeid(T).hash_code();
 }
 
 template <typename T>
@@ -115,10 +156,10 @@ size_t TypedInputPortCollection<T, Ts...>::size() const
 
 template <typename T, typename ...Ts>
 template <std::size_t N>
-typename std::tuple_element<N, typename TypedInputPortCollection<T, Ts...>::TypeTuple>::type&
+typename std::tuple_element<N, typename TypedInputPortCollection<T, Ts...>::PortTuple>::type
 TypedInputPortCollection<T, Ts...>::input()
 {
-    return std::get<N>(m_inputPorts)->value();
+    return std::get<N>(m_inputPorts);
 }
 
 template <typename T, typename ...Ts>
@@ -147,10 +188,10 @@ size_t TypedOutputPortCollection<T, Ts...>::size() const
 
 template <typename T, typename ...Ts>
 template <std::size_t N>
-typename std::tuple_element<N, typename TypedOutputPortCollection<T, Ts...>::TypeTuple>::type& 
+typename std::tuple_element<N, typename TypedOutputPortCollection<T, Ts...>::PortTuple>::type
 TypedOutputPortCollection<T, Ts...>::output()
 {
-    return std::get<N>(m_outputPorts)->value();
+    return std::get<N>(m_outputPorts);
 }
 
 namespace detail {

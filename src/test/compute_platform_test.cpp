@@ -4,96 +4,19 @@
 #include <memory>
 #include <tuple>
 
-#include <core/compute_platform/ports.h>
-#include <core/compute_platform/port_utils.hpp>
-#include <core/compute_platform/ComputeModule.h>
-#include <core/compute_platform/ComputePlatform.h>
+#include "compute_platform_test_helper.hpp"
 
 using namespace core::compute_platform;
 using namespace std;
 
-class DataSource : public ComputeModule {
-public:
-    DataSource(ComputePlatform& parent)
-        : ComputeModule(parent, m_inputs, m_outputs),
-        m_inputs(*this),
-        m_outputs(*this)
-    {}
-    void execute() override
-    {
-        m_outputs.output<0>() = m_seed;
-    }
-    void setData(int x)
-    {
-        m_seed = x;
-    }
-protected:
-    int m_seed = 0;
-    InputPortCollection m_inputs;
-    TypedOutputPortCollection<int> m_outputs;
-};
-
-class PlusOne : public ComputeModule {
-public:
-    PlusOne(ComputePlatform& parent)
-        : ComputeModule(parent, m_inputs, m_outputs),
-        m_inputs(*this),
-        m_outputs(*this)
-    {}
-    void execute() override
-    {
-        m_outputs.output<0>() = m_inputs.input<0>() + 1;
-    }
-protected:
-    TypedInputPortCollection<int> m_inputs;
-    TypedOutputPortCollection<int> m_outputs;
-};
-
-class Add : public ComputeModule {
-public:
-    Add(ComputePlatform& parent)
-        : ComputeModule(parent, m_inputs, m_outputs),
-        m_inputs(*this),
-        m_outputs(*this)
-    {}
-    void execute() override
-    {
-        m_outputs.output<0>() = m_inputs.input<0>() + m_inputs.input<1>();
-    }
-protected:
-    TypedInputPortCollection<int, int> m_inputs;
-    TypedOutputPortCollection<int> m_outputs;
-};
-
-class DataDestination : public ComputeModule {
-public:
-    DataDestination(ComputePlatform& parent)
-        : ComputeModule(parent, m_inputs, m_outputs),
-        m_inputs(*this),
-        m_outputs(*this)
-    {}
-    void execute() override
-    {
-        m_store = m_inputs.input<0>();
-    }
-    int getResult()
-    {
-        return m_store;
-    }
-protected:
-    TypedInputPortCollection<int> m_inputs;
-    OutputPortCollection m_outputs;
-    int m_store;
-};
-
-SCENARIO("intuitive usage", "[core/compute_platform]")
+SCENARIO("basic usage", "[core/compute_platform]")
 {
     GIVEN("a simple net manipulating a simple int") {
         ComputePlatform p;
         
-        DataSource ds(p);
+        IntSource ds(p);
         PlusOne po(p);
-        DataDestination dd(p);
+        IntDestination dd(p);
 
         REQUIRE(p.size() == 3);
 
@@ -120,16 +43,16 @@ SCENARIO("intuitive usage", "[core/compute_platform]")
     GIVEN("a more complex net but also manipulating a simple int") {
         ComputePlatform p;
         
-        DataSource ds1(p);
-        DataSource ds2(p);
+        IntSource ds1(p);
+        IntSource ds2(p);
         PlusOne po1(p);
         Add ad1(p);
         Add ad2(p);
-        DataDestination dd1(p);
-        DataDestination dd2(p);
-        DataDestination dd3(p);
-        DataDestination dd4(p);
-        DataDestination dd5(p);
+        IntDestination dd1(p);
+        IntDestination dd2(p);
+        IntDestination dd3(p);
+        IntDestination dd4(p);
+        IntDestination dd5(p);
 
         REQUIRE(p.size() == 10);
 
@@ -170,4 +93,28 @@ SCENARIO("intuitive usage", "[core/compute_platform]")
             }
         }
     }
+}
+
+SCENARIO("leakage free", "[core/compute_platform]")
+{
+    GIVEN("a simple net manipulating complex data") {
+        ComputePlatform p;
+        
+        DataSource ds(p);
+        DataBypass po(p);
+        DataSink dd(p);
+
+        REQUIRE(p.size() == 3);
+
+        REQUIRE(ds.outputPort(0).lock()->bind(po.inputPort(0)) == true);
+        REQUIRE(po.outputPort(0).lock()->bind(dd.inputPort(0)) == true);
+
+        WHEN("run is called") {
+            p.run();
+        }
+        // TODO: check Data is created only once
+        // TODO: check in a more complex network Data and check for cleanup after running
+    }
+    // cout << Data::ctrReport << endl;
+    // cout << Data::dtrReport << endl;
 }
