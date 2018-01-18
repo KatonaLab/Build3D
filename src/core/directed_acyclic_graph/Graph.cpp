@@ -37,7 +37,7 @@ NodePtr Graph::add(const std::string& name)
     return m_nodes.back();
 }
 
-NodePtr Graph::add(NodePtr& node)
+NodePtr Graph::add(NodePtr node)
 {
     auto it = find(m_nodes.begin(), m_nodes.end(), node);
     if (it != m_nodes.end()) {
@@ -62,7 +62,7 @@ NodePtr Graph::add(NodePtr& node)
     return node;
 }
 
-void Graph::remove(NodePtr& node)
+void Graph::remove(NodePtr node)
 {
     auto it = find(m_nodes.begin(), m_nodes.end(), node);
     if (it != m_nodes.end()) {

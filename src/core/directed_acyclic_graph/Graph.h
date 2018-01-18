@@ -32,8 +32,8 @@ namespace directed_acyclic_graph {
     public:
         static GraphPtr create(const std::string& name = "");
         NodePtr add(const std::string& name = "");
-        NodePtr add(NodePtr& node);
-        void remove(NodePtr& node);
+        NodePtr add(NodePtr node);
+        void remove(NodePtr node);
         void clear();
         DependencyTraversal traverse();
         bool empty() const;
