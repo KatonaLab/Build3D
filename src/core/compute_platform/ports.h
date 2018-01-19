@@ -13,6 +13,7 @@ class OutputPort : public std::enable_shared_from_this<OutputPort> {
 public:
     OutputPort(ComputeModule& parent);
     bool bind(std::weak_ptr<InputPort> inputPort);
+    void unbind(std::weak_ptr<InputPort> inputPort);
     size_t numBinds() const;
     void reset();
     ComputeModule& parent();

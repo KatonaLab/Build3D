@@ -23,6 +23,24 @@ bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
     return false;
 }
 
+void OutputPort::unbind(std::weak_ptr<InputPort> inputPort)
+{
+    if (auto inputPtr = inputPort.lock()) {
+        if (auto ptr = inputPtr->m_source.lock()) {
+            if (ptr == shared_from_this()) {
+                inputPtr->m_source.reset();
+                if (m_numBinds == 1) {
+                    m_parent.node()->disconnect(inputPtr->parent().node());
+                } else if (m_numBinds < 1) {
+                    throw std::runtime_error(string("output bind count decreases below 0, ") +
+                        string("indicating some port managing issues in compute_platform library"));
+                }
+                m_numBinds--;
+            }
+        }
+    }
+}
+
 size_t OutputPort::numBinds() const
 {
     return m_numBinds;
