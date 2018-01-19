@@ -5,10 +5,11 @@
 
 #include "ComputeModule.h"
 
+#include <iostream>
+
 using namespace core::compute_platform;
-using namespace std;
 using namespace core::directed_acyclic_graph;
-using namespace core::compute_platform;
+using namespace std;
 
 ComputePlatform::ComputePlatform()
     : m_graph(Graph::create())
@@ -36,4 +37,17 @@ void ComputePlatform::run()
     while (t.hasNext()) {
         t.next()->notified();
     }
+}
+
+bool ComputePlatform::checkCompleteness()
+{
+    for (ComputeModule& module : m_modules) {
+        for (size_t i = 0; i < module.numInputs(); ++i) {
+            bool con = module.inputPort(i).lock()->connected();
+            if (con == false) {
+                return false;
+            }
+        }
+    }
+    return true;
 }

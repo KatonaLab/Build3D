@@ -34,6 +34,7 @@ public:
     virtual void fetch() = 0;
     ComputeModule& parent();
     virtual size_t typeHash() const = 0;
+    bool connected() const;
     virtual ~InputPort();
 protected:
     std::weak_ptr<OutputPort> m_source;

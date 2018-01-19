@@ -68,6 +68,11 @@ ComputeModule& InputPort::parent()
     return m_parent;
 }
 
+bool InputPort::connected() const
+{
+    return m_source.lock() != nullptr;
+}
+
 InputPort::~InputPort()
 {}
 

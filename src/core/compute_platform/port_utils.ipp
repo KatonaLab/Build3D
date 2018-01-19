@@ -116,6 +116,13 @@ T& TypedInputPort<T>::value()
     throw std::runtime_error("tried to get the value of an unconnected input");
 }
 
+template <typename T>
+inline
+std::weak_ptr<T> TypedInputPort<T>::inputPtr()
+{
+    return m_ptr;
+}
+
 template <typename T, typename ...Ts>
 inline 
 TypedInputPortCollection<T, Ts...>::TypedInputPortCollection(ComputeModule& parent)

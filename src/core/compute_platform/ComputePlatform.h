@@ -17,6 +17,7 @@ public:
         core::directed_acyclic_graph::NodePtr node);
     size_t size() const;
     void run();
+    bool checkCompleteness();
 private:
     std::list<std::reference_wrapper<ComputeModule>> m_modules;
     core::directed_acyclic_graph::GraphPtr m_graph;

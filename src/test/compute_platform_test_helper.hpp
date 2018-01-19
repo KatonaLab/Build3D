@@ -89,28 +89,34 @@ protected:
     int m_store;
 };
 
-class Data : public std::enable_shared_from_this<Data> {
+class Data {
 public:
     Data()
     {
-        m_instanceId = instanceCounter++;
-        ctrReport += std::to_string(m_instanceId) + " ";
-        std::cout << "ctr " << m_instanceId << std::endl;
+        m_instanceId = m_nextInstanceId++;
+        m_instancesAlive++;
     }
-    ~Data() {
-        dtrReport += std::to_string(m_instanceId) + " ";
-        std::cout << "dtr " << m_instanceId << std::endl;
+    Data(const Data&)
+    {
+        m_instanceId = m_nextInstanceId++;
+        m_instancesAlive++;
     }
-    static std::string ctrReport;
-    static std::string dtrReport;
-private:
+    ~Data()
+    {
+        m_instancesAlive--;
+    }
+    static int nextInstanceId() {
+        return m_nextInstanceId;
+    }
+public:
     int m_instanceId = 0;
-    static int instanceCounter;
+    static int m_instancesAlive;
+private:
+    static int m_nextInstanceId;
 };
 
-int Data::instanceCounter = 0;
-std::string Data::ctrReport;
-std::string Data::dtrReport;
+int Data::m_nextInstanceId = 0;
+int Data::m_instancesAlive = 0;
 
 class DataSource : public cp::ComputeModule {
 public:
@@ -123,6 +129,10 @@ public:
     void execute() override
     {
         m_outputs.output<0>()->forwardFromSharedPtr(m_seed);
+    }
+    std::weak_ptr<Data> giveWeakPtrToData()
+    {
+        return m_seed;
     }
 protected:
     std::shared_ptr<Data> m_seed;
@@ -146,6 +156,22 @@ protected:
     cp::TypedOutputPortCollection<Data> m_outputs;
 };
 
+class TwoInputBypass : public cp::ComputeModule {
+public:
+    TwoInputBypass(cp::ComputePlatform& parent)
+        : cp::ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
+    }
+protected:
+    cp::TypedInputPortCollection<Data, Data> m_inputs;
+    cp::TypedOutputPortCollection<Data> m_outputs;
+};
+
 class DataSink : public cp::ComputeModule {
 public:
     DataSink(cp::ComputePlatform& parent)
@@ -155,12 +181,28 @@ public:
     {}
     void execute() override
     {
-        // TODO: copy only the shared_ptr of input
-        // m_result = m_inputs.input<0>()->value();
+        m_result = m_inputs.input<0>()->inputPtr().lock();
     }
 protected:
     std::shared_ptr<Data> m_result;
     cp::TypedInputPortCollection<Data> m_inputs;
+    cp::OutputPortCollection m_outputs;
+};
+
+class TwoInputSink : public cp::ComputeModule {
+public:
+    TwoInputSink(cp::ComputePlatform& parent)
+        : cp::ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        m_result = m_inputs.input<0>()->inputPtr().lock();
+    }
+protected:
+    std::shared_ptr<Data> m_result;
+    cp::TypedInputPortCollection<Data, Data> m_inputs;
     cp::OutputPortCollection m_outputs;
 };
 

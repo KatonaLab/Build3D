@@ -12,6 +12,7 @@ namespace compute_platform {
     public:
         TriggerNode(ComputeModule& parent);
         void notified() override;
+        ComputeModule& parent();
     private:
         ComputeModule& m_parent;
     };

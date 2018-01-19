@@ -22,6 +22,8 @@ SCENARIO("basic usage", "[core/compute_platform]")
 
         REQUIRE(ds.outputPort(0).lock()->bind(po.inputPort(0)) == true);
         REQUIRE(po.outputPort(0).lock()->bind(dd.inputPort(0)) == true);
+        REQUIRE(ds.outputPort(0).lock()->numBinds() == 1);
+        REQUIRE(po.outputPort(0).lock()->numBinds() == 1);
 
         ds.setData(42);
 
@@ -38,11 +40,36 @@ SCENARIO("basic usage", "[core/compute_platform]")
                 REQUIRE(dd.getResult() == 43);
             }
         }
-    }
 
+        AND_WHEN("the a link is removed") {
+            ds.outputPort(0).lock()->unbind(po.inputPort(0));
+            THEN("the bind counter decreased") {
+                REQUIRE(ds.outputPort(0).lock()->numBinds() == 0);
+            }
+            AND_WHEN("we try to run the net") {
+                THEN("we get exception") {
+                    REQUIRE_THROWS(p.run());
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("basic usage with a more complex net", "[core/compute_platform]")
+{
     GIVEN("a more complex net but also manipulating a simple int") {
         ComputePlatform p;
         
+        //       +-------+
+        //       |       v 
+        // dd1<-ds1->po1->ad1->dd4
+        //       |    | 
+        //       v    v
+        // ds2->ad2  dd3
+        //  |    |
+        //  v    v
+        // dd2  dd5
+
         IntSource ds1(p);
         IntSource ds2(p);
         PlusOne po1(p);
@@ -95,26 +122,144 @@ SCENARIO("basic usage", "[core/compute_platform]")
     }
 }
 
-SCENARIO("leakage free", "[core/compute_platform]")
+SCENARIO("efficient data handling and leakage free checks with simple net", "[core/compute_platform]")
 {
-    GIVEN("a simple net manipulating complex data") {
-        ComputePlatform p;
-        
-        DataSource ds(p);
-        DataBypass po(p);
-        DataSink dd(p);
+    GIVEN("a net manipulating complex data, the nodes forwards its input to the output") {
+        weak_ptr<Data> weakData;
+        {
+            ComputePlatform p;
+            
+            DataSource ds(p);
+            weakData = ds.giveWeakPtrToData();
+            REQUIRE(weakData.lock());
 
-        REQUIRE(p.size() == 3);
+            DataBypass po(p);
+            DataSink dd(p);
 
-        REQUIRE(ds.outputPort(0).lock()->bind(po.inputPort(0)) == true);
-        REQUIRE(po.outputPort(0).lock()->bind(dd.inputPort(0)) == true);
+            REQUIRE(p.size() == 3);
+            REQUIRE(ds.outputPort(0).lock()->bind(po.inputPort(0)) == true);
+            REQUIRE(po.outputPort(0).lock()->bind(dd.inputPort(0)) == true);
 
-        WHEN("run is called") {
-            p.run();
+            // ds and weakData is refering the data
+            REQUIRE(weakData.lock().use_count() == 2);
+
+            WHEN("run is called") {
+                p.run();
+                THEN("the reference count increases") {
+                    // ds.m_seed, ds.m_outputs, po.m_outputs, dd.m_outputs, dd.m_result
+                    REQUIRE(weakData.lock().use_count() == 5);
+                    REQUIRE(weakData.lock()->nextInstanceId() == 1);
+                }
+            }
         }
-        // TODO: check Data is created only once
-        // TODO: check in a more complex network Data and check for cleanup after running
+        WHEN("the platform is wiped out") {
+            THEN("the data is cleaned") {
+                REQUIRE(weakData.expired() == true);
+            }
+        }
     }
-    // cout << Data::ctrReport << endl;
-    // cout << Data::dtrReport << endl;
+}
+
+vector<shared_ptr<ComputeModule>>
+addGrowingLayer(vector<shared_ptr<ComputeModule>> prevLayer,
+    ComputePlatform& p, bool lastLayer)
+{
+    vector<shared_ptr<ComputeModule>> result;
+    if (prevLayer.empty()) {
+        result.push_back(make_shared<DataSource>(p));
+        return result;
+    }
+    
+    if (!lastLayer) {
+        auto side1 = make_shared<DataBypass>(p);
+        auto side2 = make_shared<DataBypass>(p);
+
+        REQUIRE(prevLayer[0]->outputPort(0).lock()->bind(side1->inputPort(0)) == true);
+        REQUIRE(prevLayer[prevLayer.size()-1]->outputPort(0).lock()->bind(side2->inputPort(0)) == true);
+
+        result.push_back(side1);
+        for (int i = 0; i < (int)prevLayer.size() - 1; ++i) {
+            auto m = make_shared<TwoInputBypass>(p);
+            result.push_back(m);
+            REQUIRE(prevLayer[i]->outputPort(0).lock()->bind(m->inputPort(0)) == true);
+            REQUIRE(prevLayer[i + 1]->outputPort(0).lock()->bind(m->inputPort(1)) == true);
+        }
+        result.push_back(side2);
+
+        return result;
+    } else {
+        auto side1 = make_shared<DataSink>(p);
+        auto side2 = make_shared<DataSink>(p);
+
+        REQUIRE(prevLayer[0]->outputPort(0).lock()->bind(side1->inputPort(0)) == true);
+        REQUIRE(prevLayer[prevLayer.size()-1]->outputPort(0).lock()->bind(side2->inputPort(0)) == true);
+
+        result.push_back(side1);
+        for (int i = 0; i < (int)prevLayer.size() - 1; ++i) {
+            auto m = make_shared<TwoInputSink>(p);
+            result.push_back(m);
+            REQUIRE(prevLayer[i]->outputPort(0).lock()->bind(m->inputPort(0)) == true);
+            REQUIRE(prevLayer[i + 1]->outputPort(0).lock()->bind(m->inputPort(1)) == true);
+        }
+        result.push_back(side2);
+
+        return result;
+    }
+}
+
+SCENARIO("efficient data handling and leakage free checks with complex net", "[core/compute_platform]")
+{
+    GIVEN("a net manipulating complex data, the nodes forwards its input to the output") {
+        vector<weak_ptr<ComputeModule>> weakModules;
+        {
+            ComputePlatform p;
+            vector<vector<shared_ptr<ComputeModule>>> modules;
+            vector<shared_ptr<ComputeModule>> first;
+            modules.push_back(addGrowingLayer(first, p, false));
+            for (int i = 0; i < 3; ++i) {
+                auto layer = addGrowingLayer(modules.back(), p, i == 2);
+                modules.push_back(layer);
+            }
+
+            // S = source
+            // M = module
+            // SNK = sink
+            //
+            // S -> M -> M -> SNK
+            // |    |    |
+            // v    v    v
+            // M -> M -> SNK
+            // |    |
+            // v    v
+            // M -> SNK
+            // |
+            // v
+            // SNK
+            //
+            // Data should be copied at every junction, and the originals should be carried through
+            // resulting in 6 copies and 3 carried 'originals'
+
+            REQUIRE(p.checkCompleteness() == true);
+
+            WHEN("running the net") {
+                p.run();
+                THEN("Data should be instatiated 4 times") {
+                    auto ptr = dynamic_pointer_cast<DataSource>(modules[0][0]);
+                    auto data = ptr->giveWeakPtrToData().lock();
+                    REQUIRE(data->nextInstanceId() == 9);
+                }
+            }
+        }
+        WHEN("the platform is wiped out") {
+            THEN("the modules are cleaned") {
+                for (auto module : weakModules) {
+                    REQUIRE(module.lock() == nullptr);
+                }
+            }
+
+            AND_THEN("the data is cleaned") {
+                REQUIRE(Data::m_instancesAlive == 0);
+            }
+        }
+    }
 }

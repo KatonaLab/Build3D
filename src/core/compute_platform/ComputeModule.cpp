@@ -14,6 +14,11 @@ void TriggerNode::notified()
     m_parent.evaluate();
 }
 
+ComputeModule& TriggerNode::parent()
+{
+    return m_parent;
+}
+
 void ComputeModule::evaluate()
 {
     m_inputs.fetch();
