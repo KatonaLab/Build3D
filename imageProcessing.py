@@ -34,8 +34,8 @@ class Main(object):
         sourceDictList = []
 
 
-        fileNameList1 =['one_1.tif']#['test7_1.tif','test7_11.tif', 'test7_111.tif']# ['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif']#, 'ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
-        fileNameList2 =['one_2.tif'] #['test7_2.tif','test7_22.tif', 'test7_222.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif']#, 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
+        fileNameList1 =['u_1.tif']#['test7_1.tif','test7_11.tif', 'test7_111.tif']# ['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif']#, 'ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
+        fileNameList2 =['u_2.tif'] #['test7_2.tif','test7_22.tif', 'test7_222.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif']#, 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
 
         path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512"
 
@@ -81,14 +81,12 @@ class Main(object):
         taggedImageDictionary1['name'] = str(ch1Dict['name']) + '_tagged'
         taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict])
 
-        _, taggedImageDictionary1_filtered,_=Main.filter(taggedImage1, taggedImageDictionary1, {'meanIntensity in '+str(ch1Dict['name']):{'min': 5, 'max': 50}}, filterImage=False)
-        Main.save([taggedImageDictionary1_filtered], path,
-                            fileName='testFilter', toText=False)
-        taggedImageDictionary1=taggedImageDictionary1_filtered
-        log += '\n' + logText
+        taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,{'tag':{'min': 0, 'max': 40}}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
+
+        #Main.save([taggedImageDictionary1_filtered], path,
+                            #fileName='testFilter', toText=False)
 
         print(logText)
-
         log += '\n' + logText
 
         # Channel 2
@@ -109,21 +107,31 @@ class Main(object):
         log += '\n' + logText
 
         ###########################################Colocalization#########################################################
+
         # Colocalization analysis
         overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization(
             [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2], [])
+
+
         print(logText)
-
-
         log += '\n' + logText
+
         ###########################################Save#########################################################
         logText = Main.save([taggedImageDictionary1, taggedImageDictionary2, overlappingDictionary], path,
                             fileName=fileName, toText=False)
         log += '\n' + logText
-        #print(logText)
+        print(logText)
+
+        print('1')
+        print(taggedDataBaseList[0])
+        print('2')
+        print(taggedDataBaseList[1])
+        print('OVL')
+        print(overlappingDictionary)
 
         with open(os.path.join(path,'log_'+fileName+'.txt'), "w") as textFile:
             textFile.write(log)
+
 
 
     def tagImage(image, imageDictionary):
@@ -151,7 +159,6 @@ class Main(object):
         # Finish timing and add to logText
         tstop = time.clock()
         logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
-
 
         return outputImage, logText
 
@@ -196,8 +203,6 @@ class Main(object):
 
             else:
                 raise LookupError("'" + str(method) + "' is Not a valid mode!")
-
-
 
         except Exception as e:
             logText += '\n\tException encountered!!!!'
@@ -244,7 +249,6 @@ class Main(object):
             #Add number of objects to logText
             logText += '\n\tNumber of objects: '+str(len(outputDictionary['dataBase']['tag']))
 
-
         except Exception as e:
             logText += '\n\tException encountered!!!!'
             logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
@@ -260,7 +264,7 @@ class Main(object):
 
 
     def filter(inputImage, inputDictionary, filterDict, removeFiltered=True,
-               overWrite=True, filterImage=False):
+               overWrite=True):
         '''
         Filters dictionary stored in the 'dataBase' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['Database']
         and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
@@ -282,10 +286,8 @@ class Main(object):
         # Creatre LogText and start logging
         logText = '\nFiltering: ' + str(inputDictionary['name'])
         logText += '\n\tFilter settings: '+str(filterDict).replace('{', ' ').replace('}', ' ')
-        logText += '\n\t\tfilterImage=' + str(filterImage)
         logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
         logText += '\n\t\toverwrite=' + str(overWrite)
-
 
         try:
             # Print list of images in Imagelist to log text
@@ -295,19 +297,20 @@ class Main(object):
                     #logText += dict['name']
 
             # Filter dictionary
-            outputDictionary = Measurement.filter_dataBase(inputDictionary, filterDict, removeFiltered, overWrite)
+            outputDictionary = Measurement.filter_dataBase(inputDictionary, filterDict, overWrite)
+
             # Filter image
-            if filterImage == True:
+            if removeFiltered == True:
                 outputImage = Measurement.filter_image(inputImage, outputDictionary)
-            else:
-                outputImage = inputImage
-                outputDictionary=inputDictionary
+
+            elif removeFiltered == False:
+                outputImage=inputImage
+
 
         except Exception as e:
             logText += '\n\tException encountered!!!!'
             logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
             logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
-
             outputImage = []
             outputDictionary={}
 
@@ -319,7 +322,7 @@ class Main(object):
 
 
     def colocalization(taggedImageList, taggedDictList, sourceImageList=[], sourceDictionayList=[], overlappingFilter={},
-                       removeFiltered=False, overWrite=True, filterImage=False):
+                       removeFiltered=False, overWrite=True):
         '''
 
         :param taggedImageList:
@@ -331,7 +334,6 @@ class Main(object):
         '''
         # Start timingsourceDictionayList
         tstart = time.clock()
-        print(taggedDictList)
         #print(sourceDictionayList)
         #sourceDictionayList = []
 
@@ -345,7 +347,6 @@ class Main(object):
 
             # Add Filter settings
             logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
-            logText += '\n\t\tfilterImage=' + str(filterImage)
             logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
             logText += '\n\t\toverwrite=' + str(overWrite)
 
@@ -358,7 +359,7 @@ class Main(object):
             overlappingDataBase = Measurement.colocalization_connectivity(taggedImageList, taggedDictList,
                                                                       overlappingDataBase)
             # Filter dataBase and image
-            overlappingDataBase, overlappingDataBase, _ = Main.filter(overlappingImage, overlappingDataBase, overlappingFilter, filterImage)
+            overlappingImage, overlappingDataBase, _ = Main.filter(overlappingImage, overlappingDataBase, overlappingFilter, removeFiltered)
 
             # Analyze colocalization
             taggedDataBaseList, overlappingDataBase = Measurement.colocalizaion_analysis(taggedDictList,
@@ -436,15 +437,14 @@ class Measurement(object):
     @staticmethod
     def filter_image(taggedImg, taggedDict):
 
-
         dataBase=taggedDict['dataBase']
+
         changeDict={}
         if 'filter' in dataBase.keys():
             for i in range(len(dataBase['filter'])):#dataBase should have a label key!!!
                 if dataBase['filter'][i]==False:
-                    changeDict[int(dataBase['tag'])]=0
+                    changeDict[int(dataBase['tag'][i])]=0
 
-            # change label
             itkImage = sitk.GetImageFromArray(taggedImg)
 
             sitkFilter = sitk.ChangeLabelImageFilter()
@@ -452,6 +452,7 @@ class Measurement(object):
 
             outputImage = sitk.GetArrayFromImage(sitkFilter.Execute(itkImage))
         else:
+
             outputImage = taggedImg
 
         return outputImage
@@ -485,7 +486,6 @@ class Measurement(object):
     @staticmethod
     def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
 
-
         # Generate array lists and name lists
         nameList = [x['name'] for x in dataBaseList]
 
@@ -501,10 +501,7 @@ class Measurement(object):
             for j in range(len(overlappingPixels)):
                 ovlPosition = overlappingPixels[j]
                 objectList[j] = itk_image.GetPixel(ovlPosition)
-                #print('############')
 
-                #print(objectList[j])
-                #print(dataBaseList[i]['dataBase']['tag'].index(objectList[j] ))
                 #if objectList[j] in dataBaseList[i]['dataBase']['tag']:
                 ovlRatioList[j] = overlappingDataBase['dataBase']['voxelCount'][j] / dataBaseList[i]['dataBase']['voxelCount'][dataBaseList[i]['dataBase']['tag'].index(objectList[j])]
                 #else:
@@ -512,8 +509,6 @@ class Measurement(object):
 
             overlappingDataBase['dataBase']['object in ' + nameList[i]] = objectList
             overlappingDataBase['dataBase']['overlappingRatio in ' + nameList[i]] = ovlRatioList
-            print('##########################')
-            print(overlappingDataBase)
 
 
         return overlappingDataBase
@@ -521,12 +516,16 @@ class Measurement(object):
     @staticmethod
     def colocalizaion_analysis(dictionaryList, overlappingDictionary):
 
+
         dataBaseList=[x['dataBase'] for x in dictionaryList]
         overlappingDataBase=overlappingDictionary['dataBase']
+
         nameList = [x['name'] for x in dictionaryList]
+
 
         NbObjects = [len(x['dataBase']['tag']) for x in dictionaryList]
         NbOfInputElements=len(dataBaseList)
+
 
         ovlFiltered = 'filter' in overlappingDataBase.keys()
         dictFiltered = [('filter' in x.keys()) for x in dataBaseList]
@@ -538,10 +537,11 @@ class Measurement(object):
             outputList[i]['colocalizationCount']=[0  for i in range(NbObjects[i])]
             outputList[i]['totalOverlappingRatio'] = [0  for i in range(NbObjects[i])]
 
-            positionList = [x for x in range(NbOfInputElements) if x != i]
+            positionList = [x for x in range(NbOfInputElements) if x != 1]
             for j in range(len(positionList)):
-                outputList[i]['objects in '+nameList[positionList[j]]]=[[] for i in range(NbObjects[i])]
-
+                outputList[i]['object in '+nameList[positionList[j]]]=[[] for i in range(NbObjects[i])]
+        print(nameList)
+        print(outputList)
         for j in range(len(overlappingDataBase['tag'])):
 
             #Determine if any of the objects have been filtered out and retrieve tags and their rispected position
@@ -562,14 +562,17 @@ class Measurement(object):
 
             #If none of the objects have been filtered out add info to output
             if flag==True:
-                for i in range(NbOfInputElements):
+                for i in range(0,NbOfInputElements):
+                    print(str(i))
                     if currentPositionList[i] in dataBaseList[i]['tag']:
-                        outputList[i]['colocalizationCount'][currentPositionList[i]]+=1
-                        outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j-1]
+                        print(str(i))
+                        print(str(currentPositionList[i]))
+                        outputList[i]['colocalizationCount'][currentPositionList[i]-1]+=1
+                        outputList[i]['totalOverlappingRatio'][currentPositionList[i]-1] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j]
 
                     positionList = [x for x in range(NbOfInputElements) if x != i]
                     for j in range(len(positionList)):
-                        outputList[i]['objects in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j-1]])
+                        outputList[i]['object in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j]])
 
         for i in range(NbOfInputElements):
             for key in outputList[i]:
@@ -695,7 +698,7 @@ class Measurement(object):
 
 
     @staticmethod
-    def filter_dataBase(dictionary, filterDict, removeFiltered=False, overWrite=True):
+    def filter_dataBase(dictionary, filterDict, overWrite=True):
 
         dataFrame=pd.DataFrame(dictionary['dataBase'])
 
@@ -711,15 +714,18 @@ class Measurement(object):
             if dataFrame[key].dtype in typeList:
 
                 currentFilter=(dataFrame[key]>=filterDict[key]['min'])&(dataFrame[key]<=filterDict[key]['max'])
+
                 if ('filter' in dictionary['dataBase'].keys()) & (overWrite == False):
                     dataFrame['filter']=np.multiply(originalFilter,currentFilter)
                 else:
                     dataFrame['filter']=currentFilter
 
-        if removeFiltered == True: #or 'filtered' in dataFrame.keys()  :
-            dataFrame=dataFrame[(dataFrame['filter']==True)]
+        #Remove Filtered
+        #if removeFiltered == True: #or 'filtered' in dataFrame.keys()  :
+            #dataFrame=dataFrame[(dataFrame['filter']==True)]
 
         dictionary['dataBase'] = dataFrame.to_dict(orient='list')
+
 
         return dictionary
 
