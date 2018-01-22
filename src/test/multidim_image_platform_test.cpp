@@ -59,10 +59,297 @@ SCENARIO("multidim image basic usage", "[core/multidim_image_platform]")
         }
     }
 
-    // TODO: type check
-    // TODO: huge allocation test, copy, assign, dctr
-    // TODO: clear
-    // TODO: custom(?) meta data, dim name, (channel name)
-    // TODO: create multidim data by copying some dimensions
-    // TODO: view(?)
+    GIVEN("an 0xN image that fails to be constructed") {
+        REQUIRE_THROWS(MultiDimImage im1({0, 32}));
+        REQUIRE_THROWS(MultiDimImage im2({32, 0}));
+        REQUIRE_THROWS(MultiDimImage im3({32, 32, 2, 0}));
+    }
+
+    GIVEN("three images") {
+        MultiDimImage im1({1, 1}, MultiDimImage::type<uint8_t>());
+        MultiDimImage im2({1, 1}, MultiDimImage::type<uint8_t>());
+        MultiDimImage im3({1, 1}, MultiDimImage::type<float>());
+
+        REQUIRE(im1.type() == im2.type());
+        REQUIRE(im1.type() != im3.type());
+        REQUIRE(im2.type() != im3.type());
+
+        WHEN("when assigned (copied)") {
+            im3 = im2;
+            THEN("the type matches") {
+                REQUIRE(im1.type() == im3.type());
+                REQUIRE(im2.type() == im3.type());
+            }
+        }
+    }
+}
+
+typedef ImageWeakPtrPair std::pair<
+    std::vector<std::weak_ptr<MultiDimImage>>,
+    std::vector<std::weak_ptr<MultiDimImage>>>
+
+ImageWeakPtrPair weakPointerToImageData(MultiDimImage& image)
+{
+    std::vector<std::weak_ptr<MultiDimImage>> planePtrs;
+    std::vector<std::weak_ptr<MultiDimImage>> volumePtrs;
+
+    REQUIRE(image.dims() == 4);
+
+    for (size_t c = 0; c < image.dim(3); ++c) {
+        auto volume = image.volume(c);
+        volumePtrs.push_back(volume);
+        for (size_t d = 0; d < image.dim(2); ++d) {
+            auto plane = image.plane(d, c);
+            planePtrs.push_back(plane);
+        }
+    }
+
+    return std::make_pair(planePtrs, volumePtrs);
+}
+
+void checkWeakPtrNull(ImageWeakPtrPair& wpp)
+{
+    for (auto wPtr : wpp.first) {
+        REQUIRE(wPtr.lock() == nullptr);
+    }
+    for (auto wPtr : wpp.second) {
+        REQUIRE(wPtr.lock() == nullptr);
+    }
+}
+
+SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
+{
+    GIVEN("the demand for a huge volume with 4 channels, 2048x2048x64x4 float") {
+        WHEN("created") {
+            MultiDimImage huge({2048, 2048, 64, 4}, MultiDimImage::type<float>());
+            ImageWeakPtrPair wpp = weakPointerToImageData(huge);
+            THEN("it is allocated without problems") {
+                REQUIRE(huge.size() == 2048 * 2048 * 64 * 4);
+                REQUIRE(huge.byteSize() == 2048 * 2048 * 64 * 4 * sizeof(float));
+                REQUIRE(huge.dims() == 4);
+                REQUIRE(huge.dim(0) == 2048);
+                REQUIRE(huge.dim(1) == 2048);
+                REQUIRE(huge.dim(2) == 64);
+                REQUIRE(huge.dim(3) == 4);
+                REQUIRE(huge.type() == MultiDimImage::type<float>());
+                REQUIRE(huge.empty() == false);
+            }
+
+            std::shared_ptr<MultiDimImage> hugeCopy = std::make_shared<MultiDimImage>();
+            ImageWeakPtrPair wppCpy;
+            AND_WHEN("copied") {
+                *hugeCopy = huge;
+                wppCpy = weakPointerToImageData(*hugeCopy);
+                THEN("the copy is allocated without problems") {
+                    REQUIRE(hugeCopy->size() == 2048 * 2048 * 64 * 4);
+                    REQUIRE(hugeCopy->byteSize() == 2048 * 2048 * 64 * 4 * sizeof(float));
+                    REQUIRE(hugeCopy->dims() == 4);
+                    REQUIRE(hugeCopy->dim(0) == 2048);
+                    REQUIRE(hugeCopy->dim(1) == 2048);
+                    REQUIRE(hugeCopy->dim(2) == 64);
+                    REQUIRE(hugeCopy->dim(3) == 4);
+                    REQUIRE(hugeCopy->type() == MultiDimImage::type<float>());
+                    REQUIRE(hugeCopy->empty() == false);
+                }
+            }
+
+            AND_WHEN("the copy is destroyed") {
+                hugeCopy.reset();
+                THEN("the memory is freed") {
+                    checkWeakPtrNull(wppCpy);
+                }
+            }
+
+            AND_WHEN("the original is cleared") {
+                huge.clear();
+                THEN("the memory is freed") {
+                    checkWeakPtrNull(wpp);
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("multidim metadata usage", "[core/multidim_image_platform]")
+{
+    GIVEN("an image") {
+        MultiDimImage im;
+        WHEN("meta is added") {
+            im.meta.add<int>("int_meta_test", 42);
+            im.meta.add<float>("float_meta_test", 2024.2024);
+            im.meta.add<std::string>("string_meta_test", "testing 1, 2, 3...");
+            im.meta.add<char>("to be removed", 0);
+            THEN("it is stored correctly") {
+                REQUIRE(im.meta.get<int>("int_meta_test") == 42);
+                REQUIRE(im.meta.get<float>("float_meta_test") == 2024.2024);
+                REQUIRE(im.meta.get<std::string>("string_meta_test") == "testing 1, 2, 3...");
+                REQUIRE(im.meta.get<char>("to be removed") == 0);
+            }
+
+            AND_THAN("the data can only be reached type correctly") {
+                REQUIRE(im.meta.has<int>("int_meta_test") == true);
+                REQUIRE(im.meta.has<float>("int_meta_test") == false);
+                REQUIRE_THROW(im.meta.get<float>("int_meta_test"));
+                
+                REQUIRE(im.meta.has<std::string>("string_meta_test") == true);
+                REQUIRE(im.meta.has<int>("string_meta_test") == false);
+                REQUIRE_THROW(im.meta.get<int>("string_meta_test"));
+            }
+            
+            AND_WHEN("one is removed") {
+                im.meta.remove<char>("to be removed");
+                THEN("it is no longer reachable") {
+                    REQUIRE(im.meta.has<char>("to be removed") == false);
+                    REQUIRE_THROW(im.meta.get<char>("to be removed"));
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
+{
+    GIVEN("an image") {
+        MultiDimImage image({16, 16, 4, 2});
+        image.at(0, 0, 0, 0) = 42;
+        image.at(0, 0, 1, 0) = 43;
+        image.at(0, 0, 2, 0) = 44;
+        image.at(0, 0, 3, 0) = 45;
+        image.at(0, 0, 0, 1) = 82;
+        image.at(0, 0, 1, 1) = 83;
+        image.at(0, 0, 2, 1) = 84;
+        image.at(0, 0, 3, 1) = 85;
+        WHEN("a plane is viewed through a MultiDimImageView") {
+            MultiDimImageView view1 = image.plane(0, 0);
+            MultiDimImageView view2 = image.plane(1, 0);
+            MultiDimImageView view3 = image.plane(2, 0);
+            MultiDimImageView view4 = image.plane(3, 0);
+            MultiDimImageView view5 = image.plane(0, 1);
+            MultiDimImageView view6 = image.plane(1, 1);
+            MultiDimImageView view7 = image.plane(2, 1);
+            MultiDimImageView view8 = image.plane(3, 1);
+
+            REQUIRE(view1.dims() == 2);
+            REQUIRE(view1.dim(0) == 16);
+            REQUIRE(view1.dim(1) == 16);
+            REQUIRE(view1.size() == 16 * 16);
+            REQUIRE(view1.empty() == false);
+            REQUIRE(view1.valid() == true);
+            REQUIRE(view1.parent() == image);
+
+            REQUIRE(view7.dims() == 2);
+            REQUIRE(view7.dim(0) == 16);
+            REQUIRE(view7.dim(1) == 16);
+            REQUIRE(view7.size() == 16 * 16);
+            REQUIRE(view7.empty() == false);
+            REQUIRE(view7.valid() == true);
+            REQUIRE(view7.parent() == image);
+
+            THEN("it points to the right data") {
+                REQUIRE(view1.at(0, 0) == 42);
+                REQUIRE(view2.at(0, 0) == 43);
+                REQUIRE(view3.at(0, 0) == 44);
+                REQUIRE(view4.at(0, 0) == 45);
+                REQUIRE(view5.at(0, 0) == 82);
+                REQUIRE(view6.at(0, 0) == 83);
+                REQUIRE(view7.at(0, 0) == 84);
+                REQUIRE(view8.at(0, 0) == 85);
+            }
+
+            AND_WHEN("a view id modified") {
+                view1.at(0, 0) = 2024;
+                view7.at(0, 0) = 2025;
+                THEN("then the original MultiDimImage is modified too") {
+                    REQUIRE(image.at(0, 0, 0, 0) == 2024);
+                    REQUIRE(image.at(0, 0, 2, 1) == 2025);
+                }
+            }
+        }
+
+        WHEN("a volume is viewed through a MultiDimImageView") {
+            MultiDimImageView vol1 = image.volume(0);
+            MultiDimImageView vol2 = image.volume(1);
+            THEN("the dimensions match") {
+                REQUIRE(vol1.dims() == 3);
+                REQUIRE(vol1.dim(0) == 16);
+                REQUIRE(vol1.dim(1) == 16);
+                REQUIRE(vol1.empty() == false);
+                REQUIRE(vol1.size() == 16 * 16);
+                REQUIRE(vol1.valid() == true);
+                REQUIRE(vol1.parent() == image);
+
+                REQUIRE(vol2.dims() == 3);
+                REQUIRE(vol2.dim(0) == 16);
+                REQUIRE(vol2.dim(1) == 16);
+                REQUIRE(vol2.empty() == false);
+                REQUIRE(vol2.size() == 16 * 16);
+                REQUIRE(vol2.valid() == true);
+                REQUIRE(vol2.parent() == image);
+            }
+
+            AND_WHEN("view is modified") {
+                vol1.at(15, 15, 0) = 127;
+                vol2.at(15, 15, 0) = 78;
+                THEN("the original is modified too") {
+                    REQUIRE(image.at(15, 15, 0, 0) == 127);
+                    REQUIRE(image.at(15, 15, 0, 1) == 78);
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
+{
+    GIVEN("an image") {
+        MultiDimImage image({512, 512, 16, 3});
+        image.at(511, 0, 0, 1) = 42;
+        WHEN("first two dimensions reordered") {
+            image.reorderDims({1, 0, 2, 3});
+            THEN("the data is reordered") {
+                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.dims() == 4);
+                REQUIRE(image.dim(0) == 512);
+                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(2) == 16);
+                REQUIRE(image.dim(3) == 3);
+                REQUIRE(image.at(0, 511, 0, 1) == 42);
+            }
+        }
+
+        WHEN("the reorder parametrs are bad") {
+            THEN("the funciton throws") {
+                REQUIRE_THROWS(image.reorderDims({1, 0}));
+                REQUIRE_THROWS(image.reorderDims({0, 1, 2, 3, 4}));
+                REQUIRE_THROWS(image.reorderDims({0, 1, 2, 4}));
+                REQUIRE_THROWS(image.reorderDims({}));
+            }
+        }
+
+        WHEN("complex reordeing happens") {
+            image.reorderDims({3, 0, 1, 2});
+            THEN("the data is reordered") {
+                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.dims() == 4);
+                REQUIRE(image.dim(0) == 3);
+                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(2) == 512);
+                REQUIRE(image.dim(3) == 16);
+                REQUIRE(image.at(1, 511, 0, 0) == 42);
+            }
+        }
+
+        WHEN("the reordering is the same") {
+            image.reorderDims({0, 1, 2, 3});
+            THEN("the data is the same") {
+                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.dims() == 4);
+                REQUIRE(image.dim(0) == 512);
+                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(2) == 16);
+                REQUIRE(image.dim(3) == 3);
+                REQUIRE(image.at(511, 0, 0, 0) == 42);
+            }
+        }
+    }
 }
