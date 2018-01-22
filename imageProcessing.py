@@ -10,301 +10,422 @@ import pandas as pd
 from scipy.ndimage.filters import convolve
 import time
 import os
-import multiprocessing as mp
+#import multiprocessing as mp
 import copy
-from itertools import chain
+#from itertools import chain
 import matplotlib.pyplot as plt
 import pickle
-from operator import add
-import xml.etree.cElementTree as ET
+import traceback
+#from operator import add
+#import xml.etree.cElementTree as ET
+#from pympler import summary, muppy
+#import gc
 
-
-####################################################Interface to call from C++####################################################
-def tagImage(inputImage, outputImage):
-    '''
-    Function that runs ITK connected components on input image
-    :param image: nd Array
-    :param outputImage: nd Array
-    '''
-    outputImage=Segmentation.tag_image(image)
-
-def autoThreshold(inputImage, method, outputImage):
-    '''
-    Apply autothreshold slice by slice. For later use there is an implementation that uses stack histograms
-    and one that uses the mean of the slice by slice threshold values.
-    :param inputImage: nd array
-    :param method: threshold method name as string
-            * 'Otsu'
-            * 'Huang'
-            * 'IsoData'
-            * 'Li'
-            * 'MaxEntropy'
-            * 'KittlerIllingworth'
-            * 'Moments'
-            * 'Yen'
-            * 'RenyiEntropy'
-            * 'Shanbhag'
-    :return:
-    '''
-
-    outputImage=Segmentation.threshold2D_auto(inputImage, method, outputImage)
-
-def analyze(taggedImage, taggedDictionary, outputDictionary, outputImage, imageList=[], dictionaryList=[]):
-    '''
-    Analyzes tagedImage and appends 'dataBase' to its dictionary that contain measured values.
-    :param taggedImage: tagged image
-    :param taggedDictionary: dictionary with descriptors of tagged image
-    :param imageList: image list where intensity is measured within objects of taggedImage
-    :param dictionaryList: list of dictionaries that apartain to each element in imageList
-    :param outputImage: output image
-    :param outputDictionary: dictionary with descriptors of outputImage
-    :return:
-    '''
-
-    outputDictionary =Measurement.analyze(taggedImage, taggedDictionary, imageList, dictionaryList)
-
-
-
-def filter(inputImage ,inputDictionary, outputImage, outputDictionary, filterDict,  removeFiltered=False, overWrite=True, filterImage=False ):
-    '''
-    Filters dictionary stored in the 'dataBase' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['Database']
-    and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
-
-    :param inputDictionary: Dictionary containing informason related to inputImage
-    :param inputImage: Tagged image
-    :param filterDict: Dictionary contains the keywords to be filtered and the min/maximum value as the following example:
-
-            dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
-
-    :param outputDictionary
-    :param inputImage
-    :param removeFiltered: If True objects that are filtered out are removed
-    :return:
-    '''
-
-    #Filter dictionary
-    outputDictionary=Measurement.filter_dataBase(inputDictionary, filterDict, removeFiltered, overWrite)
-    #Filter image
-    if filterImage==True:
-        outputImage=Measurement.filter_image(inputImage, outputDictionary)
-    else:
-        outputImage=inputImage
-
-
-def colocalization(taggedImageList, taggedDictList, sourceImageList=[], overlappingFilterList=[], filterImage=True):
-    '''
-
-    :param taggedImageList:
-    :param taggedDictList:
-    :param sourceImageList:
-    :param overlappingFilterList:
-    :param filterImage:
-    :return:
-    '''
-
-    # Create overlapping Image and overlapping Database
-    overlappingImage, overlappingDataBase = Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
-    # Determine connectivity data
-    overlappingDataBase = Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-    # Filter dataBase
-    outputDictionary = Measurement.filter_dataBase(taggedDictList[1], overlappingFilterList)
-    # Filter image
-    if filterImage == True:
-        overlappingImage = Measurement.filter_image(overlappingImage, outputDictionary)
-    # Analyze colocalization
-    taggedDataBaseList, overlappingDataBase = Measurement.colocalizaion_analysis(taggedImageList, taggedDictList, overlappingImage, overlappingDataBase)
-
-    return overlappingImage, overlappingDataBase, taggedDataBaseList
-
-
-def save(inputDictionaryList, path, fileName='output', toText=True):
-    '''
-    :param dictionaryList: Save dictionaries in inputDictionaryList
-    :param path: path where file is saved
-    :param toText: if True data are saved to text
-    :param fileName: fileneme WITHOUT extension
-    :return:
-    '''
-
-    Measurement.save(inputDictionaryList, path, fileName, toText)
-
-#############################################Class to use as sandbox for python####################################################
 class Main(object):
+
 
     def __init__(self):
 
+
+
+        ###################################################################################################################################
+        #############################################Load Images###########################################################################
+        sourceImageList = []
+        sourceDictList = []
+
+
+        fileNameList1 =['one_1.tif']#['test7_1.tif','test7_11.tif', 'test7_111.tif']# ['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif']#, 'ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
+        fileNameList2 =['one_2.tif'] #['test7_2.tif','test7_22.tif', 'test7_222.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif']#, 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
+
+        path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512"
+
+        for i in range(len(fileNameList1)):
+            print('####################################################################################')
+            print(str(i)+'. '+fileNameList1[i]+'+'+fileNameList2[i])
+            print('####################################################################################')
+
+            ch1Img = Processor.load_image(os.path.join(path, fileNameList1[i]))
+            ch1Dict = {'name': fileNameList1[i]}#,
+                   #'width': ch1Img.shape[2], 'height': ch1Img.shape[1], 'depth': ch1Img.shape[0],
+                   #'pixelSizeX': 0.5, 'pixelSizeY': 0.5, 'pixelSizeZ': 0.5, 'pixelSizeUnit': 'um'}
+
+            ch2Img = Processor.load_image(os.path.join(path, fileNameList2[i]))
+            ch2Dict = {'name': fileNameList2[i]}#,
+                   #'width': ch2Img.shape[2], 'height': ch2Img.shape[1], 'depth': ch2Img.shape[0],
+                   #'pixelSizeX': 0.5, 'pixelSizeY': 0.5, 'pixelSizeZ': 0.5, 'pixelSizeUnit': 'um'}
+
+            Main.pairwiseColocalization(ch1Img, ch2Img, ch1Dict, ch2Dict, path,
+                                    'output_' + fileNameList1[i] + '_' + fileNameList2[i])
+
+
+    ####################################################Interface to call from C++####################################################
+
+    def pairwiseColocalization(ch1Img, ch2Img, ch1Dict, ch2Dict ,path, fileName):
+        ###########################################Segmentation and Analysis#########################################################
+        #print('###########################################Segmentation and Analysis#########################################################')
+       #print(ch1Dict)
+        #print('###########################################Segmentation and Analysis#########################################################')
+        #print(ch2Dict)
+
+        # Channel 1
+        thresholdedImage1, logText = Main.threshold(ch1Img, ch1Dict, method="MaxEntropy", mode="Slice")
+        print(logText)
+        log=logText
+
+
+        taggedImage1, logText = Main.tagImage(ch1Img, ch1Dict)
+        print(logText)
+        log+='\n'+logText
+
+        taggedImageDictionary1 = copy.copy(ch1Dict)
+        taggedImageDictionary1['name'] = str(ch1Dict['name']) + '_tagged'
+        taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict])
+
+        _, taggedImageDictionary1_filtered,_=Main.filter(taggedImage1, taggedImageDictionary1, {'meanIntensity in '+str(ch1Dict['name']):{'min': 5, 'max': 50}}, filterImage=False)
+        Main.save([taggedImageDictionary1_filtered], path,
+                            fileName='testFilter', toText=False)
+        taggedImageDictionary1=taggedImageDictionary1_filtered
+        log += '\n' + logText
+
+        print(logText)
+
+        log += '\n' + logText
+
+        # Channel 2
+        thresholdedImage2, logText = Main.threshold(ch2Img, ch2Dict, method="MaxEntropy", mode="Slice")
+        print(logText)
+        log += '\n' + logText
+
+
+        taggedImage2, logText = Main.tagImage(ch2Img, ch2Dict)
+        print(logText)
+        log += '\n' + logText
+
+        taggedImageDictionary2 = copy.copy(ch2Dict)
+        taggedImageDictionary2['name'] = str(ch2Dict['name']) + '_tagged'
+        taggedImageDictionary2, logText = Main.analyze(taggedImage2, taggedImageDictionary2, imageList=[ch2Img],dictionaryList=[ch2Dict])
+
+        print(logText)
+        log += '\n' + logText
+
+        ###########################################Colocalization#########################################################
+        # Colocalization analysis
+        overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization(
+            [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2], [])
+        print(logText)
+
+
+        log += '\n' + logText
+        ###########################################Save#########################################################
+        logText = Main.save([taggedImageDictionary1, taggedImageDictionary2, overlappingDictionary], path,
+                            fileName=fileName, toText=False)
+        log += '\n' + logText
+        #print(logText)
+
+        with open(os.path.join(path,'log_'+fileName+'.txt'), "w") as textFile:
+            textFile.write(log)
+
+
+    def tagImage(image, imageDictionary):
+        '''
+        Function that runs ITK connected components on input image
+        :param image: nd Array
+        :param outputImage: nd Array
+        '''
+
+        # Start timing
         tstart = time.clock()
 
-        '''
-        Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/ImageTest/3ch_ome.tif")
-        img = sitk.ReadImage(Path)
-        metadataKeys=img.GetMetaDataKeys()
-        print(metadataKeys)
-        root = ET.fromstring(img.GetMetaData('ImageDescription'))
-        print(root)
-        for child in root:
-            print('child: ')
-            print(child)
-            for child2 in child:
-                print("################################################################################################")
-                print(child2.tag)
-                print(child2.attrib)
+        # Creatre LogText and start logging
+        logText = '\nRunning connected components on : ' + str(imageDictionary['name'])
 
-        print(root.findall("item"))
-        #print(img.GetMetaData('ImageDescription'))
-        for key in metadataKeys:
-            print("################################################################################################")
-            #print(img.GetMetaData(key))
-        #img=Processor.load_image(Path)
-        #print(img[0])
-        '''
+        try:
+            outputImage = Segmentation.tag_image(image)
 
-        #############################################Load Images####################################################
-        sourceImageList=[]
-        sourceDictList=[]
-        # Channel 1
+        except Exception as e:
+            logText += '\n\tException encountered!!!!'
+            logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
+            logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
+            outputImage = []
 
-        #ch1Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_1.tif")
-        ch1Path = 'D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512x512/c1.tif'
-        #ch1Path = ('F:/Workspace/TestImages/test_1.tif')
-        ch1Img=Processor.load_image(ch1Path)
-        ch1Dict={'name': 'RawImage1',
-                 'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
-                 'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
-
-        sourceImageList.append(ch1Img)
-        sourceDictList.append(ch1Dict)
-
-
-        # Channel 2
-        #ch2Path =("D:/OneDrive - MTA KOKI/Workspace/Playground/img_2.tif")
-        ch2Path = 'D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512x512/c2.tif'
-        #ch2Path =('F:/Workspace/TestImages/test_2.tif')
-
-        ch2Img = Processor.load_image(ch2Path)
-
-        #b=np.array([65535,65535/2, 50], dtype=np.uint16)
-        #b=exposure.rescale_intensity(b,out_range='uint8')
-        #b = img_as_ubyte(ch2Img)
-        #exposure.equalize_hist(b)
-        b=Segmentation.threshold_adaptive(ch2Img[0], 'Adaptive Gaussian', blockSize=5, offSet=0)
-
-        ch2Dict={'name': 'RawImage1',
-                 'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
-                 'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
-
-        sourceImageList.append(ch2Img)
-        sourceDictList.append(ch2Dict)
-
-        # Channel 3
-        ch3Path = ("D:/OneDrive - MTA KOKI/Workspace/Playground/img_3.tif")
-        ch3Path = 'D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512x512/c3.tif'
-        #ch3Path =('F:/Workspace/TestImages/test_3.tif')
-        ch3Img = Processor.load_image(ch3Path)
-
-        ch3Dict={'name': 'RawImage1',
-                 'width':ch1Img.shape[2], 'height':ch1Img.shape[1],'depth':ch1Img.shape[0],
-                 'pixelSizeX':0.5,'pixelSizeY':0.5, 'pixelSizeZ':0.5, 'pixelSizeUnit':'um' }
-
-        sourceImageList.append(ch3Img)
-        sourceDictList.append(ch3Dict)
-        #############################################################################################################
-
-
-        #######################################Create Tagged Image List##############################################
-        taggedImageList = []
-        taggedDictList = []
-
-        #measurementKeys = ['volume', 'surface', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox',
-                           #'pixelsOnBorder', 'getElongation', 'getEquivalentSphericalRadius', 'getFlatness',
-                           #'getPrincipalAxes', 'getPrincipalMoments', 'getRoundness', 'getPrincipalAxes',
-                           #'getFeretDiameter', 'getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio',
-                           #'getEquivalentSphericalPerimeter''meanIntensity', 'medianIntensity', 'skewness', 'kurtosis',
-                           #'variance', 'maximumPixel', 'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass',
-                           #'standardDeviation', 'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
-                           #'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
-        #measurementKeys = ['volume', 'surface', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox',
-                           #'pixelsOnBorder', 'getElongation', 'getEquivalentSphericalRadius', 'getFlatness',
-                           #'getPrincipalAxes', 'getPrincipalMoments', 'getRoundness', 'getPrincipalAxes',
-                           #'getFeretDiameter', 'getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio',
-                           #'getEquivalentSphericalPerimeter''meanIntensity', 'medianIntensity', 'skewness', 'kurtosis',
-                           #'variance', 'maximumPixel', 'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass',
-                           #'standardDeviation', 'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
-                           #'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
-        measurementKeys = []
-
-        # Channel 1
-        thresholdedImage1=Segmentation.threshold_auto(sourceImageList[0], method="MaxEntropy", mode="3D")
-        taggedImage1=Segmentation.tag_image(thresholdedImage1)
-
-        taggedDict1=sourceDictList[0]
-        taggedDict1=Measurement.analyze(taggedImage1, taggedDict1, imageList=sourceImageList, dictionaryList=sourceDictList, measurementInput=measurementKeys)
-
-        taggedDict1['name']='Channel1'
-
-        taggedImageList.append(taggedImage1)
-        taggedDictList.append(taggedDict1)
-
-
-        # Channel 2
-        thresholdedImage2 = Segmentation.threshold_auto(sourceImageList[1], method="MaxEntropy", mode="3D")
-        taggedImage2 = Segmentation.tag_image(thresholdedImage2)
-
-        taggedDict2=sourceDictList[1]
-        taggedDict2 = Measurement.analyze(taggedImage2, taggedDict2, imageList=[sourceImageList[1]], dictionaryList=sourceDictList, measurementInput=measurementKeys)
-        taggedDict2['name']='Channel2'
-
-        taggedImageList.append(taggedImage2)
-        taggedDictList.append(taggedDict2)
-
-        # Channel 3
-        thresholdedImage3 = Segmentation.threshold_auto(sourceImageList[2], method="Otsu", mode="2D")
-        taggedImage3 = Segmentation.tag_image(thresholdedImage3)
-
-        taggedDict3 =sourceDictList[2]
-        taggedDict3 = Measurement.analyze(taggedImage3, taggedDict3, imageList=sourceImageList, dictionaryList=sourceDictList, measurementInput=measurementKeys)
-        taggedDict3['name'] = 'Channel3'
-
-        taggedImageList.append(taggedImage3)
-        taggedDictList.append(taggedDict3)
-        #############################################################################################################
-
-        #############################################Analysis Images####################################################
-
-        #Filter database
-        #dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
-
-        #taggedDictList[1]=Measurement.filter_dataBase(taggedDictList[1], {'tag':{'min':2,'max':3}}) #'ellipsoidDiameter':{'min':2,'max':3}})
-
-
-        #Colocalization analysis
-        overlappingImage, overlappingDataBase=Measurement.colocalization_overlap(taggedImageList, taggedDictList, sourceImageList=sourceImageList, sourceDictionayList=sourceDictList)
-        overlappingDataBase=Measurement.colocalization_connectivity(taggedImageList, taggedDictList, overlappingDataBase)
-        taggedDataBaseList, overlappingDataBase=Measurement.colocalizaion_analysis( taggedDictList, overlappingDataBase)
-
-        #print(overlappingDataBase)
-
-        #Save results
-        taggedDictList.append(overlappingDataBase)
-        #print(taggedDictList)
-        Measurement.saveData(taggedDictList, "D:/OneDrive - MTA KOKI/Workspace/Playground", toText=False)
-
-        taggedImageList.append(overlappingImage)
-        #print(type(taggedImageList[0]))
-        #print(taggedImageList)
-        Measurement.saveImage(taggedImageList, "D:/OneDrive - MTA KOKI/Workspace/Playground")
-       #Processor.imsave(path, nparray)
-
-
-
+        # Finish timing and add to logText
         tstop = time.clock()
-        print('ITK STATS: ' + str(tstop - tstart))
+        logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+
+
+        return outputImage, logText
+
+
+    def threshold(image, imageDictionary, method="Otsu", **kwargs):
+        '''
+
+            :param image:
+        :param imageDictionary:
+        :param method:
+        :param kwargs:
+            lowerThreshold, upperThreshold, mode,blockSize=5, offSet=0
+
+        :return:
+            LogText
+        '''
+
+        # Start timing
+        tstart = time.clock()
+
+        # Available Autothreshold methods
+        autothresholdList = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
+                             'RenyiEntropy', 'Shanbhag']
+        adaptiveThresholdList = ['Adaptive Mean', 'Adaptive Gaussian']
+
+        # Creatre LogText and start logging
+        logText = '\nThresholding: ' + str(imageDictionary['name']) + '\n\tMethod: ' + method
+        if kwargs != {}:
+            logText += '(' + str(kwargs)[1: -1] + ')'
+
+        # Run thresholding functions
+        try:
+            if method in autothresholdList:
+                outputImage, thresholdValue = Segmentation.threshold_auto(image, method, **kwargs)
+                logText += '\n\tThreshold values: ' + str(thresholdValue)
+
+            elif method in adaptiveThresholdList:
+                outputImage = Segmentation.threshold_adaptive(image, method, **kwargs)
+
+            elif method == 'Manual':
+                outputImage = Segmentation.threshold_manual(img, **kwargs)
+
+            else:
+                raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
 
 
+        except Exception as e:
+            logText += '\n\tException encountered!!!!'
+            logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
+            logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
+
+            outputImage = []
+
+        # Finish timing and add to logText
+        tstop = time.clock()
+        logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+
+        return outputImage, logText
+
+
+    def analyze(taggedImage, taggedDictionary, imageList=None, dictionaryList=None):
+        '''
+        Analyzes tagedImage and appends 'dataBase' to its dictionary that contain measured values.
+        :param taggedImage: tagged image
+        :param taggedDictionary: dictionary with descriptors of tagged image
+        :param imageList: image list where intensity is measured within objects of taggedImage
+        :param dictionaryList: list of dictionaries that apartain to each element in imageList
+        :param outputImage: output image
+        :param outputDictionary: dictionary with descriptors of outputImage
+        :return:
+        '''
+
+        # Start timing
+        tstart = time.clock()
+
+        # Creatre LogText and start logging
+        logText = '\nAnalyzing: ' + str(taggedDictionary['name'])
+
+        try:
+            #Print list of images in Imagelist to log text
+            if dictionaryList != None:
+                logText += '\n\tMeasuring intensity in: '
+                for dict in dictionaryList:
+                    logText += dict['name']
+
+            #Analyze image
+            outputDictionary = Measurement.analyze(taggedImage, taggedDictionary, imageList, dictionaryList)
+
+            #Add number of objects to logText
+            logText += '\n\tNumber of objects: '+str(len(outputDictionary['dataBase']['tag']))
+
+
+        except Exception as e:
+            logText += '\n\tException encountered!!!!'
+            logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
+            logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
+
+            outputDictionary = {}
+
+        # Finish timing and add to logText
+        tstop = time.clock()
+        logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+
+        return outputDictionary, logText
+
+
+    def filter(inputImage, inputDictionary, filterDict, removeFiltered=True,
+               overWrite=True, filterImage=False):
+        '''
+        Filters dictionary stored in the 'dataBase' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['Database']
+        and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
+
+        :param inputDictionary: Dictionary containing informason related to inputImage
+        :param inputImage: Tagged image
+        :param filterDict: Dictionary contains the keywords to be filtered and the min/maximum value as the following example:
+
+                dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
+
+        :param outputDictionary
+        :param inputImage
+        :param removeFiltered: If True objects that are filtered out are removed
+        :return:
+        '''
+        # Start timing
+        tstart = time.clock()
+
+        # Creatre LogText and start logging
+        logText = '\nFiltering: ' + str(inputDictionary['name'])
+        logText += '\n\tFilter settings: '+str(filterDict).replace('{', ' ').replace('}', ' ')
+        logText += '\n\t\tfilterImage=' + str(filterImage)
+        logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
+        logText += '\n\t\toverwrite=' + str(overWrite)
+
+
+        try:
+            # Print list of images in Imagelist to log text
+            #if dictionaryList != None:
+                #logText += '\n\tMeasuring intensity in: '
+                #for dict in dictionaryList:
+                    #logText += dict['name']
+
+            # Filter dictionary
+            outputDictionary = Measurement.filter_dataBase(inputDictionary, filterDict, removeFiltered, overWrite)
+            # Filter image
+            if filterImage == True:
+                outputImage = Measurement.filter_image(inputImage, outputDictionary)
+            else:
+                outputImage = inputImage
+                outputDictionary=inputDictionary
+
+        except Exception as e:
+            logText += '\n\tException encountered!!!!'
+            logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
+            logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
+
+            outputImage = []
+            outputDictionary={}
+
+        # Finish timing and add to logText
+        tstop = time.clock()
+        logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+
+        return outputImage, outputDictionary, logText
+
+
+    def colocalization(taggedImageList, taggedDictList, sourceImageList=[], sourceDictionayList=[], overlappingFilter={},
+                       removeFiltered=False, overWrite=True, filterImage=False):
+        '''
+
+        :param taggedImageList:
+        :param taggedDictList:
+        :param sourceImageList:
+        :param overlappingFilterList:
+        :param filterImage:
+        :return:
+        '''
+        # Start timingsourceDictionayList
+        tstart = time.clock()
+        print(taggedDictList)
+        #print(sourceDictionayList)
+        #sourceDictionayList = []
+
+
+        try:
+
+            # Creatre LogText
+            logText = '\nColocalization analysis started using: '
+            for dict in taggedDictList:
+                logText += '\t ' + str(dict['name'])
+
+            # Add Filter settings
+            logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
+            logText += '\n\t\tfilterImage=' + str(filterImage)
+            logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
+            logText += '\n\t\toverwrite=' + str(overWrite)
+
+
+            # Create overlapping Image and overlapping Database
+            overlappingImage, overlappingDataBase = Measurement.colocalization_overlap(taggedImageList, taggedDictList,
+                                                                                   sourceImageList, sourceDictionayList)
+
+            # Determine connectivity data
+            overlappingDataBase = Measurement.colocalization_connectivity(taggedImageList, taggedDictList,
+                                                                      overlappingDataBase)
+            # Filter dataBase and image
+            overlappingDataBase, overlappingDataBase, _ = Main.filter(overlappingImage, overlappingDataBase, overlappingFilter, filterImage)
+
+            # Analyze colocalization
+            taggedDataBaseList, overlappingDataBase = Measurement.colocalizaion_analysis(taggedDictList,
+                                                                                         overlappingDataBase)
+            #Print number of objects to logText
+            logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingDataBase['dataBase']['tag']))
+
+        except Exception as e:
+            logText += '\n\tException encountered!!!!'
+            logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
+            logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
+
+            overlappingImage=[]
+            overlappingDataBase= {}
+            taggedDataBaseList={}
+
+            # Finish timing and add to logText
+        tstop = time.clock()
+        logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+
+        return overlappingImage, overlappingDataBase, taggedDataBaseList, logText
+
+
+    def save(inputDictionaryList, path, fileName='output', toText=True):
+        '''
+        :param dictionaryList: Save dictionaries in inputDictionaryList
+        :param path: path where file is saved
+        :param toText: if True data are saved to text
+        :param fileName: fileneme WITHOUT extension
+        :return:
+        '''
+        # Start timing
+        tstart = time.clock()
+
+
+        try:
+            # Creatre LogText and start logging
+            logText = '\nSaving: '
+            # Add names of dictionary sources to logText
+            for dict in inputDictionaryList:
+                logText += '\t' + str(dict['name'])
+            #Add settings to logText
+            # Add filter settings to logText
+            logText += '\n\tPath: '+str(path)
+            logText += '\n\tFilename: '+str(fileName)
+            if toText==True: logText += '.txt'
+            elif toText==False:logText += '.xlsx'
+
+
+            Measurement.saveData(inputDictionaryList, path, fileName, toText)
 
 
 
+        except Exception as e:
+            logText += '\n\tException encountered!!!!'
+            logText += '\n\t\t' + str(e.__class__.__name__) + ': ' + str(e)
+            logText += '\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t')
+
+
+
+        # Finish timing and add to logText
+        tstop = time.clock()
+        logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+
+        return logText
+
+#############################################Class to use as sandbox for python####################################################
 
 #############################################Class that contain main functions for A3DC###################################################
 class Measurement(object):
@@ -314,6 +435,7 @@ class Measurement(object):
 
     @staticmethod
     def filter_image(taggedImg, taggedDict):
+
 
         dataBase=taggedDict['dataBase']
         changeDict={}
@@ -338,8 +460,13 @@ class Measurement(object):
     @staticmethod
     def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
 
-        #Create Overlapping Image
-        overlappingImage = Segmentation.tag_image(Segmentation.create_overlappingImage(taggedImgList))
+        # Create Overlapping Image
+        overlappingImage = taggedImgList[0]
+        for i in range(1, len(taggedImgList)):
+            overlappingImage = np.multiply(overlappingImage, taggedImgList[i])
+
+        # Tag overlapping image
+        overlappingImage = Segmentation.tag_image(overlappingImage)
 
         # Create Overlapping dataBase
         if name==None:
@@ -358,6 +485,7 @@ class Measurement(object):
     @staticmethod
     def colocalization_connectivity(taggedImgList, dataBaseList, overlappingDataBase):
 
+
         # Generate array lists and name lists
         nameList = [x['name'] for x in dataBaseList]
 
@@ -373,19 +501,30 @@ class Measurement(object):
             for j in range(len(overlappingPixels)):
                 ovlPosition = overlappingPixels[j]
                 objectList[j] = itk_image.GetPixel(ovlPosition)
-                ovlRatioList[j] = overlappingDataBase['dataBase']['voxelCount'][j] / dataBaseList[i]['dataBase']['voxelCount'][objectList[j] - 1]
+                #print('############')
+
+                #print(objectList[j])
+                #print(dataBaseList[i]['dataBase']['tag'].index(objectList[j] ))
+                #if objectList[j] in dataBaseList[i]['dataBase']['tag']:
+                ovlRatioList[j] = overlappingDataBase['dataBase']['voxelCount'][j] / dataBaseList[i]['dataBase']['voxelCount'][dataBaseList[i]['dataBase']['tag'].index(objectList[j])]
+                #else:
+                    #ovlRatioList[j]=0
 
             overlappingDataBase['dataBase']['object in ' + nameList[i]] = objectList
             overlappingDataBase['dataBase']['overlappingRatio in ' + nameList[i]] = ovlRatioList
+            print('##########################')
+            print(overlappingDataBase)
+
 
         return overlappingDataBase
 
     @staticmethod
-    def colocalizaion_analysis( dictionaryList, overlappingDictionary):
+    def colocalizaion_analysis(dictionaryList, overlappingDictionary):
 
         dataBaseList=[x['dataBase'] for x in dictionaryList]
         overlappingDataBase=overlappingDictionary['dataBase']
         nameList = [x['name'] for x in dictionaryList]
+
         NbObjects = [len(x['dataBase']['tag']) for x in dictionaryList]
         NbOfInputElements=len(dataBaseList)
 
@@ -424,9 +563,9 @@ class Measurement(object):
             #If none of the objects have been filtered out add info to output
             if flag==True:
                 for i in range(NbOfInputElements):
-
-                    outputList[i]['colocalizationCount'][currentPositionList[i]]+=1
-                    outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j-1]
+                    if currentPositionList[i] in dataBaseList[i]['tag']:
+                        outputList[i]['colocalizationCount'][currentPositionList[i]]+=1
+                        outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j-1]
 
                     positionList = [x for x in range(NbOfInputElements) if x != i]
                     for j in range(len(positionList)):
@@ -443,7 +582,6 @@ class Measurement(object):
 
     @staticmethod
     def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[], measurementInput = []):
-
 
         #Convert tagged image to ITK image
         itkImage = sitk.GetImageFromArray(taggedImage)
@@ -463,7 +601,6 @@ class Measurement(object):
                                      'getPrincipalAxes': itkFilter.GetPrincipalAxes,
                                      'getPrincipalMoments': itkFilter.GetPrincipalMoments,
                                      'getRoundness': itkFilter.GetRoundness,
-                                     'getPrincipalAxes': itkFilter.GetPrincipalAxes,
                                      'getFeretDiameter': itkFilter.GetFeretDiameter,
                                      'getPerimeter': itkFilter.GetPerimeter,
                                      'getPerimeterOnBorder': itkFilter.GetPerimeterOnBorder,
@@ -568,6 +705,7 @@ class Measurement(object):
         #Only run filter if key has numerical value
         typeList=['int', 'float', 'bool', 'complex',  'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64'
                         ,'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]
+
         for key in filterDict:
 
             if dataFrame[key].dtype in typeList:
@@ -578,7 +716,7 @@ class Measurement(object):
                 else:
                     dataFrame['filter']=currentFilter
 
-        if removeFiltered == True:
+        if removeFiltered == True: #or 'filtered' in dataFrame.keys()  :
             dataFrame=dataFrame[(dataFrame['filter']==True)]
 
         dictionary['dataBase'] = dataFrame.to_dict(orient='list')
@@ -669,10 +807,9 @@ class Measurement(object):
             with open(os.path.join(path, fileName + '.txt'), 'w') as outputFile:
 
                 for i in range(len(dataFrameList)):
-                    if dataFrameList[i] != None:
-
-                        outputFile.write('name= '+nameList[i]+'\n')
-                        outputFile.write(dataFrameList[i].to_csv(sep='\t', columns=keyOrderList[i], index=False, header=True))
+                    #if dataFrameList[i] != None:
+                    outputFile.write('name= '+nameList[i]+'\n')
+                    outputFile.write(dataFrameList[i].to_csv(sep='\t', columns=keyOrderList[i], index=False, header=True))
 
         return 0
 
@@ -719,40 +856,11 @@ class Measurement(object):
 #############################################Class that contain main functions for A3DC####################################################
 class Segmentation(object):
 
-    @staticmethod
-    def threshold_auto(image, method="Otsu", mode="2D"):
 
-        '''
-        Apply autothreshold slice by slice
-        :param img: nd array
-        :param thresholdMethod: threshold method name as string
-                * 'Otsu'
-                * 'Huang'
-                * 'IsoData'
-                * 'Li'
-                * 'MaxEntropy'
-                * 'KittlerIllingworth'
-                * 'Moments'
-                * 'Yen'
-                * 'RenyiEntropy'
-                * 'Shanbhag'
-        :return: nd array
-        '''
-
-        if mode=="3D":
-            outputImage, _=Segmentation.itkThresholder(image, method)
-
-        elif mode=="2D":
-
-            outputImage = []
-            for i in range(len(image)):
-                segmentedImage, _ = Segmentation.itkThresholder(image[i], method)
-                outputImage.append(segmentedImage)
-
-        return outputImage
 
     @staticmethod
-    def itkThresholder(image, method):
+    def threshold_auto(image, method, mode='Slice'):
+
 
         itkThresholdDict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                                 'Huang': sitk.HuangThresholdImageFilter(),
@@ -762,16 +870,41 @@ class Segmentation(object):
                                 'KittlerIllingworth': sitk.KittlerIllingworthThresholdImageFilter(),
                                 'Moments': sitk.MomentsThresholdImageFilter(), 'Yen': sitk.YenThresholdImageFilter(),
                                 'Shanbhag': sitk.ShanbhagThresholdImageFilter(),
-                            'Triangle': sitk.TriangleThresholdImageFilter()}
-        #Create ITK image
-        itkImage = sitk.GetImageFromArray(image)
-        #Create ITK FIlter object
-        threshold=itkThresholdDict[method]
-        # Get and apply threshold and invert
-        segmentedImage = sitk.InvertIntensity(threshold.Execute(itkImage), 1)
-        threshold = threshold.GetThreshold()
+                                'Triangle': sitk.TriangleThresholdImageFilter()}
 
-        return sitk.GetArrayFromImage(segmentedImage), threshold
+        #Check if method is valid
+        if method not in itkThresholdDict.keys():
+            raise LookupError("'" + str(method) + "' is Not a valid mode!")
+
+        #Create ITK FIlter object
+        thresholdFilter=itkThresholdDict[method]
+
+        if mode=="Stack" or len(image.shape)<3 :
+            # Create ITK image
+            itkImage = sitk.GetImageFromArray(image)
+            # Apply threshold, invert and convert to nd array
+            outputImage=sitk.GetArrayFromImage(sitk.InvertIntensity(thresholdFilter.Execute(itkImage), 1))
+            #Get threshold value
+            thresholdValue = thresholdFilter.GetThreshold()
+
+        elif mode=="Slice":
+
+            thresholdValue=[]
+            outputImage=[]
+            for i in range(len(image)):
+                # Create ITK image
+                itkImage = sitk.GetImageFromArray(image[i])
+                # Apply threshold, invert and convert to nd array
+                segmentedImage = sitk.GetArrayFromImage(sitk.InvertIntensity(thresholdFilter.Execute(itkImage), 1))
+                #Append threshold value to threshodValue
+                thresholdValue.append(thresholdFilter.GetThreshold())
+                #Append slice to outputImage
+                outputImage.append(segmentedImage)
+        else:
+            raise LookupError("'"+str(mode)+"' is Not a valid mode!")
+
+
+        return outputImage, thresholdValue
 
     @staticmethod
     def create_surfaceImage(taggedImage):
@@ -781,8 +914,6 @@ class Segmentation(object):
         pixelType = itkImage.GetPixelID()
         # Run binary threshold
         thresholdedItkImage = sitk.BinaryThreshold(itkImage, 0, 0, 0, 1)
-
-
 
         # Create an parametrize instance ofBinaryContourImageFilter()
         itkFilter = sitk.BinaryContourImageFilter()
@@ -797,22 +928,17 @@ class Segmentation(object):
 
         return sitk.GetArrayFromImage(output)
 
-    @staticmethod
-    def create_overlappingImage(taggedImageList):
-        # Create an overlapping image by pixelwise multiplication
-        img=taggedImageList[0]
-
-        for i in range(1,len(taggedImageList)):
-            img=np.multiply(img, taggedImageList[i])
-
-        return img
-
 
     @staticmethod
     def tag_image(image):
 
-        # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
+        #Convert ndarray to itk image
         itk_image = sitk.GetImageFromArray(image)
+
+        #Cast images to 8-bit as images should be binary anyway
+        #itk_image=sitk.Cast(itk_image, sitk.sitkUInt8)
+
+        # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
         tagged_image = sitk.ConnectedComponent(itk_image, fullyConnected=True)
 
         return sitk.GetArrayFromImage(tagged_image)
@@ -843,15 +969,13 @@ class Segmentation(object):
         outputImage = []
         for i in range(len(image)):
             if method == 'Adaptive Mean':
-                outputImage.append(threshold_local(convertedImage, blockSize, offSet))
+                outputImage.append(skimage.filters.threshold_local(convertedImage, blockSize, offSet))
 
             elif method == 'Adaptive Gaussian':
                 outputImage.append(cv2.adaptiveThreshold(convertedImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                     cv2.THRESH_BINARY, blockSize, offSet))
             else:
                 raise LookupError('Not a valid method!')
-                break
-
 
         return outputImage
 
