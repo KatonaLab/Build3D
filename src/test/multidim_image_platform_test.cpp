@@ -121,16 +121,17 @@ void checkWeakPtrNull(ImageViewPair<T>& wpp)
 
 SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
 {
+    std::size_t n = 248;
     GIVEN("the demand for a huge volume with 4 channels, 2048x2048x64x4 float") {
         WHEN("created") {
-            MultiDimImage<float> huge({2048, 2048, 64, 4});
+            MultiDimImage<float> huge({n, n, 64, 4});
             ImageViewPair<float> wpp = weakPointerToImageData(huge);
             THEN("it is allocated without problems") {
-                REQUIRE(huge.size() == 2048 * 2048 * 64 * 4);
-                REQUIRE(huge.byteSize() == 2048 * 2048 * 64 * 4 * sizeof(float));
+                REQUIRE(huge.size() == n * n * 64 * 4);
+                REQUIRE(huge.byteSize() == n * n * 64 * 4 * sizeof(float));
                 REQUIRE(huge.dims() == 4);
-                REQUIRE(huge.dim(0) == 2048);
-                REQUIRE(huge.dim(1) == 2048);
+                REQUIRE(huge.dim(0) == n);
+                REQUIRE(huge.dim(1) == n);
                 REQUIRE(huge.dim(2) == 64);
                 REQUIRE(huge.dim(3) == 4);
                 REQUIRE(huge.type() == GetType<float>());
@@ -143,11 +144,11 @@ SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
                 *hugeCopy = huge;
                 wppCpy = weakPointerToImageData(*hugeCopy);
                 THEN("the copy is allocated without problems") {
-                    REQUIRE(hugeCopy->size() == 2048 * 2048 * 64 * 4);
-                    REQUIRE(hugeCopy->byteSize() == 2048 * 2048 * 64 * 4 * sizeof(float));
+                    REQUIRE(hugeCopy->size() == n * n * 64 * 4);
+                    REQUIRE(hugeCopy->byteSize() == n * n * 64 * 4 * sizeof(float));
                     REQUIRE(hugeCopy->dims() == 4);
-                    REQUIRE(hugeCopy->dim(0) == 2048);
-                    REQUIRE(hugeCopy->dim(1) == 2048);
+                    REQUIRE(hugeCopy->dim(0) == n);
+                    REQUIRE(hugeCopy->dim(1) == n);
                     REQUIRE(hugeCopy->dim(2) == 64);
                     REQUIRE(hugeCopy->dim(3) == 4);
                     REQUIRE(hugeCopy->type() == GetType<float>());
@@ -298,6 +299,7 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
     GIVEN("an image") {
         MultiDimImage<uint8_t> image({512, 512, 16, 3});
         image.at({511, 0, 0, 1}) = 42;
+        image.at({78, 96, 7, 1}) = 47;
         WHEN("first two dimensions reordered") {
             image.reorderDims({1, 0, 2, 3});
             THEN("the data is reordered") {
@@ -307,7 +309,10 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
                 REQUIRE(image.dim(1) == 512);
                 REQUIRE(image.dim(2) == 16);
                 REQUIRE(image.dim(3) == 3);
+                REQUIRE(image.at({511, 0, 0, 1}) == 0);
+                REQUIRE(image.at({78, 96, 7, 1}) == 0);
                 REQUIRE(image.at({0, 511, 0, 1}) == 42);
+                REQUIRE(image.at({96, 78, 7, 1}) == 47);
             }
         }
 
@@ -320,7 +325,23 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
             }
         }
 
-        WHEN("complex reordeing happens") {
+        WHEN("complex reordeing happens #1") {
+            image.reorderDims({0, 1, 3, 2});
+            THEN("the data is reordered") {
+                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.dims() == 4);
+                REQUIRE(image.dim(0) == 512);
+                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(2) == 3);
+                REQUIRE(image.dim(3) == 16);
+                REQUIRE(image.at({511, 0, 0, 1}) == 0);
+                REQUIRE_THROWS(image.at({78, 96, 7, 1}));
+                REQUIRE(image.at({511, 0, 1, 0}) == 42);
+                REQUIRE(image.at({78, 96, 1, 7}) == 47);
+            }
+        }
+
+        WHEN("complex reordeing happens #2") {
             image.reorderDims({3, 0, 1, 2});
             THEN("the data is reordered") {
                 REQUIRE(image.size() == 512 * 512 * 16 * 3);
@@ -329,7 +350,10 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
                 REQUIRE(image.dim(1) == 512);
                 REQUIRE(image.dim(2) == 512);
                 REQUIRE(image.dim(3) == 16);
+                REQUIRE_THROWS(image.at({511, 0, 0, 1}));
+                REQUIRE_THROWS(image.at({78, 96, 7, 1}));
                 REQUIRE(image.at({1, 511, 0, 0}) == 42);
+                REQUIRE(image.at({1, 78, 96, 7}) == 47);
             }
         }
 
@@ -342,7 +366,8 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
                 REQUIRE(image.dim(1) == 512);
                 REQUIRE(image.dim(2) == 16);
                 REQUIRE(image.dim(3) == 3);
-                REQUIRE(image.at({511, 0, 0, 0}) == 42);
+                REQUIRE(image.at({511, 0, 0, 1}) == 42);
+                REQUIRE(image.at({78, 96, 7, 1}) == 47);
             }
         }
     }

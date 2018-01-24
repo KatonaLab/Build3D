@@ -48,8 +48,29 @@ namespace multidim_image_platform {
         const std::string& get(const std::string& tag);
         bool has(const std::string& tag);
         void remove(const std::string& tag);
+        void clear();
     private:
         std::unordered_map<std::string, std::string> m_items;
+    };
+
+    template <typename T>
+    class Registry {
+    public:
+        Registry() {}
+        Registry(const Registry& other) {}
+        Registry& operator=(const Registry&) 
+        void add(T* item);
+        void remove(T* item);
+        void clear();
+    private:
+        std::list<T*> m_items;
+    };
+
+    template <typename T>
+    class Registrable {
+    public:
+    private:
+        Registry<T>* m_registry;
     };
 
     template <typename T>
@@ -107,13 +128,33 @@ namespace multidim_image_platform {
         View subDimView(std::vector<std::size_t> coords, std::size_t firstNDims);
         void registerView(View* view);
         void unregisterView(View* view);
+        void unregisterAllViews();
 
-        std::list<View*> m_views;
+        struct ViewContainer {
+            std::list<View*> viewList;
+            ViewContainer()
+            {}
+            ViewContainer(const ViewContainer&)
+            {
+                // intentionally not copying viewList
+                viewList.clear();
+            }
+            ViewContainer& operator=(const ViewContainer&)
+            {
+                // intentionally not copying viewList
+                viewList.clear();
+                return *this;
+            }
+        };
+        ViewContainer m_viewContainer;
     };
 
     namespace detail {
         std::size_t flatCoordinate(const std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& dims);
+
+        bool stepCoords(std::vector<std::size_t>& coords,
+            const std::vector<std::size_t>& limits);
     }
 
     #include "MultiDimImage.ipp"

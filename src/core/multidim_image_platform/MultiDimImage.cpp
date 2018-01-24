@@ -27,7 +27,12 @@ void Meta::remove(const std::string& tag)
     }
 }
 
-std::size_t core::multidim_image_platform::detail::flatCoordinate(
+void Meta::clear()
+{
+    m_items.clear();
+}
+
+std::size_t detail::flatCoordinate(
     const std::vector<std::size_t>& coords,
     const std::vector<std::size_t>& dims)
 {
@@ -44,4 +49,21 @@ std::size_t core::multidim_image_platform::detail::flatCoordinate(
         dimMult *= (*itD);
     }
     return x;
+}
+
+bool detail::stepCoords(std::vector<std::size_t>& coords,
+    const std::vector<std::size_t>& limits)
+{
+    std::size_t carry = 1;
+    for (int i = (int)coords.size() - 1; i >= 0; --i) {
+        coords[i] += carry;
+        if (coords[i] < limits[i]) {
+            carry = 0;
+            break;
+        } else {
+            coords[i] = 0;
+            carry = 1;
+        }
+    }
+    return carry;
 }

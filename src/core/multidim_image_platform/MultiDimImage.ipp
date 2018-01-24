@@ -3,7 +3,7 @@ template <typename T>
 MultiDimImage<T>::View::View(MultiDimImage<T>* parent,
     std::vector<std::size_t> offsets,
     std::vector<std::size_t> dims)
-    : m_parent(parent), m_offsets(offsets), m_dims(dims)
+    : m_offsets(offsets), m_dims(dims), m_parent(parent)
 {
     if (offsets.size() != dims.size()) {
         throw std::invalid_argument("number of offsets differes form the number of dims");
@@ -14,6 +14,8 @@ MultiDimImage<T>::View::View(MultiDimImage<T>* parent,
         [](std::size_t x) { return x > 1; });
 
     // TODO: check that the region is valid
+
+    m_parent->registerView(this);
 }
 
 template <typename T>
@@ -87,6 +89,7 @@ MultiDimImage<T>::View::~View()
 {
     if (m_parent) {
         m_parent->unregisterView(this);
+        m_parent = nullptr;
     }
 }
 
@@ -166,7 +169,9 @@ Type MultiDimImage<T>::type() const
 template <typename T>
 void MultiDimImage<T>::clear()
 {
-
+    unregisterAllViews();
+    MultiDimImage<T> empty;
+    std::swap(empty, *this);
 }
 
 template <typename T>
@@ -239,37 +244,86 @@ typename MultiDimImage<T>::View MultiDimImage<T>::subDimView(std::vector<std::si
             offsets[i] = coords[i - firstNDims];
         }
     }
-    View view(this, offsets, dims);
-    return view;
+    return View(this, offsets, dims);
 }
 
 template <typename T>
-void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dims)
+void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
 {
+    if (dimOrder.size() != m_dims.size()) {
+        throw std::invalid_argument("number of dimensions in the argument does not match with the number of data dimensions");
+    }
 
+    std::vector<std::size_t> identity(m_dims.size());
+    std::iota(identity.begin(), identity.end(), 0);
+    
+    std::vector<std::size_t> dimOrderSorted(dimOrder);
+    std::sort(dimOrderSorted.begin(), dimOrderSorted.end());
+
+    if (!std::equal(dimOrderSorted.begin(), dimOrderSorted.end(), identity.begin())) {
+        throw std::invalid_argument("bad parameters for dimension reordering");
+    }
+    
+    if (std::equal(dimOrder.begin(), dimOrder.end(), identity.begin())) {
+        // nothing to do
+        return;
+    }
+
+    std::vector<std::size_t> newDims(m_dims.size(), 0);
+    for (std::size_t j = 0; j < m_dims.size(); ++j) {
+        newDims[j] = m_dims[dimOrder[j]];
+    }
+
+    MultiDimImage<T> newImage(newDims);
+    std::size_t n = size();
+    std::vector<std::size_t> coords(m_dims.size(), 0);
+    for (std::size_t i = 0; i < n; ++i) {
+        std::vector<std::size_t> newCoords(m_dims.size(), 0);
+
+        for (std::size_t j = 0; j < m_dims.size(); ++j) {
+            newCoords[j] = coords[dimOrder[j]];
+        }
+
+        newImage.unsafeAt(newCoords) = unsafeAt(coords);
+        detail::stepCoords(coords, m_dims);
+    }
+
+    unregisterAllViews();
+    std::swap(newImage, *this);
 }
 
 template <typename T>
-MultiDimImage<T>::~MultiDimImage()
+void MultiDimImage<T>::unregisterAllViews()
 {
-    for (auto v : m_views) {
+    for (auto v : m_viewContainer.viewList) {
         unregisterView(v);
     }
 }
 
 template <typename T>
+MultiDimImage<T>::~MultiDimImage()
+{
+    unregisterAllViews();
+}
+
+template <typename T>
 void MultiDimImage<T>::registerView(View* view)
 {
-    m_views.push_back(view);
+    std::cout << "registering view " << (void*)view << "\n";
+    m_viewContainer.viewList.push_back(view);
     view->m_parent = this;
 }
 
 template <typename T>
 void MultiDimImage<T>::unregisterView(View* view)
 {
-    auto it = std::find(m_views.begin(), m_views.end(), view);
-    if (it != m_views.end()) {
+    auto it = std::find(m_viewContainer.viewList.begin(), m_viewContainer.viewList.end(), view);
+    std::cout << m_viewContainer.viewList.size() << "\n";
+    if (it != m_viewContainer.viewList.end()) {
+        std::cout << "deleting view " << (void*)view << "\n";
         view->m_parent = nullptr;
-        m_views.erase(it);
+        m_viewContainer.viewList.erase(it);
     }
+    std::cout << m_viewContainer.viewList.size() << "\n";
+    std::cout << "---\n";
 }
