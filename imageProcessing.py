@@ -33,11 +33,11 @@ class Main(object):
         sourceImageList = []
         sourceDictList = []
 
+        path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/1024"
+        fileNameList1 =['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
+        fileNameList2 =['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif', 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
 
-        fileNameList1 =['u_1.tif']#['test7_1.tif','test7_11.tif', 'test7_111.tif']# ['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif']#, 'ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
-        fileNameList2 =['u_2.tif'] #['test7_2.tif','test7_22.tif', 'test7_222.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif']#, 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
 
-        path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/512"
 
         for i in range(len(fileNameList1)):
             print('####################################################################################')
@@ -78,7 +78,6 @@ class Main(object):
         print(logText)
         log=logText
 
-
         taggedImage1, logText = Main.tagImage(ch1Img, ch1Dict)
         print(logText)
         log+='\n'+logText
@@ -86,7 +85,6 @@ class Main(object):
         taggedImageDictionary1 = copy.copy(ch1Dict)
         taggedImageDictionary1['name'] = str(ch1Dict['name']) + '_tagged'
         taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict],measurementInput=measurementList)
-
         taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,{}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
 
         print(logText)
@@ -112,7 +110,6 @@ class Main(object):
         log += '\n' + logText
 
         ###########################################Colocalization#########################################################
-
         # Colocalization analysis
         overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization(
             [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2], [])
@@ -124,14 +121,6 @@ class Main(object):
         logText = Main.save([taggedImageDictionary1, taggedImageDictionary2, overlappingDictionary], path,
                             fileName=fileName, toText=False)
         log += '\n' + logText
-
-        print(logText)
-        print('1')
-        print(taggedDataBaseList[0])
-        print('2')
-        print(taggedDataBaseList[1])
-        print('OVL')
-        print(overlappingDictionary)
 
         with open(os.path.join(path,'log_'+fileName+'.txt'), "w") as textFile:
             textFile.write(log)
