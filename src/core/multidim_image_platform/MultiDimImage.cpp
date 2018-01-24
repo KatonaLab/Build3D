@@ -34,13 +34,14 @@ std::size_t core::multidim_image_platform::detail::flatCoordinate(
     if (coords.empty()) {
         return 0;
     }
-    auto itD = dims.begin();
-    auto itC = coords.begin();
-    std::size_t x = (*itC);
+    auto itD = dims.rbegin();
+    auto itC = coords.rbegin();
+    std::size_t x = 0;
+    std::size_t dimMult = 1;
 
-    ++itC;
-    for (std::size_t i = 1; i < coords.size(); ++i, ++itD, ++itC) {
-        x = x * (*itD) + (*itC);
+    for (std::size_t i = 0; i < coords.size(); ++i, ++itD, ++itC) {
+        x += dimMult * (*itC);
+        dimMult *= (*itD);
     }
     return x;
 }

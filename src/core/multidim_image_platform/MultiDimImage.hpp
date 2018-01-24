@@ -6,6 +6,7 @@
 #include <functional>
 #include <initializer_list>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <memory>
 #include <numeric>
@@ -56,6 +57,7 @@ namespace multidim_image_platform {
     public:
         // TODO: consider making inheritance between MultiDimImage and View
         class View {
+            friend class MultiDimImage<T>;
         public:
             View(MultiDimImage<T>* parent,
                 std::vector<std::size_t> offset,
@@ -69,12 +71,12 @@ namespace multidim_image_platform {
             T& at(std::vector<std::size_t> coords);
             // TODO: do not expose a raw pointer
             MultiDimImage<T>* parent();
+            ~View();
         protected:
             std::vector<std::size_t> m_offsets;
             std::vector<std::size_t> m_dims;
-            std::size_t m_numTrueDims;
+            std::vector<std::size_t> m_trueDims;
             MultiDimImage<T>* m_parent;
-            bool m_valid;
         };
     public:
         MultiDimImage(std::vector<std::size_t> dims = {});
@@ -102,6 +104,11 @@ namespace multidim_image_platform {
         Type m_type;
 
         T& unsafeAt(std::vector<std::size_t> coords);
+        View subDimView(std::vector<std::size_t> coords, std::size_t firstNDims);
+        void registerView(View* view);
+        void unregisterView(View* view);
+
+        std::list<View*> m_views;
     };
 
     namespace detail {

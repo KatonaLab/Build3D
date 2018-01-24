@@ -9,8 +9,9 @@ MultiDimImage<T>::View::View(MultiDimImage<T>* parent,
         throw std::invalid_argument("number of offsets differes form the number of dims");
     }
 
-    m_numTrueDims = std::count_if(m_dims.begin(), m_dims.end(),
-        [](std::size_t x) { return x > 1;});
+    std::copy_if(m_dims.begin(), m_dims.end(), 
+        std::back_inserter(m_trueDims),
+        [](std::size_t x) { return x > 1; });
 
     // TODO: check that the region is valid
 }
@@ -35,16 +36,17 @@ std::size_t MultiDimImage<T>::View::size() const
 template <typename T>
 std::size_t MultiDimImage<T>::View::dims() const
 {
-    return m_dims.size();
+    return m_trueDims.size();
 }
 
 template <typename T>
 std::size_t MultiDimImage<T>::View::dim(std::size_t d) const
 {
-    if (d >= m_dims.size()) {
+    if (d >= m_trueDims.size()) {
         throw std::range_error("no such dimension");
     }
-    return m_dims[d];
+    
+    return m_trueDims[d];
 }
 
 template <typename T>
@@ -56,16 +58,21 @@ std::size_t MultiDimImage<T>::View::byteSize() const
 template <typename T>
 bool MultiDimImage<T>::View::valid() const
 {
-    return m_valid;
+    return m_parent != nullptr;
 }
 
 template <typename T>
 T& MultiDimImage<T>::View::at(std::vector<std::size_t> coords)
 {
-    if (coords.size() != m_numTrueDims) {
+    if (coords.size() != m_trueDims.size()) {
         throw std::length_error("number of coordinates not equals with the number of true dimensions");
     }
-    std::vector<std::size_t> newCoords;
+    std::vector<std::size_t> newCoords(m_offsets);
+    for (size_t i = 0, j = 0; i < newCoords.size(); ++i) {
+        if (m_dims[i] > 1) {
+            newCoords[i] += coords[j++];
+        }
+    }
     return m_parent->at(newCoords);
 }
 
@@ -73,6 +80,14 @@ template <typename T>
 MultiDimImage<T>* MultiDimImage<T>::View::parent()
 {
     return m_parent;
+}
+
+template <typename T>
+MultiDimImage<T>::View::~View()
+{
+    if (m_parent) {
+        m_parent->unregisterView(this);
+    }
 }
 
 // =======================================
@@ -194,13 +209,38 @@ T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
 template <typename T>
 typename MultiDimImage<T>::View MultiDimImage<T>::plane(std::vector<std::size_t> coords)
 {
-
+    return subDimView(coords, 2);
 }
 
 template <typename T>
 typename MultiDimImage<T>::View MultiDimImage<T>::volume(std::vector<std::size_t> coords)
 {
+    return subDimView(coords, 3);
+}
 
+template <typename T>
+typename MultiDimImage<T>::View MultiDimImage<T>::subDimView(std::vector<std::size_t> coords, std::size_t firstNDims)
+{
+    if (m_dims.size() < firstNDims + 1) {
+        throw std::invalid_argument("can not slice with the same dimensions as the original");
+    }
+
+    if (coords.size() != m_dims.size() - firstNDims) {
+        throw std::invalid_argument("invalid number of coordinates");
+    }
+
+    std::vector<std::size_t> dims(m_dims);
+    std::vector<std::size_t> offsets(m_dims.size());
+    for (size_t i = 0; i < dims.size(); ++i) {
+        if (i < firstNDims) {
+            offsets[i] = 0;
+        } else {
+            dims[i] = 1;
+            offsets[i] = coords[i - firstNDims];
+        }
+    }
+    View view(this, offsets, dims);
+    return view;
 }
 
 template <typename T>
@@ -212,5 +252,24 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dims)
 template <typename T>
 MultiDimImage<T>::~MultiDimImage()
 {
+    for (auto v : m_views) {
+        unregisterView(v);
+    }
+}
 
+template <typename T>
+void MultiDimImage<T>::registerView(View* view)
+{
+    m_views.push_back(view);
+    view->m_parent = this;
+}
+
+template <typename T>
+void MultiDimImage<T>::unregisterView(View* view)
+{
+    auto it = std::find(m_views.begin(), m_views.end(), view);
+    if (it != m_views.end()) {
+        view->m_parent = nullptr;
+        m_views.erase(it);
+    }
 }

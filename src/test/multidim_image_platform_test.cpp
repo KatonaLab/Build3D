@@ -203,14 +203,14 @@ SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
 {
     GIVEN("an image") {
         MultiDimImage<uint8_t> image({16, 16, 4, 2});
-        image.at({0, 0, 0, 0}) = 42;
-        image.at({0, 0, 1, 0}) = 43;
-        image.at({0, 0, 2, 0}) = 44;
-        image.at({0, 0, 3, 0}) = 45;
-        image.at({0, 0, 0, 1}) = 82;
-        image.at({0, 0, 1, 1}) = 83;
-        image.at({0, 0, 2, 1}) = 84;
-        image.at({0, 0, 3, 1}) = 85;
+        image.at({0, 8, 0, 0}) = 42;
+        image.at({1, 9, 1, 0}) = 43;
+        image.at({2, 10, 2, 0}) = 44;
+        image.at({3, 11, 3, 0}) = 45;
+        image.at({4, 12, 0, 1}) = 82;
+        image.at({5, 13, 1, 1}) = 83;
+        image.at({6, 14, 2, 1}) = 84;
+        image.at({7, 15, 3, 1}) = 85;
         WHEN("a plane is viewed through a MultiDimImageView") {
             auto view1 = image.plane({0, 0});
             auto view2 = image.plane({1, 0});
@@ -238,14 +238,14 @@ SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
             REQUIRE(view7.parent() == &image);
 
             THEN("it points to the right data") {
-                REQUIRE(view1.at({0, 0}) == 42);
-                REQUIRE(view2.at({0, 0}) == 43);
-                REQUIRE(view3.at({0, 0}) == 44);
-                REQUIRE(view4.at({0, 0}) == 45);
-                REQUIRE(view5.at({0, 0}) == 82);
-                REQUIRE(view6.at({0, 0}) == 83);
-                REQUIRE(view7.at({0, 0}) == 84);
-                REQUIRE(view8.at({0, 0}) == 85);
+                REQUIRE(view1.at({0, 8}) == 42);
+                REQUIRE(view2.at({1, 9}) == 43);
+                REQUIRE(view3.at({2, 10}) == 44);
+                REQUIRE(view4.at({3, 11}) == 45);
+                REQUIRE(view5.at({4, 12}) == 82);
+                REQUIRE(view6.at({5, 13}) == 83);
+                REQUIRE(view7.at({6, 14}) == 84);
+                REQUIRE(view8.at({7, 15}) == 85);
             }
 
             AND_WHEN("a view id modified") {
@@ -265,16 +265,18 @@ SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
                 REQUIRE(vol1.dims() == 3);
                 REQUIRE(vol1.dim(0) == 16);
                 REQUIRE(vol1.dim(1) == 16);
+                REQUIRE(vol1.dim(2) == 4);
                 REQUIRE(vol1.empty() == false);
-                REQUIRE(vol1.size() == 16 * 16);
+                REQUIRE(vol1.size() == 16 * 16 * 4);
                 REQUIRE(vol1.valid() == true);
                 REQUIRE(vol1.parent() == &image);
 
                 REQUIRE(vol2.dims() == 3);
                 REQUIRE(vol2.dim(0) == 16);
                 REQUIRE(vol2.dim(1) == 16);
+                REQUIRE(vol2.dim(2) == 4);
                 REQUIRE(vol2.empty() == false);
-                REQUIRE(vol2.size() == 16 * 16);
+                REQUIRE(vol2.size() == 16 * 16 * 4);
                 REQUIRE(vol2.valid() == true);
                 REQUIRE(vol2.parent() == &image);
             }
@@ -345,3 +347,6 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
         }
     }
 }
+
+// TODO: test convert copy
+// TODO: test 1d multidimimage
