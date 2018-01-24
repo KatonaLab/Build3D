@@ -64,9 +64,15 @@ class Main(object):
         ###########################################Segmentation and Analysis#########################################################
         #print('###########################################Segmentation and Analysis#########################################################')
        #print(ch1Dict)
-        #print('###########################################Segmentation and Analysis#########################################################')
-        #print(ch2Dict)
 
+        measurementList = ['volume', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox', 'pixelsOnBorder',
+                            'getElongation', 'getEquivalentSphericalRadius', 'getFlatness', 'getPrincipalAxes',
+                            'getPrincipalMoments', 'getRoundness', 'getFeretDiameter', 'getPerimeter',
+                            'getPerimeterOnBorder', 'getPerimeterOnBorderRatio', 'getEquivalentSphericalPerimeter',
+                            'meanIntensity', 'medianIntensity', 'skewness', 'kurtosis', 'variance', 'maximumPixel',
+                            'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass', 'standardDeviation',
+                            'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
+                            'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
         # Channel 1
         thresholdedImage1, logText = Main.threshold(ch1Img, ch1Dict, method="MaxEntropy", mode="Slice")
         print(logText)
@@ -79,12 +85,9 @@ class Main(object):
 
         taggedImageDictionary1 = copy.copy(ch1Dict)
         taggedImageDictionary1['name'] = str(ch1Dict['name']) + '_tagged'
-        taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict])
+        taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict],measurementInput=measurementList)
 
         taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,{}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
-
-        #Main.save([taggedImageDictionary1_filtered], path,
-                            #fileName='testFilter', toText=False)
 
         print(logText)
         log += '\n' + logText
@@ -94,14 +97,13 @@ class Main(object):
         print(logText)
         log += '\n' + logText
 
-
         taggedImage2, logText = Main.tagImage(ch2Img, ch2Dict)
         print(logText)
         log += '\n' + logText
 
         taggedImageDictionary2 = copy.copy(ch2Dict)
         taggedImageDictionary2['name'] = str(ch2Dict['name']) + '_tagged'
-        taggedImageDictionary2, logText = Main.analyze(taggedImage2, taggedImageDictionary2, imageList=[ch2Img],dictionaryList=[ch2Dict])
+        taggedImageDictionary2, logText = Main.analyze(taggedImage2, taggedImageDictionary2, imageList=[ch2Img],dictionaryList=[ch2Dict], measurementInput=measurementList)
 
         taggedImage2, taggedImageDictionary2, _ = Main.filter(taggedImage2, taggedImageDictionary2,
                                                               {'tag': {'min': 2, 'max': 3}},
@@ -115,7 +117,6 @@ class Main(object):
         overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization(
             [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2], [])
 
-        print(taggedImageDictionary1, taggedImageDictionary2)
         print(logText)
         log += '\n' + logText
 
@@ -123,8 +124,8 @@ class Main(object):
         logText = Main.save([taggedImageDictionary1, taggedImageDictionary2, overlappingDictionary], path,
                             fileName=fileName, toText=False)
         log += '\n' + logText
-        print(logText)
 
+        print(logText)
         print('1')
         print(taggedDataBaseList[0])
         print('2')
@@ -221,7 +222,7 @@ class Main(object):
         return outputImage, logText
 
 
-    def analyze(taggedImage, taggedDictionary, imageList=None, dictionaryList=None):
+    def analyze(taggedImage, taggedDictionary, imageList=None, dictionaryList=None, measurementInput=None):
         '''
         Analyzes tagedImage and appends 'dataBase' to its dictionary that contain measured values.
         :param taggedImage: tagged image
@@ -247,7 +248,7 @@ class Main(object):
                     logText += dict['name']
 
             #Analyze image
-            outputDictionary = Measurement.analyze(taggedImage, taggedDictionary, imageList, dictionaryList)
+            outputDictionary = Measurement.analyze(taggedImage, taggedDictionary, imageList, dictionaryList, measurementInput)
 
             #Add number of objects to logText
             logText += '\n\tNumber of objects: '+str(len(outputDictionary['dataBase']['tag']))
@@ -359,10 +360,7 @@ class Main(object):
 
             # Filter dataBase and image
             overlappingImage, overlappingDataBase, _ = Main.filter(overlappingImage, overlappingDataBase, overlappingFilter, removeFiltered)
-            #print('Overlapping')
-            #print(overlappingDataBase)
-            #print('Tagged')
-            #print(taggedDictList)
+
             # Analyze colocalization
             taggedDataBaseList, overlappingDataBase = Measurement.colocalizaion_analysis(taggedDictList,overlappingDataBase)
 
@@ -462,7 +460,7 @@ class Measurement(object):
 
 
     @staticmethod
-    def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=[], sourceDictionayList=[], name=None):
+    def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=None, sourceDictionayList=None, name=None):
 
         # Create Overlapping Image
         overlappingImage = taggedImgList[0]
@@ -479,8 +477,12 @@ class Measurement(object):
                 name=name+'_'+dict['name']
         overlappingDataBase = {'name': name}
 
-        sourceImageList.append(overlappingImage)
-        sourceDictionayList.append(overlappingDataBase)
+        if sourceImageList==None or sourceDictionayList==None:
+            sourceImageList=[overlappingImage]
+            sourceDictionayList=[overlappingDataBase]
+        else:
+            sourceImageList.append(overlappingImage)
+            sourceDictionayList.append(overlappingDataBase)
 
         overlappingDataBase=Measurement.analyze(overlappingImage, overlappingDataBase, sourceImageList, sourceDictionayList)
 
@@ -584,23 +586,18 @@ class Measurement(object):
 
 
 
-        print(outputList)
-        for i in range(NbOfInputElements):
-            print('#######################')
-            print(nameList[i])
-            for key in outputList[i]:
 
-                print(key)
-                print(outputList[i][key])
+        for i in range(NbOfInputElements):
+            for key in outputList[i]:
                 dictionaryList[i]['dataBase'][key]=outputList[i][key]
             overlappingDictionary['dataBase']=overlappingDataBase
-        print(dictionaryList)
+
 
         return dictionaryList, overlappingDictionary
 
 
     @staticmethod
-    def analyze(taggedImage, dictionary, imageList=[], dictionaryList=[], measurementInput = []):
+    def analyze(taggedImage, dictionary, imageList=None, dictionaryList=None, measurementInput=None):
 
         #Convert tagged image to ITK image
         itkImage = sitk.GetImageFromArray(taggedImage)
@@ -646,22 +643,22 @@ class Measurement(object):
         singleChMeasurementList = ['voxelCount', 'pixelsOnBorder', 'centroid']
         dualChMeasurementList = ['meanIntensity', 'maximumPixel']
 
-        for key in measurementInput:
+        if measurementInput!=None:
+            for key in measurementInput:
 
-            if key == 'getFeretDiameter':
-                itkFilter.ComputeFeretDiameterOn()
+                if key == 'getFeretDiameter':
+                    itkFilter.ComputeFeretDiameterOn()
 
-            if key in ['getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio','getEquivalentSphericalPerimeter']:
-                itkFilter.ComputePerimeterOn()
+                if key in ['getPerimeter', 'getPerimeterOnBorder', 'getPerimeterOnBorderRatio','getEquivalentSphericalPerimeter']:
+                    itkFilter.ComputePerimeterOn()
 
-            if (key in singleChannelFunctionDict.keys()) and (key not in singleChMeasurementList):
-                singleChMeasurementList.append(key)
+                if (key in singleChannelFunctionDict.keys()) and (key not in singleChMeasurementList):
+                    singleChMeasurementList.append(key)
 
-            elif (key in dualChannelFunctionDict.keys()) and (key not in dualChMeasurementList):
-                dualChMeasurementList.append(key)
+                elif (key in dualChannelFunctionDict.keys()) and (key not in dualChMeasurementList):
+                    dualChMeasurementList.append(key)
 
-            else:
-                pass
+
 
 
         # dataBase dictionary to store results
@@ -671,7 +668,9 @@ class Measurement(object):
             dataBase[key] = []
 
         #Cycle through images to measure parameters
-        if imageList == []:
+        if imageList == None or dictionaryList==None:
+            imageList = []
+            dictionaryList=[]
             imageList.append(taggedImage)
             dictionaryList.append(dictionary)
 
@@ -695,18 +694,19 @@ class Measurement(object):
                 for key in dualChMeasurementList:
                     dataBase[key+' in '+dictionaryList[i]['name']].append(dualChannelFunctionDict[key](label))
 
-        if 'surface' in measurementInput:
-            #Create and measure Surface Image
-            surface=Segmentation.create_surfaceImage(taggedImage)
-            surfaceItkImage=sitk.GetImageFromArray(surface)
+        if measurementInput!=None:
+            if 'surface' in measurementInput:
+                #Create and measure Surface Image
+                surface=Segmentation.create_surfaceImage(taggedImage)
+                surfaceItkImage=sitk.GetImageFromArray(surface)
 
-            itkFilter=sitk.LabelShapeStatisticsImageFilter()
-            itkFilter.Execute(surfaceItkImage)
-            surfaceData=itkFilter.GetLabels()
+                itkFilter=sitk.LabelShapeStatisticsImageFilter()
+                itkFilter.Execute(surfaceItkImage)
+                surfaceData=itkFilter.GetLabels()
 
-            dataBase['surface']=[]
-            for label in surfaceData:
-                dataBase['surface'].append(singleChannelFunctionDict['voxelCount'](label))
+                dataBase['surface']=[]
+                for label in surfaceData:
+                    dataBase['surface'].append(singleChannelFunctionDict['voxelCount'](label))
 
         dictionary['dataBase']=dataBase
 
@@ -736,12 +736,7 @@ class Measurement(object):
                 else:
                     dataFrame['filter']=currentFilter
 
-        #Remove Filtered
-        #if removeFiltered == True: #or 'filtered' in dataFrame.keys()  :
-            #dataFrame=dataFrame[(dataFrame['filter']==True)]
-
         dictionary['dataBase'] = dataFrame.to_dict(orient='list')
-
 
         return dictionary
 
@@ -758,10 +753,7 @@ class Measurement(object):
 
             if 'dataBase' in dict.keys():
 
-                #for key in dict['dataBase'].keys():
-                    #print(key+' has '+str(len(dict['dataBase'][key]))+' elements!!!!!!!!!')
                 # Convert to Pandas dataframe
-
                 dataFrame=pd.DataFrame(dict['dataBase'])
 
                 dataFrameList.append(dataFrame)
