@@ -81,7 +81,7 @@ class Main(object):
         taggedImageDictionary1['name'] = str(ch1Dict['name']) + '_tagged'
         taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict])
 
-        taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,{'tag':{'min': 2, 'max': 3}}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
+        taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,{}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
 
         #Main.save([taggedImageDictionary1_filtered], path,
                             #fileName='testFilter', toText=False)
@@ -103,6 +103,9 @@ class Main(object):
         taggedImageDictionary2['name'] = str(ch2Dict['name']) + '_tagged'
         taggedImageDictionary2, logText = Main.analyze(taggedImage2, taggedImageDictionary2, imageList=[ch2Img],dictionaryList=[ch2Dict])
 
+        taggedImage2, taggedImageDictionary2, _ = Main.filter(taggedImage2, taggedImageDictionary2,
+                                                              {'tag': {'min': 2, 'max': 3}},
+                                                              removeFiltered=False)  # {'tag':{'min': 2, 'max': 40}}
         print(logText)
         log += '\n' + logText
 
@@ -290,11 +293,6 @@ class Main(object):
         logText += '\n\t\toverwrite=' + str(overWrite)
 
         try:
-            # Print list of images in Imagelist to log text
-            #if dictionaryList != None:
-                #logText += '\n\tMeasuring intensity in: '
-                #for dict in dictionaryList:
-                    #logText += dict['name']
 
             # Filter dictionary
             outputDictionary = Measurement.filter_dataBase(inputDictionary, filterDict, overWrite)
@@ -521,12 +519,10 @@ class Measurement(object):
     @staticmethod
     def colocalizaion_analysis(dictionaryList, overlappingDictionary):
 
-
         dataBaseList=[x['dataBase'] for x in dictionaryList]
         overlappingDataBase=overlappingDictionary['dataBase']
 
         nameList = [x['name'] for x in dictionaryList]
-        print(nameList)
 
         NbObjects = [len(x['dataBase']['tag']) for x in dictionaryList]
         NbOfInputElements=len(dataBaseList)
@@ -536,27 +532,19 @@ class Measurement(object):
 
         # Create list of dictionaries to store data
         outputList=[{} for x in range(NbOfInputElements)]
-        #print('Number of dictionaries '+str(NbOfInputElements))
+
         for i in range(NbOfInputElements):
-            #print(i)
+
             outputList[i]['colocalizationCount']=[0  for i in range(NbObjects[i])]
             outputList[i]['totalOverlappingRatio'] = [0  for i in range(NbObjects[i])]
 
             positionList = [x for x in range(NbOfInputElements) if x != i]
-            #print('position list'+str(positionList))
-            #print('length of position list' + str(len(positionList)))
+
             for j in range(0, len(positionList)):
                 outputList[i]['object in '+nameList[positionList[j]]]=[[] for i in range(NbObjects[i])]
-                #print(j)
-                #print(nameList[positionList[j]])
 
         for j in range(len(overlappingDataBase['tag'])):
-            print('##########1111############')
-            print("OVerlapping object tag "+str(j))
-            print('Volume'+str(overlappingDataBase['voxelCount']))
-            print('Overlapping objects 1'+str(overlappingDataBase['object in u_1.tif_tagged']))
-            print('Overlapping objects 2' + str(overlappingDataBase['object in u_2.tif_tagged']))
-            #print('#######################'+str(outputList))
+
             #Determine if any of the objects have been filtered out and retrieve tags and their rispected position
             flag=True# = [True for i in range(len(dataBaseList))]
 
@@ -566,38 +554,22 @@ class Measurement(object):
             currentTagList=[]
             currentPositionList=[]
             for i in range(0,NbOfInputElements):
-                print('#222#')
-                print('currently on '+nameList[i])
-                print(nameList[i]+' is filtered?  ' + str(dictFiltered[i]))
 
                 currentTag=overlappingDataBase['object in ' + nameList[i]][j]
+                currentPosition=dataBaseList[i]['tag'].index(currentTag)
                 currentTagList.append(currentTag)
-                currentPositionList.append(dataBaseList[i]['tag'].index(currentTag))
-                #print('This Block')
-                #print('i='+str(i))
-                #print('j=' + str(j))
-                #print('object in ' + nameList[i])
-                print('current tag in '+nameList[i]+' is '+str(currentTag))
-                print('current pos in '+nameList[i]+' is '+str(dataBaseList[i]['tag'].index(currentTag)))
-                #print('currentTagList='+str(currentTagList))
-                print('currentPositionList='+str(currentPositionList))
+                currentPositionList.append(currentPosition)
 
                 if dictFiltered[i]==True :#and 'filter' in dataBaseList[i].keys() :
-                    #print(dataBaseList)
-                    #print(dataBaseList[i]['filter'])
-                    #print('why the fuck it does not work....'+str(j))
-                    flag*=dataBaseList[i]['filter'][dataBaseList[i]['tag'].index(currentTag)]
-            #print('flag='+str(flag))
+
+                        flag*=dataBaseList[i]['filter'][currentPosition]
+                        flag=not flag
+
             #If none of the objects have been filtered out add info to output
             if flag==False:
-                print('Yeeeeeeeeeeeeeeeeeeeee')
+
                 for i in range(NbOfInputElements):
-                    #print('ii='+str(i))
-                    #print(nameList)
-                    #print(outputList[i])
-                    #print(currentPositionList[i])
-                    #print(currentPositionList)
-                    #print('outputList[i]' + str(outputList[i]))
+
                     if currentTagList[i] in dataBaseList[i]['tag']:
                             outputList[i]['colocalizationCount'][currentPositionList[i]]+=1
                             outputList[i]['totalOverlappingRatio'][currentPositionList[i]] += overlappingDataBase['overlappingRatio in ' + nameList[i]][j]
@@ -606,8 +578,12 @@ class Measurement(object):
                     positionList = [x for x in range(NbOfInputElements) if x != i]
                     for j in range(len(positionList)):
                         outputList[i]['object in ' + nameList[positionList[j]]][currentPositionList[i]].append(currentTagList[positionList[j]])
-            #print('outputList' + str(outputList))
-            #print('#######################')
+            else:
+                outputList[i]['colocalizationCount'][currentPositionList[i]]= 0
+                outputList[i]['totalOverlappingRatio'][currentPositionList[i]] = 0
+
+
+
         print(outputList)
         for i in range(NbOfInputElements):
             print('#######################')
