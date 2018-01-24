@@ -8,7 +8,7 @@ using namespace std;
 SCENARIO("multidim image basic usage", "[core/multidim_image_platform]")
 {
     GIVEN("two images, an empty and a 2d image with some content") {
-        MultiDimImage<uint8_t> emptyImage;
+        MultiDimImage<uint32_t> emptyImage;
         REQUIRE(emptyImage.size() == 0);
         REQUIRE(emptyImage.byteSize() == 0);
         REQUIRE(emptyImage.dims() == 0);
@@ -16,7 +16,7 @@ SCENARIO("multidim image basic usage", "[core/multidim_image_platform]")
         REQUIRE_THROWS(emptyImage.dim(23));
         REQUIRE(emptyImage.empty() == true);
 
-        MultiDimImage<uint8_t> image2d({16, 32});
+        MultiDimImage<uint32_t> image2d({16, 32});
         
         REQUIRE(image2d.size() == 16 * 32);
         REQUIRE(image2d.byteSize() == 16 * 32 * 4);
@@ -46,7 +46,7 @@ SCENARIO("multidim image basic usage", "[core/multidim_image_platform]")
 
         WHEN("a new image is copy constructed from image2d") {
             image2d.at({0, 0}) = 17;
-            MultiDimImage<uint8_t> newImage(image2d);
+            MultiDimImage<uint32_t> newImage(image2d);
             image2d.at({0, 0}) = 0;
             THEN("it is truly copied") {
                 REQUIRE(newImage.size() == 16 * 32);
@@ -177,32 +177,22 @@ SCENARIO("multidim metadata usage", "[core/multidim_image_platform]")
     GIVEN("an image") {
         MultiDimImage<uint8_t> im;
         WHEN("meta is added") {
-            im.meta.add<int>("int_meta_test", 42);
-            im.meta.add<float>("float_meta_test", 2024.2024);
-            im.meta.add<std::string>("string_meta_test", "testing 1, 2, 3...");
-            im.meta.add<char>("to be removed", 0);
+            im.meta.add("int_meta_test", "42");
+            im.meta.add("float_meta_test", "2024.2024");
+            im.meta.add("string_meta_test", "testing 1, 2, 3...");
+            im.meta.add("to be removed", "0");
             THEN("it is stored correctly") {
-                REQUIRE(im.meta.get<int>("int_meta_test") == 42);
-                REQUIRE(im.meta.get<float>("float_meta_test") == 2024.2024);
-                REQUIRE(im.meta.get<std::string>("string_meta_test") == "testing 1, 2, 3...");
-                REQUIRE(im.meta.get<char>("to be removed") == 0);
-            }
-
-            AND_THEN("the data can only be reached type correctly") {
-                REQUIRE(im.meta.has<int>("int_meta_test") == true);
-                REQUIRE(im.meta.has<float>("int_meta_test") == false);
-                REQUIRE_THROWS(im.meta.get<float>("int_meta_test"));
-                
-                REQUIRE(im.meta.has<std::string>("string_meta_test") == true);
-                REQUIRE(im.meta.has<int>("string_meta_test") == false);
-                REQUIRE_THROWS(im.meta.get<int>("string_meta_test"));
+                REQUIRE(im.meta.get("int_meta_test") == "42");
+                REQUIRE(im.meta.get("float_meta_test") == "2024.2024");
+                REQUIRE(im.meta.get("string_meta_test") == "testing 1, 2, 3...");
+                REQUIRE(im.meta.get("to be removed") == "0");
             }
             
             AND_WHEN("one is removed") {
-                im.meta.remove<char>("to be removed");
+                im.meta.remove("to be removed");
                 THEN("it is no longer reachable") {
-                    REQUIRE(im.meta.has<char>("to be removed") == false);
-                    REQUIRE_THROWS(im.meta.get<char>("to be removed"));
+                    REQUIRE(im.meta.has("to be removed") == false);
+                    REQUIRE_THROWS(im.meta.get("to be removed"));
                 }
             }
         }

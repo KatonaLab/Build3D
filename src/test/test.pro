@@ -11,7 +11,8 @@ SOURCES += \
     ../core/compute_platform/ComputePlatform.cpp \
     ../core/compute_platform/port_utils.hpp \
     multidim_image_platform_test.cpp \
-    ../core/multidim_image_platform/MultiDimImage.ipp
+    ../core/multidim_image_platform/MultiDimImage.hpp \
+    ../core/multidim_image_platform/MultiDimImage.cpp
 
 CONFIG -= app_bundle
 CONFIG += debug
