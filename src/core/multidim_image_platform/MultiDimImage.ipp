@@ -5,6 +5,10 @@ MultiDimImage<T>::View::View(MultiDimImage<T>* parent,
     std::vector<std::size_t> dims)
     : m_offsets(offsets), m_dims(dims), m_parent(parent)
 {
+    if (parent == nullptr) {
+        throw std::invalid_argument("parent of the view can not be null");
+    }
+
     if (offsets.size() != dims.size()) {
         throw std::invalid_argument("number of offsets differes form the number of dims");
     }
@@ -15,7 +19,27 @@ MultiDimImage<T>::View::View(MultiDimImage<T>* parent,
 
     // TODO: check that the region is valid
 
-    m_parent->registerView(this);
+    m_parent->m_viewRegistry.add(this);
+}
+
+template <typename T>
+MultiDimImage<T>::View::View(const MultiDimImage<T>::View& other) : m_parent(nullptr)
+{
+    *this = other;
+}
+
+template <typename T>
+typename MultiDimImage<T>::View& MultiDimImage<T>::View::operator=(const MultiDimImage<T>::View& other)
+{
+    m_offsets = other.m_offsets;
+    m_dims = other.m_dims;
+    m_trueDims = other.m_trueDims;
+    if (m_parent) {
+        m_parent->m_viewRegistry.remove(this);
+        m_parent = other.m_parent;
+        m_parent->m_viewRegistry.add(this);
+    }
+    return *this;
 }
 
 template <typename T>
@@ -88,8 +112,7 @@ template <typename T>
 MultiDimImage<T>::View::~View()
 {
     if (m_parent) {
-        m_parent->unregisterView(this);
-        m_parent = nullptr;
+        m_parent->m_viewRegistry.remove(this);
     }
 }
 
@@ -97,7 +120,7 @@ MultiDimImage<T>::View::~View()
 
 template <typename T>
 MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
-    : m_dims(dims)
+    : m_dims(dims), m_viewRegistry(this)
 {
     int i = 0;
     for (std::size_t x : dims) {
@@ -110,8 +133,9 @@ MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
     }
     std::size_t planeSize = std::accumulate(m_planeDims.begin(), m_planeDims.end(), 1, std::multiplies<std::size_t>());
     std::size_t restSize = std::accumulate(m_restDims.begin(), m_restDims.end(), 1, std::multiplies<std::size_t>());
+
     std::vector<std::vector<T>> data(restSize, std::vector<T>(planeSize, T()));
-    std::swap(data, m_planes);
+    m_planes.swap(data);
     m_type = GetType<T>();
 }
 
@@ -169,7 +193,7 @@ Type MultiDimImage<T>::type() const
 template <typename T>
 void MultiDimImage<T>::clear()
 {
-    unregisterAllViews();
+    m_viewRegistry.clear();
     MultiDimImage<T> empty;
     std::swap(empty, *this);
 }
@@ -288,42 +312,10 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
         detail::stepCoords(coords, m_dims);
     }
 
-    unregisterAllViews();
+    m_viewRegistry.clear();
     std::swap(newImage, *this);
 }
 
 template <typename T>
-void MultiDimImage<T>::unregisterAllViews()
-{
-    for (auto v : m_viewContainer.viewList) {
-        unregisterView(v);
-    }
-}
-
-template <typename T>
 MultiDimImage<T>::~MultiDimImage()
-{
-    unregisterAllViews();
-}
-
-template <typename T>
-void MultiDimImage<T>::registerView(View* view)
-{
-    std::cout << "registering view " << (void*)view << "\n";
-    m_viewContainer.viewList.push_back(view);
-    view->m_parent = this;
-}
-
-template <typename T>
-void MultiDimImage<T>::unregisterView(View* view)
-{
-    auto it = std::find(m_viewContainer.viewList.begin(), m_viewContainer.viewList.end(), view);
-    std::cout << m_viewContainer.viewList.size() << "\n";
-    if (it != m_viewContainer.viewList.end()) {
-        std::cout << "deleting view " << (void*)view << "\n";
-        view->m_parent = nullptr;
-        m_viewContainer.viewList.erase(it);
-    }
-    std::cout << m_viewContainer.viewList.size() << "\n";
-    std::cout << "---\n";
-}
+{}

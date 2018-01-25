@@ -2,6 +2,7 @@
 #define _core_multidim_image_platform_MultiDimImage_h_
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <functional>
 #include <initializer_list>
@@ -54,26 +55,6 @@ namespace multidim_image_platform {
     };
 
     template <typename T>
-    class Registry {
-    public:
-        Registry() {}
-        Registry(const Registry& other) {}
-        Registry& operator=(const Registry&) 
-        void add(T* item);
-        void remove(T* item);
-        void clear();
-    private:
-        std::list<T*> m_items;
-    };
-
-    template <typename T>
-    class Registrable {
-    public:
-    private:
-        Registry<T>* m_registry;
-    };
-
-    template <typename T>
     class MultiDimImage {
     public:
         // TODO: consider making inheritance between MultiDimImage and View
@@ -83,6 +64,8 @@ namespace multidim_image_platform {
             View(MultiDimImage<T>* parent,
                 std::vector<std::size_t> offset,
                 std::vector<std::size_t> dims);
+            View(const View& other);
+            View& operator=(const View& other);
             bool empty() const;
             std::size_t size() const;
             std::size_t dims() const;
@@ -126,27 +109,37 @@ namespace multidim_image_platform {
 
         T& unsafeAt(std::vector<std::size_t> coords);
         View subDimView(std::vector<std::size_t> coords, std::size_t firstNDims);
-        void registerView(View* view);
-        void unregisterView(View* view);
-        void unregisterAllViews();
 
-        struct ViewContainer {
-            std::list<View*> viewList;
-            ViewContainer()
-            {}
-            ViewContainer(const ViewContainer&)
+        struct ViewRegistry {
+            ViewRegistry(MultiDimImage<T>* owner): m_owner(owner) {}
+            void add(View* view)
             {
-                // intentionally not copying viewList
-                viewList.clear();
+                m_views.push_back(view);
+                view->m_parent = m_owner;
             }
-            ViewContainer& operator=(const ViewContainer&)
+            void remove(View* view)
             {
-                // intentionally not copying viewList
-                viewList.clear();
-                return *this;
+                auto it = std::find(m_views.begin(), m_views.end(), view);
+                if (it != m_views.end()) {
+                    (*it)->m_parent = nullptr;
+                    m_views.erase(it);
+                }
             }
+            void clear()
+            {
+                for (auto x : m_views) {
+                    x->m_parent = nullptr;
+                }
+                m_views.clear();
+            }
+            ~ViewRegistry()
+            {
+                clear();
+            }
+            std::list<View*> m_views;
+            MultiDimImage<T>* m_owner;
         };
-        ViewContainer m_viewContainer;
+        ViewRegistry m_viewRegistry;
     };
 
     namespace detail {

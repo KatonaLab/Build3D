@@ -121,12 +121,15 @@ void checkWeakPtrNull(ImageViewPair<T>& wpp)
 
 SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
 {
-    std::size_t n = 248;
+    std::cout << "." << std::flush;
+    std::size_t n = 2048;
     GIVEN("the demand for a huge volume with 4 channels, 2048x2048x64x4 float") {
         WHEN("created") {
+            std::cout << "." << std::flush;
             MultiDimImage<float> huge({n, n, 64, 4});
             ImageViewPair<float> wpp = weakPointerToImageData(huge);
             THEN("it is allocated without problems") {
+                std::cout << "." << std::flush;
                 REQUIRE(huge.size() == n * n * 64 * 4);
                 REQUIRE(huge.byteSize() == n * n * 64 * 4 * sizeof(float));
                 REQUIRE(huge.dims() == 4);
@@ -141,9 +144,11 @@ SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
             std::shared_ptr<MultiDimImage<float>> hugeCopy = std::make_shared<MultiDimImage<float>>();
             ImageViewPair<float> wppCpy;
             AND_WHEN("copied") {
+                std::cout << "." << std::flush;
                 *hugeCopy = huge;
                 wppCpy = weakPointerToImageData(*hugeCopy);
                 THEN("the copy is allocated without problems") {
+                    std::cout << "." << std::flush;
                     REQUIRE(hugeCopy->size() == n * n * 64 * 4);
                     REQUIRE(hugeCopy->byteSize() == n * n * 64 * 4 * sizeof(float));
                     REQUIRE(hugeCopy->dims() == 4);
@@ -157,15 +162,19 @@ SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
             }
 
             AND_WHEN("the copy is destroyed") {
+                std::cout << "." << std::flush;
                 hugeCopy.reset();
                 THEN("the memory is freed") {
+                    std::cout << "." << std::flush;
                     checkWeakPtrNull<float>(wppCpy);
                 }
             }
 
             AND_WHEN("the original is cleared") {
+                std::cout << "." << std::flush;
                 huge.clear();
                 THEN("the memory is freed") {
+                    std::cout << "." << std::flush;
                     checkWeakPtrNull<float>(wpp);
                 }
             }
