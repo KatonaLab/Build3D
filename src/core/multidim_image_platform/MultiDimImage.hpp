@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <list>
 #include <memory>
 #include <numeric>
@@ -56,6 +57,7 @@ namespace multidim_image_platform {
 
     template <typename T>
     class MultiDimImage {
+        template <typename U> friend class MultiDimImage;
     public:
         // TODO: consider making inheritance between MultiDimImage and View
         class View {
@@ -84,8 +86,18 @@ namespace multidim_image_platform {
         };
     public:
         MultiDimImage(std::vector<std::size_t> dims = {});
+
+        MultiDimImage(const MultiDimImage&) = default;
+        MultiDimImage(MultiDimImage&&) = default;
+        MultiDimImage& operator=(const MultiDimImage&) = default;
+        MultiDimImage& operator=(MultiDimImage&&) = default;
+
         template <typename U>
-        void convertCopy(const MultiDimImage<U>& other);
+        void convertCopyFrom(const MultiDimImage<U>& other);
+        template <typename U>
+        void saturateCopyFrom(const MultiDimImage<U>& other,
+            T minValue = std::numeric_limits<T>::min(),
+            T maxValue = std::numeric_limits<T>::max());
 
         bool empty() const;
         std::size_t size() const;
@@ -105,10 +117,17 @@ namespace multidim_image_platform {
         std::vector<std::vector<T>> m_planes;
         std::vector<std::size_t> m_planeDims;
         std::vector<std::size_t> m_restDims;
+        std::size_t m_planeSize;
+        std::size_t m_restSize;
         Type m_type;
 
+        void initUtilsFromDim();
         T& unsafeAt(std::vector<std::size_t> coords);
         View subDimView(std::vector<std::size_t> coords, std::size_t firstNDims);
+
+        template <typename U>
+        void transformCopy(const MultiDimImage<U>& other,
+            std::function<T(const U&)> unary);
 
         struct ViewRegistry {
             ViewRegistry(MultiDimImage<T>* owner): m_owner(owner) {}
@@ -148,6 +167,15 @@ namespace multidim_image_platform {
 
         bool stepCoords(std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& limits);
+
+        // template <typename T, typename U>
+        // bool safeLessThan(T x, U y)
+        // {
+        //     return (x < 0) || 
+        // }
+
+        // template <typename T, typename U>
+        // bool safeGreaterThan(T x, U y);
     }
 
     #include "MultiDimImage.ipp"

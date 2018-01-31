@@ -12,10 +12,16 @@ SOURCES += \
     ../core/compute_platform/port_utils.hpp \
     multidim_image_platform_test.cpp \
     ../core/multidim_image_platform/MultiDimImage.hpp \
-    ../core/multidim_image_platform/MultiDimImage.cpp
+    ../core/multidim_image_platform/MultiDimImage.cpp \
+    high_platform_test.cpp \
+    ../core/high_platform/PythonComputeModule.cpp
 
 CONFIG -= app_bundle
 CONFIG += debug
 INCLUDEPATH += \
     ../util \
-    ../
+    ../ \
+    ../../lib/pybind11/include/ \
+    ../../virtualenv/include/python3.6m
+
+LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib/" -lpython3.6m

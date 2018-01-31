@@ -122,8 +122,18 @@ template <typename T>
 MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
     : m_dims(dims), m_viewRegistry(this)
 {
+    initUtilsFromDim();
+
+    std::vector<std::vector<T>> data(m_restSize, std::vector<T>(m_planeSize, T()));
+    m_planes.swap(data);
+    m_type = GetType<T>();
+}
+
+template <typename T>
+void MultiDimImage<T>::initUtilsFromDim()
+{
     int i = 0;
-    for (std::size_t x : dims) {
+    for (std::size_t x : m_dims) {
         if (i < 2) {
             m_planeDims.push_back(x);
         } else {
@@ -131,19 +141,67 @@ MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
         }
         i++;
     }
-    std::size_t planeSize = std::accumulate(m_planeDims.begin(), m_planeDims.end(), 1, std::multiplies<std::size_t>());
-    std::size_t restSize = std::accumulate(m_restDims.begin(), m_restDims.end(), 1, std::multiplies<std::size_t>());
+    if (m_planeDims.empty()) {
+        m_planeSize = 0;
+    } else {
+        m_planeSize = std::accumulate(
+            m_planeDims.begin(), m_planeDims.end(),
+            1, std::multiplies<std::size_t>());
+    }
 
-    std::vector<std::vector<T>> data(restSize, std::vector<T>(planeSize, T()));
-    m_planes.swap(data);
-    m_type = GetType<T>();
+    if (m_restDims.empty() && m_planeDims.empty()) {
+        m_restSize = 0;
+    } else {
+        m_restSize = std::accumulate(
+            m_restDims.begin(), m_restDims.end(),
+            1, std::multiplies<std::size_t>());
+    }
 }
 
 template <typename T>
 template <typename U>
-void MultiDimImage<T>::convertCopy(const MultiDimImage<U>& other)
+void MultiDimImage<T>::transformCopy(const MultiDimImage<U>& other,
+    std::function<T(const U&)> unary)
 {
+    MultiDimImage<T> newImage;
+    newImage.m_dims = other.m_dims;
+    newImage.initUtilsFromDim();
 
+    newImage.m_planes.reserve(newImage.m_restSize);
+    auto itEnd = other.m_planes.end();
+    for (auto it = other.m_planes.begin(); it != itEnd; ++it) {
+        newImage.m_planes.push_back(std::vector<T>());
+        auto& plane = newImage.m_planes.back();
+        plane.reserve(newImage.m_planeSize);
+        std::transform(it->begin(), it->end(),
+            std::back_inserter(plane), unary);
+    }
+    std::swap(*this, newImage);
+}
+
+template <typename T>
+template <typename U>
+void MultiDimImage<T>::convertCopyFrom(const MultiDimImage<U>& other)
+{
+    std::function<T(const U&)> f = [](const U& x) -> T {
+            return static_cast<T>(x);
+        };
+    transformCopy(other, f);
+}
+
+template <typename T>
+template <typename U>
+void MultiDimImage<T>::saturateCopyFrom(const MultiDimImage<U>& other,
+    T minValue, T maxValue)
+{
+    // std::enable_if !std::numeric_limits<T>::is_signed && std::numeric_limits<U>::is_signed
+
+    // return maxValue < x ? maxValue : (0 > x ? 0 : x);
+
+    std::function<T(const U&)> f = [minValue, maxValue](const U& x) -> T {
+        return maxValue < x ? maxValue : (minValue > x ? minValue : x);    
+    };
+    transformCopy(other, f);
 }
 
 template <typename T>
@@ -230,6 +288,10 @@ T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
         }
         i++;
     }
+
+    // std::cout << "at idx: " << detail::flatCoordinate(planeDimCoords, m_planeDims)
+    // << " val: " << m_planes[detail::flatCoordinate(restDimCoords, m_restDims)]
+        // [detail::flatCoordinate(planeDimCoords, m_planeDims)] << std::endl;
 
     return m_planes[detail::flatCoordinate(restDimCoords, m_restDims)]
         [detail::flatCoordinate(planeDimCoords, m_planeDims)];
