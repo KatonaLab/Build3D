@@ -21,6 +21,12 @@ GroupBox {
         onTriggered: AppActions.addAnalysisNode(AppActions.generateUid())
     }
 
+    Action {
+        id: addFakeAnalysisNode
+        text: "Add Analysis 2"
+        onTriggered: AppActions.addFakeAnalysisNode(AppActions.generateUid())
+    }
+
     ScrollView {
         anchors.fill: parent
 
@@ -57,6 +63,7 @@ GroupBox {
                     id: menu
                     MenuItem { action: addSegmentationNode }
                     MenuItem { action: addAnalysisNode }
+                    MenuItem { action: addFakeAnalysisNode }
                 }
             }
         }

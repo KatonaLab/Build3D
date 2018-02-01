@@ -9,6 +9,7 @@ Item {
     property string addSourceNode: "addSourceNode"
     property string addSegmentNode: "addSegmentNode"
     property string addAnalysisNode: "addAnalysisNode"
+    property string addFakeAnalysisNode: "addFakeAnalysisNode"
     property string setNodeViewParameters: "setNodeViewParameters"
     property string applySegmentNode: "applySegmentNode"
     property string applyAnalysisNode: "applyAnalysisNode"

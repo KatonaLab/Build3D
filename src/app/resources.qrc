@@ -24,6 +24,7 @@
 
     <file>qml/views/nodes/SegmentNodeView.qml</file>
     <file>qml/views/nodes/AnalysisNodeView.qml</file>
+    <file>qml/views/nodes/FakeAnalysisNodeView.qml</file>
     <file>qml/views/nodes/SourceNodeView.qml</file>
     <file>qml/views/nodes/NodeViewOptions.qml</file>
 

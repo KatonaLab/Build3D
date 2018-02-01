@@ -36,6 +36,10 @@ Item {
         AppDispatcher.dispatch(ActionTypes.addAnalysisNode, {uid: uid});
     }
 
+    function addFakeAnalysisNode(uid) {
+        AppDispatcher.dispatch(ActionTypes.addFakeAnalysisNode, {uid: uid});
+    }
+
     function setNodeViewParameters(uid, viewParameters) {
         AppDispatcher.dispatch(ActionTypes.setNodeViewParameters,
             {uid: uid, parameters: viewParameters});

@@ -27,6 +27,10 @@ Item {
                 var path = "../views/nodes/AnalysisNodeView.qml";
                 addProcessNode(args.uid, path, "Analysis");
                 break;
+            case ActionTypes.addFakeAnalysisNode:
+                var path = "../views/nodes/FakeAnalysisNodeView.qml";
+                addProcessNode(args.uid, path, "Colocalization");
+                break;
             case ActionTypes.importIcsFile:
             case ActionTypes.autoImportIcsFile:
                 dataManager.source = args.url;

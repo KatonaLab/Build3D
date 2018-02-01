@@ -15,7 +15,8 @@ ApplicationWindow {
     width: 480
     height: 480
     visible: true
-    title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version + ")"
+    //title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version + ")"
+    title: "A3DC"
 
     menuBar: MenuBar {
         Menu {
