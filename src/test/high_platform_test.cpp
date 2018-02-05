@@ -49,28 +49,28 @@ namespace py = pybind11;
 
 SCENARIO("test python", "[core/high_platform]")
 {
-    Py_SetProgramName((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin/python");
+//     Py_SetProgramName((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin/python");
 
-    Py_SetPythonHome((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin:"
-        "/Users/fodorbalint/projects/a3dc/virtualenv/lib:"
-        "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6:"
-        "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/lib-dynload:"
-        "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/site-packages");
+//     Py_SetPythonHome((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin:"
+//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib:"
+//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6:"
+//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/lib-dynload:"
+//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/site-packages");
 
-    string code = R"(
-import sys
-import os
-print(sys.version)
-print(sys.executable)
-print(sys.path)
-print(os.sys.path)
-# sys.path.append('/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/site-packages')
-# print(sys.path)
-# print(os.sys.path)
-import pandas
-    )";
-    py::scoped_interpreter guard{}; // start the interpreter and keep it alive
-    py::exec(code); // use the Python API
+//     string code = R"(
+// import sys
+// import os
+// print(sys.version)
+// print(sys.executable)
+// print(sys.path)
+// print(os.sys.path)
+// # sys.path.append('/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/site-packages')
+// # print(sys.path)
+// # print(os.sys.path)
+// import pandas
+//     )";
+//     py::scoped_interpreter guard{}; // start the interpreter and keep it alive
+//     py::exec(code); // use the Python API
 }
 
 SCENARIO("high_platform basic usage", "[core/high_platform]")

@@ -687,6 +687,3 @@ SCENARIO("converting between types with saturation", "[core/multidim_image_platf
         
     }
 }
-
-// TODO: test saturate
-// TODO: test 1d multidimimage
