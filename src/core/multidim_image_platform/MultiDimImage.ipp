@@ -194,12 +194,9 @@ template <typename U>
 void MultiDimImage<T>::saturateCopyFrom(const MultiDimImage<U>& other,
     T minValue, T maxValue)
 {
-    // std::enable_if !std::numeric_limits<T>::is_signed && std::numeric_limits<U>::is_signed
-
-    // return maxValue < x ? maxValue : (0 > x ? 0 : x);
-
     std::function<T(const U&)> f = [minValue, maxValue](const U& x) -> T {
-        return maxValue < x ? maxValue : (minValue > x ? minValue : x);    
+        return detail::SafeLessThanCompare<T, U>::less(maxValue, x) ?
+            maxValue : (detail::SafeLessThanCompare<T, U>::less(minValue, x) ? x : minValue);
     };
     transformCopy(other, f);
 }

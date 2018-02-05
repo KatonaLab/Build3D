@@ -96,7 +96,7 @@ namespace multidim_image_platform {
         void convertCopyFrom(const MultiDimImage<U>& other);
         template <typename U>
         void saturateCopyFrom(const MultiDimImage<U>& other,
-            T minValue = std::numeric_limits<T>::min(),
+            T minValue = std::numeric_limits<T>::lowest(),
             T maxValue = std::numeric_limits<T>::max());
 
         bool empty() const;
@@ -168,14 +168,33 @@ namespace multidim_image_platform {
         bool stepCoords(std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& limits);
 
-        // template <typename T, typename U>
-        // bool safeLessThan(T x, U y)
-        // {
-        //     return (x < 0) || 
-        // }
+        template <typename T, typename U,
+            bool T_is_integral = std::is_integral<T>::value,
+            bool U_is_integral = std::is_integral<U>::value,
+            bool T_is_signed = std::is_signed<T>::value,
+            bool U_is_signed = std::is_signed<U>::value>
+        struct SafeLessThanCompare {
+            static bool less(T a, U b)
+            {
+                return a < b;
+            }
+        };
 
-        // template <typename T, typename U>
-        // bool safeGreaterThan(T x, U y);
+        template <typename T, typename U>
+        struct SafeLessThanCompare<T, U, true, true, true, false> {
+            static bool less(T a, U b)
+            {
+                return (a < 0) || (static_cast<U>(a) < b);
+            }
+        };
+
+        template <typename T, typename U>
+        struct SafeLessThanCompare<T, U, true, true, false, true> {
+            static bool less(T a, U b)
+            {
+                return (b > 0) && (a < static_cast<T>(b));
+            }
+        };
     }
 
     #include "MultiDimImage.ipp"

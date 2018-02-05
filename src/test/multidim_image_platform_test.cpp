@@ -460,10 +460,12 @@ SCENARIO("converting between types", "[core/multidim_image_platform]")
         imf.at({17, 23}) = 0.0f;
         imf.at({17, 24}) = 42.0f;
         imf.at({17, 25}) = 42.4242f;
+        imf.at({17, 26}) = 1042.4242f;
 
         imd.at({11, 47}) = 2024.0;
         imd.at({11, 48}) = 0.0;
         imd.at({11, 49}) = 2024.202420242024;
+        imd.at({11, 50}) = 42.0;
 
         WHEN("copy converting from im8s to im64u") {
             im64u.convertCopyFrom(im8s);
@@ -473,7 +475,6 @@ SCENARIO("converting between types", "[core/multidim_image_platform]")
                 REQUIRE(im64u.dims() == 2);
                 REQUIRE(im64u.dim(0) == 16);
                 REQUIRE(im64u.dim(1) == 24);
-                REQUIRE(im64u.at({7, 9}) == static_cast<std::uint64_t>(-2));
                 REQUIRE(im64u.at({7, 10}) == 127);
                 REQUIRE(im64u.at({7, 11}) == 92);
                 REQUIRE(im64u.at({7, 12}) == 0);
@@ -488,9 +489,7 @@ SCENARIO("converting between types", "[core/multidim_image_platform]")
                 REQUIRE(im8s.dims() == 2);
                 REQUIRE(im8s.dim(0) == 24);
                 REQUIRE(im8s.dim(1) == 32);
-                REQUIRE(im8s.at({17, 13}) == static_cast<std::int8_t>(42000));
                 REQUIRE(im8s.at({17, 14}) == 0);
-                REQUIRE(im8s.at({17, 15}) == static_cast<std::int8_t>(18446744073709551615ULL));
                 REQUIRE(im8s.at({17, 16}) == 78);
             }
         }
@@ -532,122 +531,162 @@ SCENARIO("converting between types", "[core/multidim_image_platform]")
                 REQUIRE(im8s.dims() == 2);
                 REQUIRE(im8s.dim(0) == 32);
                 REQUIRE(im8s.dim(1) == 64);
-                cout << (int)imd.at({11, 47}) << endl;
-                cout << (int)im8s.at({11, 47}) << endl;
-                cout << (int)static_cast<std::int8_t>(2024.0) << endl;
-                // REQUIRE(im8s.at({11, 47}) == static_cast<std::int8_t>((double)2024.0));
                 REQUIRE(im8s.at({11, 48}) == 0);
-                REQUIRE(im8s.at({11, 49}) == static_cast<std::int8_t>(2024.202420242024));
+                REQUIRE(im8s.at({11, 50}) == 42);
             }
         }
 
-        // TODO: test saturate
-
-        // WHEN("saturate converting from im8s to im64u") {
-        //     im64u.saturateCopyFrom(im8s, 0, 100);
-        //     THEN("it is correct") {
-        //         REQUIRE(im64u.size() == 16 * 24);
-        //         REQUIRE(im64u.byteSize() == 16 * 24 * 8);
-        //         REQUIRE(im64u.dims() == 2);
-        //         REQUIRE(im64u.dim(0) == 16);
-        //         REQUIRE(im64u.dim(1) == 24);
-        //         REQUIRE(im64u.at({7, 9}) == 0);
-        //         REQUIRE(im64u.at({7, 10}) == 127);
-        //         REQUIRE(im64u.at({7, 11}) == 92);
-        //         REQUIRE(im64u.at({7, 12}) == 0);
-        //     }
-        // }
-
-// #define TEST_BLOCK \
-// REQUIRE(A.size() == B_SIZE_0 * B_SIZE_1); \
-// REQUIRE(A.byteSize() == B_SIZE_0 * B_SIZE_1 * sizeof(A_TYPE)); \
-// REQUIRE(A.dims() == 2); \
-// REQUIRE(A.dim(0) == B_SIZE_0); \
-// REQUIRE(A.dim(1) == B_SIZE_1); \
-//   REQUIRE(A.at({7, 9}) == static_cast<A_TYPE>(B.at({7, 9})  ) ); \
-//  REQUIRE(A.at({7, 10}) == static_cast<A_TYPE>(B.at({7, 10}) ) ); \
-//  REQUIRE(A.at({7, 11}) == static_cast<A_TYPE>(B.at({7, 11}) ) ); \
-//  REQUIRE(A.at({7, 12}) == static_cast<A_TYPE>(B.at({7, 12}) ) ); \
-// REQUIRE(A.at({17, 13}) == static_cast<A_TYPE>(B.at({17, 13})) ); \
-// REQUIRE(A.at({17, 14}) == static_cast<A_TYPE>(B.at({17, 14})) ); \
-// REQUIRE(A.at({17, 15}) == static_cast<A_TYPE>(B.at({17, 15})) ); \
-// REQUIRE(A.at({17, 16}) == static_cast<A_TYPE>(B.at({17, 16})) ); \
-// REQUIRE(A.at({17, 23}) == static_cast<A_TYPE>(B.at({17, 23})) ); \
-// REQUIRE(A.at({17, 24}) == static_cast<A_TYPE>(B.at({17, 24})) ); \
-// REQUIRE(A.at({17, 25}) == static_cast<A_TYPE>(B.at({17, 25})) ); \
-// REQUIRE(A.at({11, 47}) == static_cast<A_TYPE>(B.at({11, 47})) ); \
-// REQUIRE(A.at({11, 48}) == static_cast<A_TYPE>(B.at({11, 48})) ); \
-// REQUIRE(A.at({11, 49}) == static_cast<A_TYPE>(B.at({11, 49})) );
-
-//         #define A im8s
-//         #define A_TYPE std::int8_t
-//         #define B im8s
-//         #define B_SIZE_0 160
-//         #define B_SIZE_1 240
-//         WHEN("A <- B convert copied") {
-//             A.convertCopy(B);
-//             THEN("converted correctly") {
-//                 TEST_BLOCK
-//             }
-//         }
-//         #undef A
-//         #undef A_TYPE
-//         #undef B
-//         #undef B_SIZE_0
-//         #undef B_SIZE_1
-
-//         #define A im64u
-//         #define A_TYPE std::uint64_t
-//         #define B im8s
-//         #define B_SIZE_0 160
-//         #define B_SIZE_1 240
-//         WHEN("A <- B convert copied") {
-//             A.convertCopy(B);
-//             THEN("converted correctly") {
-//                 TEST_BLOCK
-//             }
-//         }
-//         #undef A
-//         #undef A_TYPE
-//         #undef B
-//         #undef B_SIZE_0
-//         #undef B_SIZE_1
-
-//         #define A imf
-//         #define A_TYPE float
-//         #define B im8s
-//         #define B_SIZE_0 160
-//         #define B_SIZE_1 240
-//         WHEN("A <- B convert copied") {
-//             A.convertCopy(B);
-//             THEN("converted correctly") {
-//                 TEST_BLOCK
-//             }
-//         }
-//         #undef A
-//         #undef A_TYPE
-//         #undef B
-//         #undef B_SIZE_0
-//         #undef B_SIZE_1
         
-//         #define A imd
-//         #define A_TYPE double
-//         #define B im8s
-//         #define B_SIZE_0 160
-//         #define B_SIZE_1 240
-//         WHEN("A <- B convert copied") {
-//             A.convertCopy(B);
-//             THEN("converted correctly") {
-//                 TEST_BLOCK
-//             }
-//         }
-//         #undef A
-//         #undef A_TYPE
-//         #undef B
-//         #undef B_SIZE_0
-//         #undef B_SIZE_1
     }
 }
 
-// TODO: test convert copy
+SCENARIO("safe less compare test", "[core/multidim_image_platform]")
+{
+    using namespace core::multidim_image_platform::detail;
+    REQUIRE(SafeLessThanCompare<char, char>::less(2, 4) == true);
+    REQUIRE(SafeLessThanCompare<char, char>::less(4, 2) == false);
+    REQUIRE(SafeLessThanCompare<char, char>::less(-8, -3) == true);
+    REQUIRE(SafeLessThanCompare<char, char>::less(-3, -8) == false);
+    REQUIRE(SafeLessThanCompare<char, char>::less(-3, -3) == false);
+    REQUIRE(SafeLessThanCompare<unsigned char, char>::less(2, -2) == false);
+    REQUIRE(SafeLessThanCompare<unsigned char, char>::less(2, 4) == true);
+    REQUIRE(SafeLessThanCompare<unsigned char, char>::less(2, 2) == false);
+    REQUIRE(SafeLessThanCompare<char, unsigned char>::less(-2, 2) == true);
+    REQUIRE(SafeLessThanCompare<char, unsigned char>::less(2, 4) == true);
+    REQUIRE(SafeLessThanCompare<char, unsigned char>::less(4, 2) == false);
+
+    REQUIRE(SafeLessThanCompare<char, int>::less(2, 400) == true);
+    REQUIRE(SafeLessThanCompare<char, int>::less(4, 2) == false);
+    REQUIRE(SafeLessThanCompare<char, int>::less(-7, -5) == true);
+    REQUIRE(SafeLessThanCompare<int, char>::less(-300, -5) == true);
+    REQUIRE(SafeLessThanCompare<unsigned char, int>::less(2, -400) == false);
+    REQUIRE(SafeLessThanCompare<unsigned char, int>::less(2, 400) == true);
+    REQUIRE(SafeLessThanCompare<char, unsigned int>::less(-2, 400) == true);
+    REQUIRE(SafeLessThanCompare<char, unsigned int>::less(2, 400) == true);
+    REQUIRE(SafeLessThanCompare<char, unsigned int>::less(4, 2) == false);
+
+    REQUIRE(SafeLessThanCompare<long, double>::less(2203, 4000.324) == true);
+    REQUIRE(SafeLessThanCompare<long, double>::less(23412, 23411.9) == false);
+    REQUIRE(SafeLessThanCompare<long, double>::less(23412, 23412.0000001) == true);
+    REQUIRE(SafeLessThanCompare<long, double>::less(-1354, 23411.9) == true);
+    REQUIRE(SafeLessThanCompare<unsigned long, double>::less(2, -400) == false);
+    REQUIRE(SafeLessThanCompare<unsigned long, double>::less(2, 400) == true);
+    REQUIRE(SafeLessThanCompare<long, double>::less(-2, 400) == true);
+    REQUIRE(SafeLessThanCompare<long, double>::less(2, 400) == true);
+    REQUIRE(SafeLessThanCompare<long, double>::less(4, 2) == false);
+    REQUIRE(SafeLessThanCompare<double, double>::less(3.141519, 3.141519) == false);
+}
+
+SCENARIO("converting between types with saturation", "[core/multidim_image_platform]")
+{
+    GIVEN("different types of images") {
+        MultiDimImage<std::int8_t> im8s({16, 24});
+        MultiDimImage<std::uint64_t> im64u({24, 32});
+        MultiDimImage<float> imf({64, 32});
+        MultiDimImage<double> imd({32, 64});
+
+        im8s.at({7, 9}) = -2;
+        im8s.at({7, 10}) = 127;
+        im8s.at({7, 11}) = 92;
+        im8s.at({7, 12}) = 0;
+
+        im64u.at({17, 13}) = 42000;
+        im64u.at({17, 14}) = 0;
+        im64u.at({17, 15}) = 18446744073709551615ULL;
+        im64u.at({17, 16}) = 78;
+
+        imf.at({17, 23}) = 0.0f;
+        imf.at({17, 24}) = 42.0f;
+        imf.at({17, 25}) = 42.4242f;
+        imf.at({17, 26}) = 1042.4242f;
+
+        imd.at({11, 47}) = 2024.0;
+        imd.at({11, 48}) = -700.0;
+        imd.at({11, 49}) = 2024.202420242024;
+        imd.at({11, 50}) = 42.0;
+
+        WHEN("copy saturate converting from im8s to im64u") {
+            im64u.saturateCopyFrom(im8s);
+            THEN("it is correct") {
+                REQUIRE(im64u.size() == 16 * 24);
+                REQUIRE(im64u.byteSize() == 16 * 24 * sizeof(std::uint64_t));
+                REQUIRE(im64u.dims() == 2);
+                REQUIRE(im64u.dim(0) == 16);
+                REQUIRE(im64u.dim(1) == 24);
+
+                REQUIRE(im64u.at({7, 9}) == 0);
+                REQUIRE(im64u.at({7, 10}) == 127);
+                REQUIRE(im64u.at({7, 11}) == 92);
+                REQUIRE(im64u.at({7, 12}) == 0);
+            }
+        }
+
+        WHEN("copy saturate converting from im64u to im8s") {
+            im8s.saturateCopyFrom(im64u);
+            THEN("it is correct") {
+                REQUIRE(im8s.size() == 24 * 32);
+                REQUIRE(im8s.byteSize() == 24 * 32 * sizeof(std::int8_t));
+                REQUIRE(im8s.dims() == 2);
+                REQUIRE(im8s.dim(0) == 24);
+                REQUIRE(im8s.dim(1) == 32);
+                REQUIRE(im8s.at({17, 13}) == 127);
+                REQUIRE(im8s.at({17, 14}) == 0);
+                REQUIRE(im8s.at({17, 15}) == 127);
+                REQUIRE(im8s.at({17, 16}) == 78);
+            }
+        }
+
+        WHEN("copy saturate converting from im8s to imf") {
+            imf.saturateCopyFrom(im8s);
+            THEN("it is correct") {
+                REQUIRE(imf.size() == 16 * 24);
+                REQUIRE(imf.byteSize() == 16 * 24 * sizeof(float));
+                REQUIRE(imf.dims() == 2);
+                REQUIRE(imf.dim(0) == 16);
+                REQUIRE(imf.dim(1) == 24);
+
+                REQUIRE(imf.at({7, 9}) == -2.f);
+                REQUIRE(imf.at({7, 10}) == 127.f);
+                REQUIRE(imf.at({7, 11}) == 92.f);
+                REQUIRE(imf.at({7, 12}) == 0.f);
+            }
+        }
+
+        WHEN("copy saturate converting from imf to im8s") {
+            im8s.saturateCopyFrom(imf);
+            THEN("it is correct") {
+                REQUIRE(im8s.size() == 64 * 32);
+                REQUIRE(im8s.byteSize() == 64 * 32 * sizeof(std::int8_t));
+                REQUIRE(im8s.dims() == 2);
+                REQUIRE(im8s.dim(0) == 64);
+                REQUIRE(im8s.dim(1) == 32);
+
+                REQUIRE(im8s.at({17, 23}) == 0);
+                REQUIRE(im8s.at({17, 24}) == 42);
+                REQUIRE(im8s.at({17, 25}) == 42);
+                REQUIRE(im8s.at({17, 26}) == 127);
+            }
+        }
+
+        WHEN("copy saturate converting from imd to im8s") {
+            im8s.saturateCopyFrom(imd);
+            THEN("it is correct") {
+                REQUIRE(im8s.size() == 64 * 32);
+                REQUIRE(im8s.byteSize() == 64 * 32 * sizeof(std::int8_t));
+                REQUIRE(im8s.dims() == 2);
+                REQUIRE(im8s.dim(0) == 32);
+                REQUIRE(im8s.dim(1) == 64);
+
+                REQUIRE(im8s.at({11, 47}) == 127);
+                REQUIRE(im8s.at({11, 48}) == -128);
+                REQUIRE(im8s.at({11, 49}) == 127);
+                REQUIRE(im8s.at({11, 50}) == 42);
+            }
+        }
+
+        
+    }
+}
+
+// TODO: test saturate
 // TODO: test 1d multidimimage
