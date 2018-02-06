@@ -2,18 +2,21 @@
 #include <pybind11/embed.h> // everything needed for embedding
 
 // #include <core/high_platform/Platform.hpp>
-// #include <core/compute_platform/PythonComputeModule.h>
+#include <core/high_platform/PythonComputeModule.h>
 
-// using namespace core::high_platform;
+using namespace core::high_platform;
+using namespace core::compute_platform;
 using namespace std;
 
 string codeSource = R"code(
 import a3dc
 import numpy
 
-a3dc.set_module_meta({
+a3dc.set_module_args({
     inputs: {},
     outputs: {'out_image': a3dc.types.image}})
+
+a3dc.set_module_main(module_main)
 
 def module_main():
     return {'out_image': np.ones((320, 240))}
@@ -23,9 +26,11 @@ def module_main():
 string codeAdd = R"code(
 import a3dc
 
-a3dc.set_module_meta({
+a3dc.set_module_args({
     inputs: {'image1': a3dc.types.image, 'image2': a3dc.types.image},
     outputs: {'out_image': a3dc.types.image}})
+
+a3dc.set_module_main(module_main)
 
 def module_main(image1, image2):
     return {'out_image': image1 + image2}
@@ -35,15 +40,16 @@ def module_main(image1, image2):
 string codeTarget = R"code(
 import a3dc
 
-a3dc.set_module_meta({
+a3dc.set_module_args({
     inputs: {'image': a3dc.types.image},
     outputs: {}})
+
+a3dc.set_module_main(module_main)
 
 def module_main():
     return None
 
 )code";
-
 
 namespace py = pybind11;
 
@@ -75,25 +81,25 @@ SCENARIO("test python", "[core/high_platform]")
 
 SCENARIO("high_platform basic usage", "[core/high_platform]")
 {
-    // GIVEN("a simple net") {
-    //     ComputePlatform p;
+    GIVEN("a simple net") {
+        ComputePlatform p;
 
-    //     PythonComputeModule src1(p, codeSource);
-    //     PythonComputeModule src2(p, codeSource);
-    //     PythonComputeModule add(p, codeAdd);
-    //     PythonComputeModule dst(p, codeTarget);
+        PythonComputeModule src1(p, codeSource);
+        PythonComputeModule src2(p, codeSource);
+        PythonComputeModule add(p, codeAdd);
+        PythonComputeModule dst(p, codeTarget);
 
-    //     REQUIRE(p.size() == 3);
+        // REQUIRE(p.size() == 3);
 
-    //     REQUIRE(src1.outputPort(0).lock()->bind(add.inputPort(0)) == true);
-    //     REQUIRE(src2.outputPort(0).lock()->bind(add.inputPort(1)) == true);
-    //     REQUIRE(add.outputPort(0).lock()->bind(dst.inputPort(0)) == true);
+        // REQUIRE(src1.outputPort(0).lock()->bind(add.inputPort(0)) == true);
+        // REQUIRE(src2.outputPort(0).lock()->bind(add.inputPort(1)) == true);
+        // REQUIRE(add.outputPort(0).lock()->bind(dst.inputPort(0)) == true);
 
-    //     WHEN("run is called") {
-    //         p.run();
-    //         THEN("it outputs the correct result") {
-    //             //REQUIRE(dd.getResult() == 43);
-    //         }
-    //     }
-    // }
+        // WHEN("run is called") {
+        //     p.run();
+        //     THEN("it outputs the correct result") {
+        //         //REQUIRE(dd.getResult() == 43);
+        //     }
+        // }
+    }
 }
