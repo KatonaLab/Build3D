@@ -66,3 +66,9 @@ void ComputeModule::reset()
         m_outputs.get(i).lock()->reset();
     }
 }
+
+bool core::compute_platform::connectPorts(ComputeModule& outputModule, std::size_t outputId,
+    ComputeModule& inputModule, std::size_t inputId)
+{
+    return outputModule.outputPort(outputId).lock()->bind(inputModule.inputPort(inputId));
+}

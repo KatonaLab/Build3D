@@ -8,6 +8,7 @@
 
 using namespace core::compute_platform;
 using namespace std;
+using namespace compute_platform_test;
 
 SCENARIO("basic usage", "[core/compute_platform]")
 {
@@ -160,50 +161,53 @@ SCENARIO("efficient data handling and leakage free checks with simple net", "[co
     }
 }
 
-vector<shared_ptr<ComputeModule>>
-addGrowingLayer(vector<shared_ptr<ComputeModule>> prevLayer,
-    ComputePlatform& p, bool lastLayer)
-{
-    vector<shared_ptr<ComputeModule>> result;
-    if (prevLayer.empty()) {
-        result.push_back(make_shared<DataSource>(p));
-        return result;
-    }
-    
-    if (!lastLayer) {
-        auto side1 = make_shared<DataBypass>(p);
-        auto side2 = make_shared<DataBypass>(p);
+namespace compute_platform_test {
 
-        REQUIRE(prevLayer[0]->outputPort(0).lock()->bind(side1->inputPort(0)) == true);
-        REQUIRE(prevLayer[prevLayer.size()-1]->outputPort(0).lock()->bind(side2->inputPort(0)) == true);
-
-        result.push_back(side1);
-        for (int i = 0; i < (int)prevLayer.size() - 1; ++i) {
-            auto m = make_shared<TwoInputBypass>(p);
-            result.push_back(m);
-            REQUIRE(prevLayer[i]->outputPort(0).lock()->bind(m->inputPort(0)) == true);
-            REQUIRE(prevLayer[i + 1]->outputPort(0).lock()->bind(m->inputPort(1)) == true);
+    vector<shared_ptr<ComputeModule>>
+    addGrowingLayer(vector<shared_ptr<ComputeModule>> prevLayer,
+        ComputePlatform& p, bool lastLayer)
+    {
+        vector<shared_ptr<ComputeModule>> result;
+        if (prevLayer.empty()) {
+            result.push_back(make_shared<DataSource>(p));
+            return result;
         }
-        result.push_back(side2);
+        
+        if (!lastLayer) {
+            auto side1 = make_shared<DataBypass>(p);
+            auto side2 = make_shared<DataBypass>(p);
 
-        return result;
-    } else {
-        auto side1 = make_shared<DataSink>(p);
-        auto side2 = make_shared<DataSink>(p);
+            REQUIRE(prevLayer[0]->outputPort(0).lock()->bind(side1->inputPort(0)) == true);
+            REQUIRE(prevLayer[prevLayer.size()-1]->outputPort(0).lock()->bind(side2->inputPort(0)) == true);
 
-        REQUIRE(prevLayer[0]->outputPort(0).lock()->bind(side1->inputPort(0)) == true);
-        REQUIRE(prevLayer[prevLayer.size()-1]->outputPort(0).lock()->bind(side2->inputPort(0)) == true);
+            result.push_back(side1);
+            for (int i = 0; i < (int)prevLayer.size() - 1; ++i) {
+                auto m = make_shared<TwoInputBypass>(p);
+                result.push_back(m);
+                REQUIRE(prevLayer[i]->outputPort(0).lock()->bind(m->inputPort(0)) == true);
+                REQUIRE(prevLayer[i + 1]->outputPort(0).lock()->bind(m->inputPort(1)) == true);
+            }
+            result.push_back(side2);
 
-        result.push_back(side1);
-        for (int i = 0; i < (int)prevLayer.size() - 1; ++i) {
-            auto m = make_shared<TwoInputSink>(p);
-            result.push_back(m);
-            REQUIRE(prevLayer[i]->outputPort(0).lock()->bind(m->inputPort(0)) == true);
-            REQUIRE(prevLayer[i + 1]->outputPort(0).lock()->bind(m->inputPort(1)) == true);
+            return result;
+        } else {
+            auto side1 = make_shared<DataSink>(p);
+            auto side2 = make_shared<DataSink>(p);
+
+            REQUIRE(prevLayer[0]->outputPort(0).lock()->bind(side1->inputPort(0)) == true);
+            REQUIRE(prevLayer[prevLayer.size()-1]->outputPort(0).lock()->bind(side2->inputPort(0)) == true);
+
+            result.push_back(side1);
+            for (int i = 0; i < (int)prevLayer.size() - 1; ++i) {
+                auto m = make_shared<TwoInputSink>(p);
+                result.push_back(m);
+                REQUIRE(prevLayer[i]->outputPort(0).lock()->bind(m->inputPort(0)) == true);
+                REQUIRE(prevLayer[i + 1]->outputPort(0).lock()->bind(m->inputPort(1)) == true);
+            }
+            result.push_back(side2);
+
+            return result;
         }
-        result.push_back(side2);
-
-        return result;
     }
 }
 

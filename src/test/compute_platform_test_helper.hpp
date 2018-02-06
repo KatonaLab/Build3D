@@ -12,6 +12,8 @@
 
 namespace cp = core::compute_platform;
 
+namespace compute_platform_test {
+
 class IntSource : public cp::ComputeModule {
 public:
     IntSource(cp::ComputePlatform& parent)
@@ -205,5 +207,7 @@ protected:
     cp::TypedInputPortCollection<Data, Data> m_inputs;
     cp::OutputPortCollection m_outputs;
 };
+
+}
 
 #endif
