@@ -109,8 +109,11 @@ namespace multidim_image_platform {
         T& at(std::vector<std::size_t> coords);
         View plane(std::vector<std::size_t> coords);
         View volume(std::vector<std::size_t> coords);
+        const std::vector<std::vector<T>> data() const;
         void reorderDims(std::vector<std::size_t> dims);
         virtual ~MultiDimImage();
+
+        // TODO: make getter/setter
         Meta meta;
     protected:
         std::vector<std::size_t> m_dims;

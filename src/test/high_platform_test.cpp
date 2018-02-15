@@ -110,152 +110,113 @@ SCENARIO("compute platform works with multidim images", "[core/high_platform]")
     }
 }
 
-string codeSource = R"code(
-import a3dc
-import numpy
-
-a3dc.set_module_args({
-    inputs: {},
-    outputs: {'out_image': a3dc.types.image}})
-
-a3dc.set_module_main(module_main)
-
-def module_main():
-    return {'out_image': np.ones((320, 240))}
-
-)code";
-
-string codeAdd = R"code(
-import a3dc
-
-a3dc.set_module_args({
-    inputs: {'image1': a3dc.types.image, 'image2': a3dc.types.image},
-    outputs: {'out_image': a3dc.types.image}})
-
-a3dc.set_module_main(module_main)
-
-def module_main(image1, image2):
-    return {'out_image': image1 + image2}
-
-)code";
-
-string codeTarget = R"code(
-import a3dc
-
-a3dc.set_module_args({
-    inputs: {'image': a3dc.types.image},
-    outputs: {}})
-
-a3dc.set_module_main(module_main)
-
-def module_main():
-    return None
-
-)code";
-
 namespace py = pybind11;
 
-SCENARIO("test python binding: a3dc.Meta", "[core/high_platform]")
+SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platform]")
 {
-    // TODO: test more aspects
-    string code = R"code(
-        import a3dc
-        m = a3dc.Meta()
-        m.add('a', 'b')
-        m.has('a')
-    )code";
+    GIVEN("a MultiDimImage instanced on cpp side") {
+        py::scoped_interpreter guard{};
+        py::module::import("a3dc");
 
-    py::scoped_interpreter guard{};
-    py::exec(code);
-}
+        MultiDimImage<uint8_t> im({32, 32});
+        im.at({17, 19}) = 42;
+        WHEN("passed to python side") {
+            using namespace py::literals;
+            auto locals = py::dict("x"_a = im);
+            THEN("it is passed correctly") {
+                py::exec(R"(
+                    import numpy as np
+                    print(type(x))
+                    print(dir(x))
+                    print(type(x.data()))
+                    print(dir(x.data()))
 
-PyMultiDimImage<float>& 
+                    z = np.array(x.data(), copy=False)
+                    print(z.shape)
 
-PYBIND11_EMBEDDED_MODULE(test, m)
-{
-    py::class_<Meta>(m, "Meta")
-    .def(py::init<>())
-    .def("add", &Meta::add)
-    .def("has", &Meta::has)
-    .def("remove", &Meta::remove)
-    .def("clear", &Meta::clear)
-    .def("__repr__",
-        [](const Meta &) {
-            return "<a3dc.Meta>";
+                    print('zzzz')
+                    y = (x.data()[17, 19] == 42)
+                )", py::globals(), locals);
+                
+                bool y = locals["y"].cast<bool>();
+                REQUIRE(y == true);
+            }
         }
-    );
-}
-
-SCENARIO("test python binding: a3dc.MultiDimImage", "[core/high_platform]")
-{
-    using namespace py::literals;
-    py::scoped_interpreter guard{};
+    }
     
-    PyMultiDimImage<uint8_t> im({32, 32});
-    im.at({12, 14}) = 42;
-    py::object z = py::cast(&im);
-    // auto locals = py::dict("image"_a = im);
-
-    string code = R"(
+    // GIVEN("a MultiDimImage instanced on python side") {
+            // py::scoped_interpreter guard{};
+            // py::module::import("a3dc");
+    //     py::scoped_interpreter guard{};
+    //     auto locals = py::dict();
+    //     py::exec(R"(
+    //         import numpy as np
+    //         import a3dc.MultiDimImageInt8
+    //         x = a3dc.MultiDimImage([16, 16], np.uint8)
+    //         x.data[7, 9] = 42
+    //     )", py::globals(), locals);
         
-    )";
-    
-// import a3dc
-//         import numpy as np
-//         import time
+    //     WHEN("passed to the cpp side") {
+    //         THEN("it is passed correctly") {
+    //             auto im = locals["x"].cast<MultiDimImage<uint8_t>>();
+    //             REQUIRE(im.at({7, 9}) == 42);
+    //         }
+    //     }
+    // }
 
-//         start = time.time()
-//         im = a3dc.ImageU8([1024, 1024, 16, 4])
-//         print(time.time() - start)
-
-//         start = time.time()
-//         data = im.getData()
-//         print(time.time() - start)
-
-//         start = time.time()
-//         npdata = np.array(data)
-//         print(time.time() - start)
-
-//         print(npdata.shape)
-
-    // py::exec(code, py::globals(), locals);
+    // TODO: test: create on cpp side, modify on python side, the instance on cpp is modified too
+    // TODO: test: Meta item read/write
 }
-
-// SCENARIO("test python", "[core/high_platform]")
-// {
-//     Py_SetProgramName((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin/python");
-
-//     Py_SetPythonHome((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin:"
-//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib:"
-//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6:"
-//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/lib-dynload:"
-//         "/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/site-packages");
-
-//     string code = R"(
-// import sys
-// import os
-// print(sys.version)
-// print(sys.executable)
-// print(sys.path)
-// print(os.sys.path)
-// # sys.path.append('/Users/fodorbalint/projects/a3dc/virtualenv/lib/python3.6/site-packages')
-// # print(sys.path)
-// # print(os.sys.path)
-// import pandas
-//     )";
-//     py::scoped_interpreter guard{}; // start the interpreter and keep it alive
-//     py::exec(code); // use the Python API
-// }
 
 SCENARIO("high_platform basic usage", "[core/high_platform]")
 {
+    string codeSource = R"code(
+        import a3dc
+        import numpy
+
+        a3dc.set_module_args({
+            inputs: {},
+            outputs: {'out_image': a3dc.types.image}})
+
+        a3dc.set_module_main(module_main)
+
+        def module_main():
+            return {'out_image': np.ones((320, 240))}
+    )code";
+
+    string codeAdd = R"code(
+        import a3dc
+
+        a3dc.set_module_args({
+            inputs: {'image1': a3dc.types.image, 'image2': a3dc.types.image},
+            outputs: {'out_image': a3dc.types.image}})
+
+        a3dc.set_module_main(module_main)
+
+        def module_main(image1, image2):
+            return {'out_image': image1 + image2}
+    )code";
+
+    string codeTarget = R"code(
+        import a3dc
+
+        a3dc.set_module_args({
+            inputs: {'image': a3dc.types.image},
+            outputs: {}})
+
+        a3dc.set_module_main(module_main)
+
+        def module_main():
+            return None
+    )code";
+
     GIVEN("a simple net") {
         ComputePlatform p;
 
-        PythonComputeModule src1(p, codeSource);
-        PythonComputeModule src2(p, codeSource);
-        PythonComputeModule add(p, codeAdd);
-        PythonComputeModule dst(p, codeTarget);
+        // PythonComputeModule src1(p, codeSource);
+        // PythonComputeModule src2(p, codeSource);
+        // PythonComputeModule add(p, codeAdd);
+        // PythonComputeModule dst(p, codeTarget);
 
         // REQUIRE(p.size() == 3);
 

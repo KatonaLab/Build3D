@@ -177,6 +177,7 @@ void MultiDimImage<T>::transformCopy(const MultiDimImage<U>& other,
             std::back_inserter(plane), unary);
     }
     std::swap(*this, newImage);
+    
 }
 
 template <typename T>
@@ -304,6 +305,12 @@ template <typename T>
 typename MultiDimImage<T>::View MultiDimImage<T>::volume(std::vector<std::size_t> coords)
 {
     return subDimView(coords, 3);
+}
+
+template <typename T>
+const std::vector<std::vector<T>> MultiDimImage<T>::data() const
+{
+    return m_planes;
 }
 
 template <typename T>

@@ -1,6 +1,6 @@
 #include "PythonComputeModule.h"
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+// #include <pybind11/stl_bind.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <memory>
 
@@ -37,48 +37,82 @@ void PythonEnvironment::run()
 PythonEnvironment::PythonEnvironment()
 {}
 
-template <typename T>
-void pyDeclareMultiDimImageType(pybind11::module &m, const char* name)
-{
-    py::class_<PyMultiDimImage<T>>(m, name)
-    .def(py::init([](std::vector<std::size_t> dims)
-        {
-            return std::unique_ptr<PyMultiDimImage<T>>(new PyMultiDimImage<T>(dims));
-        }))
-    .def("getMeta", &PyMultiDimImage<T>::getMeta)
-    .def("getData", &PyMultiDimImage<T>::getData)
-    .def("setData", &PyMultiDimImage<T>::setData);
-}
-
-PYBIND11_EMBEDDED_MODULE(a3dc, m)
+void pyDeclareMetaType(pybind11::module &m)
 {
     py::class_<Meta>(m, "Meta")
     .def(py::init<>())
     .def("add", &Meta::add)
     .def("has", &Meta::has)
     .def("remove", &Meta::remove)
-    .def("clear", &Meta::clear)
-    .def("__repr__",
-        [](const Meta &) {
-            return "<a3dc.Meta>";
-        }
-    );
+    .def("clear", &Meta::clear);
+}
 
-    pyDeclareMultiDimImageType<int8_t>(m, "ImageS8");
-    pyDeclareMultiDimImageType<uint8_t>(m, "ImageU8");
-    pyDeclareMultiDimImageType<int32_t>(m, "ImageS32");
-    pyDeclareMultiDimImageType<uint32_t>(m, "ImageU32");
-    pyDeclareMultiDimImageType<int64_t>(m, "ImageS64");
-    pyDeclareMultiDimImageType<uint64_t>(m, "ImageU64");
-    pyDeclareMultiDimImageType<float>(m, "ImageF");
-    pyDeclareMultiDimImageType<double>(m, "ImageD");
+template <typename T>
+void pyDeclareMultiDimImageType(pybind11::module &m, const char* name)
+{
+    // py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name)
+    // .def(py::init([](std::vector<std::size_t> dims)
+    // {
+    //     return std::shared_ptr<MultiDimImage<T>>(new MultiDimImage<T>(dims));
+    // }))
 
-    // m.def("set_module_args", [](py::dict args) {
-    //     PythonEnvironment::instance().setArgs(args);
-    // });
-    // m.def("set_module_main", [](py::function func) {
-    //     PythonEnvironment::instance().setMain(func);
-    // });
+    py::class_<MultiDimImage<T>>(m, name)
+    .def(py::init([](std::vector<std::size_t> dims)
+    {
+        return std::unique_ptr<MultiDimImage<T>>(new MultiDimImage<T>(dims));
+    }))
+    .def("data", [](const MultiDimImage<T>& obj)
+    {
+        return obj.data();
+    })
+    .def_readwrite("meta", &MultiDimImage<T>::meta);
+
+    // TODO: type
+    // TODO: planes
+    // TODO: volumes
+}
+
+PYBIND11_EMBEDDED_MODULE(a3dc, m)
+{
+    py::bind_vector<std::vector<int8_t>>(m, "VectorInt8");
+    py::bind_vector<std::vector<int16_t>>(m, "VectorInt16");
+    py::bind_vector<std::vector<int32_t>>(m, "VectorInt32");
+    py::bind_vector<std::vector<int64_t>>(m, "VectorInt64");
+
+    py::bind_vector<std::vector<uint8_t>>(m, "VectorUInt8");
+    py::bind_vector<std::vector<uint16_t>>(m, "VectorUInt16");
+    py::bind_vector<std::vector<uint32_t>>(m, "VectorUInt32");
+    py::bind_vector<std::vector<uint64_t>>(m, "VectorUInt64");
+
+    py::bind_vector<std::vector<std::vector<int8_t>>>(m, "VectorVectorInt8");
+    py::bind_vector<std::vector<std::vector<int16_t>>>(m, "VectorVectorInt16");
+    py::bind_vector<std::vector<std::vector<int32_t>>>(m, "VectorVectorInt32");
+    py::bind_vector<std::vector<std::vector<int64_t>>>(m, "VectorVectorInt64");
+
+    py::bind_vector<std::vector<std::vector<uint8_t>>>(m, "VectorVectorUInt8");
+    py::bind_vector<std::vector<std::vector<uint16_t>>>(m, "VectorVectorUInt16");
+    py::bind_vector<std::vector<std::vector<uint32_t>>>(m, "VectorVectorUInt32");
+    py::bind_vector<std::vector<std::vector<uint64_t>>>(m, "VectorVectorUInt64");
+
+    py::bind_vector<std::vector<float>>(m, "VectorFloat");
+    py::bind_vector<std::vector<double>>(m, "VectorDouble");
+    py::bind_vector<std::vector<std::vector<float>>>(m, "VectorVectorFloat");
+    py::bind_vector<std::vector<std::vector<double>>>(m, "VectorVectorDouble");
+
+    pyDeclareMetaType(m);
+
+    pyDeclareMultiDimImageType<int8_t>(m, "MultiDimImageInt8");
+    pyDeclareMultiDimImageType<int16_t>(m, "MultiDimImageInt16");
+    pyDeclareMultiDimImageType<int32_t>(m, "MultiDimImageInt32");
+    pyDeclareMultiDimImageType<int64_t>(m, "MultiDimImageInt64");
+
+    pyDeclareMultiDimImageType<uint8_t>(m, "MultiDimImageUInt8");
+    pyDeclareMultiDimImageType<uint16_t>(m, "MultiDimImageUInt16");
+    pyDeclareMultiDimImageType<uint32_t>(m, "MultiDimImageUInt32");
+    pyDeclareMultiDimImageType<uint64_t>(m, "MultiDimImageUInt64");
+
+    pyDeclareMultiDimImageType<float>(m, "MultiDimImageFloat");
+    pyDeclareMultiDimImageType<double>(m, "MultiDimImageDouble");
 }
 
 // --------------------------------------------------------
@@ -92,7 +126,7 @@ PythonComputeModule::PythonComputeModule(ComputePlatform& platform, std::string 
 
 void PythonComputeModule::execute()
 {
-    m_inputPorts.size()
+    m_inputPorts.size();
     
     py::scoped_interpreter guard{};
     py::exec(m_code);
