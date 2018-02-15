@@ -155,8 +155,74 @@ def module_main():
 
 namespace py = pybind11;
 
-SCENARIO("test python", "[core/high_platform]")
+SCENARIO("test python binding: a3dc.Meta", "[core/high_platform]")
 {
+    // TODO: test more aspects
+    string code = R"code(
+        import a3dc
+        m = a3dc.Meta()
+        m.add('a', 'b')
+        m.has('a')
+    )code";
+
+    py::scoped_interpreter guard{};
+    py::exec(code);
+}
+
+PyMultiDimImage<float>& 
+
+PYBIND11_EMBEDDED_MODULE(test, m)
+{
+    py::class_<Meta>(m, "Meta")
+    .def(py::init<>())
+    .def("add", &Meta::add)
+    .def("has", &Meta::has)
+    .def("remove", &Meta::remove)
+    .def("clear", &Meta::clear)
+    .def("__repr__",
+        [](const Meta &) {
+            return "<a3dc.Meta>";
+        }
+    );
+}
+
+SCENARIO("test python binding: a3dc.MultiDimImage", "[core/high_platform]")
+{
+    using namespace py::literals;
+    py::scoped_interpreter guard{};
+    
+    PyMultiDimImage<uint8_t> im({32, 32});
+    im.at({12, 14}) = 42;
+    py::object z = py::cast(&im);
+    // auto locals = py::dict("image"_a = im);
+
+    string code = R"(
+        
+    )";
+    
+// import a3dc
+//         import numpy as np
+//         import time
+
+//         start = time.time()
+//         im = a3dc.ImageU8([1024, 1024, 16, 4])
+//         print(time.time() - start)
+
+//         start = time.time()
+//         data = im.getData()
+//         print(time.time() - start)
+
+//         start = time.time()
+//         npdata = np.array(data)
+//         print(time.time() - start)
+
+//         print(npdata.shape)
+
+    // py::exec(code, py::globals(), locals);
+}
+
+// SCENARIO("test python", "[core/high_platform]")
+// {
 //     Py_SetProgramName((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin/python");
 
 //     Py_SetPythonHome((wchar_t*)L"/Users/fodorbalint/projects/a3dc/virtualenv/bin:"
@@ -179,7 +245,7 @@ SCENARIO("test python", "[core/high_platform]")
 //     )";
 //     py::scoped_interpreter guard{}; // start the interpreter and keep it alive
 //     py::exec(code); // use the Python API
-}
+// }
 
 SCENARIO("high_platform basic usage", "[core/high_platform]")
 {
