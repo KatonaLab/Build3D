@@ -115,8 +115,7 @@ namespace py = pybind11;
 SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platform]")
 {
     GIVEN("a MultiDimImage instanced on cpp side") {
-        py::scoped_interpreter guard{};
-        py::module::import("a3dc");
+        PythonEnvironment::instance();
 
         MultiDimImage<uint8_t> im({32, 32});
         im.at({17, 19}) = 42;
@@ -125,17 +124,7 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
             auto locals = py::dict("x"_a = im);
             THEN("it is passed correctly") {
                 py::exec(R"(
-                    import numpy as np
-                    print(type(x))
-                    print(dir(x))
-                    print(type(x.data()))
-                    print(dir(x.data()))
-
-                    z = np.array(x.data(), copy=False)
-                    print(z.shape)
-
-                    print('zzzz')
-                    y = (x.data()[17, 19] == 42)
+                    y = x[17, 19] == 42
                 )", py::globals(), locals);
                 
                 bool y = locals["y"].cast<bool>();
@@ -143,26 +132,24 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
             }
         }
     }
-    
-    // GIVEN("a MultiDimImage instanced on python side") {
-            // py::scoped_interpreter guard{};
-            // py::module::import("a3dc");
-    //     py::scoped_interpreter guard{};
-    //     auto locals = py::dict();
-    //     py::exec(R"(
-    //         import numpy as np
-    //         import a3dc.MultiDimImageInt8
-    //         x = a3dc.MultiDimImage([16, 16], np.uint8)
-    //         x.data[7, 9] = 42
-    //     )", py::globals(), locals);
+
+    GIVEN("a MultiDimImage instanced on python side") {
+        PythonEnvironment::instance();
         
-    //     WHEN("passed to the cpp side") {
-    //         THEN("it is passed correctly") {
-    //             auto im = locals["x"].cast<MultiDimImage<uint8_t>>();
-    //             REQUIRE(im.at({7, 9}) == 42);
-    //         }
-    //     }
-    // }
+        auto locals = py::dict();
+        py::exec(R"(
+            import a3dc
+            x = a3dc.MultiDimImageUInt8([16, 16])
+            x[7, 9] = 42
+        )", py::globals(), locals);
+        
+        WHEN("passed to the cpp side") {
+            THEN("it is passed correctly") {
+                auto im = locals["x"].cast<MultiDimImage<uint8_t>>();
+                REQUIRE(im.at({7, 9}) == 42);
+            }
+        }
+    }
 
     // TODO: test: create on cpp side, modify on python side, the instance on cpp is modified too
     // TODO: test: Meta item read/write

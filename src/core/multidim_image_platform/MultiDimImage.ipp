@@ -235,6 +235,12 @@ std::size_t MultiDimImage<T>::dim(std::size_t d) const
 }
 
 template <typename T>
+std::vector<std::size_t> MultiDimImage<T>::dimList() const
+{
+    return m_dims;
+}
+
+template <typename T>
 std::size_t MultiDimImage<T>::byteSize() const
 {
     return size() * sizeof(T);

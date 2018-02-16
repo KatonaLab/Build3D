@@ -52,13 +52,10 @@ namespace md = core::multidim_image_platform;
 class PythonEnvironment {
 public:
     static PythonEnvironment& instance();
-    void setMain(py::function func);
-    void setArgs(py::dict args);
     void run();
+    ~PythonEnvironment();
 protected:
     PythonEnvironment();
-    py::function m_func;
-    py::dict m_args;
 };
 
 // --------------------------------------------------------

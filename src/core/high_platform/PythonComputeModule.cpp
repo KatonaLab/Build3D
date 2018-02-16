@@ -1,6 +1,6 @@
 #include "PythonComputeModule.h"
 #include <pybind11/pybind11.h>
-// #include <pybind11/stl_bind.h>
+#include <pybind11/stl.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <memory>
 
@@ -17,25 +17,16 @@ PythonEnvironment& PythonEnvironment::instance()
     return instance;
 }
 
-void PythonEnvironment::setMain(py::function func)
-{
-    m_func = func;
-}
-
-void PythonEnvironment::setArgs(py::dict args)
-{
-    m_args = args;
-}
-
-void PythonEnvironment::run()
-{
-    if (m_func.is_none()) {
-        throw std::runtime_error("py: no valid function was set with a3dc.set_module_main");
-    }
-}
-
 PythonEnvironment::PythonEnvironment()
-{}
+{
+    py::initialize_interpreter();
+    py::module::import("a3dc");
+}
+
+PythonEnvironment::~PythonEnvironment()
+{
+    py::finalize_interpreter();
+}
 
 void pyDeclareMetaType(pybind11::module &m)
 {
@@ -50,21 +41,17 @@ void pyDeclareMetaType(pybind11::module &m)
 template <typename T>
 void pyDeclareMultiDimImageType(pybind11::module &m, const char* name)
 {
-    // py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name)
-    // .def(py::init([](std::vector<std::size_t> dims)
-    // {
-    //     return std::shared_ptr<MultiDimImage<T>>(new MultiDimImage<T>(dims));
-    // }))
-
-    py::class_<MultiDimImage<T>>(m, name)
+    py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name)
     .def(py::init([](std::vector<std::size_t> dims)
     {
-        return std::unique_ptr<MultiDimImage<T>>(new MultiDimImage<T>(dims));
+        return std::shared_ptr<MultiDimImage<T>>(new MultiDimImage<T>(dims));
     }))
-    .def("data", [](const MultiDimImage<T>& obj)
+    .def("__getitem__", &MultiDimImage<T>::at)
+    .def("__setitem__", [](MultiDimImage<T>& obj, std::vector<std::size_t> coords, T value)
     {
-        return obj.data();
+        obj.at(coords) = value;
     })
+    .def("shape", &MultiDimImage<T>::dimList)
     .def_readwrite("meta", &MultiDimImage<T>::meta);
 
     // TODO: type
@@ -130,5 +117,5 @@ void PythonComputeModule::execute()
     
     py::scoped_interpreter guard{};
     py::exec(m_code);
-    PythonEnvironment::instance().run();
+    // PythonEnvironment::instance().run();
 }

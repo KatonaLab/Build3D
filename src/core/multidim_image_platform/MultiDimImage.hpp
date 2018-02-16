@@ -103,6 +103,7 @@ namespace multidim_image_platform {
         std::size_t size() const;
         std::size_t dims() const;
         std::size_t dim(std::size_t d) const;
+        std::vector<std::size_t> dimList() const;
         std::size_t byteSize() const;
         Type type() const;
         void clear();
