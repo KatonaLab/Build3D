@@ -114,7 +114,7 @@ namespace py = pybind11;
 
 SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platform]")
 {
-    GIVEN("a MultiDimImage instanced on cpp side") {
+    GIVEN("a 2d MultiDimImage instanced on cpp side") {
         PythonEnvironment::instance();
 
         MultiDimImage<uint8_t> im({32, 32});
@@ -133,7 +133,7 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
         }
     }
 
-    GIVEN("a MultiDimImage instanced on python side") {
+    GIVEN("a 2d MultiDimImage instanced on python side") {
         PythonEnvironment::instance();
         
         auto locals = py::dict();
@@ -147,6 +147,47 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
             THEN("it is passed correctly") {
                 auto im = locals["x"].cast<MultiDimImage<uint8_t>>();
                 REQUIRE(im.at({7, 9}) == 42);
+            }
+        }
+    }
+
+    GIVEN("a nd MultiDimImage instanced on cpp side") {
+        PythonEnvironment::instance();
+
+        MultiDimImage<uint8_t> im({32, 32, 3, 4});
+        im.at({17, 19, 1, 2}) = 42;
+        WHEN("passed to python side") {
+            using namespace py::literals;
+            auto locals = py::dict("x"_a = im);
+            THEN("it is passed correctly") {
+                py::exec(R"(
+                    import numpy as np
+                    p = x.plane([1, 2])
+                    y = p[17, 19] == 42
+                )", py::globals(), locals);
+                
+                bool y = locals["y"].cast<bool>();
+                REQUIRE(y == true);
+            }
+        }
+    }
+
+    GIVEN("a nd MultiDimImage instanced on python side") {
+        PythonEnvironment::instance();
+        
+        auto locals = py::dict();
+        py::exec(R"(
+            import a3dc
+            import numpy as np
+            x = a3dc.MultiDimImageUInt8([16, 16, 3, 4])
+            p = x.plane([1, 2])
+            p[7, 9] = 42
+        )", py::globals(), locals);
+        
+        WHEN("passed to the cpp side") {
+            THEN("it is passed correctly") {
+                auto im = locals["x"].cast<MultiDimImage<uint8_t>>();
+                REQUIRE(im.at({7, 9, 1, 2}) == 42);
             }
         }
     }

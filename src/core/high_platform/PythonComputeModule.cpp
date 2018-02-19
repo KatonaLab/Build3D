@@ -1,8 +1,10 @@
 #include "PythonComputeModule.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <memory>
+#include <stdexcept>
 
 using namespace core::high_platform;
 using namespace core::compute_platform;
@@ -39,9 +41,9 @@ void pyDeclareMetaType(pybind11::module &m)
 }
 
 template <typename T>
-void pyDeclareMultiDimImageType(pybind11::module &m, const char* name)
+void pyDeclareMultiDimImageType(pybind11::module &m, string name)
 {
-    py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name)
+    py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name.c_str())
     .def(py::init([](std::vector<std::size_t> dims)
     {
         return std::shared_ptr<MultiDimImage<T>>(new MultiDimImage<T>(dims));
@@ -51,7 +53,18 @@ void pyDeclareMultiDimImageType(pybind11::module &m, const char* name)
     {
         obj.at(coords) = value;
     })
-    .def("shape", &MultiDimImage<T>::dimList)
+    .def("plane", [](MultiDimImage<T>& obj, std::vector<std::size_t> coords) -> py::array_t<T>
+    {
+        PyImageView<T> helper(obj, coords);
+        // prevent copy on return
+        py::capsule onDestroy(helper.data(), [](void*) {});
+        return py::array_t<T>(
+            {helper.rows(), helper.cols()},
+            {sizeof(T) * helper.rows(), sizeof(T)},
+            helper.data(),
+            onDestroy);
+    }, py::keep_alive<0, 1>())
+    .def("dims", &MultiDimImage<T>::dimList)
     .def_readwrite("meta", &MultiDimImage<T>::meta);
 
     // TODO: type
@@ -61,31 +74,6 @@ void pyDeclareMultiDimImageType(pybind11::module &m, const char* name)
 
 PYBIND11_EMBEDDED_MODULE(a3dc, m)
 {
-    py::bind_vector<std::vector<int8_t>>(m, "VectorInt8");
-    py::bind_vector<std::vector<int16_t>>(m, "VectorInt16");
-    py::bind_vector<std::vector<int32_t>>(m, "VectorInt32");
-    py::bind_vector<std::vector<int64_t>>(m, "VectorInt64");
-
-    py::bind_vector<std::vector<uint8_t>>(m, "VectorUInt8");
-    py::bind_vector<std::vector<uint16_t>>(m, "VectorUInt16");
-    py::bind_vector<std::vector<uint32_t>>(m, "VectorUInt32");
-    py::bind_vector<std::vector<uint64_t>>(m, "VectorUInt64");
-
-    py::bind_vector<std::vector<std::vector<int8_t>>>(m, "VectorVectorInt8");
-    py::bind_vector<std::vector<std::vector<int16_t>>>(m, "VectorVectorInt16");
-    py::bind_vector<std::vector<std::vector<int32_t>>>(m, "VectorVectorInt32");
-    py::bind_vector<std::vector<std::vector<int64_t>>>(m, "VectorVectorInt64");
-
-    py::bind_vector<std::vector<std::vector<uint8_t>>>(m, "VectorVectorUInt8");
-    py::bind_vector<std::vector<std::vector<uint16_t>>>(m, "VectorVectorUInt16");
-    py::bind_vector<std::vector<std::vector<uint32_t>>>(m, "VectorVectorUInt32");
-    py::bind_vector<std::vector<std::vector<uint64_t>>>(m, "VectorVectorUInt64");
-
-    py::bind_vector<std::vector<float>>(m, "VectorFloat");
-    py::bind_vector<std::vector<double>>(m, "VectorDouble");
-    py::bind_vector<std::vector<std::vector<float>>>(m, "VectorVectorFloat");
-    py::bind_vector<std::vector<std::vector<double>>>(m, "VectorVectorDouble");
-
     pyDeclareMetaType(m);
 
     pyDeclareMultiDimImageType<int8_t>(m, "MultiDimImageInt8");

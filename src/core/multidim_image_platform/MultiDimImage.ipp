@@ -293,10 +293,6 @@ T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
         i++;
     }
 
-    // std::cout << "at idx: " << detail::flatCoordinate(planeDimCoords, m_planeDims)
-    // << " val: " << m_planes[detail::flatCoordinate(restDimCoords, m_restDims)]
-        // [detail::flatCoordinate(planeDimCoords, m_planeDims)] << std::endl;
-
     return m_planes[detail::flatCoordinate(restDimCoords, m_restDims)]
         [detail::flatCoordinate(planeDimCoords, m_planeDims)];
 }
@@ -314,7 +310,7 @@ typename MultiDimImage<T>::View MultiDimImage<T>::volume(std::vector<std::size_t
 }
 
 template <typename T>
-const std::vector<std::vector<T>> MultiDimImage<T>::data() const
+std::vector<std::vector<T>>& MultiDimImage<T>::unsafeData()
 {
     return m_planes;
 }
