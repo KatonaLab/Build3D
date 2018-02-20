@@ -4,6 +4,8 @@
 #include <core/high_platform/PythonComputeModule.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
+#include <memory>
+
 using namespace core::high_platform;
 using namespace core::compute_platform;
 using namespace core::multidim_image_platform;
@@ -117,18 +119,20 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
     GIVEN("a 2d MultiDimImage instanced on cpp side") {
         PythonEnvironment::instance();
 
-        MultiDimImage<uint8_t> im({32, 32});
-        im.at({17, 19}) = 42;
+        auto im = std::shared_ptr<MultiDimImage<uint8_t>>(new MultiDimImage<uint8_t>({32, 32}));
+        im->at({17, 19}) = 42;
         WHEN("passed to python side") {
             using namespace py::literals;
             auto locals = py::dict("x"_a = im);
             THEN("it is passed correctly") {
                 py::exec(R"(
                     y = x[17, 19] == 42
+                    x[17, 19] = 255
                 )", py::globals(), locals);
                 
                 bool y = locals["y"].cast<bool>();
                 REQUIRE(y == true);
+                REQUIRE(im->at({17, 19}) == 255);
             }
         }
     }
@@ -154,8 +158,8 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
     GIVEN("a nd MultiDimImage instanced on cpp side") {
         PythonEnvironment::instance();
 
-        MultiDimImage<uint8_t> im({32, 32, 3, 4});
-        im.at({17, 19, 1, 2}) = 42;
+        auto im = std::shared_ptr<MultiDimImage<uint8_t>>(new MultiDimImage<uint8_t>({32, 32, 3, 4}));
+        im->at({17, 19, 1, 2}) = 42;
         WHEN("passed to python side") {
             using namespace py::literals;
             auto locals = py::dict("x"_a = im);
@@ -164,10 +168,12 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
                     import numpy as np
                     p = x.plane([1, 2])
                     y = p[17, 19] == 42
+                    p[17, 19] = 255
                 )", py::globals(), locals);
                 
                 bool y = locals["y"].cast<bool>();
                 REQUIRE(y == true);
+                REQUIRE(im->at({17, 19, 1, 2}) == 255);
             }
         }
     }
