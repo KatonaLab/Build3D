@@ -198,56 +198,53 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
         }
     }
 
-    // TODO: test: create on cpp side, modify on python side, the instance on cpp is modified too
     // TODO: test: Meta item read/write
 }
 
-SCENARIO("high_platform basic usage", "[core/high_platform]")
+SCENARIO("high_platform basic checks", "[core/high_platform]")
 {
-    string codeSource = R"code(
-        import a3dc
-        import numpy
+    string codeSource =
+    R"(
+import a3dc
 
-        a3dc.set_module_args({
-            inputs: {},
-            outputs: {'out_image': a3dc.types.image}})
+def module_main():
+    im = a3dc.MultiDimImageUInt8([320, 240])
+    a3dc.output['out_image'] = im
 
-        a3dc.set_module_main(module_main)
+a3dc.def_process_module({}, {'out_image': a3dc.types.ImageUInt8}, module_main)
+    )";
 
-        def module_main():
-            return {'out_image': np.ones((320, 240))}
-    )code";
+    // string codeAdd = R"code(
+    //     import a3dc
 
-    string codeAdd = R"code(
-        import a3dc
+    //     a3dc.set_module_args({
+    //         inputs: {'image1': a3dc.types.image, 'image2': a3dc.types.image},
+    //         outputs: {'out_image': a3dc.types.image}})
 
-        a3dc.set_module_args({
-            inputs: {'image1': a3dc.types.image, 'image2': a3dc.types.image},
-            outputs: {'out_image': a3dc.types.image}})
+    //     a3dc.set_module_main(module_main)
 
-        a3dc.set_module_main(module_main)
+    //     def module_main(image1, image2):
+    //         return {'out_image': image1 + image2}
+    // )code";
 
-        def module_main(image1, image2):
-            return {'out_image': image1 + image2}
-    )code";
+    // string codeTarget = R"code(
+    //     import a3dc
 
-    string codeTarget = R"code(
-        import a3dc
+    //     a3dc.set_module_args({
+    //         inputs: {'image': a3dc.types.image},
+    //         outputs: {}})
 
-        a3dc.set_module_args({
-            inputs: {'image': a3dc.types.image},
-            outputs: {}})
+    //     a3dc.set_module_main(module_main)
 
-        a3dc.set_module_main(module_main)
-
-        def module_main():
-            return None
-    )code";
+    //     def module_main():
+    //         return None
+    // )code";
 
     GIVEN("a simple net") {
         ComputePlatform p;
 
-        // PythonComputeModule src1(p, codeSource);
+        PythonComputeModule src1(p, codeSource);
+
         // PythonComputeModule src2(p, codeSource);
         // PythonComputeModule add(p, codeAdd);
         // PythonComputeModule dst(p, codeTarget);

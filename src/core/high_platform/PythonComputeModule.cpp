@@ -1,8 +1,14 @@
 #include "PythonComputeModule.h"
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 #include <pybind11/numpy.h>
+#include <pybind11/pytypes.h>
+
 #include <core/multidim_image_platform/MultiDimImage.hpp>
+#include <core/compute_platform/port_utils.hpp>
+
 #include <memory>
 #include <stdexcept>
 
@@ -23,6 +29,16 @@ PythonEnvironment::PythonEnvironment()
 {
     py::initialize_interpreter();
     py::module::import("a3dc");
+}
+
+void PythonEnvironment::reset()
+{
+
+}
+
+void PythonEnvironment::exec(std::string code)
+{
+    py::exec(code);
 }
 
 PythonEnvironment::~PythonEnvironment()
@@ -74,6 +90,37 @@ void pyDeclareMultiDimImageType(pybind11::module &m, string name)
 
 PYBIND11_EMBEDDED_MODULE(a3dc, m)
 {
+    py::enum_<PyTypes>(m, "types", py::arithmetic())
+    .value("int8", PyTypes::TYPE_int8_t)
+    .value("int16", PyTypes::TYPE_int16_t)
+    .value("int32", PyTypes::TYPE_int32_t)
+    .value("int64", PyTypes::TYPE_int64_t)
+    .value("uint8", PyTypes::TYPE_uint8_t)
+    .value("uint16", PyTypes::TYPE_uint16_t)
+    .value("uint32", PyTypes::TYPE_uint32_t)
+    .value("uint64", PyTypes::TYPE_uint64_t)
+    .value("float", PyTypes::TYPE_float)
+    .value("double", PyTypes::TYPE_double)
+    .value("ImageInt8", PyTypes::TYPE_MultiDimImageInt8)
+    .value("ImageInt16", PyTypes::TYPE_MultiDimImageInt16)
+    .value("ImageInt32", PyTypes::TYPE_MultiDimImageInt32)
+    .value("ImageInt64", PyTypes::TYPE_MultiDimImageInt64)
+    .value("ImageUInt8", PyTypes::TYPE_MultiDimImageUInt8)
+    .value("ImageUInt16", PyTypes::TYPE_MultiDimImageUInt16)
+    .value("ImageUInt32", PyTypes::TYPE_MultiDimImageUInt32)
+    .value("ImageUInt64", PyTypes::TYPE_MultiDimImageUInt64)
+    .value("ImageFloat", PyTypes::TYPE_MultiDimImageFloat)
+    .value("ImageDouble", PyTypes::TYPE_MultiDimImageDouble);
+
+    m.def("def_process_module",
+        [](ProcessArg inputs, ProcessArg outputs, const ProcessFunc& func)
+        {
+            auto& env = PythonEnvironment::instance();
+            env.inputs = inputs;
+            env.outputs = outputs;
+            env.func = func;
+        });
+
     pyDeclareMetaType(m);
 
     pyDeclareMultiDimImageType<int8_t>(m, "MultiDimImageInt8");
@@ -97,13 +144,146 @@ PythonComputeModule::PythonComputeModule(ComputePlatform& platform, std::string 
     m_inputPorts(*this),
     m_outputPorts(*this),
     m_code(code)
-{}
+{
+    buildPorts();
+}
+
+shared_ptr<InputPort> PythonComputeModule::createInputPort(PyTypes t)
+{
+    #define CASE(E, T) case PyTypes::E: return shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this));
+    switch (t) {
+        CASE(TYPE_int8_t, int8_t)
+        CASE(TYPE_int16_t, int16_t)
+        CASE(TYPE_int32_t, int32_t)
+        CASE(TYPE_int64_t, int64_t)
+        CASE(TYPE_uint8_t, uint8_t)
+        CASE(TYPE_uint16_t, uint16_t)
+        CASE(TYPE_uint32_t, uint32_t)
+        CASE(TYPE_uint64_t, uint64_t)
+        CASE(TYPE_float, float)
+        CASE(TYPE_double, double)
+        CASE(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
+        CASE(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
+        CASE(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
+        CASE(TYPE_MultiDimImageInt64, MultiDimImage<int64_t>)
+        CASE(TYPE_MultiDimImageUInt8, MultiDimImage<uint8_t>)
+        CASE(TYPE_MultiDimImageUInt16, MultiDimImage<uint16_t>)
+        CASE(TYPE_MultiDimImageUInt32, MultiDimImage<uint32_t>)
+        CASE(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
+        CASE(TYPE_MultiDimImageFloat, MultiDimImage<float>)
+        CASE(TYPE_MultiDimImageDouble, MultiDimImage<double>)
+        default: throw std::runtime_error("unknown input port type");
+    }
+    #undef CASE
+}
+
+shared_ptr<OutputPort> PythonComputeModule::createOutputPort(PyTypes t)
+{
+    #define CASE(E, T) case PyTypes::E: return shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this));
+    switch (t) {
+        CASE(TYPE_int8_t, int8_t)
+        CASE(TYPE_int16_t, int16_t)
+        CASE(TYPE_int32_t, int32_t)
+        CASE(TYPE_int64_t, int64_t)
+        CASE(TYPE_uint8_t, uint8_t)
+        CASE(TYPE_uint16_t, uint16_t)
+        CASE(TYPE_uint32_t, uint32_t)
+        CASE(TYPE_uint64_t, uint64_t)
+        CASE(TYPE_float, float)
+        CASE(TYPE_double, double)
+        CASE(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
+        CASE(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
+        CASE(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
+        CASE(TYPE_MultiDimImageInt64, MultiDimImage<int64_t>)
+        CASE(TYPE_MultiDimImageUInt8, MultiDimImage<uint8_t>)
+        CASE(TYPE_MultiDimImageUInt16, MultiDimImage<uint16_t>)
+        CASE(TYPE_MultiDimImageUInt32, MultiDimImage<uint32_t>)
+        CASE(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
+        CASE(TYPE_MultiDimImageFloat, MultiDimImage<float>)
+        CASE(TYPE_MultiDimImageDouble, MultiDimImage<double>)
+        default: throw std::runtime_error("unknown output port type");
+    }
+    #undef CASE
+}
+
+void PythonComputeModule::buildPorts()
+{
+    auto& env = PythonEnvironment::instance();
+    env.reset();
+    env.exec(m_code);
+    m_func = env.func;
+
+    for (auto& p : env.inputs) {
+        auto port = createInputPort(p.second);
+        m_inputPorts.push(port);
+        m_inputPortMap[p.first] = port;
+    }
+
+    for (auto& p : env.outputs) {
+        auto port = createOutputPort(p.second);
+        m_outputPorts.push(port);
+        m_outputPortMap[p.first] = port;
+    }
+}
 
 void PythonComputeModule::execute()
 {
-    m_inputPorts.size();
+    // m_inputPorts.size();
     
-    py::scoped_interpreter guard{};
-    py::exec(m_code);
+    // py::scoped_interpreter guard{};
+    // py::exec(m_code);
     // PythonEnvironment::instance().run();
+}
+
+// --------------------------------------------------------
+
+DynamicInputPortCollection::DynamicInputPortCollection(ComputeModule& parent)
+    : InputPortCollection(parent)
+{}
+
+void DynamicInputPortCollection::fetch()
+{
+    for (auto& port : m_inputPorts) {
+        port->fetch();
+    }
+}
+
+std::weak_ptr<InputPort> DynamicInputPortCollection::get(size_t portId)
+{
+    if (portId >= m_inputPorts.size()) {
+        throw std::out_of_range("no such id in input ports");
+    }
+    return m_inputPorts[portId];
+}
+
+void DynamicInputPortCollection::push(std::shared_ptr<InputPort> port)
+{
+    m_inputPorts.push_back(port);
+}
+
+size_t DynamicInputPortCollection::size() const
+{
+    return m_inputPorts.size();
+}
+
+DynamicOutputPortCollection::DynamicOutputPortCollection(ComputeModule& parent)
+    : OutputPortCollection(parent)
+{}
+
+std::weak_ptr<OutputPort> DynamicOutputPortCollection::get(size_t portId)
+{
+    if (portId >= m_outputPorts.size()) {
+        throw std::out_of_range("no such id in output ports");
+    }
+    return m_outputPorts[portId];
+}
+
+size_t DynamicOutputPortCollection::size() const
+{
+    return m_outputPorts.size();
+}
+
+void DynamicOutputPortCollection::push(std::shared_ptr<OutputPort> port)
+{
+    m_outputPorts.push_back(port);
 }
