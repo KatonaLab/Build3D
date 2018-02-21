@@ -9,6 +9,7 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <core/compute_platform/port_utils.hpp>
 
+#include <functional>
 #include <memory>
 #include <stdexcept>
 
@@ -121,7 +122,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
             env.func = func;
         });
 
-    // m.attr("")
+    m.attr("inputs") = py::dict();
+    m.attr("outputs") = py::dict();
 
     pyDeclareMetaType(m);
 
@@ -150,70 +152,82 @@ PythonComputeModule::PythonComputeModule(ComputePlatform& platform, std::string 
     buildPorts();
 }
 
-shared_ptr<PyInputPortWrapper> PythonComputeModule::createInputPortWrapper(PyTypes t)
+PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
 {
-    #define CASE(E, T) \
+    #define CASE_POD(E, T) \
         case PyTypes::E: \
             {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
-            return make_shared<PyTypedInputPortWrapper<T>>(tp);}
+            return PyInputPortWrapperPtr(new PyInputPortWrapperPod<T>(tp));}
+
+    #define CASE_NON_POD(E, T) \
+        case PyTypes::E: \
+            {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
+            return PyInputPortWrapperPtr(new PyInputPortWrapperNonPod<T>(tp));}
 
     switch (t) {
-        CASE(TYPE_int8_t, int8_t)
-        CASE(TYPE_int16_t, int16_t)
-        CASE(TYPE_int32_t, int32_t)
-        CASE(TYPE_int64_t, int64_t)
-        CASE(TYPE_uint8_t, uint8_t)
-        CASE(TYPE_uint16_t, uint16_t)
-        CASE(TYPE_uint32_t, uint32_t)
-        CASE(TYPE_uint64_t, uint64_t)
-        CASE(TYPE_float, float)
-        CASE(TYPE_double, double)
-        CASE(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
-        CASE(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
-        CASE(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
-        CASE(TYPE_MultiDimImageInt64, MultiDimImage<int64_t>)
-        CASE(TYPE_MultiDimImageUInt8, MultiDimImage<uint8_t>)
-        CASE(TYPE_MultiDimImageUInt16, MultiDimImage<uint16_t>)
-        CASE(TYPE_MultiDimImageUInt32, MultiDimImage<uint32_t>)
-        CASE(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
-        CASE(TYPE_MultiDimImageFloat, MultiDimImage<float>)
-        CASE(TYPE_MultiDimImageDouble, MultiDimImage<double>)
+        CASE_POD(TYPE_int8_t, int8_t)
+        CASE_POD(TYPE_int16_t, int16_t)
+        CASE_POD(TYPE_int32_t, int32_t)
+        CASE_POD(TYPE_int64_t, int64_t)
+        CASE_POD(TYPE_uint8_t, uint8_t)
+        CASE_POD(TYPE_uint16_t, uint16_t)
+        CASE_POD(TYPE_uint32_t, uint32_t)
+        CASE_POD(TYPE_uint64_t, uint64_t)
+        CASE_POD(TYPE_float, float)
+        CASE_POD(TYPE_double, double)
+        CASE_NON_POD(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
+        CASE_NON_POD(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
+        CASE_NON_POD(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
+        CASE_NON_POD(TYPE_MultiDimImageInt64, MultiDimImage<int64_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt8, MultiDimImage<uint8_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt16, MultiDimImage<uint16_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt32, MultiDimImage<uint32_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
+        CASE_NON_POD(TYPE_MultiDimImageFloat, MultiDimImage<float>)
+        CASE_NON_POD(TYPE_MultiDimImageDouble, MultiDimImage<double>)
         default: throw std::runtime_error("unknown input port type");
     }
-    #undef CASE
+    #undef CASE_POD
+    #undef CASE_NON_POD
 }
 
-shared_ptr<PyOutputPortWrapper> PythonComputeModule::createOutputPortWrapper(PyTypes t)
+PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
 {
-    #define CASE(E, T) \
+    #define CASE_POD(E, T) \
         case PyTypes::E: \
             {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
-            return make_shared<PyTypedOutputPortWrapper<T>>(tp);}
+            return PyOutputPortWrapperPtr(new PyOutputPortWrapperPod<T>(tp));}
+
+    #define CASE_NON_POD(E, T) \
+        case PyTypes::E: \
+            {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
+            return PyOutputPortWrapperPtr(new PyOutputPortWrapperNonPod<T>(tp));}
 
     switch (t) {
-        CASE(TYPE_int8_t, int8_t)
-        CASE(TYPE_int16_t, int16_t)
-        CASE(TYPE_int32_t, int32_t)
-        CASE(TYPE_int64_t, int64_t)
-        CASE(TYPE_uint8_t, uint8_t)
-        CASE(TYPE_uint16_t, uint16_t)
-        CASE(TYPE_uint32_t, uint32_t)
-        CASE(TYPE_uint64_t, uint64_t)
-        CASE(TYPE_float, float)
-        CASE(TYPE_double, double)
-        CASE(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
-        CASE(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
-        CASE(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
-        CASE(TYPE_MultiDimImageInt64, MultiDimImage<int64_t>)
-        CASE(TYPE_MultiDimImageUInt8, MultiDimImage<uint8_t>)
-        CASE(TYPE_MultiDimImageUInt16, MultiDimImage<uint16_t>)
-        CASE(TYPE_MultiDimImageUInt32, MultiDimImage<uint32_t>)
-        CASE(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
-        CASE(TYPE_MultiDimImageFloat, MultiDimImage<float>)
-        CASE(TYPE_MultiDimImageDouble, MultiDimImage<double>)
-        default: throw std::runtime_error("unknown output port type");
+        CASE_POD(TYPE_int8_t, int8_t)
+        CASE_POD(TYPE_int16_t, int16_t)
+        CASE_POD(TYPE_int32_t, int32_t)
+        CASE_POD(TYPE_int64_t, int64_t)
+        CASE_POD(TYPE_uint8_t, uint8_t)
+        CASE_POD(TYPE_uint16_t, uint16_t)
+        CASE_POD(TYPE_uint32_t, uint32_t)
+        CASE_POD(TYPE_uint64_t, uint64_t)
+        CASE_POD(TYPE_float, float)
+        CASE_POD(TYPE_double, double)
+        CASE_NON_POD(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
+        CASE_NON_POD(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
+        CASE_NON_POD(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
+        CASE_NON_POD(TYPE_MultiDimImageInt64, MultiDimImage<int64_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt8, MultiDimImage<uint8_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt16, MultiDimImage<uint16_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt32, MultiDimImage<uint32_t>)
+        CASE_NON_POD(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
+        CASE_NON_POD(TYPE_MultiDimImageFloat, MultiDimImage<float>)
+        CASE_NON_POD(TYPE_MultiDimImageDouble, MultiDimImage<double>)
+        default: throw std::runtime_error("unknown input port type");
     }
-    #undef CASE
+    #undef CASE_POD
+    #undef CASE_NON_POD
 }
 
 void PythonComputeModule::buildPorts()
@@ -231,16 +245,48 @@ void PythonComputeModule::buildPorts()
     for (auto& p : env.outputs) {
         auto pw = createOutputPortWrapper(p.second);
         m_outputPorts.push(p.first, pw);
-    
     }
 }
 
+template <typename T, bool U = std::is_pod<T>::value>
+struct foo {};
+
+template <typename T>
+struct foo<T, true> {
+    py::object conv(std::shared_ptr<T> x)
+    {
+        return py::cast(*x);
+    }
+};
+
+template <typename T>
+struct foo<T, false> {
+    py::object conv(std::shared_ptr<T> x)
+    {
+        return py::cast(x);
+    }
+};
+
 void PythonComputeModule::execute()
 {
-    auto& env = PythonEnvironment::instance();
-    auto i = unique_ptr<int>(new int);
-    py::object obj = py::cast(i);
+    py::module m = py::module::import("a3dc");
+    py::object inputs = m.attr("inputs");
+    py::object outputs = m.attr("outputs");
+
+    inputs.attr("clear")();
+
+    for (auto& p : m_inputPorts) {
+        inputs.attr("__setitem__")(p.first, p.second);
+    }
+    for (auto& p : m_outputPorts) {
+        outputs.attr("__setitem__")(p.first, py::none());
+    }
+
     m_func();
+
+    for (auto& p : m_outputPorts) {
+        p.second->fromPyObject(outputs.attr("__getitem__")(p.first));
+    }
 }
 
 // --------------------------------------------------------
@@ -264,11 +310,10 @@ std::weak_ptr<InputPort> DynamicInputPortCollection::get(size_t portId)
     return m_orderedInputs[portId];
 }
 
-void DynamicInputPortCollection::push(std::string name,
-    std::shared_ptr<PyInputPortWrapper> portWrapper)
+void DynamicInputPortCollection::push(std::string name, PyInputPortWrapperPtr portWrapper)
 {
     m_orderedInputs.push_back(portWrapper->port());
-    m_inputMap[name] = portWrapper;
+    m_map[name] = portWrapper;
 }
 
 size_t DynamicInputPortCollection::size() const
@@ -295,9 +340,8 @@ size_t DynamicOutputPortCollection::size() const
     return m_orderedOutputs.size();
 }
 
-void DynamicOutputPortCollection::push(std::string name,
-    std::shared_ptr<PyOutputPortWrapper> portWrapper)
+void DynamicOutputPortCollection::push(std::string name, PyOutputPortWrapperPtr portWrapper)
 {
     m_orderedOutputs.push_back(portWrapper->port());
-    m_outputMap[name] = portWrapper;
+    m_map[name] = portWrapper;
 }

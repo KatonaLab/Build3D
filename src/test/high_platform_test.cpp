@@ -210,7 +210,7 @@ import a3dc
 def module_main():
     im = a3dc.MultiDimImageFloat([16, 24])
     im[7, 23] = 42
-    return {'out_image': im}
+    a3dc.outputs['out_image'] = im
 
 a3dc.def_process_module({}, {'out_image': a3dc.types.ImageFloat}, module_main)
     )";
