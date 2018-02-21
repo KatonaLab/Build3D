@@ -22,6 +22,7 @@ public:
     std::weak_ptr<T> serve();
     virtual size_t typeHash() const;
     T& value();
+    std::shared_ptr<T> sharedValue();
     void forwardFromInput(std::weak_ptr<TypedInputPort<T>> input);
     void forwardFromSharedPtr(std::shared_ptr<T> data);
 protected:

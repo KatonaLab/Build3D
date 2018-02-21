@@ -208,10 +208,11 @@ SCENARIO("high_platform basic checks", "[core/high_platform]")
 import a3dc
 
 def module_main():
-    im = a3dc.MultiDimImageUInt8([320, 240])
-    a3dc.output['out_image'] = im
+    im = a3dc.MultiDimImageFloat([16, 24])
+    im[7, 23] = 42
+    return {'out_image': im}
 
-a3dc.def_process_module({}, {'out_image': a3dc.types.ImageUInt8}, module_main)
+a3dc.def_process_module({}, {'out_image': a3dc.types.ImageFloat}, module_main)
     )";
 
     // string codeAdd = R"code(
@@ -243,7 +244,10 @@ a3dc.def_process_module({}, {'out_image': a3dc.types.ImageUInt8}, module_main)
     GIVEN("a simple net") {
         ComputePlatform p;
 
-        PythonComputeModule src1(p, codeSource);
+        PythonComputeModule source(p, codeSource);
+        ImageSink imSink(p);
+
+        REQUIRE(source.outputPort(0).lock()->bind(imSink.inputPort(0)) == true);
 
         // PythonComputeModule src2(p, codeSource);
         // PythonComputeModule add(p, codeAdd);
@@ -255,11 +259,11 @@ a3dc.def_process_module({}, {'out_image': a3dc.types.ImageUInt8}, module_main)
         // REQUIRE(src2.outputPort(0).lock()->bind(add.inputPort(1)) == true);
         // REQUIRE(add.outputPort(0).lock()->bind(dst.inputPort(0)) == true);
 
-        // WHEN("run is called") {
-        //     p.run();
-        //     THEN("it outputs the correct result") {
-        //         //REQUIRE(dd.getResult() == 43);
-        //     }
-        // }
+        WHEN("run is called") {
+            p.run();
+            THEN("it outputs the correct result") {
+                REQUIRE(imSink.getImage().at({7, 23}) == 42);
+            }
+        }
     }
 }

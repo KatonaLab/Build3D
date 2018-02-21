@@ -121,6 +121,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
             env.func = func;
         });
 
+    // m.attr("")
+
     pyDeclareMetaType(m);
 
     pyDeclareMultiDimImageType<int8_t>(m, "MultiDimImageInt8");
@@ -148,9 +150,13 @@ PythonComputeModule::PythonComputeModule(ComputePlatform& platform, std::string 
     buildPorts();
 }
 
-shared_ptr<InputPort> PythonComputeModule::createInputPort(PyTypes t)
+shared_ptr<PyInputPortWrapper> PythonComputeModule::createInputPortWrapper(PyTypes t)
 {
-    #define CASE(E, T) case PyTypes::E: return shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this));
+    #define CASE(E, T) \
+        case PyTypes::E: \
+            {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
+            return make_shared<PyTypedInputPortWrapper<T>>(tp);}
+
     switch (t) {
         CASE(TYPE_int8_t, int8_t)
         CASE(TYPE_int16_t, int16_t)
@@ -177,9 +183,13 @@ shared_ptr<InputPort> PythonComputeModule::createInputPort(PyTypes t)
     #undef CASE
 }
 
-shared_ptr<OutputPort> PythonComputeModule::createOutputPort(PyTypes t)
+shared_ptr<PyOutputPortWrapper> PythonComputeModule::createOutputPortWrapper(PyTypes t)
 {
-    #define CASE(E, T) case PyTypes::E: return shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this));
+    #define CASE(E, T) \
+        case PyTypes::E: \
+            {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
+            return make_shared<PyTypedOutputPortWrapper<T>>(tp);}
+
     switch (t) {
         CASE(TYPE_int8_t, int8_t)
         CASE(TYPE_int16_t, int16_t)
@@ -214,25 +224,23 @@ void PythonComputeModule::buildPorts()
     m_func = env.func;
 
     for (auto& p : env.inputs) {
-        auto port = createInputPort(p.second);
-        m_inputPorts.push(port);
-        m_inputPortMap[p.first] = port;
+        auto pw = createInputPortWrapper(p.second);
+        m_inputPorts.push(p.first, pw);
     }
 
     for (auto& p : env.outputs) {
-        auto port = createOutputPort(p.second);
-        m_outputPorts.push(port);
-        m_outputPortMap[p.first] = port;
+        auto pw = createOutputPortWrapper(p.second);
+        m_outputPorts.push(p.first, pw);
+    
     }
 }
 
 void PythonComputeModule::execute()
 {
-    // m_inputPorts.size();
-    
-    // py::scoped_interpreter guard{};
-    // py::exec(m_code);
-    // PythonEnvironment::instance().run();
+    auto& env = PythonEnvironment::instance();
+    auto i = unique_ptr<int>(new int);
+    py::object obj = py::cast(i);
+    m_func();
 }
 
 // --------------------------------------------------------
@@ -243,28 +251,32 @@ DynamicInputPortCollection::DynamicInputPortCollection(ComputeModule& parent)
 
 void DynamicInputPortCollection::fetch()
 {
-    for (auto& port : m_inputPorts) {
-        port->fetch();
+    for (auto& p : m_orderedInputs) {
+        p->fetch();
     }
 }
 
 std::weak_ptr<InputPort> DynamicInputPortCollection::get(size_t portId)
 {
-    if (portId >= m_inputPorts.size()) {
+    if (portId >= m_orderedInputs.size()) {
         throw std::out_of_range("no such id in input ports");
     }
-    return m_inputPorts[portId];
+    return m_orderedInputs[portId];
 }
 
-void DynamicInputPortCollection::push(std::shared_ptr<InputPort> port)
+void DynamicInputPortCollection::push(std::string name,
+    std::shared_ptr<PyInputPortWrapper> portWrapper)
 {
-    m_inputPorts.push_back(port);
+    m_orderedInputs.push_back(portWrapper->port());
+    m_inputMap[name] = portWrapper;
 }
 
 size_t DynamicInputPortCollection::size() const
 {
-    return m_inputPorts.size();
+    return m_orderedInputs.size();
 }
+
+// --------------------------------------------------------
 
 DynamicOutputPortCollection::DynamicOutputPortCollection(ComputeModule& parent)
     : OutputPortCollection(parent)
@@ -272,18 +284,20 @@ DynamicOutputPortCollection::DynamicOutputPortCollection(ComputeModule& parent)
 
 std::weak_ptr<OutputPort> DynamicOutputPortCollection::get(size_t portId)
 {
-    if (portId >= m_outputPorts.size()) {
+    if (portId >= m_orderedOutputs.size()) {
         throw std::out_of_range("no such id in output ports");
     }
-    return m_outputPorts[portId];
+    return m_orderedOutputs[portId];
 }
 
 size_t DynamicOutputPortCollection::size() const
 {
-    return m_outputPorts.size();
+    return m_orderedOutputs.size();
 }
 
-void DynamicOutputPortCollection::push(std::shared_ptr<OutputPort> port)
+void DynamicOutputPortCollection::push(std::string name,
+    std::shared_ptr<PyOutputPortWrapper> portWrapper)
 {
-    m_outputPorts.push_back(port);
+    m_orderedOutputs.push_back(portWrapper->port());
+    m_outputMap[name] = portWrapper;
 }

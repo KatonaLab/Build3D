@@ -68,15 +68,71 @@ protected:
 
 // --------------------------------------------------------
 
+class PyOutputPortWrapper {
+public:
+    virtual py::object pyObject() = 0;
+    virtual std::shared_ptr<cp::OutputPort> port() = 0;
+    virtual ~PyOutputPortWrapper() = default;
+};
+
+template <typename T>
+class PyTypedOutputPortWrapper : public PyOutputPortWrapper {
+public:
+    PyTypedOutputPortWrapper(std::shared_ptr<cp::TypedOutputPort<T>> port)
+        : m_port(port) {}
+    py::object pyObject() override
+    {
+        // return py::cast(m_port->sharedValue());
+        return py::object();
+    }
+    std::shared_ptr<cp::OutputPort> port() override
+    {
+        return m_port;
+    }
+private:
+    std::shared_ptr<cp::TypedOutputPort<T>> m_port;
+};
+
+// --------------------------------------------------------
+
+class PyInputPortWrapper {
+public:
+    virtual py::object pyObject() = 0;
+    virtual std::shared_ptr<cp::InputPort> port() = 0;
+    virtual ~PyInputPortWrapper() = default;
+};
+
+template <typename T>
+class PyTypedInputPortWrapper : public PyInputPortWrapper {
+public:
+    PyTypedInputPortWrapper(std::shared_ptr<cp::TypedInputPort<T>> port)
+        : m_port(port) {}
+    py::object pyObject() override
+    {
+        // return py::cast(m_port->inputPtr().lock());
+        return py::object();
+        // return m_port->inputPtr().lock();
+    }
+    std::shared_ptr<cp::InputPort> port() override
+    {
+        return m_port;
+    }
+private:
+    std::shared_ptr<cp::TypedInputPort<T>> m_port;
+};
+
+// --------------------------------------------------------
+
 class DynamicInputPortCollection : public cp::InputPortCollection {
 public:
     DynamicInputPortCollection(cp::ComputeModule& parent);
     void fetch() override;
     std::weak_ptr<cp::InputPort> get(size_t portId) override;
     size_t size() const override;
-    void push(std::shared_ptr<cp::InputPort> port);
+    void push(std::string name, std::shared_ptr<PyInputPortWrapper> portWrapper);
 protected:
-    std::vector<std::shared_ptr<cp::InputPort>> m_inputPorts;
+    std::map<std::string, std::shared_ptr<PyInputPortWrapper>> m_inputMap;
+    std::vector<std::shared_ptr<cp::InputPort>> m_orderedInputs;
 };
 
 // --------------------------------------------------------
@@ -86,9 +142,10 @@ public:
     DynamicOutputPortCollection(cp::ComputeModule& parent);
     std::weak_ptr<cp::OutputPort> get(size_t portId) override;
     size_t size() const override;
-    void push(std::shared_ptr<cp::OutputPort> port);
+    void push(std::string name, std::shared_ptr<PyOutputPortWrapper> portWrapper);
 protected:
-    std::vector<std::shared_ptr<cp::OutputPort>> m_outputPorts;
+    std::map<std::string, std::shared_ptr<PyOutputPortWrapper>> m_outputMap;
+    std::vector<std::shared_ptr<cp::OutputPort>> m_orderedOutputs;
 };
 
 // --------------------------------------------------------
@@ -99,14 +156,12 @@ public:
 protected:
     void buildPorts();
     void execute() override;
-    std::shared_ptr<cp::InputPort> createInputPort(PyTypes t);
-    std::shared_ptr<cp::OutputPort> createOutputPort(PyTypes t);
+    std::shared_ptr<PyInputPortWrapper> createInputPortWrapper(PyTypes t);
+    std::shared_ptr<PyOutputPortWrapper> createOutputPortWrapper(PyTypes t);
 private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;
     std::string m_code;
-    std::map<std::string, std::shared_ptr<cp::InputPort>> m_inputPortMap;
-    std::map<std::string, std::shared_ptr<cp::OutputPort>> m_outputPortMap;
     ProcessFunc m_func;
 };
 

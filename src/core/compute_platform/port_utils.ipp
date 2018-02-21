@@ -52,6 +52,13 @@ T& TypedOutputPort<T>::value()
 
 template <typename T>
 inline
+std::shared_ptr<T> TypedOutputPort<T>::sharedValue()
+{
+    return m_original;
+}
+
+template <typename T>
+inline
 void TypedOutputPort<T>::forwardFromInput(std::weak_ptr<TypedInputPort<T>> input)
 {
     if (auto inputPtr = input.lock()) {
