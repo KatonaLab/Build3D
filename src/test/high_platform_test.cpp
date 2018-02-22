@@ -407,6 +407,7 @@ a3dc.def_process_module(inputs, outputs, module_main)
         PythonComputeModule inc2(p, incrementCode);
         PythonComputeModule inc3(p, incrementCode);
         PythonComputeModule inc4(p, incrementCode);
+        PythonComputeModule inc5(p, incrementCode);
 
         PythonComputeModule add1(p, addCode);
         PythonComputeModule add2(p, addCode);
@@ -421,8 +422,10 @@ a3dc.def_process_module(inputs, outputs, module_main)
         REQUIRE(connectPorts(src1, 0, inc2, 0) == true);
         REQUIRE(connectPorts(src1, 0, inc3, 0) == true);
 
+        REQUIRE(connectPorts(inc2, 0, inc5, 0) == true);
+
         REQUIRE(connectPorts(inc1, 0, add1, 0) == true);
-        REQUIRE(connectPorts(inc2, 0, add1, 1) == true);
+        REQUIRE(connectPorts(inc5, 0, add1, 1) == true);
 
         REQUIRE(connectPorts(add1, 0, sink1, 0) == true);
         REQUIRE(connectPorts(add1, 0, inc4, 0) == true);
@@ -435,8 +438,8 @@ a3dc.def_process_module(inputs, outputs, module_main)
         REQUIRE(connectPorts(r1, 0, sink1, 1) == true);
         REQUIRE(connectPorts(r2, 0, sink2, 1) == true);
 
-        r1.setNumber(86);
-        r1.setNumber(130);
+        r1.setNumber(87);
+        r1.setNumber(131);
 
         WHEN("run is called") {
             p.run();
