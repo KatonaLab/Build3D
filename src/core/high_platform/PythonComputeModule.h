@@ -132,7 +132,7 @@ public:
     {}
     py::object toPyObject() override
     {
-        return py::cast(m_port->value());
+        return py::cast(m_port->sharedValue());
     }
     std::shared_ptr<cp::InputPort> port() override
     {

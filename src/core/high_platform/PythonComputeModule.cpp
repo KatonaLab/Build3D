@@ -276,7 +276,7 @@ void PythonComputeModule::execute()
     inputs.attr("clear")();
 
     for (auto& p : m_inputPorts) {
-        inputs.attr("__setitem__")(p.first, p.second);
+        inputs.attr("__setitem__")(p.first, p.second->toPyObject());
     }
     for (auto& p : m_outputPorts) {
         outputs.attr("__setitem__")(p.first, py::none());

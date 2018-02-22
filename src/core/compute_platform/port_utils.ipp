@@ -125,6 +125,13 @@ T& TypedInputPort<T>::value()
 
 template <typename T>
 inline
+std::shared_ptr<T> TypedInputPort<T>::sharedValue()
+{
+    return m_ptr.lock();
+}
+
+template <typename T>
+inline
 std::weak_ptr<T> TypedInputPort<T>::inputPtr()
 {
     return m_ptr;

@@ -201,7 +201,7 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
     // TODO: test: Meta item read/write
 }
 
-SCENARIO("high_platform basic checks", "[core/high_platform]")
+SCENARIO("high_platform source py module test", "[core/high_platform]")
 {
     string codeSource =
     R"(
@@ -215,32 +215,6 @@ def module_main():
 a3dc.def_process_module({}, {'out_image': a3dc.types.ImageFloat}, module_main)
     )";
 
-    // string codeAdd = R"code(
-    //     import a3dc
-
-    //     a3dc.set_module_args({
-    //         inputs: {'image1': a3dc.types.image, 'image2': a3dc.types.image},
-    //         outputs: {'out_image': a3dc.types.image}})
-
-    //     a3dc.set_module_main(module_main)
-
-    //     def module_main(image1, image2):
-    //         return {'out_image': image1 + image2}
-    // )code";
-
-    // string codeTarget = R"code(
-    //     import a3dc
-
-    //     a3dc.set_module_args({
-    //         inputs: {'image': a3dc.types.image},
-    //         outputs: {}})
-
-    //     a3dc.set_module_main(module_main)
-
-    //     def module_main():
-    //         return None
-    // )code";
-
     GIVEN("a simple net") {
         ComputePlatform p;
 
@@ -249,20 +223,43 @@ a3dc.def_process_module({}, {'out_image': a3dc.types.ImageFloat}, module_main)
 
         REQUIRE(source.outputPort(0).lock()->bind(imSink.inputPort(0)) == true);
 
-        // PythonComputeModule src2(p, codeSource);
-        // PythonComputeModule add(p, codeAdd);
-        // PythonComputeModule dst(p, codeTarget);
-
-        // REQUIRE(p.size() == 3);
-
-        // REQUIRE(src1.outputPort(0).lock()->bind(add.inputPort(0)) == true);
-        // REQUIRE(src2.outputPort(0).lock()->bind(add.inputPort(1)) == true);
-        // REQUIRE(add.outputPort(0).lock()->bind(dst.inputPort(0)) == true);
-
         WHEN("run is called") {
             p.run();
             THEN("it outputs the correct result") {
                 REQUIRE(imSink.getImage().at({7, 23}) == 42);
+            }
+        }
+    }
+}
+
+SCENARIO("high_platform sink py module test", "[core/high_platform]")
+{
+    string codeSource =
+    R"(
+import a3dc
+
+def module_main():
+    im = a3dc.inputs['in_image']
+    if im[7, 23] != 42:
+        raise Exception('im[7, 23] != 42')
+
+a3dc.def_process_module({'in_image': a3dc.types.ImageFloat}, {}, module_main)
+    )";
+
+    GIVEN("a simple net") {
+        ComputePlatform p;
+
+        MultiDimImage<float> im({32, 32});
+        im.at({7, 23}) = 42;
+        ImageSource source(p);
+        source.setImage(im);
+        PythonComputeModule sink(p, codeSource);
+
+        REQUIRE(source.outputPort(0).lock()->bind(sink.inputPort(0)) == true);
+
+        WHEN("run is called") {
+            p.run();
+            THEN("it runs correctly") {
             }
         }
     }

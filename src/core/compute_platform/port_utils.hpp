@@ -41,6 +41,7 @@ public:
     virtual void fetch();
     virtual size_t typeHash() const;
     T& value();
+    std::shared_ptr<T> sharedValue();
     std::weak_ptr<T> inputPtr();
 private:
     std::weak_ptr<T> m_ptr;
