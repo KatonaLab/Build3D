@@ -18,6 +18,51 @@ namespace md = core::multidim_image_platform;
 
 typedef md::MultiDimImage<float> Image;
 
+template <typename T>
+class NumberSource : public cp::ComputeModule {
+public:
+    NumberSource(cp::ComputePlatform& parent)
+        : cp::ComputeModule(parent, m_inputs, m_outputs),
+        m_seed(T()),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        m_outputs.template output<0>()->value() = m_seed;
+    }
+    void setNumber(T x)
+    {
+        m_seed = x;
+    }
+protected:
+    T m_seed;
+    cp::InputPortCollection m_inputs;
+    cp::TypedOutputPortCollection<T> m_outputs;
+};
+
+template <typename T>
+class NumberSink : public cp::ComputeModule {
+public:
+    NumberSink(cp::ComputePlatform& parent)
+        : cp::ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        m_result = m_inputs.template input<0>()->value();
+    }
+    T getNumber()
+    {
+        return m_result;
+    }
+protected:
+    T m_result;
+    cp::TypedInputPortCollection<T> m_inputs;
+    cp::OutputPortCollection m_outputs;
+};
+
 class ImageSource : public cp::ComputeModule {
 public:
     ImageSource(cp::ComputePlatform& parent)

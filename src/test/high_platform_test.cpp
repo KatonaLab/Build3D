@@ -264,3 +264,184 @@ a3dc.def_process_module({'in_image': a3dc.types.ImageFloat}, {}, module_main)
         }
     }
 }
+
+SCENARIO("high_platform common py module test", "[core/high_platform]")
+{
+    string codeSource =
+    R"(
+import a3dc
+
+def module_main():
+    im = a3dc.inputs['in_image']
+    im[7, 23] += 42
+    im[7, 24] = a3dc.inputs['in_int_param']
+    im[7, 25] = a3dc.inputs['in_double_param']
+
+    a3dc.outputs['out_image'] = im
+    a3dc.outputs['out_uint_param'] = 42000000
+    a3dc.outputs['out_float_param'] = 2024.2024
+
+inputs = {
+    'in_image': a3dc.types.ImageFloat,
+    'in_int_param': a3dc.types.int64,
+    'in_double_param': a3dc.types.double}
+outputs = {
+    'out_image': a3dc.types.ImageFloat,
+    'out_uint_param': a3dc.types.uint64,
+    'out_float_param': a3dc.types.float}
+a3dc.def_process_module(inputs, outputs, module_main)
+    )";
+
+    GIVEN("a simple net") {
+        ComputePlatform p;
+
+        MultiDimImage<float> im({32, 32});
+        im.at({7, 23}) = 42;
+        ImageSource imSource(p);
+        NumberSource<int64_t> intSource(p);
+        NumberSource<double> doubleSource(p);
+
+        PythonComputeModule module(p, codeSource);
+
+        ImageSink imSink(p);
+        NumberSink<uint64_t> intSink(p);
+        NumberSink<float> floatSink(p);
+
+        imSource.setImage(im);
+        intSource.setNumber(420000);
+        doubleSource.setNumber(3.1415);
+
+        REQUIRE(connectPorts(imSource, 0, module, 0) == true);
+        REQUIRE(connectPorts(intSource, 0, module, 1) == true);
+        REQUIRE(connectPorts(doubleSource, 0, module, 2) == true);
+        REQUIRE(connectPorts(module, 0, imSink, 0) == true);
+        REQUIRE(connectPorts(module, 0, intSink, 0) == true);
+        REQUIRE(connectPorts(module, 0, floatSink, 0) == true);
+
+        WHEN("run is called") {
+            p.run();
+            THEN("it runs correctly") {
+                REQUIRE(imSink.getImage().at({7, 23}) == 84);
+                REQUIRE(imSink.getImage().at({7, 24}) == 420000);
+                REQUIRE(imSink.getImage().at({7, 25}) == 3.1415);
+                REQUIRE(intSink.getNumber() == 42000000);
+                REQUIRE(floatSink.getNumber() == 2024.2024);
+            }
+        }
+    }
+}
+
+SCENARIO("high_platform complex py module test", "[core/high_platform]")
+{
+    string generatorCode =
+    R"(
+import a3dc
+
+def module_main():
+    im = a3dc.MultiDimImageUInt8([1024, 1024, 32])
+    for i in range(32):
+        im.plane([i]) = 42
+    a3dc.outputs['out_image'] = im
+
+inputs = {}
+outputs = {'out_image': a3dc.types.ImageUInt8}
+a3dc.def_process_module(inputs, outputs, module_main)
+    )";
+
+    string incrementCode =
+    R"(
+import a3dc
+
+def module_main():
+    im = a3dc.inputs('in_image')
+    for i in range(im.dims()[2]):
+        im.plane([i]) += 1
+    a3dc.outputs['out_image'] = im
+
+inputs = {'in_image': a3dc.types.ImageUInt8}
+outputs = {'out_image': a3dc.types.ImageUInt8}
+a3dc.def_process_module(inputs, outputs, module_main)
+    )";
+
+    string addCode =
+    R"(
+import a3dc
+
+def module_main():
+    out = a3dc.MultiDimImageUInt8(im1.dims())
+    im1 = a3dc.inputs('in_image1')
+    im2 = a3dc.inputs('in_image2')
+    for i in range(im1.dims()[2]):
+        out.plane([i]) = im1.plane([i]) + im2.plane([i])
+    a3dc.outputs['out_image'] = out
+
+inputs = {
+    'in_image1': a3dc.types.ImageUInt8,
+    'in_image2': a3dc.types.ImageUInt8}
+outputs = {'out_image': a3dc.types.ImageUInt8}
+a3dc.def_process_module(inputs, outputs, module_main)
+    )";
+
+    string sinkCode =
+    R"(
+import a3dc
+import numpy
+
+def module_main():
+    im = a3dc.inputs('in_image')
+    for i in range(im.dims()[2]):
+        if not np.all(im.plane([i]) == a3dc.inputs['require']):
+            raise Exception('image value is not the required one')
+
+inputs = {'in_image': a3dc.types.ImageUInt8, 'require': a3dc.types.uint8}
+outputs = {}
+a3dc.def_process_module(inputs, outputs, module_main)
+    )";
+
+    GIVEN("a simple net") {
+        ComputePlatform p;
+
+        PythonComputeModule src1(p, generatorCode);
+
+        PythonComputeModule inc1(p, incrementCode);
+        PythonComputeModule inc2(p, incrementCode);
+        PythonComputeModule inc3(p, incrementCode);
+        PythonComputeModule inc4(p, incrementCode);
+
+        PythonComputeModule add1(p, addCode);
+        PythonComputeModule add2(p, addCode);
+
+        PythonComputeModule sink1(p, sinkCode);
+        PythonComputeModule sink2(p, sinkCode);
+
+        NumberSource<uint8_t> r1(p);
+        NumberSource<uint8_t> r2(p);
+
+        REQUIRE(connectPorts(src1, 0, inc1, 0) == true);
+        REQUIRE(connectPorts(src1, 0, inc2, 0) == true);
+        REQUIRE(connectPorts(src1, 0, inc3, 0) == true);
+
+        REQUIRE(connectPorts(inc1, 0, add1, 0) == true);
+        REQUIRE(connectPorts(inc2, 0, add1, 1) == true);
+
+        REQUIRE(connectPorts(add1, 0, sink1, 0) == true);
+        REQUIRE(connectPorts(add1, 0, inc4, 0) == true);
+
+        REQUIRE(connectPorts(inc4, 0, add2, 0) == true);
+        REQUIRE(connectPorts(inc3, 0, add2, 1) == true);
+
+        REQUIRE(connectPorts(add2, 0, sink2, 0) == true);
+
+        REQUIRE(connectPorts(r1, 0, sink1, 1) == true);
+        REQUIRE(connectPorts(r2, 0, sink2, 1) == true);
+
+        r1.setNumber(86);
+        r1.setNumber(130);
+
+        WHEN("run is called") {
+            p.run();
+            THEN("it runs correctly") {
+            }
+        }
+    }
+}
