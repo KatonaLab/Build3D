@@ -316,24 +316,23 @@ SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
 
 SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
 {
-    std::cout << "testing data reordering" << std::endl;
-
+    size_t n = 100;
     GIVEN("an image") {
-        MultiDimImage<uint8_t> image({512, 512, 16, 3});
-        image.at({511, 0, 0, 1}) = 42;
+        MultiDimImage<uint8_t> image({n, n, 16, 3});
+        image.at({n-1, 0, 0, 1}) = 42;
         image.at({78, 96, 7, 1}) = 47;
         WHEN("first two dimensions reordered") {
             image.reorderDims({1, 0, 2, 3});
             THEN("the data is reordered") {
-                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.size() == n * n * 16 * 3);
                 REQUIRE(image.dims() == 4);
-                REQUIRE(image.dim(0) == 512);
-                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(0) == n);
+                REQUIRE(image.dim(1) == n);
                 REQUIRE(image.dim(2) == 16);
                 REQUIRE(image.dim(3) == 3);
-                REQUIRE(image.at({511, 0, 0, 1}) == 0);
+                REQUIRE(image.at({n-1, 0, 0, 1}) == 0);
                 REQUIRE(image.at({78, 96, 7, 1}) == 0);
-                REQUIRE(image.at({0, 511, 0, 1}) == 42);
+                REQUIRE(image.at({0, n-1, 0, 1}) == 42);
                 REQUIRE(image.at({96, 78, 7, 1}) == 47);
             }
         }
@@ -350,15 +349,15 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
         WHEN("complex reordeing happens #1") {
             image.reorderDims({0, 1, 3, 2});
             THEN("the data is reordered") {
-                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.size() == n * n * 16 * 3);
                 REQUIRE(image.dims() == 4);
-                REQUIRE(image.dim(0) == 512);
-                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(0) == n);
+                REQUIRE(image.dim(1) == n);
                 REQUIRE(image.dim(2) == 3);
                 REQUIRE(image.dim(3) == 16);
-                REQUIRE(image.at({511, 0, 0, 1}) == 0);
+                REQUIRE(image.at({n-1, 0, 0, 1}) == 0);
                 REQUIRE_THROWS(image.at({78, 96, 7, 1}));
-                REQUIRE(image.at({511, 0, 1, 0}) == 42);
+                REQUIRE(image.at({n-1, 0, 1, 0}) == 42);
                 REQUIRE(image.at({78, 96, 1, 7}) == 47);
             }
         }
@@ -366,15 +365,15 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
         WHEN("complex reordeing happens #2") {
             image.reorderDims({3, 0, 1, 2});
             THEN("the data is reordered") {
-                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.size() == n * n * 16 * 3);
                 REQUIRE(image.dims() == 4);
                 REQUIRE(image.dim(0) == 3);
-                REQUIRE(image.dim(1) == 512);
-                REQUIRE(image.dim(2) == 512);
+                REQUIRE(image.dim(1) == n);
+                REQUIRE(image.dim(2) == n);
                 REQUIRE(image.dim(3) == 16);
-                REQUIRE_THROWS(image.at({511, 0, 0, 1}));
+                REQUIRE_THROWS(image.at({n-1, 0, 0, 1}));
                 REQUIRE_THROWS(image.at({78, 96, 7, 1}));
-                REQUIRE(image.at({1, 511, 0, 0}) == 42);
+                REQUIRE(image.at({1, n-1, 0, 0}) == 42);
                 REQUIRE(image.at({1, 78, 96, 7}) == 47);
             }
         }
@@ -382,19 +381,17 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
         WHEN("the reordering is the same") {
             image.reorderDims({0, 1, 2, 3});
             THEN("the data is the same") {
-                REQUIRE(image.size() == 512 * 512 * 16 * 3);
+                REQUIRE(image.size() == n * n * 16 * 3);
                 REQUIRE(image.dims() == 4);
-                REQUIRE(image.dim(0) == 512);
-                REQUIRE(image.dim(1) == 512);
+                REQUIRE(image.dim(0) == n);
+                REQUIRE(image.dim(1) == n);
                 REQUIRE(image.dim(2) == 16);
                 REQUIRE(image.dim(3) == 3);
-                REQUIRE(image.at({511, 0, 0, 1}) == 42);
+                REQUIRE(image.at({n-1, 0, 0, 1}) == 42);
                 REQUIRE(image.at({78, 96, 7, 1}) == 47);
             }
         }
     }
-
-    std::cout << "testing data finished" << std::endl;
 }
 
 SCENARIO("multidim with 1d arrays", "[core/multidim_image_platform]")
