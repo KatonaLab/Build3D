@@ -14,7 +14,30 @@ SOURCES += \
     ../core/multidim_image_platform/MultiDimImage.hpp \
     ../core/multidim_image_platform/MultiDimImage.cpp \
     high_platform_test.cpp \
-    ../core/high_platform/PythonComputeModule.cpp
+    ../core/high_platform/PythonComputeModule.cpp \
+    io_utils_test.cpp \
+    ../core/io_utils/IcsAdapter.cpp
+
+# TODO: move libics into a separate .pro file and use its product to link
+HEADERS += \
+    ../../lib/libics/libics_ll.h \
+    ../../lib/libics/libics_intern.h \
+    ../../lib/libics/libics.h \
+    ../../lib/libics/libics_sensor.h
+
+SOURCES +=  \
+    ../../lib/libics/libics_preview.c \
+    ../../lib/libics/libics_read.c \
+    ../../lib/libics/libics_top.c \
+    ../../lib/libics/libics_sensor.c \
+    ../../lib/libics/libics_history.c \
+    ../../lib/libics/libics_util.c \
+    ../../lib/libics/libics_data.c \
+    ../../lib/libics/libics_binary.c \
+    ../../lib/libics/libics_test.c \
+    ../../lib/libics/libics_write.c \
+    ../../lib/libics/libics_gzip.c \
+    ../../lib/libics/libics_compress.c
 
 CONFIG -= app_bundle
 CONFIG += debug
@@ -22,6 +45,7 @@ INCLUDEPATH += \
     ../util \
     ../ \
     ../../lib/pybind11/include/ \
-    ../../virtualenv/include/python3.6m
+    ../../virtualenv/include/python3.6m \
+    ../../lib/libics
 
 LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib/" -lpython3.6m

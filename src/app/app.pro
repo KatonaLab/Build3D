@@ -55,7 +55,8 @@ SOURCES += \
     ../core/compute_platform/port_utils.hpp \
     ../core/multidim_image_platform/MultiDimImage.hpp \
     ../core/multidim_image_platform/MultiDimImage.cpp \
-    ../core/high_platform/PythonComputeModule.cpp
+    ../core/high_platform/PythonComputeModule.cpp \
+    ../core/io_utils/IcsAdapter.cpp
 
 RESOURCES += resources.qrc
 
