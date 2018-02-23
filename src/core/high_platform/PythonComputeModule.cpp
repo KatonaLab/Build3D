@@ -70,7 +70,7 @@ void pyDeclareMultiDimImageType(pybind11::module &m, string name)
     {
         obj.at(coords) = value;
     })
-    .def("plane", [](MultiDimImage<T>& obj, std::vector<std::size_t> coords) -> py::array_t<T>
+    .def("plane", [](MultiDimImage<T>& obj, const std::vector<std::size_t>& coords) -> py::array_t<T>
     {
         PyImageView<T> helper(obj, coords);
         // prevent copy on return
@@ -80,7 +80,32 @@ void pyDeclareMultiDimImageType(pybind11::module &m, string name)
             {sizeof(T) * helper.rows(), sizeof(T)},
             helper.data(),
             onDestroy);
-    }, py::keep_alive<0, 1>())
+    }, py::keep_alive<0, 1>(), py::return_value_policy::reference)
+    .def("set_plane", [](MultiDimImage<T>& obj,
+        const std::vector<std::size_t>& coords,
+        const py::array_t<T>& arr)
+    {
+        PyImageView<T> helper(obj, coords);
+        if (arr.ndim() != 2) {
+            throw std::runtime_error("data should be 2d when calling set_plane");
+        }
+
+        if ((size_t)arr.shape(0) != helper.rows()) {
+            throw std::runtime_error("data should have same number of rows when calling set_plane");
+        }
+
+        if ((size_t)arr.shape(1) != helper.cols()) {
+            throw std::runtime_error("data should have same number of cols when calling set_plane");
+        }
+
+        if (arr.data() == helper.data()) {
+            return;
+        }
+
+        std::vector<T> tmp(arr.data(), arr.data() + arr.size());
+        helper.dataVec().swap(tmp);
+    })
+
     .def("dims", &MultiDimImage<T>::dimList)
     .def_readwrite("meta", &MultiDimImage<T>::meta);
 

@@ -24,7 +24,6 @@ win32 {
 }
 
 HEADERS += \
-    ../core/volumetric.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -32,7 +31,6 @@ HEADERS += \
     ../../lib/libics/libics_sensor.h
 
 SOURCES +=  \
-    ../core/volumetric.cpp \
     ../util/version.cpp \
     main.cpp \
     ../../lib/libics/libics_preview.c \
@@ -48,6 +46,17 @@ SOURCES +=  \
     ../../lib/libics/libics_gzip.c \
     ../../lib/libics/libics_compress.c
 
+SOURCES += \
+    ../core/directed_acyclic_graph/Node.cpp \
+    ../core/directed_acyclic_graph/Graph.cpp \
+    ../core/compute_platform/ports.cpp \
+    ../core/compute_platform/ComputeModule.cpp \
+    ../core/compute_platform/ComputePlatform.cpp \
+    ../core/compute_platform/port_utils.hpp \
+    ../core/multidim_image_platform/MultiDimImage.hpp \
+    ../core/multidim_image_platform/MultiDimImage.cpp \
+    ../core/high_platform/PythonComputeModule.cpp
+
 RESOURCES += resources.qrc
 
 INCLUDEPATH += \
@@ -55,6 +64,14 @@ INCLUDEPATH += \
     ../core \
     ../../lib/libics \
     ../../lib/pybind11/include
+
+INCLUDEPATH += \
+    ../util \
+    ../ \
+    ../../lib/pybind11/include/ \
+    ../../virtualenv/include/python3.6m
+
+LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib/" -lpython3.6m
 
 macx {
     CRASHPAD_DIR = $$_PRO_FILE_PWD_/../../../tools/crashpad/crashpad

@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 
 #include <pybind11/embed.h>
@@ -154,7 +155,7 @@ public:
     }
     void fromPyObject(py::object obj) override
     {
-        m_port->value() = obj.cast<T>();
+        m_port->forwardFromSharedPtr(std::make_shared<T>(obj.cast<T>()));
     }
     std::shared_ptr<cp::OutputPort> port() override
     {
@@ -239,10 +240,12 @@ private:
 // --------------------------------------------------------
 
 // TODO: review this class and consider removing it
+// TODO: this is a highly dangerous class along with the 
+// private-data-opening MultiDimImage mechanism, FIXME
 template <typename T>
 class PyImageView {
 public:
-    PyImageView(md::MultiDimImage<T>& im, std::vector<std::size_t> coords)
+    PyImageView(md::MultiDimImage<T>& im, const std::vector<std::size_t>& coords)
         : m_source(im)
     {
         switch (im.dims())
@@ -278,6 +281,10 @@ public:
     T* data()
     {
         return &m_source.unsafeData()[m_planeId].front();
+    }
+    std::vector<T>& dataVec()
+    {
+        return m_source.unsafeData()[m_planeId];
     }
 protected:
     md::MultiDimImage<T>& m_source;

@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <chrono>
+
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
 using namespace core::multidim_image_platform;
@@ -121,65 +123,74 @@ void checkWeakPtrNull(ImageViewPair<T>& wpp)
 
 SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
 {
-    std::cout << "." << std::flush;
+    auto __start = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> __elapsed = std::chrono::high_resolution_clock::now() - __start;
+    #define TIC __start = std::chrono::high_resolution_clock::now();
+    #define TAC(tag) __elapsed = std::chrono::high_resolution_clock::now() - __start; \
+        std::cout << tag << ": \t" << __elapsed.count() << "s" << std::endl;
+
+    std::cout << "testing huge data create/copy/destroy" << std::endl;
+    
     std::size_t n = 2048;
     GIVEN("the demand for a huge volume with 4 channels, 2048x2048x64x4 float") {
-        WHEN("created") {
-            std::cout << "." << std::flush;
-            MultiDimImage<float> huge({n, n, 64, 4});
-            ImageViewPair<float> wpp = weakPointerToImageData(huge);
-            THEN("it is allocated without problems") {
-                std::cout << "." << std::flush;
-                REQUIRE(huge.size() == n * n * 64 * 4);
-                REQUIRE(huge.byteSize() == n * n * 64 * 4 * sizeof(float));
-                REQUIRE(huge.dims() == 4);
-                REQUIRE(huge.dim(0) == n);
-                REQUIRE(huge.dim(1) == n);
-                REQUIRE(huge.dim(2) == 64);
-                REQUIRE(huge.dim(3) == 4);
-                REQUIRE(huge.type() == GetType<float>());
-                REQUIRE(huge.empty() == false);
-            }
 
-            std::shared_ptr<MultiDimImage<float>> hugeCopy = std::make_shared<MultiDimImage<float>>();
-            ImageViewPair<float> wppCpy;
-            AND_WHEN("copied") {
-                std::cout << "." << std::flush;
-                *hugeCopy = huge;
-                wppCpy = weakPointerToImageData(*hugeCopy);
-                THEN("the copy is allocated without problems") {
-                    std::cout << "." << std::flush;
-                    REQUIRE(hugeCopy->size() == n * n * 64 * 4);
-                    REQUIRE(hugeCopy->byteSize() == n * n * 64 * 4 * sizeof(float));
-                    REQUIRE(hugeCopy->dims() == 4);
-                    REQUIRE(hugeCopy->dim(0) == n);
-                    REQUIRE(hugeCopy->dim(1) == n);
-                    REQUIRE(hugeCopy->dim(2) == 64);
-                    REQUIRE(hugeCopy->dim(3) == 4);
-                    REQUIRE(hugeCopy->type() == GetType<float>());
-                    REQUIRE(hugeCopy->empty() == false);
-                }
-            }
+        // create
+        TIC;
+        MultiDimImage<float> huge({n, n, 64, 4});
+        TAC("allocate 2048x2048x64x4 float data");
 
-            AND_WHEN("the copy is destroyed") {
-                std::cout << "." << std::flush;
-                hugeCopy.reset();
-                THEN("the memory is freed") {
-                    std::cout << "." << std::flush;
-                    checkWeakPtrNull<float>(wppCpy);
-                }
-            }
+        ImageViewPair<float> wpp = weakPointerToImageData(huge);
 
-            AND_WHEN("the original is cleared") {
-                std::cout << "." << std::flush;
-                huge.clear();
-                THEN("the memory is freed") {
-                    std::cout << "." << std::flush;
-                    checkWeakPtrNull<float>(wpp);
-                }
-            }
-        }
+        REQUIRE(huge.size() == n * n * 64 * 4);
+        REQUIRE(huge.byteSize() == n * n * 64 * 4 * sizeof(float));
+        REQUIRE(huge.dims() == 4);
+        REQUIRE(huge.dim(0) == n);
+        REQUIRE(huge.dim(1) == n);
+        REQUIRE(huge.dim(2) == 64);
+        REQUIRE(huge.dim(3) == 4);
+        REQUIRE(huge.type() == GetType<float>());
+        REQUIRE(huge.empty() == false);
+
+        std::shared_ptr<MultiDimImage<float>> hugeCopy = std::make_shared<MultiDimImage<float>>();
+
+        ImageViewPair<float> wppCpy;
+
+        // copy
+        TIC;
+        *hugeCopy = huge;
+        TAC("copy 2048x2048x64x4 float data")
+
+        wppCpy = weakPointerToImageData(*hugeCopy);
+
+        REQUIRE(hugeCopy->size() == n * n * 64 * 4);
+        REQUIRE(hugeCopy->byteSize() == n * n * 64 * 4 * sizeof(float));
+        REQUIRE(hugeCopy->dims() == 4);
+        REQUIRE(hugeCopy->dim(0) == n);
+        REQUIRE(hugeCopy->dim(1) == n);
+        REQUIRE(hugeCopy->dim(2) == 64);
+        REQUIRE(hugeCopy->dim(3) == 4);
+        REQUIRE(hugeCopy->type() == GetType<float>());
+        REQUIRE(hugeCopy->empty() == false);
+
+        // reset
+        TIC;
+        hugeCopy.reset();
+        TAC("free 2048x2048x64x4 float data")
+
+        checkWeakPtrNull<float>(wppCpy);
+
+        // clear
+        TIC;
+        huge.clear();
+        TAC("clear 2048x2048x64x4 float data")
+
+        checkWeakPtrNull<float>(wpp);
     }
+
+    std::cout << "testing huge data create/copy/destroy finished" << std::endl;
+
+    #undef TIC
+    #undef TAC
 }
 
 SCENARIO("multidim metadata usage", "[core/multidim_image_platform]")
@@ -305,6 +316,8 @@ SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
 
 SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
 {
+    std::cout << "testing data reordering" << std::endl;
+
     GIVEN("an image") {
         MultiDimImage<uint8_t> image({512, 512, 16, 3});
         image.at({511, 0, 0, 1}) = 42;
@@ -380,6 +393,8 @@ SCENARIO("multidim dimension reordering", "[core/multidim_image_platform]")
             }
         }
     }
+
+    std::cout << "testing data finished" << std::endl;
 }
 
 SCENARIO("multidim with 1d arrays", "[core/multidim_image_platform]")

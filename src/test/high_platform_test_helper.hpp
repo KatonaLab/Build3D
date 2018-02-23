@@ -23,20 +23,20 @@ class NumberSource : public cp::ComputeModule {
 public:
     NumberSource(cp::ComputePlatform& parent)
         : cp::ComputeModule(parent, m_inputs, m_outputs),
-        m_seed(T()),
+        m_seed(std::make_shared<T>()),
         m_inputs(*this),
         m_outputs(*this)
     {}
     void execute() override
     {
-        m_outputs.template output<0>()->value() = m_seed;
+        m_outputs.template output<0>()->forwardFromSharedPtr(m_seed);
     }
     void setNumber(T x)
     {
-        m_seed = x;
+        *m_seed = x;
     }
 protected:
-    T m_seed;
+    std::shared_ptr<T> m_seed;
     cp::InputPortCollection m_inputs;
     cp::TypedOutputPortCollection<T> m_outputs;
 };
