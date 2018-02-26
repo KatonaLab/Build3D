@@ -3,26 +3,36 @@
 
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
+#include <type_traits>
+
 namespace md = core::multidim_image_platform;
 
 namespace core {
 namespace io_utils {
 
-class FileAdapter {
+class IcsAdapter {
 public:
-    // template <typename T>
-    // virtual md::MultiDimImage<T> read(const std::string& filename);
-    // template <typename T>
-    // virtual write(const std::string& filename, md::MultiDimImage<T>& data);
+    bool open(const std::string& filename);
+    template <typename T> md::MultiDimImage<T> read();
+    template <typename T> void write(const std::string& filename, const md::MultiDimImage<T>& data);
+    std::size_t dataType() const;
+    bool valid() const;
+    void close();
 };
 
-class IcsAdapter : public FileAdapter {
-public:
-    // template <typename T>
-    // virtual md::MultiDimImage<T> read(const std::string& filename);
-    // template <typename T>
-    // virtual write(const std::string& filename, md::MultiDimImage<T>& data);
-};
+template <typename T>
+md::MultiDimImage<T> IcsAdapter::read()
+{
+    // TODO:
+    md::MultiDimImage<T> im;
+    return im;
+}
+
+template <typename T>
+void IcsAdapter::write(const std::string& filename, const md::MultiDimImage<T>& data)
+{
+    // TODO:
+}
 
 }
 }
