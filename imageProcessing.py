@@ -3,7 +3,7 @@ import sys
 import cv2
 import numpy as np
 from math import pow
-from skimage import img_as_ubyte, exposure
+from skimage import img_as_ubyte
 from skimage.external.tifffile import imread, imsave, TiffWriter
 from skimage.filters import threshold_local
 import pandas as pd
@@ -13,8 +13,8 @@ import os
 #import multiprocessing as mp
 import copy
 #from itertools import chain
-import matplotlib.pyplot as plt
-import pickle
+#import matplotlib.pyplot as plt
+#import pickle
 import traceback
 #from operator import add
 #import xml.etree.cElementTree as ET
@@ -34,8 +34,8 @@ class Main(object):
         sourceDictList = []
 
         path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/1024"
-        fileNameList1 =['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
-        fileNameList2 =['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif', 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
+        fileNameList1 =['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']#['test7_1.tif']#['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
+        fileNameList2 =['ch3_Z64_2048.tif', 'ch3_Z128_2048.tif', 'ch3_Z256_2048.tif', 'ch3_Z512_2048.tif', 'ch3_Z1024_2048.tif']#['test7_2.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif', 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
 
 
 
@@ -103,17 +103,19 @@ class Main(object):
         taggedImageDictionary2['name'] = str(ch2Dict['name']) + '_tagged'
         taggedImageDictionary2, logText = Main.analyze(taggedImage2, taggedImageDictionary2, imageList=[ch2Img],dictionaryList=[ch2Dict], measurementInput=measurementList)
 
-        taggedImage2, taggedImageDictionary2, _ = Main.filter(taggedImage2, taggedImageDictionary2,
-                                                              {'tag': {'min': 2, 'max': 3}},
-                                                              removeFiltered=False)  # {'tag':{'min': 2, 'max': 40}}
+
+        taggedImage2, taggedImageDictionary2, _ = Main.filter(taggedImage2, taggedImageDictionary2, removeFiltered=False)  # {'tag':{'min': 2, 'max': 40}}
+
         print(logText)
         log += '\n' + logText
 
         ###########################################Colocalization#########################################################
         # Colocalization analysis
-        overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization(
-            [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2], [])
+        overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization( [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2])
 
+        #Main.colocalization(taggedImageList, taggedDictList, sourceImageList=None, sourceDictionayList=None,
+                           #overlappingFilter=None,
+                           #removeFiltered=False, overWrite=True):
         print(logText)
         log += '\n' + logText
 
@@ -192,7 +194,7 @@ class Main(object):
                 outputImage = Segmentation.threshold_adaptive(image, method, **kwargs)
 
             elif method == 'Manual':
-                outputImage = Segmentation.threshold_manual(img, **kwargs)
+                outputImage = Segmentation.threshold_manual(image, **kwargs)
 
             else:
                 raise LookupError("'" + str(method) + "' is Not a valid mode!")
@@ -255,8 +257,7 @@ class Main(object):
 
         return outputDictionary, logText
 
-
-    def filter(inputImage, inputDictionary, filterDict, removeFiltered=True,
+    def filter(inputImage, inputDictionary, filterDict=None, removeFiltered=True,
                overWrite=True):
         '''
         Filters dictionary stored in the 'dataBase' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['Database']
@@ -283,6 +284,8 @@ class Main(object):
         logText += '\n\t\toverwrite=' + str(overWrite)
 
         try:
+            if filterDict==None:
+                filterDict={}
 
             # Filter dictionary
             outputDictionary = Measurement.filter_dataBase(inputDictionary, filterDict, overWrite)
@@ -294,6 +297,7 @@ class Main(object):
             elif removeFiltered == False:
                 outputImage=inputImage
 
+            inputDictionary = outputDictionary
 
         except Exception as e:
             logText += '\n\tException encountered!!!!'
@@ -306,10 +310,12 @@ class Main(object):
         tstop = time.clock()
         logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-        return outputImage, outputDictionary, logText
 
 
-    def colocalization(taggedImageList, taggedDictList, sourceImageList=[], sourceDictionayList=[], overlappingFilter={},
+        return outputImage, inputDictionary, logText
+
+
+    def colocalization(taggedImageList, taggedDictList, sourceImageList=None, sourceDictionayList=None, overlappingFilter=None,
                        removeFiltered=False, overWrite=True):
         '''
 
@@ -322,9 +328,6 @@ class Main(object):
         '''
         # Start timingsourceDictionayList
         tstart = time.clock()
-        #print(sourceDictionayList)
-        #sourceDictionayList = []
-
 
         try:
 
@@ -451,6 +454,7 @@ class Measurement(object):
     @staticmethod
     def colocalization_overlap(taggedImgList, taggedDictList, sourceImageList=None, sourceDictionayList=None, name=None):
 
+
         # Create Overlapping Image
         overlappingImage = taggedImgList[0]
         for i in range(1, len(taggedImgList)):
@@ -461,7 +465,7 @@ class Measurement(object):
 
         # Create Overlapping dataBase
         if name==None:
-            name='Overlapping'
+            name='Ovl'
             for dict in taggedDictList:
                 name=name+'_'+dict['name']
         overlappingDataBase = {'name': name}
@@ -972,7 +976,7 @@ class Segmentation(object):
         outputImage = []
         for i in range(len(image)):
             if method == 'Adaptive Mean':
-                outputImage.append(skimage.filters.threshold_local(convertedImage, blockSize, offSet))
+                outputImage.append(threshold_local(convertedImage, blockSize, offSet))
 
             elif method == 'Adaptive Gaussian':
                 outputImage.append(cv2.adaptiveThreshold(convertedImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -1077,7 +1081,7 @@ class Processor(object):
     @staticmethod
     def threshold_manual(image,  lower, upper=pow(2, 32)):
         # Threshold image using lower and upper as range
-        return (lower < img) & (img < upper)
+        return (lower < imag) & (image < upper)
 
     @staticmethod
     def colocalization_overlap(taggedImgList, sourceImageList=[], overlappingAnalysisInput={}):
