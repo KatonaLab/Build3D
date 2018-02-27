@@ -30,12 +30,12 @@ class Main(object):
 
         ###################################################################################################################################
         #############################################Load Images###########################################################################
-        sourceImageList = []
-        sourceDictList = []
+        #sourceImageList = []
+        #sourceDictList = []
 
         path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/1024"
-        fileNameList1 =['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']#['test7_1.tif']#['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
-        fileNameList2 =['ch3_Z64_2048.tif', 'ch3_Z128_2048.tif', 'ch3_Z256_2048.tif', 'ch3_Z512_2048.tif', 'ch3_Z1024_2048.tif']#['test7_2.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif', 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
+        fileNameList1 =['ch1_Z64_2048.tif']#, 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']#['test7_1.tif']#['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
+        fileNameList2 =['ch3_Z64_2048.tif']#, 'ch3_Z128_2048.tif', 'ch3_Z256_2048.tif', 'ch3_Z512_2048.tif', 'ch3_Z1024_2048.tif']#['test7_2.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif', 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
 
 
 
