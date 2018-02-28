@@ -4,6 +4,9 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
 #include <type_traits>
+#include <typeindex>
+
+#include <libics.h>
 
 namespace md = core::multidim_image_platform;
 
@@ -15,16 +18,56 @@ public:
     bool open(const std::string& filename);
     template <typename T> md::MultiDimImage<T> read();
     template <typename T> void write(const std::string& filename, const md::MultiDimImage<T>& data);
-    std::size_t dataType() const;
+    std::type_index dataType() const;
     bool valid() const;
     void close();
+    virtual ~IcsAdapter();
+protected:
+    void errorCheck(Ics_Error error, const std::string message);
+protected:
+    std::string m_filename;
+    ICS *m_ip = nullptr;
+    Ics_DataType m_dt = Ics_unknown;
+    std::vector<std::size_t> m_dims = std::vector<std::size_t>(ICS_MAXDIM, 0);
 };
 
 template <typename T>
 md::MultiDimImage<T> IcsAdapter::read()
 {
-    // TODO:
-    md::MultiDimImage<T> im;
+    if (std::type_index(typeid(T)) != dataType()) {
+        md::MultiDimImage<T> im;
+        switch (m_dt) {
+            case Ics_uint8: im. saturateCopyFrom(read<uint8_t>()); break;
+            case Ics_sint8: im. saturateCopyFrom(read<int8_t>()); break;
+            case Ics_uint16: im.saturateCopyFrom(read<uint16_t>()); break;
+            case Ics_sint16: im.saturateCopyFrom(read<int16_t>()); break;
+            case Ics_uint32: im.saturateCopyFrom(read<uint32_t>()); break;
+            case Ics_sint32: im.saturateCopyFrom(read<int32_t>()); break;
+            case Ics_real32: im.saturateCopyFrom(read<float>()); break;
+            case Ics_real64: im.saturateCopyFrom(read<double>()); break;
+            case Ics_complex32:
+            case Ics_complex64:
+            case Ics_unknown:
+            default: throw std::runtime_error("unsupported data type for read in '" + m_filename + "'");
+        }
+        return im;
+    }
+
+    md::MultiDimImage<T> im(m_dims);
+    std::size_t size = 0;
+    if (m_dims.empty()) {
+        return im;
+    } else if (m_dims.size() == 1) {
+        size = m_dims[0];
+    } else {
+        size = m_dims[0] * m_dims[1];
+    }
+
+    auto& planes = im.unsafeData();
+    std::size_t k = 0;
+    for (auto& plane : planes) {
+        IcsGetDataBlock(m_ip, plane.data(), size * sizeof(T));
+    }
     return im;
 }
 

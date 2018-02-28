@@ -2,26 +2,142 @@
 #include <core/io_utils/IcsAdapter.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
+#include <fstream>
+
 using namespace core::io_utils;
 using namespace core::multidim_image_platform;
 using namespace std;
 
 namespace io_utils_test {
 
-SCENARIO("ics read", "[core/io_utils]")
+// REQUIRE(ics.open("/Users/fodorbalint/Sandbox/testset/new/A15_1_a_DAPI_TH__vGluT1_20x.ics") == true);
+// REQUIRE(ics.open("/Users/fodorbalint/Sandbox/testset/old/128_128_128_R15_RGB_2.ics") == true);
+// REQUIRE(ics.open("/Users/fodorbalint/Sandbox/testset/old/K32_bassoon_TH_vGluT1_c01_cmle.ics") == true);
+// REQUIRE(ics.open("/Users/fodorbalint/Sandbox/testset/ics/B23_4_b_DAPI_TH_vGluT1_bassoon_60x_cmle.ics") == true);
+
+// for (size_t i = 0; i < 32; ++i) {
+//     ofstream myfile;
+//     myfile.open("plane" + to_string(i) + ".pgm");
+//     myfile << "P2\n";
+//     myfile << "128 128\n";
+//     myfile << "255\n";
+//     for (size_t v = 0; v < 128; ++v) {
+//         for (size_t u = 0; u < 128; ++u) {
+//             auto x = im.at({v, u, i, 0, 0});
+//             myfile << (uint32_t)(x*255) << " ";
+//         }
+//         myfile << "\n";
+//     }
+//     myfile.close();
+// }
+
+SCENARIO("ics read assets/128x128x32_c1_t1_float32.ics", "[core/io_utils]")
 {
     IcsAdapter ics;
-    REQUIRE(ics.open("assets/128x128x32_c1_t1_8bit.ics") == true);
+    REQUIRE(ics.open("assets/128x128x32_c1_t1_float32.ics") == true);
 
     REQUIRE(ics.valid() == true);
-    REQUIRE(ics.dataType() == typeid(uint8_t).hash_code());
+    REQUIRE(ics.dataType() == type_index(typeid(float)));
+    REQUIRE(ics.dataType() != type_index(typeid(double)));
+    REQUIRE(ics.dataType() != type_index(typeid(int8_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int16_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int32_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int64_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint8_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint16_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint32_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint64_t)));
     
-    MultiDimImage<int8_t> im = ics.read<int8_t>();
+    MultiDimImage<float> im = ics.read<float>();
 
-    REQUIRE(im.dims() == 3);
+    REQUIRE(im.dims() == 5);
     REQUIRE(im.dim(0) == 128);
     REQUIRE(im.dim(1) == 128);
     REQUIRE(im.dim(2) == 32);
+    REQUIRE(im.dim(3) == 1);
+    REQUIRE(im.dim(4) == 1);
+    
+    REQUIRE(im.at({5, 4, 0, 0, 0}) == 0.0f);
+    REQUIRE(im.at({5, 4, 1, 0, 0}) == 0.0f);
+    REQUIRE(im.at({5, 4, 15, 0, 0}) == 0.0f);
+    REQUIRE(im.at({5, 4, 31, 0, 0}) == 0.0f);
+
+    REQUIRE(im.at({69, 26, 0, 0, 0}) == 1.0f);
+    REQUIRE(im.at({69, 26, 1, 0, 0}) == 1.0f);
+    REQUIRE(im.at({69, 26, 15, 0, 0}) == 1.0f);
+    REQUIRE(im.at({69, 26, 31, 0, 0}) == 1.0f);
+
+    REQUIRE(im.at({49, 67, 0, 0, 0}) == 0.5234375f);
+    REQUIRE(im.at({49, 67, 1, 0, 0}) == 0.5234375f);
+    REQUIRE(im.at({49, 67, 7, 0, 0}) == 0.5234375f);
+    REQUIRE(im.at({49, 67, 29, 0, 0}) == 0.5234375f);
+
+    REQUIRE(im.at({36, 91, 0, 0, 0}) == 0.7109375f);
+    REQUIRE(im.at({36, 91, 1, 0, 0}) == 0.7109375f);
+    REQUIRE(im.at({36, 91, 9, 0, 0}) == 0.7109375f);
+    REQUIRE(im.at({36, 91, 17, 0, 0}) == 0.7109375f);
+
+    REQUIRE(im.at({45, 46, 4, 0, 0}) == 0.359375f);
+    REQUIRE(im.at({45, 46, 5, 0, 0}) == 1.0f);
+    REQUIRE(im.at({44, 38, 8, 0, 0}) == 0.296875f);
+    REQUIRE(im.at({44, 38, 13, 0, 0}) == 1.0f);
+
+    ics.close();
+
+    REQUIRE(ics.valid() == false);
+}
+
+SCENARIO("ics read assets/A15_1_a_DAPI_TH__vGluT1_20x.ics", "[core/io_utils]")
+{
+    IcsAdapter ics;
+    REQUIRE(ics.open("assets/A15_1_a_DAPI_TH__vGluT1_20x.ics") == true);
+
+    REQUIRE(ics.valid() == true);
+    REQUIRE(ics.dataType() == type_index(typeid(uint16_t)));
+    
+    REQUIRE(ics.dataType() != type_index(typeid(float)));
+    REQUIRE(ics.dataType() != type_index(typeid(double)));
+    REQUIRE(ics.dataType() != type_index(typeid(int8_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int16_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int32_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int64_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint8_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint32_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint64_t)));
+
+    MultiDimImage<float> im = ics.read<float>();
+
+    // REQUIRE(im.dims() == 5);
+    // REQUIRE(im.dim(0) == 128);
+    // REQUIRE(im.dim(1) == 128);
+    // REQUIRE(im.dim(2) == 32);
+    // REQUIRE(im.dim(3) == 1);
+    // REQUIRE(im.dim(4) == 1);
+    
+    // REQUIRE(im.at({5, 4, 0, 0, 0}) == 0.0f);
+    // REQUIRE(im.at({5, 4, 1, 0, 0}) == 0.0f);
+    // REQUIRE(im.at({5, 4, 15, 0, 0}) == 0.0f);
+    // REQUIRE(im.at({5, 4, 31, 0, 0}) == 0.0f);
+
+    // REQUIRE(im.at({69, 26, 0, 0, 0}) == 1.0f);
+    // REQUIRE(im.at({69, 26, 1, 0, 0}) == 1.0f);
+    // REQUIRE(im.at({69, 26, 15, 0, 0}) == 1.0f);
+    // REQUIRE(im.at({69, 26, 31, 0, 0}) == 1.0f);
+
+    // REQUIRE(im.at({49, 67, 0, 0, 0}) == 0.5234375f);
+    // REQUIRE(im.at({49, 67, 1, 0, 0}) == 0.5234375f);
+    // REQUIRE(im.at({49, 67, 7, 0, 0}) == 0.5234375f);
+    // REQUIRE(im.at({49, 67, 29, 0, 0}) == 0.5234375f);
+
+    // REQUIRE(im.at({36, 91, 0, 0, 0}) == 0.7109375f);
+    // REQUIRE(im.at({36, 91, 1, 0, 0}) == 0.7109375f);
+    // REQUIRE(im.at({36, 91, 9, 0, 0}) == 0.7109375f);
+    // REQUIRE(im.at({36, 91, 17, 0, 0}) == 0.7109375f);
+
+    // REQUIRE(im.at({45, 46, 4, 0, 0}) == 0.359375f);
+    // REQUIRE(im.at({45, 46, 5, 0, 0}) == 1.0f);
+    // REQUIRE(im.at({44, 38, 8, 0, 0}) == 0.296875f);
+    // REQUIRE(im.at({44, 38, 13, 0, 0}) == 1.0f);
 
     ics.close();
 
