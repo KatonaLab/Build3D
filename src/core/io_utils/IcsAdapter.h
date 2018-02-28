@@ -7,6 +7,8 @@
 #include <typeindex>
 
 #include <libics.h>
+#include <libics_intern.h>
+#include <cstdio>
 
 namespace md = core::multidim_image_platform;
 
@@ -53,6 +55,9 @@ md::MultiDimImage<T> IcsAdapter::read()
     for (auto& plane : planes) {
         IcsGetDataBlock(m_ip, plane.data(), size * sizeof(T));
     }
+    // NOTE: a dirty hack for rewinding the ics file pointer since there is
+    // no support for that in libics and I don't want IcsClose/IcsOpen all the time
+    std::rewind(((Ics_BlockRead*)m_ip->blockRead)->dataFilePtr);
     return im;
 }
 

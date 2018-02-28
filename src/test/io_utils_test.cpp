@@ -105,7 +105,7 @@ SCENARIO("ics read assets/128x128x32_c1_t1_float32.ics", "[core/io_utils]")
     REQUIRE(imDouble.at({69, 26, 0, 0, 0}) == 1.0);
     REQUIRE(imDouble.at({69, 26, 1, 0, 0}) == 1.0);
     REQUIRE(imDouble.at({69, 26, 15, 0, 0}) == 1.0);
-    REQUIRE(imDouble.at({69, 26, 31, 0, 0}) == 1.0f);
+    REQUIRE(imDouble.at({69, 26, 31, 0, 0}) == 1.0);
 
     REQUIRE(imDouble.at({49, 67, 0, 0, 0}) == 0.5234375);
     REQUIRE(imDouble.at({49, 67, 1, 0, 0}) == 0.5234375);
@@ -121,6 +121,35 @@ SCENARIO("ics read assets/128x128x32_c1_t1_float32.ics", "[core/io_utils]")
     REQUIRE(imDouble.at({45, 46, 5, 0, 0}) == 1.0);
     REQUIRE(imDouble.at({44, 38, 8, 0, 0}) == 0.296875);
     REQUIRE(imDouble.at({44, 38, 13, 0, 0}) == 1.0);
+
+    MultiDimImage<uint8_t> imUint8 = ics.readScaledConvert<uint8_t>();
+
+    REQUIRE(imUint8.dims() == 5);
+    REQUIRE(imUint8.dim(0) == 128);
+    REQUIRE(imUint8.dim(1) == 128);
+    REQUIRE(imUint8.dim(2) == 32);
+    REQUIRE(imUint8.dim(3) == 1);
+    REQUIRE(imUint8.dim(4) == 1);
+    REQUIRE(imUint8.at({5, 4, 0, 0, 0}) == 0.0);
+    REQUIRE(imUint8.at({5, 4, 1, 0, 0}) == 0.0);
+    REQUIRE(imUint8.at({5, 4, 15, 0, 0}) == 0.0);
+    REQUIRE(imUint8.at({5, 4, 31, 0, 0}) == 0.0);
+    REQUIRE(imUint8.at({69, 26, 0, 0, 0}) == static_cast<uint8_t>(255));
+    REQUIRE(imUint8.at({69, 26, 1, 0, 0}) == static_cast<uint8_t>(255));
+    REQUIRE(imUint8.at({69, 26, 15, 0, 0}) == static_cast<uint8_t>(255));
+    REQUIRE(imUint8.at({69, 26, 31, 0, 0}) == static_cast<uint8_t>(255));
+    REQUIRE(imUint8.at({49, 67, 0, 0, 0}) == static_cast<uint8_t>(0.5234375 * 255));
+    REQUIRE(imUint8.at({49, 67, 1, 0, 0}) == static_cast<uint8_t>(0.5234375 * 255));
+    REQUIRE(imUint8.at({49, 67, 7, 0, 0}) == static_cast<uint8_t>(0.5234375 * 255));
+    REQUIRE(imUint8.at({49, 67, 29, 0, 0}) == static_cast<uint8_t>(0.5234375 * 255));
+    REQUIRE(imUint8.at({36, 91, 0, 0, 0}) == static_cast<uint8_t>(0.7109375 * 255));
+    REQUIRE(imUint8.at({36, 91, 1, 0, 0}) == static_cast<uint8_t>(0.7109375 * 255));
+    REQUIRE(imUint8.at({36, 91, 9, 0, 0}) == static_cast<uint8_t>(0.7109375 * 255));
+    REQUIRE(imUint8.at({36, 91, 17, 0, 0}) == static_cast<uint8_t>(0.7109375 * 255));
+    REQUIRE(imUint8.at({45, 46, 4, 0, 0}) == static_cast<uint8_t>(0.359375 * 255));
+    REQUIRE(imUint8.at({45, 46, 5, 0, 0}) == static_cast<uint8_t>(1.0 * 255));
+    REQUIRE(imUint8.at({44, 38, 8, 0, 0}) == static_cast<uint8_t>(0.296875 * 255));
+    REQUIRE(imUint8.at({44, 38, 13, 0, 0}) == static_cast<uint8_t>(1.0 * 255));
 
     ics.close();
 
