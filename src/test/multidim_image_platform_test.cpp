@@ -699,3 +699,197 @@ SCENARIO("converting between types with saturation", "[core/multidim_image_platf
         
     }
 }
+
+SCENARIO("tests for scaledCopyFrom", "[core/multidim_image_platform]")
+{
+    GIVEN("an uint8 image") {
+        MultiDimImage<std::uint8_t> im({16, 24});
+        im.at({7, 9}) = 42;
+        im.at({7, 10}) = 0;
+        im.at({7, 11}) = 255;
+
+        WHEN("converted to uint8 image") {
+            MultiDimImage<std::uint8_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("nothing is changed") {
+                REQUIRE(dst.at({7, 9}) == static_cast<uint8_t>(42));
+                REQUIRE(dst.at({7, 10}) == static_cast<uint8_t>(0));
+                REQUIRE(dst.at({7, 11}) == static_cast<uint8_t>(255));
+            }
+        }
+
+        WHEN("converted to float image") {
+            MultiDimImage<float> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 42.0f/255.0f);
+                REQUIRE(dst.at({7, 10}) == 0.0f);
+                REQUIRE(dst.at({7, 11}) == 1.0f);
+            }
+        }
+
+        WHEN("converted to double image") {
+            MultiDimImage<double> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 42.0/255.0);
+                REQUIRE(dst.at({7, 10}) == 0.0);
+                REQUIRE(dst.at({7, 11}) == 1.0);
+            }
+        }
+
+        WHEN("converted to double image") {
+            MultiDimImage<std::int8_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == -86);
+                REQUIRE(dst.at({7, 10}) == -128);
+                REQUIRE(dst.at({7, 11}) == 127);
+            }
+        }
+
+        WHEN("converted to uint32 image") {
+            MultiDimImage<std::uint32_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 707406378);
+                REQUIRE(dst.at({7, 10}) == 0);
+                REQUIRE(dst.at({7, 11}) == 4294967295);
+            }
+        }
+
+        WHEN("converted to int32 image") {
+            MultiDimImage<std::int32_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == -1440077270);
+                REQUIRE(dst.at({7, 10}) == -2147483648);
+                REQUIRE(dst.at({7, 11}) == 2147483647);
+            }
+        }
+
+        WHEN("converted to uint64 image") {
+            MultiDimImage<std::uint64_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 3038287259199220266ul);
+                REQUIRE(dst.at({7, 10}) == 0ul);
+                REQUIRE(dst.at({7, 11}) == 18446744073709551615ul);
+            }
+        }
+    }
+
+    GIVEN("an double image") {
+        MultiDimImage<double> im({16, 24});
+        im.at({7, 9}) = 0.3141519;
+        im.at({7, 10}) = 0.0;
+        im.at({7, 11}) = 1.0;
+
+        WHEN("converted to double image") {
+            MultiDimImage<double> dst;
+            dst.scaledCopyFrom(im);
+            THEN("nothing is changed") {
+                REQUIRE(dst.at({7, 9}) == 0.3141519);
+                REQUIRE(dst.at({7, 10}) == 0.0);
+                REQUIRE(dst.at({7, 11}) == 1.0);
+            }
+        }
+
+        WHEN("converted to uint8 image") {
+            MultiDimImage<std::uint8_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 80);
+                REQUIRE(dst.at({7, 10}) == 0);
+                REQUIRE(dst.at({7, 11}) == 255);
+            }
+        }
+
+        WHEN("converted to float image") {
+            MultiDimImage<float> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 0.3141519f);
+                REQUIRE(dst.at({7, 10}) == 0.0f);
+                REQUIRE(dst.at({7, 11}) == 1.0f);
+            }
+        }
+
+        WHEN("converted to uint16 image") {
+            MultiDimImage<std::uint16_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 20587);
+                REQUIRE(dst.at({7, 10}) == 0);
+                REQUIRE(dst.at({7, 11}) == 65535);
+            }
+        }
+
+        WHEN("converted to int64 image") {
+            MultiDimImage<std::int64_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == -3428292337285180416l);
+                REQUIRE(dst.at({7, 10}) == -9223372036854775807l - 1);
+                REQUIRE(dst.at({7, 11}) == 9223372036854775807l);
+            }
+        }
+    }
+
+    GIVEN("an uint64 image") {
+        MultiDimImage<std::uint64_t> im({16, 24});
+        im.at({7, 9}) = 422024202420242024ul;
+        im.at({7, 10}) = 0ul;
+        im.at({7, 11}) = 18446744073709551615ul;
+
+        WHEN("converted to uint64 image") {
+            MultiDimImage<std::uint64_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("nothing is changed") {
+                REQUIRE(dst.at({7, 9}) == 422024202420242024ul);
+                REQUIRE(dst.at({7, 10}) == 0ul);
+                REQUIRE(dst.at({7, 11}) == 18446744073709551615ul);
+            }
+        }
+
+        WHEN("converted to uint8 image") {
+            MultiDimImage<std::uint8_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 5);
+                REQUIRE(dst.at({7, 10}) == 0);
+                REQUIRE(dst.at({7, 11}) == 255);
+            }
+        }
+
+        WHEN("converted to float image") {
+            MultiDimImage<float> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 0.022877977855274434037238338882041612770106873437608516889f);
+                REQUIRE(dst.at({7, 10}) == 0.0f);
+                REQUIRE(dst.at({7, 11}) == 1.0f);
+            }
+        }
+
+        WHEN("converted to double image") {
+            MultiDimImage<double> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == 0.022877977855274434037238338882041612770106873437608516889);
+                REQUIRE(dst.at({7, 10}) == 0.0);
+                REQUIRE(dst.at({7, 11}) == 1.0);
+            }
+        }
+
+        WHEN("converted to int64 image") {
+            MultiDimImage<std::int64_t> dst;
+            dst.scaledCopyFrom(im);
+            THEN("the values converted correctly") {
+                REQUIRE(dst.at({7, 9}) == -8801347834434533784l);
+                REQUIRE(dst.at({7, 10}) == -9223372036854775807l - 1);
+                REQUIRE(dst.at({7, 11}) == 9223372036854775807l);
+            }
+        }
+    }
+}

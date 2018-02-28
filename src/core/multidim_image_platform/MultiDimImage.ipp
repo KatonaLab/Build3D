@@ -203,6 +203,42 @@ void MultiDimImage<T>::saturateCopyFrom(const MultiDimImage<U>& other,
 }
 
 template <typename T>
+template <typename U>
+void MultiDimImage<T>::scaledCopyFrom(const MultiDimImage<U>& other)
+{
+    // NOTE: converting from or to long double image has problems at precision borders!
+    long double fromMin = 0;
+    long double fromRange = 0;
+    long double toMin = 0;
+    long double toRange = 0;
+
+    if (std::is_floating_point<U>::value) {
+        fromMin = 0;
+        fromRange = 1;
+    } else {
+        fromMin = static_cast<long double>(std::numeric_limits<U>::min());
+        fromRange = static_cast<long double>(std::numeric_limits<U>::max())
+            - static_cast<long double>(std::numeric_limits<U>::min());
+    }
+
+    if (std::is_floating_point<T>::value) {
+        toMin = 0;
+        toRange = 1;
+    } else {
+        toMin = static_cast<long double>(std::numeric_limits<T>::min());
+        toRange = static_cast<long double>(std::numeric_limits<T>::max())
+            - static_cast<long double>(std::numeric_limits<T>::min());
+    }
+
+    long double ratio = toRange / fromRange;
+
+    std::function<T(const U&)> f = [fromMin, toMin, ratio](const U& x) -> T {
+        return static_cast<T>((x - fromMin) * ratio + toMin);
+    };
+    transformCopy(other, f);
+}
+
+template <typename T>
 bool MultiDimImage<T>::empty() const
 {
     return m_dims.empty() || std::any_of(m_dims.begin(), m_dims.end(),

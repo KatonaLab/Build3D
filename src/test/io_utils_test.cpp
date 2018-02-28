@@ -48,6 +48,12 @@ SCENARIO("ics read assets/128x128x32_c1_t1_float32.ics", "[core/io_utils]")
     REQUIRE(ics.dataType() != type_index(typeid(uint32_t)));
     REQUIRE(ics.dataType() != type_index(typeid(uint64_t)));
     
+    REQUIRE_THROWS(ics.read<uint8_t>());
+    REQUIRE_THROWS(ics.read<uint16_t>());
+    REQUIRE_THROWS(ics.read<int8_t>());
+    REQUIRE_THROWS(ics.read<double>());
+    REQUIRE_THROWS(ics.read<int64_t>());
+
     MultiDimImage<float> im = ics.read<float>();
 
     REQUIRE(im.dims() == 5);
@@ -81,6 +87,40 @@ SCENARIO("ics read assets/128x128x32_c1_t1_float32.ics", "[core/io_utils]")
     REQUIRE(im.at({45, 46, 5, 0, 0}) == 1.0f);
     REQUIRE(im.at({44, 38, 8, 0, 0}) == 0.296875f);
     REQUIRE(im.at({44, 38, 13, 0, 0}) == 1.0f);
+
+    MultiDimImage<double> imDouble = ics.readScaledConvert<double>();
+
+    REQUIRE(imDouble.dims() == 5);
+    REQUIRE(imDouble.dim(0) == 128);
+    REQUIRE(imDouble.dim(1) == 128);
+    REQUIRE(imDouble.dim(2) == 32);
+    REQUIRE(imDouble.dim(3) == 1);
+    REQUIRE(imDouble.dim(4) == 1);
+
+    REQUIRE(imDouble.at({5, 4, 0, 0, 0}) == 0.0);
+    REQUIRE(imDouble.at({5, 4, 1, 0, 0}) == 0.0);
+    REQUIRE(imDouble.at({5, 4, 15, 0, 0}) == 0.0);
+    REQUIRE(imDouble.at({5, 4, 31, 0, 0}) == 0.0);
+
+    REQUIRE(imDouble.at({69, 26, 0, 0, 0}) == 1.0);
+    REQUIRE(imDouble.at({69, 26, 1, 0, 0}) == 1.0);
+    REQUIRE(imDouble.at({69, 26, 15, 0, 0}) == 1.0);
+    REQUIRE(imDouble.at({69, 26, 31, 0, 0}) == 1.0f);
+
+    REQUIRE(imDouble.at({49, 67, 0, 0, 0}) == 0.5234375);
+    REQUIRE(imDouble.at({49, 67, 1, 0, 0}) == 0.5234375);
+    REQUIRE(imDouble.at({49, 67, 7, 0, 0}) == 0.5234375);
+    REQUIRE(imDouble.at({49, 67, 29, 0, 0}) == 0.5234375);
+
+    REQUIRE(imDouble.at({36, 91, 0, 0, 0}) == 0.7109375);
+    REQUIRE(imDouble.at({36, 91, 1, 0, 0}) == 0.7109375);
+    REQUIRE(imDouble.at({36, 91, 9, 0, 0}) == 0.7109375);
+    REQUIRE(imDouble.at({36, 91, 17, 0, 0}) == 0.7109375);
+
+    REQUIRE(imDouble.at({45, 46, 4, 0, 0}) == 0.359375);
+    REQUIRE(imDouble.at({45, 46, 5, 0, 0}) == 1.0);
+    REQUIRE(imDouble.at({44, 38, 8, 0, 0}) == 0.296875);
+    REQUIRE(imDouble.at({44, 38, 13, 0, 0}) == 1.0);
 
     ics.close();
 

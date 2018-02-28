@@ -17,6 +17,7 @@ class IcsAdapter {
 public:
     bool open(const std::string& filename);
     template <typename T> md::MultiDimImage<T> read();
+    template <typename T> md::MultiDimImage<T> readScaledConvert();
     template <typename T> void write(const std::string& filename, const md::MultiDimImage<T>& data);
     std::type_index dataType() const;
     bool valid() const;
@@ -35,22 +36,7 @@ template <typename T>
 md::MultiDimImage<T> IcsAdapter::read()
 {
     if (std::type_index(typeid(T)) != dataType()) {
-        md::MultiDimImage<T> im;
-        switch (m_dt) {
-            case Ics_uint8: im. saturateCopyFrom(read<uint8_t>()); break;
-            case Ics_sint8: im. saturateCopyFrom(read<int8_t>()); break;
-            case Ics_uint16: im.saturateCopyFrom(read<uint16_t>()); break;
-            case Ics_sint16: im.saturateCopyFrom(read<int16_t>()); break;
-            case Ics_uint32: im.saturateCopyFrom(read<uint32_t>()); break;
-            case Ics_sint32: im.saturateCopyFrom(read<int32_t>()); break;
-            case Ics_real32: im.saturateCopyFrom(read<float>()); break;
-            case Ics_real64: im.saturateCopyFrom(read<double>()); break;
-            case Ics_complex32:
-            case Ics_complex64:
-            case Ics_unknown:
-            default: throw std::runtime_error("unsupported data type for read in '" + m_filename + "'");
-        }
-        return im;
+        throw std::runtime_error("image object and ics file data type mismatch in '" + m_filename + "'");
     }
 
     md::MultiDimImage<T> im(m_dims);
@@ -64,7 +50,6 @@ md::MultiDimImage<T> IcsAdapter::read()
     }
 
     auto& planes = im.unsafeData();
-    std::size_t k = 0;
     for (auto& plane : planes) {
         IcsGetDataBlock(m_ip, plane.data(), size * sizeof(T));
     }
@@ -72,7 +57,32 @@ md::MultiDimImage<T> IcsAdapter::read()
 }
 
 template <typename T>
-void IcsAdapter::write(const std::string& filename, const md::MultiDimImage<T>& data)
+md::MultiDimImage<T> IcsAdapter::readScaledConvert()
+{
+    if (std::type_index(typeid(T)) != dataType()) {
+        md::MultiDimImage<T> im;
+        switch (m_dt) {
+            case Ics_uint8:  im.scaledCopyFrom(read<uint8_t>()); break;
+            case Ics_sint8:  im.scaledCopyFrom(read<int8_t>()); break;
+            case Ics_uint16: im.scaledCopyFrom(read<uint16_t>()); break;
+            case Ics_sint16: im.scaledCopyFrom(read<int16_t>()); break;
+            case Ics_uint32: im.scaledCopyFrom(read<uint32_t>()); break;
+            case Ics_sint32: im.scaledCopyFrom(read<int32_t>()); break;
+            case Ics_real32: im.scaledCopyFrom(read<float>()); break;
+            case Ics_real64: im.scaledCopyFrom(read<double>()); break;
+            case Ics_complex32:
+            case Ics_complex64:
+            case Ics_unknown:
+            default: throw std::runtime_error("unsupported data type for scaled convert read in '" + m_filename + "'");
+        }
+        return im;
+    }
+
+    return read<T>();
+}
+
+template <typename T>
+void IcsAdapter::write(const std::string& /*filename*/, const md::MultiDimImage<T>& /*data*/)
 {
     // TODO:
 }

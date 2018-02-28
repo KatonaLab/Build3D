@@ -98,6 +98,8 @@ namespace multidim_image_platform {
         void saturateCopyFrom(const MultiDimImage<U>& other,
             T minValue = std::numeric_limits<T>::lowest(),
             T maxValue = std::numeric_limits<T>::max());
+        template <typename U>
+        void scaledCopyFrom(const MultiDimImage<U>& other);
 
         bool empty() const;
         std::size_t size() const;
