@@ -7,6 +7,30 @@
 using namespace core::multidim_image_platform;
 using namespace std;
 
+SCENARIO("indexing test", "[core/multidim_image_platform]")
+{
+    using namespace core::multidim_image_platform::detail;
+
+    REQUIRE(flatCoordinate({0, 0}, {2, 1024}) == 0);
+    REQUIRE(flatCoordinate({1, 0}, {2, 1024}) == 1);
+    REQUIRE(flatCoordinate({0, 1}, {2, 1024}) == 2);
+    REQUIRE(flatCoordinate({0, 2}, {2, 1024}) == 4);
+    REQUIRE(flatCoordinate({0, 1023}, {2, 1024}) == 2 * 1023);
+    REQUIRE(flatCoordinate({1, 1}, {2, 1024}) == 3);
+    REQUIRE(flatCoordinate({1, 2}, {2, 1024}) == 5);
+    REQUIRE(flatCoordinate({1, 1023}, {2, 1024}) == 2 * 1024 - 1);
+
+    REQUIRE(flatCoordinate({0, 0}, {1024, 20}) == 0);
+    REQUIRE(flatCoordinate({1, 0}, {1024, 20}) == 1);
+    REQUIRE(flatCoordinate({2, 0}, {1024, 20}) == 2);
+    REQUIRE(flatCoordinate({0, 1}, {1024, 20}) == 1024);
+    REQUIRE(flatCoordinate({0, 2}, {1024, 20}) == 2 * 1024);
+    REQUIRE(flatCoordinate({0, 19}, {1024, 20}) == 19 * 1024);
+    REQUIRE(flatCoordinate({1, 1}, {1024, 20}) == 1025);
+    REQUIRE(flatCoordinate({2, 1}, {1024, 20}) == 1026);
+    REQUIRE(flatCoordinate({1023, 19}, {1024, 20}) == 20 * 1024 - 1);
+}
+
 SCENARIO("multidim image basic usage", "[core/multidim_image_platform]")
 {
     GIVEN("two images, an empty and a 2d image with some content") {

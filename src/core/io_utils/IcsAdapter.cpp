@@ -34,6 +34,19 @@ bool IcsAdapter::open(const std::string& filename)
     }
     m_dims.resize(n);
     m_dims.shrink_to_fit();
+
+    // for (int i = 0; i < ICS_MAX_IMEL_SIZE; ++i) {
+    //     cout << m_ip->byteOrder[i] << "\n";
+    // }
+    // cout << "---\n";
+    // size_t sb;
+    // IcsGetSignificantBits(m_ip, &sb);
+    // cout << sb << " <------\n\n";
+
+    // cout << ": " << endl;
+    // for (int i = 0; i < m_dims.size(); ++i) {
+    //     cout << "dim " << m_dims[i] << endl;
+    // }
     // throw unsupported dtype if needed
     dataType();
     return true;

@@ -167,8 +167,8 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
                 py::exec(R"(
                     import numpy as np
                     p = x.plane([1, 2])
-                    y = p[17, 19] == 42
-                    p[17, 19] = 255
+                    y = p[19, 17] == 42
+                    p[19, 17] = 255
                 )", py::globals(), locals);
                 
                 bool y = locals["y"].cast<bool>();
@@ -187,7 +187,7 @@ SCENARIO("test pybind11 python binding: a3dc.MultiDimImage", "[core/high_platfor
             import numpy as np
             x = a3dc.MultiDimImageUInt8([16, 16, 3, 4])
             p = x.plane([1, 2])
-            p[7, 9] = 42
+            p[9, 7] = 42
         )", py::globals(), locals);
         
         WHEN("passed to the cpp side") {

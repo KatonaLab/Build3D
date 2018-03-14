@@ -39,8 +39,8 @@ std::size_t detail::flatCoordinate(
     if (coords.empty()) {
         return 0;
     }
-    auto itD = dims.rbegin();
-    auto itC = coords.rbegin();
+    auto itD = dims.begin();
+    auto itC = coords.begin();
     std::size_t x = 0;
     std::size_t dimMult = 1;
 
