@@ -2,6 +2,7 @@
 #include <core/io_utils/IcsAdapter.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
+#include <iomanip>
 #include <fstream>
 
 using namespace core::io_utils;
@@ -133,92 +134,107 @@ SCENARIO("ics read assets/128x128x32_c1_t1_float32.ics", "[core/io_utils]")
     REQUIRE(ics.valid() == false);
 }
 
+template <typename T>
+void writePGM(MultiDimImage<T>& image, std::string fname)
+{
+    // MultiDimImage<uint8_t> tmp;
+    // tmp.scaledCopyFrom(image);
+
+    ofstream ofile;
+    ofile.open(fname + ".pgm");
+
+    auto& planes = image.unsafeData();
+
+    ofile << "P2\n" << image.dim(0) << " " << image.dim(1) << "\n255\n";
+    int c = 0;
+    for (int i = 0; i < image.dim(0); ++i) {
+        for (int j = 0; j < image.dim(1); ++j) {
+            // uint8_t z = std::max(std::min((uint8_t)round(planes[0][c++]), (uint8_t)255), (uint8_t)0);
+            // z = (uint8_t)i;
+            ofile << (int)(planes[0][c++]*0.01) << " ";
+        }
+        // cout << (int)z << " ";
+        ofile << "\n";
+    }
+
+    // ofile << "P2\n256 256\n255\n";
+
+    // int c = 0;
+    // for (int i = 0; i < 256; ++i) {
+    //     for (int j = 0; j < 256; ++j) {
+    //         uint8_t z = (uint8_t)i;
+    //         ofile << "127 ";
+    //     }
+    //     ofile << "\n";
+    // }
+
+    // std::ostream_iterator<std::string> oi(ofile, " ");
+    // std::copy(planes[0].begin(), planes[0].end(), oi);
+
+    // ofile.write(reinterpret_cast<const char*>(planes[0].data()), sizeof(char) * planes[0].size());
+    // for (auto& plane : planes) {
+    //     ofile.write(reinterpret_cast<const char*>(plane.data()), sizeof(T) * plane.size());
+    // }
+
+    ofile.close();
+}
+
 SCENARIO("ics read assets/B23_4_b_DAPI_TH_vGluT1_bassoon_60x_cmle.ics", "[core/io_utils]")
 {
     IcsAdapter ics;
     REQUIRE(ics.open("assets/B23_4_b_DAPI_TH_vGluT1_bassoon_60x_cmle.ics") == true);
 
-//     REQUIRE(ics.valid() == true);
-//     //REQUIRE(ics.dataType() == type_index(typeid(uint16_t)));
-//     REQUIRE(ics.dataType() == type_index(typeid(float)));
-    
-//     // REQUIRE(ics.dataType() != type_index(typeid(float)));
-//     REQUIRE(ics.dataType() != type_index(typeid(double)));
-//     REQUIRE(ics.dataType() != type_index(typeid(int8_t)));
-//     REQUIRE(ics.dataType() != type_index(typeid(int16_t)));
-//     REQUIRE(ics.dataType() != type_index(typeid(int32_t)));
-//     REQUIRE(ics.dataType() != type_index(typeid(int64_t)));
-//     REQUIRE(ics.dataType() != type_index(typeid(uint8_t)));
-//     REQUIRE(ics.dataType() != type_index(typeid(uint32_t)));
-//     REQUIRE(ics.dataType() != type_index(typeid(uint64_t)));
+    REQUIRE(ics.valid() == true);
+    REQUIRE(ics.dataType() == type_index(typeid(float)));
 
-//     // REQUIRE_THROWS(ics.read<float>());
-//     REQUIRE_THROWS(ics.read<double>());
-//     REQUIRE_THROWS(ics.read<int8_t>());
-//     REQUIRE_THROWS(ics.read<int64_t>());
-//     REQUIRE_THROWS(ics.read<uint8_t>());
-//     REQUIRE_THROWS(ics.read<uint64_t>());
+    REQUIRE(ics.dataType() != type_index(typeid(double)));
+    REQUIRE(ics.dataType() != type_index(typeid(int8_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int16_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int32_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(int64_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint8_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint32_t)));
+    REQUIRE(ics.dataType() != type_index(typeid(uint64_t)));
 
-//     // MultiDimImage<uint16_t> im = ics.read<uint16_t>();
-//     MultiDimImage<float> im = ics.read<float>();
+    REQUIRE_THROWS(ics.read<double>());
+    REQUIRE_THROWS(ics.read<int8_t>());
+    REQUIRE_THROWS(ics.read<int64_t>());
+    REQUIRE_THROWS(ics.read<uint8_t>());
+    REQUIRE_THROWS(ics.read<uint64_t>());
 
-//     REQUIRE(im.dims() == 4);
-//     REQUIRE(im.dim(0) == 2048);
-//     REQUIRE(im.dim(1) == 2048);
-//     REQUIRE(im.dim(2) == 15);
-//     REQUIRE(im.dim(3) == 4);
-    
-//     REQUIRE(im.at({0, 0, 0, 0}) == 216);
+    MultiDimImage<float> im = ics.read<float>();
 
-//     // im.reorderDims({1, 2, 3, 0});
+    REQUIRE(im.dims() == 4);
+    REQUIRE(im.dim(0) == 2048);
+    REQUIRE(im.dim(1) == 2048);
+    REQUIRE(im.dim(2) == 15);
+    REQUIRE(im.dim(3) == 4);
 
-//     // for (size_t i = 0; i < 20; ++i) {
-//     //     ofstream myfile;
-//     //     myfile.open("plane" + to_string(i) + ".pgm");
-//     //     myfile << "P2\n";
-//     //     myfile << "1024 1024\n";
-//     //     myfile << "65535\n";
-//     //     for (size_t v = 0; v < 1024; ++v) {
-//     //         for (size_t u = 0; u < 1024; ++u) {
-//     //             auto x = im.at({0, v, u, i});
-//     //             myfile << (uint16_t)(x) << " ";
-//     //         }
-//     //         myfile << "\n";
-//     //         if (v % 100 == 0) {
-//     //             cout << "row " << v << endl;
-//     //         }
-//     //     }
-//     //     myfile.close();
-//     //     cout << "done " << i << endl;
-//     // }
+    REQUIRE(im.at({0, 0, 0, 0}) == 206.9238433837890625);
+    REQUIRE(im.at({1, 0, 0, 0}) == 256.381744384765625);
+    REQUIRE(im.at({0, 1, 0, 0}) == 165.5158843994140625);
+    REQUIRE(im.at({0, 0, 1, 0}) == 340.086639404296875);
+    REQUIRE(im.at({0, 0, 0, 1}) == 162.71307373046875);
+    REQUIRE(im.at({2047, 0, 0, 0}) == 29.1736927032470703125);
+    REQUIRE(im.at({0, 2047, 0, 0}) == 282.6539306640625);
+    REQUIRE(im.at({2047, 2047, 0, 0}) == 112.78113555908203125);
 
-//     // REQUIRE(im.at({0, 0, 0, 0}) == 216);
-//     // REQUIRE(im.at({0, 0, 0, 0}) == 53);
-//     // REQUIRE(im.at({1, 585, 429, 3}) == 1060);
-//     // REQUIRE(im.at({1, 606, 435, 3}) == 1060);
-//     // REQUIRE(im.at({0, 716, 645, 7}) == 4095);
-//     // REQUIRE(im.at({0, 725, 638, 7}) == 375);
-//     // REQUIRE(im.at({1, 785, 587, 13}) == 960);
-//     // REQUIRE(im.at({1, 775, 644, 13}) == 469);
+    ics.close();
 
-//     ics.close();
-
-//     REQUIRE(ics.valid() == false);
+    REQUIRE(ics.valid() == false);
 }
 
-template <typename T>
-void writeBinary(MultiDimImage<T>& image, std::string fname)
-{
-    ofstream ofile;
-    ofile.open(fname, fstream::out | fstream::binary);
-    auto& planes = image.unsafeData();
-    // cout << planes.size() << "\n";
-    // cout << planes[0].size() << "\n";
-    for (auto& plane : planes) {
-        ofile.write(reinterpret_cast<const char*>(plane.data()), sizeof(T) * plane.size());
-    }
-    ofile.close();
-}
+// template <typename T>
+// void writeBinary(MultiDimImage<T>& image, std::string fname)
+// {
+//     ofstream ofile;
+//     ofile.open(fname, fstream::out | fstream::binary);
+//     auto& planes = image.unsafeData();
+//     for (auto& plane : planes) {
+//         ofile.write(reinterpret_cast<const char*>(plane.data()), sizeof(T) * plane.size());
+//     }
+//     ofile.close();
+// }
 
 SCENARIO("ics read assets/A15_1_a_DAPI_TH__vGluT1_20x.ics", "[core/io_utils]")
 {
