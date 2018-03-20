@@ -15,6 +15,10 @@
 #include "version.h"
 // #include "volumetric.h"
 
+#include "VolumeData.h"
+#include "VolumeDataCollection.h"
+#include "VolumeTexture.h"
+
 #ifdef _WIN32
     #include <windows.h>
 #else
@@ -98,9 +102,8 @@ int main(int argc, char* argv[])
 
     setSurfaceFormat();
 
-    // qmlRegisterType<VolumetricData>("koki.katonalab.a3dc", 1, 0, "VolumetricData");
-    // qmlRegisterType<VolumetricDataManager>("koki.katonalab.a3dc", 1, 0, "VolumetricDataManager");
-    // qmlRegisterType<VolumetricTexture>("koki.katonalab.a3dc", 1, 0, "VolumetricTexture");
+    qmlRegisterType<VolumeDataCollection>("koki.katonalab.a3dc", 1, 0, "VolumeDataCollection");
+    qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {

@@ -13,7 +13,8 @@ Item {
     property vector3d storedVolumeSize: Qt.vector3d(0, 0, 0)
 
     function onDispatched(actionType, args) {
-        // TODO: find a better way for action response than a switch/case
+        // TODO: find a better way for action response than a switch/case,
+        // maybe: dict of functions, where actiontype is the key
         switch (actionType) {
             case ActionTypes.addSourceNode:
                 var path = "../views/nodes/SourceNodeView.qml";

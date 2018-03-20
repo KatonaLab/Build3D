@@ -3,6 +3,7 @@ CONFIG += c++11
 # for crashpad
 CONFIG += force_debug_info
 CONFIG += separate_debug_info
+# CONFIG -= app_bundle
 
 # used in version.h/cpp
 DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --abbrev=8 --dirty --always --tags)
@@ -24,15 +25,23 @@ win32 {
 }
 
 HEADERS += \
+    VolumeData.h \
+    VolumeDataCollection.h \
+    VolumeTexture.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
     ../../lib/libics/libics.h \
     ../../lib/libics/libics_sensor.h
 
-SOURCES +=  \
+SOURCES += \
     ../util/version.cpp \
+    VolumeData.cpp \
+    VolumeDataCollection.cpp \
+    VolumeTexture.cpp \
     main.cpp \
+
+SOURCES +=  \
     ../../lib/libics/libics_preview.c \
     ../../lib/libics/libics_read.c \
     ../../lib/libics/libics_top.c \
@@ -61,6 +70,7 @@ SOURCES += \
 RESOURCES += resources.qrc
 
 INCLUDEPATH += \
+    ../ \
     ../util \
     ../core \
     ../../lib/libics \
