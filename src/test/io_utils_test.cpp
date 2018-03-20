@@ -219,6 +219,23 @@ SCENARIO("ics read assets/B23_4_b_DAPI_TH_vGluT1_bassoon_60x_cmle.ics", "[core/i
     REQUIRE(im.at({0, 2047, 0, 0}) == 282.6539306640625);
     REQUIRE(im.at({2047, 2047, 0, 0}) == 112.78113555908203125);
 
+    im = ics.read<float>(true);
+
+    REQUIRE(im.dims() == 4);
+    REQUIRE(im.dim(0) == 2048);
+    REQUIRE(im.dim(1) == 2048);
+    REQUIRE(im.dim(2) == 15);
+    REQUIRE(im.dim(3) == 4);
+
+    REQUIRE(im.at({0, 0, 0, 0}) == 206.9238433837890625);
+    REQUIRE(im.at({1, 0, 0, 0}) == 256.381744384765625);
+    REQUIRE(im.at({0, 1, 0, 0}) == 165.5158843994140625);
+    REQUIRE(im.at({0, 0, 1, 0}) == 340.086639404296875);
+    REQUIRE(im.at({0, 0, 0, 1}) == 162.71307373046875);
+    REQUIRE(im.at({2047, 0, 0, 0}) == 29.1736927032470703125);
+    REQUIRE(im.at({0, 2047, 0, 0}) == 282.6539306640625);
+    REQUIRE(im.at({2047, 2047, 0, 0}) == 112.78113555908203125);
+
     ics.close();
 
     REQUIRE(ics.valid() == false);
@@ -283,6 +300,29 @@ SCENARIO("ics read assets/A15_1_a_DAPI_TH__vGluT1_20x.ics", "[core/io_utils]")
     REQUIRE(im.at({1, 336, 760, 15}) == 4095);
     REQUIRE(im.at({1, 331, 724, 15}) == 2702);
     REQUIRE(im.at({1, 328, 752, 9}) == 2032);
+
+    im = ics.read<uint16_t>(true);
+
+    REQUIRE(im.dims() == 4);
+    REQUIRE(im.dim(0) == 1024);
+    REQUIRE(im.dim(1) == 1024);
+    REQUIRE(im.dim(2) == 20);
+    REQUIRE(im.dim(3) == 2);
+
+    REQUIRE(im.at({0, 0, 0, 0}) == 216);
+    REQUIRE(im.at({0, 0, 0, 1}) == 96);
+    REQUIRE(im.at({1, 0, 0, 0}) == 53);
+    REQUIRE(im.at({0, 1, 0, 0}) == 227);
+    REQUIRE(im.at({0, 0, 1, 0}) == 121);
+
+    REQUIRE(im.at({378, 709, 19, 0}) == 1954);
+    REQUIRE(im.at({738, 805, 4 , 0}) == 773);
+    REQUIRE(im.at({375, 708, 15, 0}) == 2238);
+    REQUIRE(im.at({667, 684, 15, 0}) == 501);
+    REQUIRE(im.at({686, 671, 15, 1}) == 1028);
+    REQUIRE(im.at({336, 760, 15, 1}) == 4095);
+    REQUIRE(im.at({331, 724, 15, 1}) == 2702);
+    REQUIRE(im.at({328, 752, 9 , 1}) == 2032);
 
     ics.close();
 

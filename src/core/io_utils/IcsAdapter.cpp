@@ -1,6 +1,7 @@
 #include "IcsAdapter.h"
 
 #include <libics.h>
+#include <map>
 
 using namespace std;
 using namespace core;
@@ -35,86 +36,36 @@ bool IcsAdapter::open(const std::string& filename)
     m_dims.resize(n);
     m_dims.shrink_to_fit();
 
-    // for (int i = 0; i < ICS_MAX_IMEL_SIZE; ++i) {
-    //     cout << m_ip->byteOrder[i] << "\n";
-    // }
-    // cout << "---\n";
-    // size_t sb;
-    // IcsGetSignificantBits(m_ip, &sb);
-    // cout << sb << " <------\n\n";
+    map<char, int> orderMap;
+    for (int i = 0; i < n; ++i) {
+        char order[ICS_STRLEN_TOKEN];
+        char label[ICS_STRLEN_TOKEN];
+        IcsGetOrder(m_ip, i, order, label);
+        char d = tolower(order[0]);
+        switch (d) {
+            case 'x':
+            case 'y':
+            case 'z':
+            case 'c':
+            case 't':
+                orderMap[d] = i;
+                break;
+            default:
+                throw std::runtime_error("unknown dimension '" + string(order) + "'");
+        }
+    }
 
-    // cout << ": " << endl;
-    // for (int i = 0; i < m_dims.size(); ++i) {
-    //     cout << "dim " << m_dims[i] << endl;
-    // }
-    // throw unsupported dtype if needed
+    vector<char> dstOrder = {'x', 'y', 'z', 't', 'c'};
+    for (int i = 0; i < (int)dstOrder.size(); ++i) {
+        char d = dstOrder[i];
+        if (orderMap.count(d)) {
+            m_reorder.push_back(orderMap[d]);
+        }
+    }
+
+    // check valid type
     dataType();
     return true;
-
-    // for (int i = 0; i < m_dims.size(); ++i) {
-    //     cout << "dim " << i << endl;
-    //     cout << " size " << m_ip->dim[i].size << endl;
-    //     cout << " origin " << m_ip->dim[i].origin << endl;
-    //     cout << " scale " << m_ip->dim[i].scale << endl;
-    //     cout << " order " << m_ip->dim[i].order << endl;
-    //     cout << " label " << m_ip->dim[i].label << endl;
-    //     cout << " unit " << m_ip->dim[i].unit << endl;
-
-    //     // char order[ICS_STRLEN_TOKEN];
-    //     // char label[ICS_STRLEN_TOKEN];
-    //     // ICS_EC(IcsGetOrder(m_ip, i, order, label));
-    //     // cout << "order: " << order << ", label: " << label << endl;
-    // }
-
-    // double origin;
-    // double scale;
-    // char units[ICS_STRLEN_TOKEN];
-    // IcsGetImelUnits(m_ip, &origin, &scale, units);
-
-
-    // cout << origin << " " << scale << " " << units << endl;
-
-    // char coord[ICS_STRLEN_TOKEN];
-    // IcsGetCoordinateSystem(m_ip, &coord);
-    // cout << coord << endl;
-
-    // int n;
-    // IcsGetNumHistoryStrings(m_ip, &n);
-    // cout << n << endl;
-    // IcsGetOrder(m_ip, )
-    // IcsGetSensorChannels
-
-    // ICS_EC(IcsGetLayout(ip, &dt, &ndims, dims));
-    // if (typeMap.count(dt) == 0) {
-        // throw ICSError("not supported data type format");
-    // }
-
-    // for (int i = 0; i < ndims; ++i) {
-    //     char order[ICS_STRLEN_TOKEN];
-    //     char label[ICS_STRLEN_TOKEN];
-    //     ICS_EC(IcsGetOrder(ip, i, order, label));
-    //     channelLabels.push_back(label);
-    //     orderLabels.push_back(order);
-    // }
-
-    // if (orderLabels[0] == "x") {
-    //     cout << "x is the first dimension" << endl;
-    //     fillChannelData();
-    // } else if (orderLabels[0] == "ch") {
-    //     cout << "ch is the first dimension" << endl;
-    //     // ch, x, y, z
-    //     swap(dims[0], dims[3]); // z, x, y, ch
-    //     swap(dims[0], dims[2]); // y, x, z, ch
-    //     swap(dims[0], dims[1]); // x, y, z, ch
-
-    //     swap(channelLabels[0], channelLabels[3]);
-    //     swap(channelLabels[0], channelLabels[2]);
-    //     swap(channelLabels[0], channelLabels[1]);
-
-    //     fillChannelDataWithChannelFirstDim();
-    // } else {
-    //     throw ICSError("not supported data dimension order");
-    // }
 }
     
 std::type_index IcsAdapter::dataType() const
