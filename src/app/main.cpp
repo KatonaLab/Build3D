@@ -88,10 +88,10 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
-    if (startCrashHandler() == false) {
-        cout << "crash reporter could not start" << endl;
-        return -1;
-    }
+    // if (startCrashHandler() == false) {
+    //     cout << "crash reporter could not start" << endl;
+    //     return -1;
+    // }
 
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 

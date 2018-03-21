@@ -19,12 +19,12 @@ bool VolumeDataCollection::loadICS(const string& filename)
 
     size_t cn = 0;
     switch (m_image.dims()) {
-        case 3: cn = 1;
-        case 4: cn = m_image.dim(2);
+        case 3: cn = 1; break;
+        case 4: cn = m_image.dim(3); break;
         default:
             throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
     };
-    
+
     m_progress = 0.0f;
     emit progressChanged();
 

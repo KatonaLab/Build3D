@@ -56,7 +56,7 @@ Entity {
             width: model.size.x
             height: model.size.y
             depth: model.size.z
-            volumeData: model.data
+            volumeTexture: model.volumeTexture
 
             backFaceMap: renderSettings.backFaceMap
             // TODO: count only the visible channels
@@ -69,7 +69,8 @@ Entity {
             lutLowCut: model.nodeViewParams.lowCut
             lutHighCut: model.nodeViewParams.highCut
             Component.onCompleted: {
-                lutDataMax = model.data.dataLimits.y;
+                //lutDataMax = model.data.dataLimits.y;
+                lutDataMax = 1000.;
             }
         }
     }

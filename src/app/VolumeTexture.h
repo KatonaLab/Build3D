@@ -6,6 +6,7 @@
 #include <Qt3DRender/QAbstractTextureImage>
 #include <Qt3DRender/QTextureImageData>
 #include <Qt3DRender/QTextureImageDataGenerator>
+#include <QVector3D>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include "VolumeData.h"
 #include <memory>
@@ -38,9 +39,11 @@ typedef QSharedPointer<VolumeTextureImageDataGenerator> VolumeTextureImageDataGe
 class VolumeTexture : public Qt3DRender::QAbstractTexture {
     Q_OBJECT
     Q_PROPERTY(bool smooth READ smooth WRITE setSmooth)
+    Q_PROPERTY(QVector3D size READ size)
 public:
     explicit VolumeTexture(Qt3DCore::QNode* parent = nullptr);
     void init(core::multidim_image_platform::MultiDimImage<float>& source, std::size_t channel);
+    QVector3D size() const { return QVector3D(m_data->width(), m_data->height(), m_data->depth()); }
     virtual ~VolumeTexture() = default;
     bool smooth() const { return m_smooth; }
     void setSmooth(bool val);

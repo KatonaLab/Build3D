@@ -30,7 +30,7 @@ Item {
                 break;
             case ActionTypes.importIcsFile:
             case ActionTypes.autoImportIcsFile:
-                dataManager.source = args.url;
+                volumeCollection.source = args.url;
                 break;
             case ActionTypes.removeNode:
                 remove(args.uid)
@@ -61,22 +61,26 @@ Item {
 
         var item = {
             uid: uid,
-            nodeName: data.dataName,
+            nodeName: "dataname", //data.dataName,
             nodeViewPath: nodeViewPath,
             nodeViewParams: viewParams,
             nodeApplied: true,
             nodeParams: []
         };
+        console.log("item is ", item);
+        console.log("viewParams is ", viewParams);
         model.append(item);
 
-        var maxDim = Math.max(data.width, data.height, data.depth);
+        var maxDim = Math.max(data.size.x, data.size.y, data.size.z);
         var sceneItem = {
             uid: uid,
-            size: Qt.vector3d(data.width / maxDim, 
-                data.height / maxDim, data.depth / maxDim),
-            data: data,
+            size: Qt.vector3d(data.size.x / maxDim, data.size.y / maxDim, data.size.z / maxDim),
+            volumeTexture: data,
             nodeViewParams: viewParams
         };
+        console.log("scene item size ", maxDim);
+        console.log("scene item size ", data.size);
+        console.log("scene item size ", sceneItem.size);
         sceneModel.append(sceneItem);
     }
 
@@ -113,107 +117,107 @@ Item {
     }
 
     function applySegmentNode(uid, args) {
-        var node = getNode(uid);
-        if (node == null) {
-            consol.log("no uid", uid);
-            return;
-        }
+        // var node = getNode(uid);
+        // if (node == null) {
+        //     consol.log("no uid", uid);
+        //     return;
+        // }
 
-        var sceneNode = getSceneNode(uid);
-        var outputData;
-        if (sceneNode == null) {
-            outputData = dataManager.newDataLike(args.data, node.nodeName);
-        }
+        // var sceneNode = getSceneNode(uid);
+        // var outputData;
+        // if (sceneNode == null) {
+        //     outputData = dataManager.newDataLike(args.data, node.nodeName);
+        // }
 
-        dataManager.runSegmentation(args.data, outputData, 
-            args.method, args.param0, args.param1);
+        // dataManager.runSegmentation(args.data, outputData, 
+        //     args.method, args.param0, args.param1);
     
-        if (sceneNode == null) {
-            var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
-            var sceneItem = {
-                uid: uid,
-                size: Qt.vector3d(outputData.width / maxDim, 
-                    outputData.height / maxDim, outputData.depth / maxDim),
-                data: outputData,
-                nodeViewParams: node.nodeViewParams
-            };
-            sceneModel.append(sceneItem);
-        } else {
-            sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
-        }
+        // if (sceneNode == null) {
+        //     var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
+        //     var sceneItem = {
+        //         uid: uid,
+        //         size: Qt.vector3d(outputData.width / maxDim, 
+        //             outputData.height / maxDim, outputData.depth / maxDim),
+        //         data: outputData,
+        //         nodeViewParams: node.nodeViewParams
+        //     };
+        //     sceneModel.append(sceneItem);
+        // } else {
+        //     sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
+        // }
 
         node.nodeApplied = true;
     }
 
     function applyAnalysisNode(uid, args) {
-        var node = getNode(uid);
-        if (node == null) {
-            consol.log("no uid, analysis", uid);
-            return;
-        }
+        // var node = getNode(uid);
+        // if (node == null) {
+        //     consol.log("no uid, analysis", uid);
+        //     return;
+        // }
 
-        var sceneNode = getSceneNode(uid);
-        var outputData;
-        if (sceneNode == null) {
-            outputData = dataManager.newDataLike(args.segData0, node.nodeName);
-        }
-        node.nodeParams = dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
-        if (sceneNode == null) {
-            var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
-            var sceneItem = {
-                uid: uid,
-                size: Qt.vector3d(outputData.width / maxDim, 
-                    outputData.height / maxDim, outputData.depth / maxDim),
-                data: outputData,
-                nodeViewParams: node.nodeViewParams
-            };
-            sceneModel.append(sceneItem);
-        } else {
-            sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
-        }
+        // var sceneNode = getSceneNode(uid);
+        // var outputData;
+        // if (sceneNode == null) {
+        //     outputData = dataManager.newDataLike(args.segData0, node.nodeName);
+        // }
+        // node.nodeParams = dataManager.runAnalysis(args.data0, args.data1, args.segData0, args.segData1, outputData);
+        // if (sceneNode == null) {
+        //     var maxDim = Math.max(outputData.width, outputData.height, outputData.depth);
+        //     var sceneItem = {
+        //         uid: uid,
+        //         size: Qt.vector3d(outputData.width / maxDim, 
+        //             outputData.height / maxDim, outputData.depth / maxDim),
+        //         data: outputData,
+        //         nodeViewParams: node.nodeViewParams
+        //     };
+        //     sceneModel.append(sceneItem);
+        // } else {
+        //     sceneNode.lutDataMax = sceneNode.volumeData.dataLimits.y;
+        // }
 
         node.nodeApplied = true;
     }
 
     function saveAnalysisCsv(uid, url) {
-        var node = getNode(uid);
-        if (node == null) {
-            consol.log("saveAnalysisCsv: no uid, analysis", uid);
-            return;
-        }
-        var table = [];
-        for (var i = 0; i < node.nodeParams.count; ++i) {
-            table.push({
-                channelName: node.nodeParams.get(i).channelName,
-                objectId: node.nodeParams.get(i).objectId,
-                volume: node.nodeParams.get(i).volume,
-                sumIntensity: node.nodeParams.get(i).sumIntensity,
-                meanIntensity: node.nodeParams.get(i).meanIntensity,
-                overlapRatio: node.nodeParams.get(i).overlapRatio,
-                intersectingVolume: node.nodeParams.get(i).intersectingVolume,
-                centerX: node.nodeParams.get(i).centerX,
-                centerY: node.nodeParams.get(i).centerY,
-                centerZ: node.nodeParams.get(i).centerZ,
-                intensityWeightCenterX: node.nodeParams.get(i).intensityWeightCenterX,
-                intensityWeightCenterY: node.nodeParams.get(i).intensityWeightCenterY,
-                intensityWeightCenterZ: node.nodeParams.get(i).intensityWeightCenterZ
-            });
-        }
-        console.log(url);
-        dataManager.saveCsv(table, [
-            "channelName",
-            "objectId",
-            "volume",
-            "sumIntensity",
-            "meanIntensity",
-            "overlapRatio",
-            "intersectingVolume",
-            "centerX",
-            "centerY",
-            "centerZ",
-            "intensityWeightCenterX",
-            "intensityWeightCenterY",
-            "intensityWeightCenterZ"], url);
+        // var node = getNode(uid);
+        // if (node == null) {
+        //     consol.log("saveAnalysisCsv: no uid, analysis", uid);
+        //     return;
+        // }
+        // var table = [];
+        // for (var i = 0; i < node.nodeParams.count; ++i) {
+        //     table.push({
+        //         channelName: node.nodeParams.get(i).channelName,
+        //         objectId: node.nodeParams.get(i).objectId,
+        //         volume: node.nodeParams.get(i).volume,
+        //         sumIntensity: node.nodeParams.get(i).sumIntensity,
+        //         meanIntensity: node.nodeParams.get(i).meanIntensity,
+        //         overlapRatio: node.nodeParams.get(i).overlapRatio,
+        //         intersectingVolume: node.nodeParams.get(i).intersectingVolume,
+        //         centerX: node.nodeParams.get(i).centerX,
+        //         centerY: node.nodeParams.get(i).centerY,
+        //         centerZ: node.nodeParams.get(i).centerZ,
+        //         intensityWeightCenterX: node.nodeParams.get(i).intensityWeightCenterX,
+        //         intensityWeightCenterY: node.nodeParams.get(i).intensityWeightCenterY,
+        //         intensityWeightCenterZ: node.nodeParams.get(i).intensityWeightCenterZ
+        //     });
+        // }
+        // console.log(url);
+        // dataManager.saveCsv(table, [
+        //     "channelName",
+        //     "objectId",
+        //     "volume",
+        //     "sumIntensity",
+        //     "meanIntensity",
+        //     "overlapRatio",
+        //     "intersectingVolume",
+        //     "centerX",
+        //     "centerY",
+        //     "centerZ",
+        //     "intensityWeightCenterX",
+        //     "intensityWeightCenterY",
+        //     "intensityWeightCenterZ"], url);
     }
 
     function randomColor() {
@@ -269,15 +273,14 @@ Item {
         id: sceneModel
     }
 
-    VolumetricDataManager {
-        id: dataManager
+    VolumeDataCollection {
+        id: volumeCollection
         onStatusChanged: {
             console.log ('status change received', status);
             if (status === Component.Ready) {
-                console.log(volumes.length);
                 for (var i = 0; i < volumes.length; ++i) {
                     AppActions.addSourceNode(AppActions.generateUid(), volumes[i]);
-                    console.log('addSourceNode', volumes[i]);
+                    console.log('addSourceNode', volumes[i].size);
                 }
             }
         }

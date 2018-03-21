@@ -19,9 +19,13 @@ QByteArray VolumeData::toQByteArray() const
     size_t xyzByteSize = xyzSize * sizeof(float);
 
     size_t zSize = depth();
-    size_t offset = xyzSize * m_channel;
+    size_t offset = zSize * m_channel;
 
     char* data = new char[xyzByteSize];
+    if (data == nullptr) {
+        throw std::runtime_error("can not allocate enough memory for the data");
+    }
+
     auto& planes = m_source.unsafeData();
     for (size_t i = 0; i < zSize; ++i) {
         memcpy(data + i * xyByteSize, planes[i + offset].data(), xyByteSize);

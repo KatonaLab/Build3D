@@ -11,7 +11,7 @@ Entity {
     property real width
     property real height
     property real depth
-    property VolumetricData volumeData
+    property VolumeTexture volumeTexture
 
     property color volumeColor
     property real accumDivisor
@@ -40,7 +40,7 @@ Entity {
         parameters: [
                 Parameter {name: "backFaceMap"; value: backFaceMap},
                 Parameter {name: "vertexToTex3DCoordMatrix"; value: d.vertexToTex3DCoordMatrix},
-                Parameter {name: "volumeTexture"; value: VolumetricTexture {data: volumeData}},
+                Parameter {name: "volumeTexture"; value: volumeTexture},
                 Parameter {name: "volumeColor"; value: volumeColor},
                 Parameter {name: "lutParameters"; value: lutParameters},
                 Parameter {name: "accumDivisor"; value: accumDivisor},
