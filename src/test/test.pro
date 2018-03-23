@@ -1,3 +1,5 @@
+CONFIG += c++14
+
 TARGET = test
 SOURCES += \
     test.cpp \
@@ -45,7 +47,21 @@ INCLUDEPATH += \
     ../util \
     ../ \
     ../../lib/pybind11/include/ \
-    ../../virtualenv/include/python3.6m \
     ../../lib/libics
 
-LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib/" -lpython3.6m
+win32 {
+    INCLUDEPATH += C:/Python36/include/
+    LIBS += "C:/Python36/libs/libpython36.a"
+    LIBS += -L"C:/Python36/libs/"
+    QMAKE_CXXFLAGS += -bigobj
+    SOURCES -= ../../lib/libics/libics_gzip.c
+    DEFINES += "LIBICS_USE_ZLIB=Off" # for libics
+    DEFINES += "DO_NOT_USE_WMAIN" # for catch.hpp
+    CONFIG += console
+}
+
+macx {
+    INCLUDEPATH += \
+        ../../virtualenv/include/python3.6m
+    LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib" -lpython3.6m
+}

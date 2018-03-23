@@ -206,28 +206,31 @@ template <typename T>
 template <typename U>
 void MultiDimImage<T>::scaledCopyFrom(const MultiDimImage<U>& other)
 {
+	typedef double internal_type;
+
     // NOTE: converting from or to long double image has problems at precision borders!
-    long double fromMin = 0;
-    long double fromRange = 0;
-    long double toMin = 0;
-    long double toRange = 0;
+	// NOTE: changing long double to double since msvc handles long double as a simple double
+	internal_type fromMin = 0;
+	internal_type fromRange = 0;
+	internal_type toMin = 0;
+	internal_type toRange = 0;
 
     if (std::is_floating_point<U>::value) {
         fromMin = 0;
         fromRange = 1;
     } else {
-        fromMin = static_cast<long double>(std::numeric_limits<U>::min());
-        fromRange = static_cast<long double>(std::numeric_limits<U>::max())
-            - static_cast<long double>(std::numeric_limits<U>::min());
+        fromMin = static_cast<internal_type>(std::numeric_limits<U>::min());
+        fromRange = static_cast<internal_type>(std::numeric_limits<U>::max())
+            - static_cast<internal_type>(std::numeric_limits<U>::min());
     }
 
     if (std::is_floating_point<T>::value) {
         toMin = 0;
         toRange = 1;
     } else {
-        toMin = static_cast<long double>(std::numeric_limits<T>::min());
-        toRange = static_cast<long double>(std::numeric_limits<T>::max())
-            - static_cast<long double>(std::numeric_limits<T>::min());
+        toMin = static_cast<internal_type>(std::numeric_limits<T>::min());
+        toRange = static_cast<internal_type>(std::numeric_limits<T>::max())
+            - static_cast<internal_type>(std::numeric_limits<T>::min());
     }
 
     long double ratio = toRange / fromRange;

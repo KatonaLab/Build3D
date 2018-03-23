@@ -20,7 +20,6 @@
 namespace core {
 namespace high_platform {
 
-namespace py = pybind11;
 namespace cp = core::compute_platform;
 namespace md = core::multidim_image_platform;
 
@@ -73,9 +72,9 @@ protected:
 
 class PyInputPortWrapper {
 public:
-    virtual py::object toPyObject()
+    virtual pybind11::object toPyObject()
     {
-        return py::none();
+        return pybind11::none();
     }
     virtual std::shared_ptr<cp::InputPort> port()
     {
@@ -89,11 +88,11 @@ typedef std::shared_ptr<PyInputPortWrapper> PyInputPortWrapperPtr;
 
 class PyOutputPortWrapper {
 public:
-    virtual py::object toPyObject()
+    virtual pybind11::object toPyObject()
     {
-        return py::none();
+        return pybind11::none();
     }
-    virtual void fromPyObject(py::object)
+    virtual void fromPyObject(pybind11::object)
     {}
     virtual std::shared_ptr<cp::OutputPort> port()
     {
@@ -113,9 +112,9 @@ public:
     PyInputPortWrapperPod(std::shared_ptr<cp::TypedInputPort<T>> port)
         : m_port(port)
     {}
-    py::object toPyObject() override
+    pybind11::object toPyObject() override
     {
-        return py::cast(m_port->value());
+        return pybind11::cast(m_port->value());
     }
     std::shared_ptr<cp::InputPort> port() override
     {
@@ -131,9 +130,9 @@ public:
     PyInputPortWrapperNonPod(std::shared_ptr<cp::TypedInputPort<T>> port)
         : m_port(port)
     {}
-    py::object toPyObject() override
+    pybind11::object toPyObject() override
     {
-        return py::cast(m_port->sharedValue());
+        return pybind11::cast(m_port->sharedValue());
     }
     std::shared_ptr<cp::InputPort> port() override
     {
@@ -149,11 +148,11 @@ public:
     PyOutputPortWrapperPod(std::shared_ptr<cp::TypedOutputPort<T>> port)
         : m_port(port)
     {}
-    py::object toPyObject() override
+    pybind11::object toPyObject() override
     {
-         return py::cast<T>(m_port->value());
+         return pybind11::cast<T>(m_port->value());
     }
-    void fromPyObject(py::object obj) override
+    void fromPyObject(pybind11::object obj) override
     {
         m_port->forwardFromSharedPtr(std::make_shared<T>(obj.cast<T>()));
     }
@@ -171,11 +170,11 @@ public:
     PyOutputPortWrapperNonPod(std::shared_ptr<cp::TypedOutputPort<T>> port)
         : m_port(port)
     {}
-    py::object toPyObject() override
+    pybind11::object toPyObject() override
     {
-        return py::cast(m_port->sharedValue());
+        return pybind11::cast(m_port->sharedValue());
     }
-    void fromPyObject(py::object obj) override
+    void fromPyObject(pybind11::object obj) override
     {
         m_port->forwardFromSharedPtr(obj.cast<std::shared_ptr<T>>());
     }

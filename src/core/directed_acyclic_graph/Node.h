@@ -1,6 +1,7 @@
 #ifndef _core_directed_acyclic_graph_Node_h_
 #define _core_directed_acyclic_graph_Node_h_
 
+#include <iterator>
 #include <memory>
 #include <list>
 #include <set>

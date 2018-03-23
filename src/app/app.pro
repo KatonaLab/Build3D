@@ -1,5 +1,5 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
-CONFIG += c++11
+CONFIG += c++14
 # for crashpad
 CONFIG += force_debug_info
 CONFIG += separate_debug_info
@@ -10,6 +10,7 @@ DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --abb
 
 win32 {
     DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=win32
+    QMAKE_CXXFLAGS += -bigobj
 }
 
 macx {
@@ -79,10 +80,22 @@ INCLUDEPATH += \
 INCLUDEPATH += \
     ../util \
     ../ \
-    ../../lib/pybind11/include/ \
-    ../../virtualenv/include/python3.6m
+    ../../lib/pybind11/include/
 
-LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib/" -lpython3.6m
+win32 {
+    INCLUDEPATH += C:/Python36/include/
+    LIBS += "C:/Python36/libs/libpython36.a"
+    LIBS += -L"C:/Python36/libs/"
+    DEFINES += "LIBICS_USE_ZLIB=Off" # for libics
+    DEFINES += "DO_NOT_USE_WMAIN" # for catch.hpp
+    SOURCES -= ../../lib/libics/libics_gzip.c
+}
+
+macx {
+    INCLUDEPATH += \
+        ../../virtualenv/include/python3.6m
+    LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib" -lpython3.6m
+}
 
 macx {
     CRASHPAD_DIR = $$_PRO_FILE_PWD_/../../../tools/crashpad/crashpad
