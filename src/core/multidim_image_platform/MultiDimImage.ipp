@@ -202,42 +202,65 @@ void MultiDimImage<T>::saturateCopyFrom(const MultiDimImage<U>& other,
     transformCopy(other, f);
 }
 
+// template <typename T>
+// template <typename U>
+// void MultiDimImage<T>::scaledCopyFrom(const MultiDimImage<U>& other)
+// {
+//     using namespace std;
+// 	typedef double internal_type;
+
+//     bool fromFloat = std::is_floating_point<U>::value;
+//     bool toFloat = std::is_floating_point<T>::value;
+//     std::function<T(const U&)> f;
+
+//     if (fromFloat && toFloat) {
+//         f = [](const U& x) -> T {
+//             return static_cast<T>(x);
+//         };
+//     }
+
+//     if (fromFloat && !toFloat) {
+//         f = [](const U& x) -> T {
+//             return static_cast<T>(x);
+//         };
+//     }
+
+//     // NOTE: converting from or to long double image has problems at precision borders!
+// 	// NOTE: changing long double to double since msvc handles long double as a simple double
+// 	U fromMin = 0;
+// 	U fromMax = 0;
+// 	T toMin = 0;
+// 	T toMax = 0;
+
+//     if (std::is_floating_point<U>::value) {
+//         fromMin = 0;
+//         fromMax = 1;
+//     } else {
+//         fromMin = std::numeric_limits<U>::min();
+//         fromMax = std::numeric_limits<U>::max();
+//     }
+
+//     if (std::is_floating_point<T>::value) {
+//         toMin = 0;
+//         toMax = 1;
+//     } else {
+//         toMin = std::numeric_limits<T>::min();
+//         toMax = std::numeric_limits<T>::max();
+//     }
+
+//     //internal_type ratio = toRange / fromRange;
+
+//     std::function<T(const U&)> f = [fromMin, toMin, fromRange, toRange](const U& x) -> T {
+//         return static_cast<T>((x - fromMin) / fromRange * toRange + toMin);
+//     };
+//     transformCopy(other, f);
+// }
+
 template <typename T>
 template <typename U>
 void MultiDimImage<T>::scaledCopyFrom(const MultiDimImage<U>& other)
 {
-	typedef double internal_type;
-
-    // NOTE: converting from or to long double image has problems at precision borders!
-	// NOTE: changing long double to double since msvc handles long double as a simple double
-	internal_type fromMin = 0;
-	internal_type fromRange = 0;
-	internal_type toMin = 0;
-	internal_type toRange = 0;
-
-    if (std::is_floating_point<U>::value) {
-        fromMin = 0;
-        fromRange = 1;
-    } else {
-        fromMin = static_cast<internal_type>(std::numeric_limits<U>::min());
-        fromRange = static_cast<internal_type>(std::numeric_limits<U>::max())
-            - static_cast<internal_type>(std::numeric_limits<U>::min());
-    }
-
-    if (std::is_floating_point<T>::value) {
-        toMin = 0;
-        toRange = 1;
-    } else {
-        toMin = static_cast<internal_type>(std::numeric_limits<T>::min());
-        toRange = static_cast<internal_type>(std::numeric_limits<T>::max())
-            - static_cast<internal_type>(std::numeric_limits<T>::min());
-    }
-
-    long double ratio = toRange / fromRange;
-
-    std::function<T(const U&)> f = [fromMin, toMin, ratio](const U& x) -> T {
-        return static_cast<T>((x - fromMin) * ratio + toMin);
-    };
+    std::function<T(const U&)> f = detail::ScaleConvert<T, U>::scale;
     transformCopy(other, f);
 }
 
@@ -426,3 +449,68 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
 template <typename T>
 MultiDimImage<T>::~MultiDimImage()
 {}
+
+namespace detail {
+    
+    template <typename From, typename To>
+    struct ScaleConvert<From, To, true, true, true> {
+        static To scale(const From& x)
+        {
+            static const double a = typeScaleDivisor(sizeof(To), sizeof(From));
+            static const double b = std::numeric_limits<To>::max() - std::numeric_limits<From>::max() * a;
+            return static_cast<To>(x * a + b);
+        }
+    };
+
+    template <typename From, typename To>
+    struct ScaleConvert<From, To, true, true, false> {
+        static To scale(const From& x)
+        {
+            static const double a = typeScaleDivisor(sizeof(From), sizeof(To));
+            static const double b = std::numeric_limits<To>::max() - std::numeric_limits<From>::max() / a;
+            return static_cast<To>(x / a + b);
+        }
+    };
+
+    template <typename From, typename To>
+    struct ScaleConvert<From, To, true, false, sizeof(From) < sizeof(To)> {
+        static To scale(const From& x)
+        {
+            static const double a = 1.0 / (std::pow(2, sizeof(From) * 8) - 1.0);
+            return static_cast<To>(x * a - std::numeric_limits<From>::min() * a);
+        }
+    };
+
+    template <typename From, typename To>
+    struct ScaleConvert<From, To, false, true, sizeof(From) < sizeof(To)> {
+        static To scale(const From& x)
+        {
+            static const double a = std::pow(2, sizeof(To) * 8) - 1.0;
+            static const double b = std::numeric_limits<To>::min();
+            std::cout << x << std::endl;
+            std::cout << x * a << std::endl;
+            std::cout << b << std::endl;
+            std::cout << x * a + b << std::endl;
+            std::cout << "---" << std::endl;
+            std::cout << x * a + b << std::endl;
+            std::cout << b + a * x << std::endl;
+            std::cout << static_cast<To>(x * a + b) << std::endl;
+            std::cout << static_cast<To>(b + a * x) << std::endl;
+            std::cout << float(-19661) << std::endl;
+            std::cout << static_cast<int16_t>(double(-19661)) << std::endl;
+            double z = x * a + b;
+            std::cout << z << std::endl;
+            std::cout << static_cast<To>(z) << std::endl;
+            std::cout << "---" << std::endl;
+            return static_cast<To>(x * a + b);
+        }
+    };
+
+    template <typename From, typename To>
+    struct ScaleConvert<From, To, false, false, sizeof(From) < sizeof(To)> {
+        static To scale(const From& x)
+        {
+            return static_cast<To>(x);
+        }
+    };
+}
