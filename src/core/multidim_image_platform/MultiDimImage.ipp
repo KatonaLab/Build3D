@@ -431,13 +431,9 @@ namespace detail {
         }
         static Y scale(X x)
         {
+            #warning MultiDimImage: scaling a floating point type to an integral type can be numerically unstable, avoid this type of scaling
             const double a = TypeScaleHelper<X, Y>::typeScaleParamA();
             const double b = TypeScaleHelper<X, Y>::typeScaleParamB();
-            // std::cout << a << std::endl;
-            // std::cout << b << std::endl;
-            // std::cout << x << std::endl;
-            // std::cout << std::setprecision(20) << (double)x * a + b << std::endl;
-            // std::cout << static_cast<Y>((double)x * a + b) << std::endl;
             return static_cast<Y>(x * a + b);
         }
     };
