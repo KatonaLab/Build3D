@@ -116,8 +116,6 @@ MultiDimImage<T>::View::~View()
     }
 }
 
-// =======================================
-
 template <typename T>
 MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
     : m_dims(dims), m_viewRegistry(this)
@@ -206,8 +204,8 @@ template <typename T>
 template <typename U>
 void MultiDimImage<T>::scaledCopyFrom(const MultiDimImage<U>& other)
 {
-    // std::function<T(const U&)> f = detail::ScaleConvert<T, U>::scale;
-    // transformCopy(other, f);
+    std::function<T(const U&)> f = detail::TypeScaleHelper<U, T>::scale;
+    transformCopy(other, f);
 }
 
 template <typename T>
@@ -429,9 +427,14 @@ namespace detail {
             return 0.5 * ((double)std::numeric_limits<Y>::min() + (double)std::numeric_limits<Y>::max()
                 - TypeScaleHelper<X, Y>::typeScaleParamA());
         }
+        [[deprecated("MultiDimImage - scaling a floating point type to an integral type can be numerically unstable, avoid this type of scaling")]]
         static Y scale(X x)
         {
-            #warning MultiDimImage: scaling a floating point type to an integral type can be numerically unstable, avoid this type of scaling
+            // NOTE: in cases when sizeof(X) is comparable to sizeof(Y) the division and the
+            // multiplication precision will not be enough, it can lead false results
+            // NOTE: using 'long double' for all calculations might solve this issue but
+            // unfortunately msvc don't support higher precision than double, since 'long double'
+            // is just a typedef to double in that compiler.
             const double a = TypeScaleHelper<X, Y>::typeScaleParamA();
             const double b = TypeScaleHelper<X, Y>::typeScaleParamB();
             return static_cast<Y>(x * a + b);

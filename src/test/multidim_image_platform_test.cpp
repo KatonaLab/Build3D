@@ -720,8 +720,6 @@ SCENARIO("converting between types with saturation", "[core/multidim_image_platf
                 REQUIRE(im8s.at({11, 50}) == 42);
             }
         }
-
-        
     }
 }
 
@@ -729,275 +727,274 @@ SCENARIO("numeric type scaler test", "[core/multidim_image_platform]")
 {
     using namespace core::multidim_image_platform::detail;
 
-REQUIRE(TypeScaleHelper<double, double>::scale(0.200000000000000) == Approx(0.200000000000000));
-REQUIRE(TypeScaleHelper<double, double>::scale(0.500000000000000) == Approx(0.500000000000000));
-REQUIRE(TypeScaleHelper<double, double>::scale(0.700000000000000) == Approx(0.700000000000000));
-REQUIRE(TypeScaleHelper<double, float>::scale(0.200000000000000) == Approx(0.200000000000000));
-REQUIRE(TypeScaleHelper<double, float>::scale(0.500000000000000) == Approx(0.500000000000000));
-REQUIRE(TypeScaleHelper<double, float>::scale(0.700000000000000) == Approx(0.700000000000000));
-REQUIRE(TypeScaleHelper<float, double>::scale(0.200000000000000) == Approx(0.200000000000000));
-REQUIRE(TypeScaleHelper<float, double>::scale(0.500000000000000) == Approx(0.500000000000000));
-REQUIRE(TypeScaleHelper<float, double>::scale(0.700000000000000) == Approx(0.700000000000000));
-REQUIRE(TypeScaleHelper<float, float>::scale(0.200000000000000) == Approx(0.200000000000000));
-REQUIRE(TypeScaleHelper<float, float>::scale(0.500000000000000) == Approx(0.500000000000000));
-REQUIRE(TypeScaleHelper<float, float>::scale(0.700000000000000) == Approx(0.700000000000000));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(-10873) == Approx(0.334096284428168));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(-190) == Approx(0.497108415350576));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(-42) == Approx(0.499366750591287));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(0) == Approx(0.500007629510948));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(255) == Approx(0.503898680094606));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(27) == Approx(0.500419623102159));
-REQUIRE(TypeScaleHelper<int16_t, double>::scale(42) == Approx(0.500648508430610));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(-10873) == Approx(0.334096284428168));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(-190) == Approx(0.497108415350576));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(-42) == Approx(0.499366750591287));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(0) == Approx(0.500007629510948));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(255) == Approx(0.503898680094606));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(27) == Approx(0.500419623102159));
-REQUIRE(TypeScaleHelper<int16_t, float>::scale(42) == Approx(0.500648508430610));
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(-10873) == -10873);
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(-190) == -190);
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(-42) == -42);
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(255) == 255);
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(27) == 27);
-REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(42) == 42);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(-10873) == -712551033);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(-190) == -12419262);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(-42) == -2719786);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(0) == 32768);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(255) == 16744703);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(27) == 1802267);
-REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(42) == 2785322);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(-10873) == -42);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(-190) == -1);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(-42) == 0);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(255) == 0);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(27) == 0);
-REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(42) == 0);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(-10873) == 21895);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(-190) == 32578);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(-42) == 32726);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(0) == 32768);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(255) == 33023);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(27) == 32795);
-REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(42) == 32810);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(-10873) == 1434932615);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(-190) == 2135064386);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(-42) == 2144763862);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(0) == 2147516416);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(255) == 2164228351);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(27) == 2149285915);
-REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(42) == 2150268970);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(-10873) == 85);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(-190) == 126);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(-42) == 127);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(0) == 127);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(255) == 128);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(27) == 127);
-REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(42) == 127);
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(-10873) == Approx(0.499997468548826));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(-190) == Approx(0.499999955878593));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(-42) == Approx(0.499999990337528));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(0) == Approx(0.500000000116415));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(255) == Approx(0.500000059488229));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(27) == Approx(0.500000006402843));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(32980) == Approx(0.500007678871045));
-REQUIRE(TypeScaleHelper<int32_t, double>::scale(42) == Approx(0.500000009895302));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(-10873) == Approx(0.499997468548826));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(-190) == Approx(0.499999955878593));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(-42) == Approx(0.499999990337528));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(0) == Approx(0.500000000116415));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(255) == Approx(0.500000059488229));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(27) == Approx(0.500000006402843));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(32980) == Approx(0.500007678871045));
-REQUIRE(TypeScaleHelper<int32_t, float>::scale(42) == Approx(0.500000009895302));
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(-10873) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(-190) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(-42) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(255) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(27) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(32980) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(42) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(-10873) == -10873);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(-190) == -190);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(-42) == -42);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(255) == 255);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(27) == 27);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(32980) == 32980);
-REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(42) == 42);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(-10873) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(-190) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(-42) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(255) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(27) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(32980) == 0);
-REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(42) == 0);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(-10873) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(-190) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(-42) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(0) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(255) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(27) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(32980) == 32768);
-REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(42) == 32767);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(-10873) == 2147472775);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(-190) == 2147483458);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(-42) == 2147483606);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(0) == 2147483648);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(255) == 2147483903);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(27) == 2147483675);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(32980) == 2147516628);
-REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(42) == 2147483690);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(-10873) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(-190) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(-42) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(0) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(255) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(27) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(32980) == 127);
-REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(42) == 127);
-REQUIRE(TypeScaleHelper<int8_t, double>::scale(-42) == Approx(0.337254901960784));
-REQUIRE(TypeScaleHelper<int8_t, double>::scale(0) == Approx(0.501960784313725));
-REQUIRE(TypeScaleHelper<int8_t, double>::scale(27) == Approx(0.607843137254902));
-REQUIRE(TypeScaleHelper<int8_t, double>::scale(42) == Approx(0.666666666666667));
-REQUIRE(TypeScaleHelper<int8_t, float>::scale(-42) == Approx(0.337254901960784));
-REQUIRE(TypeScaleHelper<int8_t, float>::scale(0) == Approx(0.501960784313725));
-REQUIRE(TypeScaleHelper<int8_t, float>::scale(27) == Approx(0.607843137254902));
-REQUIRE(TypeScaleHelper<int8_t, float>::scale(42) == Approx(0.666666666666667));
-REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(-42) == -10666);
-REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(0) == 128);
-REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(27) == 7067);
-REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(42) == 10922);
-REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(-42) == -698984874);
-REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(0) == 8421504);
-REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(27) == 463182747);
-REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(42) == 715827882);
-REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(-42) == -42);
-REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(27) == 27);
-REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(42) == 42);
-REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(-42) == 22102);
-REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(0) == 32896);
-REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(27) == 39835);
-REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(42) == 43690);
-REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(-42) == 1448498774);
-REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(0) == 2155905152);
-REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(27) == 2610666395);
-REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(42) == 2863311530);
-REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(-42) == 86);
-REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(0) == 128);
-REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(27) == 155);
-REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(42) == 170);
-REQUIRE(TypeScaleHelper<uint16_t, double>::scale(0) == Approx(0.000000000000000));
-REQUIRE(TypeScaleHelper<uint16_t, double>::scale(255) == Approx(0.003891050583658));
-REQUIRE(TypeScaleHelper<uint16_t, double>::scale(27) == Approx(0.000411993591211));
-REQUIRE(TypeScaleHelper<uint16_t, double>::scale(32980) == Approx(0.503242542153048));
-REQUIRE(TypeScaleHelper<uint16_t, double>::scale(42) == Approx(0.000640878919661));
-REQUIRE(TypeScaleHelper<uint16_t, float>::scale(0) == Approx(0.000000000000000));
-REQUIRE(TypeScaleHelper<uint16_t, float>::scale(255) == Approx(0.003891050583658));
-REQUIRE(TypeScaleHelper<uint16_t, float>::scale(27) == Approx(0.000411993591211));
-REQUIRE(TypeScaleHelper<uint16_t, float>::scale(32980) == Approx(0.503242542153048));
-REQUIRE(TypeScaleHelper<uint16_t, float>::scale(42) == Approx(0.000640878919661));
-REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(0) == -32768);
-REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(255) == -32513);
-REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(27) == -32741);
-REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(32980) == 212);
-REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(42) == -32726);
-REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(0) == -2147483648);
-REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(255) == -2130771713);
-REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(27) == -2145714149);
-REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(32980) == 13926612);
-REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(42) == -2144731094);
-REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(0) == -128);
-REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(255) == -127);
-REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(27) == -127);
-REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(32980) == 0);
-REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(42) == -127);
-REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(255) == 255);
-REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(27) == 27);
-REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(32980) == 32980);
-REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(42) == 42);
-REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(255) == 16711935);
-REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(27) == 1769499);
-REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(32980) == 2161410260);
-REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(42) == 2752554);
-REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(255) == 0);
-REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(27) == 0);
-REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(32980) == 128);
-REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(42) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, double>::scale(0) == Approx(0.000000000000000));
-REQUIRE(TypeScaleHelper<uint32_t, double>::scale(255) == Approx(0.000000059371814));
-REQUIRE(TypeScaleHelper<uint32_t, double>::scale(27) == Approx(0.000000006286427));
-REQUIRE(TypeScaleHelper<uint32_t, double>::scale(32980) == Approx(0.000007678754629));
-REQUIRE(TypeScaleHelper<uint32_t, double>::scale(42) == Approx(0.000000009778887));
-REQUIRE(TypeScaleHelper<uint32_t, float>::scale(0) == Approx(0.000000000000000));
-REQUIRE(TypeScaleHelper<uint32_t, float>::scale(255) == Approx(0.000000059371814));
-REQUIRE(TypeScaleHelper<uint32_t, float>::scale(27) == Approx(0.000000006286427));
-REQUIRE(TypeScaleHelper<uint32_t, float>::scale(32980) == Approx(0.000007678754629));
-REQUIRE(TypeScaleHelper<uint32_t, float>::scale(42) == Approx(0.000000009778887));
-REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(0) == -32768);
-REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(255) == -32767);
-REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(27) == -32767);
-REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(32980) == -32767);
-REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(42) == -32767);
-REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(0) == -2147483648);
-REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(255) == -2147483393);
-REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(27) == -2147483621);
-REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(32980) == -2147450668);
-REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(42) == -2147483606);
-REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(0) == -128);
-REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(255) == -127);
-REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(27) == -127);
-REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(32980) == -127);
-REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(42) == -127);
-REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(255) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(27) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(32980) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(42) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(255) == 255);
-REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(27) == 27);
-REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(32980) == 32980);
-REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(42) == 42);
-REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(255) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(27) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(32980) == 0);
-REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(42) == 0);
-REQUIRE(TypeScaleHelper<uint8_t, double>::scale(0) == Approx(0.000000000000000));
-REQUIRE(TypeScaleHelper<uint8_t, double>::scale(27) == Approx(0.105882352941176));
-REQUIRE(TypeScaleHelper<uint8_t, double>::scale(42) == Approx(0.164705882352941));
-REQUIRE(TypeScaleHelper<uint8_t, float>::scale(0) == Approx(0.000000000000000));
-REQUIRE(TypeScaleHelper<uint8_t, float>::scale(27) == Approx(0.105882352941176));
-REQUIRE(TypeScaleHelper<uint8_t, float>::scale(42) == Approx(0.164705882352941));
-REQUIRE(TypeScaleHelper<uint8_t, int16_t>::scale(0) == -32768);
-REQUIRE(TypeScaleHelper<uint8_t, int16_t>::scale(27) == -25829);
-REQUIRE(TypeScaleHelper<uint8_t, int16_t>::scale(42) == -21974);
-REQUIRE(TypeScaleHelper<uint8_t, int32_t>::scale(0) == -2147483648);
-REQUIRE(TypeScaleHelper<uint8_t, int32_t>::scale(27) == -1692722405);
-REQUIRE(TypeScaleHelper<uint8_t, int32_t>::scale(42) == -1440077270);
-REQUIRE(TypeScaleHelper<uint8_t, int8_t>::scale(0) == -128);
-REQUIRE(TypeScaleHelper<uint8_t, int8_t>::scale(27) == -101);
-REQUIRE(TypeScaleHelper<uint8_t, int8_t>::scale(42) == -86);
-REQUIRE(TypeScaleHelper<uint8_t, uint16_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint8_t, uint16_t>::scale(27) == 6939);
-REQUIRE(TypeScaleHelper<uint8_t, uint16_t>::scale(42) == 10794);
-REQUIRE(TypeScaleHelper<uint8_t, uint32_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint8_t, uint32_t>::scale(27) == 454761243);
-REQUIRE(TypeScaleHelper<uint8_t, uint32_t>::scale(42) == 707406378);
-REQUIRE(TypeScaleHelper<uint8_t, uint8_t>::scale(0) == 0);
-REQUIRE(TypeScaleHelper<uint8_t, uint8_t>::scale(27) == 27);
-REQUIRE(TypeScaleHelper<uint8_t, uint8_t>::scale(42) == 42);
-
+    REQUIRE(TypeScaleHelper<double, double>::scale(0.200000000000000) == Approx(0.200000000000000));
+    REQUIRE(TypeScaleHelper<double, double>::scale(0.500000000000000) == Approx(0.500000000000000));
+    REQUIRE(TypeScaleHelper<double, double>::scale(0.700000000000000) == Approx(0.700000000000000));
+    REQUIRE(TypeScaleHelper<double, float>::scale(0.200000000000000) == Approx(0.200000000000000));
+    REQUIRE(TypeScaleHelper<double, float>::scale(0.500000000000000) == Approx(0.500000000000000));
+    REQUIRE(TypeScaleHelper<double, float>::scale(0.700000000000000) == Approx(0.700000000000000));
+    REQUIRE(TypeScaleHelper<float, double>::scale(0.200000000000000) == Approx(0.200000000000000));
+    REQUIRE(TypeScaleHelper<float, double>::scale(0.500000000000000) == Approx(0.500000000000000));
+    REQUIRE(TypeScaleHelper<float, double>::scale(0.700000000000000) == Approx(0.700000000000000));
+    REQUIRE(TypeScaleHelper<float, float>::scale(0.200000000000000) == Approx(0.200000000000000));
+    REQUIRE(TypeScaleHelper<float, float>::scale(0.500000000000000) == Approx(0.500000000000000));
+    REQUIRE(TypeScaleHelper<float, float>::scale(0.700000000000000) == Approx(0.700000000000000));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(-10873) == Approx(0.334096284428168));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(-190) == Approx(0.497108415350576));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(-42) == Approx(0.499366750591287));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(0) == Approx(0.500007629510948));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(255) == Approx(0.503898680094606));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(27) == Approx(0.500419623102159));
+    REQUIRE(TypeScaleHelper<int16_t, double>::scale(42) == Approx(0.500648508430610));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(-10873) == Approx(0.334096284428168));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(-190) == Approx(0.497108415350576));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(-42) == Approx(0.499366750591287));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(0) == Approx(0.500007629510948));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(255) == Approx(0.503898680094606));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(27) == Approx(0.500419623102159));
+    REQUIRE(TypeScaleHelper<int16_t, float>::scale(42) == Approx(0.500648508430610));
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(-10873) == -10873);
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(-190) == -190);
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(-42) == -42);
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(255) == 255);
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(27) == 27);
+    REQUIRE(TypeScaleHelper<int16_t, int16_t>::scale(42) == 42);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(-10873) == -712551033);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(-190) == -12419262);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(-42) == -2719786);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(0) == 32768);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(255) == 16744703);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(27) == 1802267);
+    REQUIRE(TypeScaleHelper<int16_t, int32_t>::scale(42) == 2785322);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(-10873) == -42);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(-190) == -1);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(-42) == 0);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(255) == 0);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(27) == 0);
+    REQUIRE(TypeScaleHelper<int16_t, int8_t>::scale(42) == 0);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(-10873) == 21895);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(-190) == 32578);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(-42) == 32726);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(0) == 32768);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(255) == 33023);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(27) == 32795);
+    REQUIRE(TypeScaleHelper<int16_t, uint16_t>::scale(42) == 32810);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(-10873) == 1434932615);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(-190) == 2135064386);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(-42) == 2144763862);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(0) == 2147516416);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(255) == 2164228351);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(27) == 2149285915);
+    REQUIRE(TypeScaleHelper<int16_t, uint32_t>::scale(42) == 2150268970);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(-10873) == 85);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(-190) == 126);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(-42) == 127);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(0) == 127);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(255) == 128);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(27) == 127);
+    REQUIRE(TypeScaleHelper<int16_t, uint8_t>::scale(42) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(-10873) == Approx(0.499997468548826));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(-190) == Approx(0.499999955878593));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(-42) == Approx(0.499999990337528));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(0) == Approx(0.500000000116415));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(255) == Approx(0.500000059488229));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(27) == Approx(0.500000006402843));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(32980) == Approx(0.500007678871045));
+    REQUIRE(TypeScaleHelper<int32_t, double>::scale(42) == Approx(0.500000009895302));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(-10873) == Approx(0.499997468548826));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(-190) == Approx(0.499999955878593));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(-42) == Approx(0.499999990337528));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(0) == Approx(0.500000000116415));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(255) == Approx(0.500000059488229));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(27) == Approx(0.500000006402843));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(32980) == Approx(0.500007678871045));
+    REQUIRE(TypeScaleHelper<int32_t, float>::scale(42) == Approx(0.500000009895302));
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(-10873) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(-190) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(-42) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(255) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(27) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(32980) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int16_t>::scale(42) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(-10873) == -10873);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(-190) == -190);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(-42) == -42);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(255) == 255);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(27) == 27);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(32980) == 32980);
+    REQUIRE(TypeScaleHelper<int32_t, int32_t>::scale(42) == 42);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(-10873) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(-190) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(-42) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(255) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(27) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(32980) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, int8_t>::scale(42) == 0);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(-10873) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(-190) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(-42) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(0) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(255) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(27) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(32980) == 32768);
+    REQUIRE(TypeScaleHelper<int32_t, uint16_t>::scale(42) == 32767);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(-10873) == 2147472775);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(-190) == 2147483458);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(-42) == 2147483606);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(0) == 2147483648);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(255) == 2147483903);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(27) == 2147483675);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(32980) == 2147516628);
+    REQUIRE(TypeScaleHelper<int32_t, uint32_t>::scale(42) == 2147483690);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(-10873) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(-190) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(-42) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(0) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(255) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(27) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(32980) == 127);
+    REQUIRE(TypeScaleHelper<int32_t, uint8_t>::scale(42) == 127);
+    REQUIRE(TypeScaleHelper<int8_t, double>::scale(-42) == Approx(0.337254901960784));
+    REQUIRE(TypeScaleHelper<int8_t, double>::scale(0) == Approx(0.501960784313725));
+    REQUIRE(TypeScaleHelper<int8_t, double>::scale(27) == Approx(0.607843137254902));
+    REQUIRE(TypeScaleHelper<int8_t, double>::scale(42) == Approx(0.666666666666667));
+    REQUIRE(TypeScaleHelper<int8_t, float>::scale(-42) == Approx(0.337254901960784));
+    REQUIRE(TypeScaleHelper<int8_t, float>::scale(0) == Approx(0.501960784313725));
+    REQUIRE(TypeScaleHelper<int8_t, float>::scale(27) == Approx(0.607843137254902));
+    REQUIRE(TypeScaleHelper<int8_t, float>::scale(42) == Approx(0.666666666666667));
+    REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(-42) == -10666);
+    REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(0) == 128);
+    REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(27) == 7067);
+    REQUIRE(TypeScaleHelper<int8_t, int16_t>::scale(42) == 10922);
+    REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(-42) == -698984874);
+    REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(0) == 8421504);
+    REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(27) == 463182747);
+    REQUIRE(TypeScaleHelper<int8_t, int32_t>::scale(42) == 715827882);
+    REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(-42) == -42);
+    REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(27) == 27);
+    REQUIRE(TypeScaleHelper<int8_t, int8_t>::scale(42) == 42);
+    REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(-42) == 22102);
+    REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(0) == 32896);
+    REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(27) == 39835);
+    REQUIRE(TypeScaleHelper<int8_t, uint16_t>::scale(42) == 43690);
+    REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(-42) == 1448498774);
+    REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(0) == 2155905152);
+    REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(27) == 2610666395);
+    REQUIRE(TypeScaleHelper<int8_t, uint32_t>::scale(42) == 2863311530);
+    REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(-42) == 86);
+    REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(0) == 128);
+    REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(27) == 155);
+    REQUIRE(TypeScaleHelper<int8_t, uint8_t>::scale(42) == 170);
+    REQUIRE(TypeScaleHelper<uint16_t, double>::scale(0) == Approx(0.000000000000000));
+    REQUIRE(TypeScaleHelper<uint16_t, double>::scale(255) == Approx(0.003891050583658));
+    REQUIRE(TypeScaleHelper<uint16_t, double>::scale(27) == Approx(0.000411993591211));
+    REQUIRE(TypeScaleHelper<uint16_t, double>::scale(32980) == Approx(0.503242542153048));
+    REQUIRE(TypeScaleHelper<uint16_t, double>::scale(42) == Approx(0.000640878919661));
+    REQUIRE(TypeScaleHelper<uint16_t, float>::scale(0) == Approx(0.000000000000000));
+    REQUIRE(TypeScaleHelper<uint16_t, float>::scale(255) == Approx(0.003891050583658));
+    REQUIRE(TypeScaleHelper<uint16_t, float>::scale(27) == Approx(0.000411993591211));
+    REQUIRE(TypeScaleHelper<uint16_t, float>::scale(32980) == Approx(0.503242542153048));
+    REQUIRE(TypeScaleHelper<uint16_t, float>::scale(42) == Approx(0.000640878919661));
+    REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(0) == -32768);
+    REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(255) == -32513);
+    REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(27) == -32741);
+    REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(32980) == 212);
+    REQUIRE(TypeScaleHelper<uint16_t, int16_t>::scale(42) == -32726);
+    REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(0) == -2147483648);
+    REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(255) == -2130771713);
+    REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(27) == -2145714149);
+    REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(32980) == 13926612);
+    REQUIRE(TypeScaleHelper<uint16_t, int32_t>::scale(42) == -2144731094);
+    REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(0) == -128);
+    REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(255) == -127);
+    REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(27) == -127);
+    REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(32980) == 0);
+    REQUIRE(TypeScaleHelper<uint16_t, int8_t>::scale(42) == -127);
+    REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(255) == 255);
+    REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(27) == 27);
+    REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(32980) == 32980);
+    REQUIRE(TypeScaleHelper<uint16_t, uint16_t>::scale(42) == 42);
+    REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(255) == 16711935);
+    REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(27) == 1769499);
+    REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(32980) == 2161410260);
+    REQUIRE(TypeScaleHelper<uint16_t, uint32_t>::scale(42) == 2752554);
+    REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(255) == 0);
+    REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(27) == 0);
+    REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(32980) == 128);
+    REQUIRE(TypeScaleHelper<uint16_t, uint8_t>::scale(42) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, double>::scale(0) == Approx(0.000000000000000));
+    REQUIRE(TypeScaleHelper<uint32_t, double>::scale(255) == Approx(0.000000059371814));
+    REQUIRE(TypeScaleHelper<uint32_t, double>::scale(27) == Approx(0.000000006286427));
+    REQUIRE(TypeScaleHelper<uint32_t, double>::scale(32980) == Approx(0.000007678754629));
+    REQUIRE(TypeScaleHelper<uint32_t, double>::scale(42) == Approx(0.000000009778887));
+    REQUIRE(TypeScaleHelper<uint32_t, float>::scale(0) == Approx(0.000000000000000));
+    REQUIRE(TypeScaleHelper<uint32_t, float>::scale(255) == Approx(0.000000059371814));
+    REQUIRE(TypeScaleHelper<uint32_t, float>::scale(27) == Approx(0.000000006286427));
+    REQUIRE(TypeScaleHelper<uint32_t, float>::scale(32980) == Approx(0.000007678754629));
+    REQUIRE(TypeScaleHelper<uint32_t, float>::scale(42) == Approx(0.000000009778887));
+    REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(0) == -32768);
+    REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(255) == -32767);
+    REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(27) == -32767);
+    REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(32980) == -32767);
+    REQUIRE(TypeScaleHelper<uint32_t, int16_t>::scale(42) == -32767);
+    REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(0) == -2147483648);
+    REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(255) == -2147483393);
+    REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(27) == -2147483621);
+    REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(32980) == -2147450668);
+    REQUIRE(TypeScaleHelper<uint32_t, int32_t>::scale(42) == -2147483606);
+    REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(0) == -128);
+    REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(255) == -127);
+    REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(27) == -127);
+    REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(32980) == -127);
+    REQUIRE(TypeScaleHelper<uint32_t, int8_t>::scale(42) == -127);
+    REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(255) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(27) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(32980) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint16_t>::scale(42) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(255) == 255);
+    REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(27) == 27);
+    REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(32980) == 32980);
+    REQUIRE(TypeScaleHelper<uint32_t, uint32_t>::scale(42) == 42);
+    REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(255) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(27) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(32980) == 0);
+    REQUIRE(TypeScaleHelper<uint32_t, uint8_t>::scale(42) == 0);
+    REQUIRE(TypeScaleHelper<uint8_t, double>::scale(0) == Approx(0.000000000000000));
+    REQUIRE(TypeScaleHelper<uint8_t, double>::scale(27) == Approx(0.105882352941176));
+    REQUIRE(TypeScaleHelper<uint8_t, double>::scale(42) == Approx(0.164705882352941));
+    REQUIRE(TypeScaleHelper<uint8_t, float>::scale(0) == Approx(0.000000000000000));
+    REQUIRE(TypeScaleHelper<uint8_t, float>::scale(27) == Approx(0.105882352941176));
+    REQUIRE(TypeScaleHelper<uint8_t, float>::scale(42) == Approx(0.164705882352941));
+    REQUIRE(TypeScaleHelper<uint8_t, int16_t>::scale(0) == -32768);
+    REQUIRE(TypeScaleHelper<uint8_t, int16_t>::scale(27) == -25829);
+    REQUIRE(TypeScaleHelper<uint8_t, int16_t>::scale(42) == -21974);
+    REQUIRE(TypeScaleHelper<uint8_t, int32_t>::scale(0) == -2147483648);
+    REQUIRE(TypeScaleHelper<uint8_t, int32_t>::scale(27) == -1692722405);
+    REQUIRE(TypeScaleHelper<uint8_t, int32_t>::scale(42) == -1440077270);
+    REQUIRE(TypeScaleHelper<uint8_t, int8_t>::scale(0) == -128);
+    REQUIRE(TypeScaleHelper<uint8_t, int8_t>::scale(27) == -101);
+    REQUIRE(TypeScaleHelper<uint8_t, int8_t>::scale(42) == -86);
+    REQUIRE(TypeScaleHelper<uint8_t, uint16_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint8_t, uint16_t>::scale(27) == 6939);
+    REQUIRE(TypeScaleHelper<uint8_t, uint16_t>::scale(42) == 10794);
+    REQUIRE(TypeScaleHelper<uint8_t, uint32_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint8_t, uint32_t>::scale(27) == 454761243);
+    REQUIRE(TypeScaleHelper<uint8_t, uint32_t>::scale(42) == 707406378);
+    REQUIRE(TypeScaleHelper<uint8_t, uint8_t>::scale(0) == 0);
+    REQUIRE(TypeScaleHelper<uint8_t, uint8_t>::scale(27) == 27);
+    REQUIRE(TypeScaleHelper<uint8_t, uint8_t>::scale(42) == 42);
 }
 
 SCENARIO("tests for scaledCopyFrom", "[core/multidim_image_platform]")
@@ -1067,16 +1064,6 @@ SCENARIO("tests for scaledCopyFrom", "[core/multidim_image_platform]")
                 REQUIRE(dst.at({7, 11}) == 2147483647);
             }
         }
-
-        WHEN("converted to uint64 image") {
-            MultiDimImage<std::uint64_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == 3038287259199220266ul);
-                REQUIRE(dst.at({7, 10}) == 0ul);
-                REQUIRE(dst.at({7, 11}) == 18446744073709551615ul);
-            }
-        }
     }
 
     GIVEN("an double image") {
@@ -1095,16 +1082,6 @@ SCENARIO("tests for scaledCopyFrom", "[core/multidim_image_platform]")
             }
         }
 
-        WHEN("converted to uint8 image") {
-            MultiDimImage<std::uint8_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == 80);
-                REQUIRE(dst.at({7, 10}) == 0);
-                REQUIRE(dst.at({7, 11}) == 255);
-            }
-        }
-
         WHEN("converted to float image") {
             MultiDimImage<float> dst;
             dst.scaledCopyFrom(im);
@@ -1112,83 +1089,6 @@ SCENARIO("tests for scaledCopyFrom", "[core/multidim_image_platform]")
                 REQUIRE(dst.at({7, 9}) == 0.3141519f);
                 REQUIRE(dst.at({7, 10}) == 0.0f);
                 REQUIRE(dst.at({7, 11}) == 1.0f);
-            }
-        }
-
-        WHEN("converted to uint16 image") {
-            MultiDimImage<std::uint16_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == 20587);
-                REQUIRE(dst.at({7, 10}) == 0);
-                REQUIRE(dst.at({7, 11}) == 65535);
-            }
-        }
-
-        WHEN("converted to int64 image") {
-            MultiDimImage<std::int64_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == -3428292337285180416l);
-                REQUIRE(dst.at({7, 10}) == -9223372036854775807l - 1);
-                REQUIRE(dst.at({7, 11}) == 9223372036854775807l);
-            }
-        }
-    }
-
-    GIVEN("an uint64 image") {
-        MultiDimImage<std::uint64_t> im({16, 24});
-        im.at({7, 9}) = 422024202420242024ul;
-        im.at({7, 10}) = 0ul;
-        im.at({7, 11}) = 18446744073709551615ul;
-
-        WHEN("converted to uint64 image") {
-            MultiDimImage<std::uint64_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("nothing is changed") {
-                REQUIRE(dst.at({7, 9}) == 422024202420242024ul);
-                REQUIRE(dst.at({7, 10}) == 0ul);
-                REQUIRE(dst.at({7, 11}) == 18446744073709551615ul);
-            }
-        }
-
-        WHEN("converted to uint8 image") {
-            MultiDimImage<std::uint8_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == 5);
-                REQUIRE(dst.at({7, 10}) == 0);
-                REQUIRE(dst.at({7, 11}) == 255);
-            }
-        }
-
-        WHEN("converted to float image") {
-            MultiDimImage<float> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == 0.022877977855274434037238338882041612770106873437608516889f);
-                REQUIRE(dst.at({7, 10}) == 0.0f);
-                REQUIRE(dst.at({7, 11}) == 1.0f);
-            }
-        }
-
-        WHEN("converted to double image") {
-            MultiDimImage<double> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == 0.022877977855274434037238338882041612770106873437608516889);
-                REQUIRE(dst.at({7, 10}) == 0.0);
-                REQUIRE(dst.at({7, 11}) == 1.0);
-            }
-        }
-
-        WHEN("converted to int64 image") {
-            MultiDimImage<std::int64_t> dst;
-            dst.scaledCopyFrom(im);
-            THEN("the values converted correctly") {
-                REQUIRE(dst.at({7, 9}) == -8801347834434533784l);
-                REQUIRE(dst.at({7, 10}) == -9223372036854775807l - 1);
-                REQUIRE(dst.at({7, 11}) == 9223372036854775807l);
             }
         }
     }
