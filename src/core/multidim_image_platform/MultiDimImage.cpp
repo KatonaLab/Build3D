@@ -54,6 +54,21 @@ std::size_t detail::flatCoordinate(
 bool detail::stepCoords(std::vector<std::size_t>& coords,
     const std::vector<std::size_t>& limits)
 {
+    // increments the coordinates with one step in 'coords'
+    // respecting the given 'limits'
+    // e.g.:
+    //       in:  coords={2, 77}, limits={5, 80}
+    //       out: coords={2, 78}, return false
+    //
+    //       in:  coords={2, 79}, limits={5, 80}
+    //       out: coords={3, 0}, return false
+    //
+    //       in:  coords={2, 79, 49}, limits={5, 80, 50}
+    //       out: coords={3, 0, 0}, return false
+    //
+    //       in:  coords={4, 79, 49}, limits={5, 80, 50}
+    //       out: coords={5, 0, 0}, return true
+
     std::size_t carry = 1;
     for (int i = (int)coords.size() - 1; i >= 0; --i) {
         coords[i] += carry;

@@ -348,6 +348,8 @@ typename MultiDimImage<T>::View MultiDimImage<T>::subDimView(std::vector<std::si
 template <typename T>
 void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
 {
+    // TODO: find a faster solution
+
     if (dimOrder.size() != m_dims.size()) {
         throw std::invalid_argument("number of dimensions in the argument does not match with the number of data dimensions");
     }
@@ -384,6 +386,40 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
 
         newImage.unsafeAt(newCoords) = unsafeAt(coords);
         detail::stepCoords(coords, m_dims);
+    }
+
+    m_viewRegistry.clear();
+    std::swap(newImage, *this);
+}
+
+template <typename T>
+void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
+{
+    // TODO: find a faster solution
+    using namespace std;
+
+    sort(dims.begin(), dims.end());
+
+    vector<size_t> newDims(m_dims);
+    size_t k = 0;
+    for (size_t d : dims) {
+        newDims.erase(newDims.begin() + d - k++);
+    }
+
+    MultiDimImage<T> newImage(newDims);
+    std::size_t n = newImage.size();
+    std::vector<std::size_t> newCoords(newImage.m_dims.size(), 0);
+    
+    for (std::size_t i = 0; i < n; ++i) {
+        std::vector<std::size_t> oldCoords(newCoords);
+
+        size_t k = 0;
+        for (size_t d : dims) {
+            oldCoords.insert(oldCoords.begin() + d + k++, 0);
+        }
+
+        newImage.unsafeAt(newCoords) = unsafeAt(oldCoords);
+        detail::stepCoords(newCoords, newImage.m_dims);
     }
 
     m_viewRegistry.clear();

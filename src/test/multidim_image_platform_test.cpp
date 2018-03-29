@@ -1093,3 +1093,133 @@ SCENARIO("tests for scaledCopyFrom", "[core/multidim_image_platform]")
         }
     }
 }
+
+SCENARIO("removing dimensions", "[core/multidim_image_platform]")
+{
+    GIVEN("a multidim image") {
+        MultiDimImage<double> im({170, 160, 20, 5, 3});
+        im.at({0,  0,  0,  0,  0}) = 0.1;
+        im.at({1,  0,  0,  0,  0}) = 0.2;
+        im.at({0,  1,  0,  0,  0}) = 0.3;
+        im.at({0,  0,  1,  0,  0}) = 0.4;
+        im.at({0,  0,  0,  1,  0}) = 0.5;
+        im.at({0,  0,  0,  0,  1}) = 0.6;
+        im.at({17, 0,  0,  0,  0}) = 0.25;
+        im.at({0,  17, 0,  0,  0}) = 0.35;
+        im.at({0,  0,  17, 0,  0}) = 0.45;
+        im.at({0,  0,  0,  4,  0}) = 0.55;
+        im.at({0,  0,  0,  0,  2}) = 0.65;
+
+        REQUIRE(im.dims() == 5);
+        REQUIRE(im.dim(0) == 170);
+        REQUIRE(im.dim(1) == 160);
+        REQUIRE(im.dim(2) == 20);
+        REQUIRE(im.dim(3) == 5);
+        REQUIRE(im.dim(4) == 3);
+
+        WHEN("removing the 1st dimension") {
+            im.removeDims({0});
+            THEN("it is removed") {
+                REQUIRE(im.dims() == 4);
+                REQUIRE(im.dim(0) == 160);
+                REQUIRE(im.dim(1) == 20);
+                REQUIRE(im.dim(2) == 5);
+                REQUIRE(im.dim(3) == 3);
+
+                REQUIRE(im.at({0,  0,  0,  0 }) == 0.1 );
+                REQUIRE(im.at({1,  0,  0,  0 }) == 0.3 );
+                REQUIRE(im.at({0,  1,  0,  0 }) == 0.4 );
+                REQUIRE(im.at({0,  0,  1,  0 }) == 0.5 );
+                REQUIRE(im.at({0,  0,  0,  1 }) == 0.6 );
+                REQUIRE(im.at({17, 0,  0,  0 }) == 0.35);
+                REQUIRE(im.at({0,  17, 0,  0 }) == 0.45);
+                REQUIRE(im.at({0,  0,  4,  0 }) == 0.55);
+                REQUIRE(im.at({0,  0,  0,  2}) == 0.65);
+            }
+        }
+
+        WHEN("removing the 2nd dimension") {
+            im.removeDims({1});
+            THEN("it is removed") {
+                REQUIRE(im.dims() == 4);
+                REQUIRE(im.dim(0) == 170);
+                REQUIRE(im.dim(1) == 20);
+                REQUIRE(im.dim(2) == 5);
+                REQUIRE(im.dim(3) == 3);
+
+                REQUIRE(im.at({0,  0,  0,  0 }) == 0.1 );
+                REQUIRE(im.at({1,  0,  0,  0 }) == 0.2 );
+                REQUIRE(im.at({0,  1,  0,  0 }) == 0.4 );
+                REQUIRE(im.at({0,  0,  1,  0 }) == 0.5 );
+                REQUIRE(im.at({0,  0,  0,  1 }) == 0.6 );
+                REQUIRE(im.at({17, 0,  0,  0 }) == 0.25);
+                REQUIRE(im.at({0,  17, 0,  0 }) == 0.45);
+                REQUIRE(im.at({0,  0,  4,  0 }) == 0.55);
+                REQUIRE(im.at({0,  0,  0,  2 }) == 0.65);
+            }
+        }
+
+        WHEN("removing the 3rd dimension") {
+            im.removeDims({2});
+            THEN("it is removed") {
+                REQUIRE(im.dims() == 4);
+                REQUIRE(im.dim(0) == 170);
+                REQUIRE(im.dim(1) == 160);
+                REQUIRE(im.dim(2) == 5);
+                REQUIRE(im.dim(3) == 3);
+
+                REQUIRE(im.at({0,  0,  0,  0 }) == 0.1 );
+                REQUIRE(im.at({1,  0,  0,  0 }) == 0.2 );
+                REQUIRE(im.at({0,  1,  0,  0 }) == 0.3 );
+                REQUIRE(im.at({0,  0,  1,  0 }) == 0.5 );
+                REQUIRE(im.at({0,  0,  0,  1 }) == 0.6 );
+                REQUIRE(im.at({17, 0,  0,  0 }) == 0.25);
+                REQUIRE(im.at({0,  17, 0,  0 }) == 0.35);
+                REQUIRE(im.at({0,  0,  4, 0 }) == 0.55);
+                REQUIRE(im.at({0,  0,  0,  2}) == 0.65);
+            }
+        }
+
+        WHEN("removing the 4th dimension") {
+            im.removeDims({3});
+            THEN("it is removed") {
+                REQUIRE(im.dims() == 4);
+                REQUIRE(im.dim(0) == 170);
+                REQUIRE(im.dim(1) == 160);
+                REQUIRE(im.dim(2) == 20);
+                REQUIRE(im.dim(3) == 3);
+
+                REQUIRE(im.at({0,  0,  0,  0 }) == 0.1 );
+                REQUIRE(im.at({1,  0,  0,  0 }) == 0.2 );
+                REQUIRE(im.at({0,  1,  0,  0 }) == 0.3 );
+                REQUIRE(im.at({0,  0,  1,  0 }) == 0.4 );
+                REQUIRE(im.at({0,  0,  0,  1 }) == 0.6 );
+                REQUIRE(im.at({17, 0,  0,  0 }) == 0.25);
+                REQUIRE(im.at({0,  17, 0,  0 }) == 0.35);
+                REQUIRE(im.at({0,  0,  17, 0 }) == 0.45);
+                REQUIRE(im.at({0,  0,  0,  2 }) == 0.65);
+            }
+        }
+
+        WHEN("removing the 5th dimension") {
+            im.removeDims({4});
+            THEN("it is removed") {
+                REQUIRE(im.dims() == 4);
+                REQUIRE(im.dim(0) == 170);
+                REQUIRE(im.dim(1) == 160);
+                REQUIRE(im.dim(2) == 20);
+                REQUIRE(im.dim(3) == 5);
+
+                REQUIRE(im.at({0,  0,  0,  0 }) == 0.1 );
+                REQUIRE(im.at({1,  0,  0,  0 }) == 0.2 );
+                REQUIRE(im.at({0,  1,  0,  0 }) == 0.3 );
+                REQUIRE(im.at({0,  0,  1,  0 }) == 0.4 );
+                REQUIRE(im.at({0,  0,  0,  1 }) == 0.5 );
+                REQUIRE(im.at({17, 0,  0,  0 }) == 0.25);
+                REQUIRE(im.at({0,  17, 0,  0 }) == 0.35);
+                REQUIRE(im.at({0,  0,  17, 0 }) == 0.45);
+                REQUIRE(im.at({0,  0,  0,  4 }) == 0.55);
+            }
+        }
+    }
+}

@@ -116,6 +116,7 @@ namespace multidim_image_platform {
         View volume(std::vector<std::size_t> coords);
         std::vector<std::vector<T>>& unsafeData();
         void reorderDims(std::vector<std::size_t> dims);
+        void removeDims(std::vector<std::size_t> dims);
         virtual ~MultiDimImage();
 
         // TODO: make getter/setter
