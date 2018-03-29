@@ -147,7 +147,12 @@ win32 {
     LIBS += -ladvapi32
 
     CRASHPAD_SRC = $$shell_path($$clean_path("$$CRASHPAD_DIR/out/Release/crashpad_handler.exe"))
-    CRASHPAD_DST = $$shell_path($$clean_path($$OUT_PWD/crashpad_handler.exe))
+    CONFIG(debug, debug|release) {
+        CRASHPAD_DST = $$shell_path($$clean_path($$OUT_PWD/debug))
+    }
+    CONFIG(release, debug|release) {
+        CRASHPAD_DST = $$shell_path($$clean_path($$OUT_PWD/release))
+    }
     CopyCrashpad.commands = $$quote(cmd /c xcopy /Y /S /I $${CRASHPAD_SRC} $${CRASHPAD_DST})
 
     QMAKE_EXTRA_TARGETS += CopyCrashpad

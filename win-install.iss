@@ -10,7 +10,7 @@ OutputDir=.
 OutputBaseFilename=a3dc-setup-011
 
 [Files]
-Source: "install\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "build\src\app\debug\*"; Excludes: "*.obj"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\A3DC"; Filename: "{app}\a3dc.exe"
