@@ -2,40 +2,47 @@
 <qresource>
     <file>../../assets/fonts/fontello.ttf</file>
     
+    <file>qml/main.qml</file>
+
     <file>qml/actions/ActionTypes.qml</file>
     <file>qml/actions/AppActions.qml</file>
     <file>qml/actions/AppDispatcher.qml</file>
-    <file>qml/main.qml</file>
-    <file>qml/stores/NodeStore.qml</file>
+
     <file>qml/stores/MainStore.qml</file>
+    <file>qml/stores/NodeStore.qml</file>
+    <file>qml/stores/SceneStore.qml</file>
+    <file>qml/stores/CardStore.qml</file>
+
     <file>qml/middlewares/Middleware.qml</file>
     <file>qml/middlewares/DialogMiddleware.qml</file>
-    <file>qml/views/controls/ColorIndicator.qml</file>
-    <file>qml/views/controls/DualSlider.qml</file>
-    <file>qml/views/controls/FontelloButton.qml</file>
-    <file>qml/views/controls/Palette.qml</file>
-    <file>qml/views/controls/SliderHandle.qml</file>
+
     <file>qml/views/MainWindow.qml</file>
-    <file>qml/views/NodeListPanel.qml</file>
-    <file>qml/views/SceneRootEntity.qml</file>
-    <file>qml/views/VolumeEntity.qml</file>
-    <file>qml/views/SceneRenderSettings.qml</file>
-    <file>qml/views/ScreenQuadEntity.qml</file>
 
-    <file>qml/views/nodes/SegmentNodeView.qml</file>
-    <file>qml/views/nodes/AnalysisNodeView.qml</file>
-    <file>qml/views/nodes/SourceNodeView.qml</file>
-    <file>qml/views/nodes/NodeViewOptions.qml</file>
+    <file>qml/views/sidebar/CardPanel.qml</file>
 
-    <file>qml/views/shaders/backfacemap.vert</file>
-    <file>qml/views/shaders/volume.vert</file>
-    <file>qml/views/shaders/final.vert</file>
+    <file>qml/views/sidebar/controls/ColorIndicator.qml</file>
+    <file>qml/views/sidebar/controls/DualSlider.qml</file>
+    <file>qml/views/sidebar/controls/FontelloButton.qml</file>
+    <file>qml/views/sidebar/controls/Palette.qml</file>
+    <file>qml/views/sidebar/controls/SliderHandle.qml</file>
     
-    <file>qml/views/shaders/backfacemap.frag</file>
-    <file>qml/views/shaders/volume.frag</file>
-    <file>qml/views/shaders/final.frag</file>
+    <file>qml/views/sidebar/nodes/SegmentNodeView.qml</file>
+    <file>qml/views/sidebar/nodes/AnalysisNodeView.qml</file>
+    <file>qml/views/sidebar/nodes/SourceNodeView.qml</file>
+    <file>qml/views/sidebar/nodes/NodeViewOptions.qml</file>
 
-    <file>qml/views/shaders/volume.geom</file>
+    <file>qml/views/display/SceneRootEntity.qml</file>
+    <file>qml/views/display/VolumeEntity.qml</file>
+    <file>qml/views/display/SceneRenderSettings.qml</file>
+    <file>qml/views/display/ScreenQuadEntity.qml</file>
+
+    <file>qml/views/display/shaders/backfacemap.vert</file>
+    <file>qml/views/display/shaders/volume.vert</file>
+    <file>qml/views/display/shaders/final.vert</file>
+    <file>qml/views/display/shaders/backfacemap.frag</file>
+    <file>qml/views/display/shaders/volume.frag</file>
+    <file>qml/views/display/shaders/final.frag</file>
+    <file>qml/views/display/shaders/volume.geom</file>
 
     <file>qml/actions/qmldir</file>
     <file>qml/stores/qmldir</file>

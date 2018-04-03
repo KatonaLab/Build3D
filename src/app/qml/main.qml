@@ -9,6 +9,8 @@ import "middlewares"
 Item {
     Component.onCompleted: {        
         AppDispatcher.addStoreListener(MainStore.nodeStore);
+        AppDispatcher.addStoreListener(MainStore.sceneStore);
+        AppDispatcher.addStoreListener(MainStore.cardStore);
         AppDispatcher.addMiddlewareListener(dialogMiddleware);
 
         // AppActions.autoImportIcsFile("file:///Users/fodorbalint/Sandbox/testset/K32_bassoon_TH_vGluT1_c01_cmle.ics");

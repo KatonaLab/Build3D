@@ -1,17 +1,11 @@
-pragma Singleton
 import QtQuick 2.8
+pragma Singleton
 
-Item {
+QtObject {
 
-    property string resetWorkspace: "resetWorkspace"
-    property string autoImportIcsFile: "autoImportIcsFile"
-    property string importIcsFile: "importIcsFile"
-    property string addSourceNode: "addSourceNode"
-    property string addSegmentNode: "addSegmentNode"
-    property string addAnalysisNode: "addAnalysisNode"
-    property string setNodeViewParameters: "setNodeViewParameters"
-    property string applySegmentNode: "applySegmentNode"
-    property string applyAnalysisNode: "applyAnalysisNode"
-    property string removeNode: "removeNode"
-    property string saveAnalysisCsv: "saveAnalysisCsv"
+    readonly property string ics_file_import: "ICS_FILE_IMPORT"
+    readonly property string node_add_request: "NODE_ADD_REQUEST"
+    readonly property string node_added_notification: "NODE_ADDED_NOTIFICATION"
+    readonly property string node_remove_request: "NODE_REMOVE_REQUEST"
+    readonly property string node_removed_notification: "NODE_REMOVED_NOTIFICATION"
 }

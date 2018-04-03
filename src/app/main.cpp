@@ -18,6 +18,7 @@
 #include "VolumeData.h"
 #include "VolumeDataCollection.h"
 #include "VolumeTexture.h"
+#include "NodePlatform.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -45,7 +46,6 @@ static bool startCrashHandler()
     wstring handler_path(exePath + L"\\crashpad_handler.exe");
     wcout << handler_path << endl;
 #else
-
     string db_path("crashes/");
     string handler_path("./crashpad_handler");
 #endif
@@ -105,6 +105,7 @@ int main(int argc, char* argv[])
     qmlRegisterType<VolumeDataCollection>("koki.katonalab.a3dc", 1, 0, "VolumeDataCollection");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
+    qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "NodePlatform");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";

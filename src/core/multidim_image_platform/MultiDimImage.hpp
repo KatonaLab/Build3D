@@ -205,35 +205,6 @@ namespace multidim_image_platform {
             }
         };
 
-        // constexpr std::size_t typeScaleDivisor(std::size_t nBytesMore, std::size_t nBytesLess)
-        // {
-        //     // return equals the result of (x^k - 1)/(x - 1)
-        //     //    = x^(k-1) + x^(k-2) + ... + x + 1
-        //     // acquired using polynomial division
-            
-        //     std::size_t x = 1 << 8 * nBytesLess;
-        //     std::size_t k = nBytesMore / nBytesLess;
-
-        //     std::size_t xExp = 1;
-        //     std::size_t sum = 0;
-        //     for (std::size_t i = 0; i < k; ++i) {
-        //         sum += xExp;
-        //         xExp *= x;
-        //     }
-        //     return sum;
-        // }
-
-        // template <typename From, typename To,
-        //     bool From_is_integral = std::is_integral<From>::value,
-        //     bool To_is_integral = std::is_integral<To>::value,
-        //     bool From_has_less_bits_than_To = sizeof(From) < sizeof(To)>
-        // struct ScaleConvert {
-        //     static To scale(const From& x);
-        // };
-
-        // template <typename X, typename Y>
-        // Y typeScale(const X& x);
-
         template <typename X, typename Y,
             bool X_is_integral = std::is_integral<X>::value,
             bool Y_is_integral = std::is_integral<Y>::value>

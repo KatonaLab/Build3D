@@ -5,7 +5,7 @@ import Qt3D.Extras 2.0
 import Qt3D.Input 2.0
 import koki.katonalab.a3dc 1.0
 
-import "../stores"
+import "../../stores"
 
 Entity {
 
@@ -49,30 +49,30 @@ Entity {
     // so we need a per object volume rendering and then merging the results
 
     NodeInstantiator {
-        model: MainStore.nodeStore.sceneModel
-        delegate: VolumeEntity {
-            uid: model.uid
+        // model: MainStore.sceneStore.model
+        // delegate: VolumeEntity {
+        //     uid: model.uid
 
-            width: model.size.x
-            height: model.size.y
-            depth: model.size.z
-            volumeTexture: model.volumeTexture
+        //     width: model.size.x
+        //     height: model.size.y
+        //     depth: model.size.z
+        //     volumeTexture: model.volumeTexture
 
-            backFaceMap: renderSettings.backFaceMap
-            // TODO: count only the visible channels
-            accumDivisor: 1.0 / MainStore.nodeStore.model.count
-            layer: sceneLayer
+        //     backFaceMap: renderSettings.backFaceMap
+        //     // TODO: count only the visible channels
+        //     accumDivisor: 1.0 / MainStore.nodeStore.model.count
+        //     layer: sceneLayer
 
-            volumeColor: model.nodeViewParams.color
-            visible: model.nodeViewParams.visible
+        //     volumeColor: model.nodeViewParams.color
+        //     visible: model.nodeViewParams.visible
 
-            lutLowCut: model.nodeViewParams.lowCut
-            lutHighCut: model.nodeViewParams.highCut
-            Component.onCompleted: {
-                //lutDataMax = model.data.dataLimits.y;
-                lutDataMax = 1000.;
-            }
-        }
+        //     lutLowCut: model.nodeViewParams.lowCut
+        //     lutHighCut: model.nodeViewParams.highCut
+        //     Component.onCompleted: {
+        //         //lutDataMax = model.data.dataLimits.y;
+        //         lutDataMax = 1000.;
+        //     }
+        // }
     }
 
     Layer {

@@ -6,16 +6,16 @@ Item {
 
     property Item nextMiddleware
 
-    function dispatch(actionType, parameters) {
+    function dispatch(actionType, args) {
         // no-op
         console.warning("not implemented middleware dispatch");
     }
 
-    function next(actionType, parameters) {
+    function next(actionType, args) {
         if (nextMiddleware != null) {
-            return nextMiddleware.dispatch(actionType, parameters);
+            nextMiddleware.dispatch(actionType, args);
         } else {
-            AppDispatcher.dispatchToStores(actionType, parameters);
+            AppDispatcher.dispatchToStores(actionType, args);
         }
     }
 }

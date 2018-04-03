@@ -7,7 +7,9 @@ import Qt.labs.settings 1.0
 import koki.katonalab.a3dc 1.0
 
 import "../actions"
-import "controls"
+import "sidebar"
+import "display"
+import "sidebar/controls"
 
 ApplicationWindow {
     id: appWindow
@@ -59,7 +61,7 @@ ApplicationWindow {
         anchors.fill: parent
         spacing: 0
     
-        NodeListPanel {
+        CardPanel {
             Layout.preferredWidth: 240
             Layout.fillHeight: true
         }

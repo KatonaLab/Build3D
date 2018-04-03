@@ -8,17 +8,18 @@ Middleware {
 
     property url folder: "."
 
-    function dispatch(actionType, parameters) {
-        if (actionType == ActionTypes.importIcsFile) {
+    function dispatch(actionType, args) {
+        console.debug("action " + actionType + " reached DialogMiddleware");
+        
+        var handlers = {};
+        handlers[ActionTypes.ics_file_import] = function(args) {
             openDialog.open();
-            return;
-        }
-        if (actionType == ActionTypes.saveAnalysisCsv) {
-            saveDialog.uid = parameters.uid;
-            saveDialog.open();
-            return;
-        }
-        next(actionType, parameters);
+        };
+
+        var notHandled = function(args) {
+            next(actionType, args);
+        };
+        (handlers[actionType] || notHandled)(args);
     }
 
     FileDialog {
@@ -28,23 +29,8 @@ Middleware {
         selectMultiple: false
         nameFilters: [ "Image Cytometry Standard (*.ics)" ]
         onAccepted: {
-            console.log(openDialog.fileUrl);
-            next(ActionTypes.importIcsFile, {url: openDialog.fileUrl});
-        }
-    }
-
-    FileDialog {
-        property int uid: -1;
-
-        id: saveDialog
-        title: "Save"
-        folder: middleware.folder
-        nameFilters: [ "CSV (*.csv)" ]
-        selectExisting: false
-        selectMultiple: false
-        onAccepted: {
-            console.log(saveDialog.fileUrl);
-            next(ActionTypes.saveAnalysisCsv, {uid: uid, url: saveDialog.fileUrl});
+            console.debug(openDialog.fileUrl);
+            next(ActionTypes.ics_file_import, {url: openDialog.fileUrl});
         }
     }
 }
