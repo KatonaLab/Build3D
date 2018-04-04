@@ -1,8 +1,9 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++14
-# for crashpad
-CONFIG += force_debug_info
-CONFIG += separate_debug_info
+CONFIG += force_debug_info # for crashpad
+CONFIG += separate_debug_info # for crashpad
+CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slot *slots; /* terminated by slot==0. */ in Python.h (since slots is a restricted keyword in Qt)
+
 # CONFIG -= app_bundle
 
 # used in version.h/cpp
@@ -27,8 +28,8 @@ win32 {
 
 HEADERS += \
     VolumeData.h \
-    VolumeDataCollection.h \
     VolumeTexture.h \
+    NodePlatformBackend.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -38,8 +39,8 @@ HEADERS += \
 SOURCES += \
     ../util/version.cpp \
     VolumeData.cpp \
-    VolumeDataCollection.cpp \
     VolumeTexture.cpp \
+    NodePlatformBackend.cpp \
     main.cpp \
 
 SOURCES +=  \

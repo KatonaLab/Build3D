@@ -13,12 +13,10 @@
 #include "client/settings.h"
 
 #include "version.h"
-// #include "volumetric.h"
 
 #include "VolumeData.h"
-#include "VolumeDataCollection.h"
 #include "VolumeTexture.h"
-#include "NodePlatform.h"
+#include "NodePlatformBackend.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -41,7 +39,7 @@ static bool startCrashHandler()
     wchar_t exePathChar[2048];
     wstring exePath(exePathChar, GetModuleFileName(NULL, exePathChar, 2048));
     exePath = exePath.substr(0, exePath.rfind('\\'));
-    // modify it to appdata
+    // TODO: change it to AppData since Program Files is readonly for the application
     wstring db_path(exePath + L"\\crashes");
     wstring handler_path(exePath + L"\\crashpad_handler.exe");
     wcout << handler_path << endl;
@@ -88,6 +86,7 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
+    // FIXME: trial period has expired at bactrace.io so no minidump upload can be done
     // if (startCrashHandler() == false) {
     //     cout << "crash reporter could not start" << endl;
     //     return -1;
@@ -102,10 +101,9 @@ int main(int argc, char* argv[])
 
     setSurfaceFormat();
 
-    qmlRegisterType<VolumeDataCollection>("koki.katonalab.a3dc", 1, 0, "VolumeDataCollection");
+    qmlRegisterType<NodePlatformBackend>("koki.katonalab.a3dc", 1, 0, "NodePlatformBackend");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
-    qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "NodePlatform");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";

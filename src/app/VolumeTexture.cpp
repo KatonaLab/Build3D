@@ -1,5 +1,4 @@
 #include "VolumeTexture.h"
-
 #include "VolumeData.h"
 
 #include <QTextureWrapMode>

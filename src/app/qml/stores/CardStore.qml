@@ -13,6 +13,7 @@ Item {
         console.debug("action " + actionType + " reached CardStore");
         
         var handlers = {};
+        
         handlers[ActionTypes.node_added_notification] = function(args) {
             var object = Qt.createQmlObject('import QtQuick 2.8; Rectangle {width:100; height:100; color:"blue"}', model);
             model.append(object);
