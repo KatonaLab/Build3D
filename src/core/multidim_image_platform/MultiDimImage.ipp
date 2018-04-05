@@ -406,7 +406,7 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
         if (d >= m_dims.size()) {
             throw std::range_error("no such dimension: " + std::to_string(d));
         }
-        newDims.erase(newDims.begin() + d - k++);
+        newDims.erase(newDims.begin() + (d - k++));
     }
 
     MultiDimImage<T> newImage(newDims);
