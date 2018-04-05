@@ -57,6 +57,8 @@ namespace multidim_image_platform {
         std::unordered_map<std::string, std::string> m_items;
     };
 
+    // TODO: consider using Eigen matrices instead of MultiDimImage implementation
+    // or using Eigen matrices for m_planes e.g.
     template <typename T>
     class MultiDimImage {
         template <typename U> friend class MultiDimImage;
@@ -117,6 +119,7 @@ namespace multidim_image_platform {
         std::vector<std::vector<T>>& unsafeData();
         void reorderDims(std::vector<std::size_t> dims);
         void removeDims(std::vector<std::size_t> dims);
+        std::vector<MultiDimImage<T>> splitDim(std::size_t dim);
         virtual ~MultiDimImage();
 
         // TODO: make getter/setter

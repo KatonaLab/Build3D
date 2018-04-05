@@ -1223,3 +1223,175 @@ SCENARIO("removing dimensions", "[core/multidim_image_platform]")
         }
     }
 }
+
+SCENARIO("removing multiple dimensions", "[core/multidim_image_platform]")
+{
+    GIVEN("a multidim image") {
+        MultiDimImage<double> im({17, 16, 3});
+        im.at({1, 0, 0}) = 0.01;
+        im.at({2, 0, 0}) = 0.02;
+        im.at({3, 0, 0}) = 0.03;
+        im.at({15, 0, 0}) = 0.015;
+        im.at({16, 0, 0}) = 0.016;
+
+        im.at({0, 1, 0}) = 0.11;
+        im.at({0, 2, 0}) = 0.12;
+        im.at({0, 3, 0}) = 0.13;
+        im.at({0, 14, 0}) = 0.115;
+        im.at({0, 15, 0}) = 0.116;
+
+        im.at({0, 0, 0}) = 0.21;
+        im.at({0, 0, 1}) = 0.22;
+        im.at({0, 0, 2}) = 0.23;
+
+        REQUIRE(im.dims() == 3);
+        REQUIRE(im.dim(0) == 17);
+        REQUIRE(im.dim(1) == 16);
+        REQUIRE(im.dim(2) == 3);
+
+        WHEN("removing the 1st and the 2nd dimensions") {
+            im.removeDims({0, 1});
+            THEN("they are is removed") {
+                REQUIRE(im.dims() == 1);
+                REQUIRE(im.dim(0) == 3);
+
+                REQUIRE(im.at({0}) == 0.21);
+                REQUIRE(im.at({1}) == 0.22);
+                REQUIRE(im.at({2}) == 0.23);
+            }
+        }
+
+        WHEN("removing the 1st and the 3rd dimensions") {
+            im.removeDims({0, 2});
+            THEN("they are is removed") {
+                REQUIRE(im.dims() == 1);
+                REQUIRE(im.dim(0) == 16);
+
+                REQUIRE(im.at({1}) == 0.11);
+                REQUIRE(im.at({2}) == 0.12);
+                REQUIRE(im.at({3}) == 0.13);
+                REQUIRE(im.at({14}) == 0.115);
+                REQUIRE(im.at({15}) == 0.116);
+            }
+        }
+
+        WHEN("removing the 2nd and the 3rd dimensions") {
+            im.removeDims({2, 1});
+            THEN("they are is removed") {
+                REQUIRE(im.dims() == 1);
+                REQUIRE(im.dim(0) == 17);
+
+                REQUIRE(im.at({1}) == 0.01);
+                REQUIRE(im.at({2}) == 0.02);
+                REQUIRE(im.at({3}) == 0.03);
+                REQUIRE(im.at({15}) == 0.015);
+                REQUIRE(im.at({16}) == 0.016);
+            }
+        }
+
+        WHEN("removing all the dimensions") {
+            im.removeDims({2, 0, 1});
+            THEN("they are all removed") {
+                REQUIRE(im.dims() == 0);
+                REQUIRE(im.empty() == true);
+            }
+        }
+
+        WHEN("removing non-existing dimension") {
+            THEN("exception is thrown") {
+                REQUIRE_THROWS(im.removeDims({3}));
+            }
+        }
+
+        WHEN("removing existing and non-existing dimensions") {
+            THEN("exception is thrown") {
+                REQUIRE_THROWS(im.removeDims({3, 1, 2, 4}));
+            }
+        }
+    }
+}
+
+SCENARIO("sliptting dimensions", "[core/multidim_image_platform]")
+{
+    GIVEN("a multidim image") {
+        MultiDimImage<double> im({17, 16, 3});
+        im.at({1, 0, 0}) = 0.01;
+        im.at({2, 0, 0}) = 0.02;
+        im.at({3, 0, 0}) = 0.03;
+        im.at({15, 0, 0}) = 0.015;
+        im.at({16, 0, 0}) = 0.016;
+
+        im.at({0, 1, 0}) = 0.11;
+        im.at({0, 2, 0}) = 0.12;
+        im.at({0, 3, 0}) = 0.13;
+        im.at({0, 14, 0}) = 0.115;
+        im.at({0, 15, 0}) = 0.116;
+
+        im.at({0, 0, 0}) = 0.21;
+        im.at({0, 0, 1}) = 0.22;
+        im.at({0, 0, 2}) = 0.23;
+
+        REQUIRE(im.dims() == 3);
+        REQUIRE(im.dim(0) == 17);
+        REQUIRE(im.dim(1) == 16);
+        REQUIRE(im.dim(2) == 3);
+
+        WHEN("splitting the 1st dimension") {
+            std::vector<MultiDimImage<double>> parts = im.splitDim(0);
+            THEN("it is splitted") {
+                REQUIRE(parts.size() == 17);
+                for (auto& p : parts) {
+                    REQUIRE(p.dims() == 2);
+                    REQUIRE(p.dim(0) == 16);
+                    REQUIRE(p.dim(1) == 3);
+                }
+
+                REQUIRE(parts[1].at({0, 0}) == 0.01);
+                REQUIRE(parts[2].at({0, 0}) == 0.02);
+                REQUIRE(parts[3].at({0, 0}) == 0.03);
+                REQUIRE(parts[15].at({0, 0}) == 0.015);
+                REQUIRE(parts[16].at({0, 0}) == 0.016);
+            }
+        }
+
+        WHEN("splitting the 2nd dimension") {
+            std::vector<MultiDimImage<double>> parts = im.splitDim(1);
+            THEN("it is splitted") {
+                REQUIRE(parts.size() == 16);
+                for (auto& p : parts) {
+                    REQUIRE(p.dims() == 2);
+                    REQUIRE(p.dim(0) == 17);
+                    REQUIRE(p.dim(1) == 3);
+                }
+
+                REQUIRE(parts[1].at({0, 0}) == 0.11);
+                REQUIRE(parts[2].at({0, 0}) == 0.12);
+                REQUIRE(parts[3].at({0, 0}) == 0.13);
+                REQUIRE(parts[14].at({0, 0}) == 0.115);
+                REQUIRE(parts[15].at({0, 0}) == 0.116);
+            }
+        }
+
+        WHEN("splitting the 3rd dimension") {
+            std::vector<MultiDimImage<double>> parts = im.splitDim(2);
+            THEN("it is splitted") {
+                REQUIRE(parts.size() == 3);
+                for (auto& p : parts) {
+                    REQUIRE(p.dims() == 2);
+                    REQUIRE(p.dim(0) == 17);
+                    REQUIRE(p.dim(1) == 16);
+                }
+
+                REQUIRE(parts[0].at({0, 0}) == 0.21);
+                REQUIRE(parts[1].at({0, 0}) == 0.22);
+                REQUIRE(parts[2].at({0, 0}) == 0.23);
+            }
+        }
+
+        WHEN("splitting a non-existing dimension") {
+            THEN("exception is raised") {
+                REQUIRE_THROWS(im.splitDim(3));
+            }
+        }
+    }
+}

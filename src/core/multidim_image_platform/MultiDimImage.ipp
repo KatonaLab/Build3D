@@ -403,19 +403,22 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
     vector<size_t> newDims(m_dims);
     size_t k = 0;
     for (size_t d : dims) {
+        if (d >= m_dims.size()) {
+            throw std::range_error("no such dimension: " + std::to_string(d));
+        }
         newDims.erase(newDims.begin() + d - k++);
     }
 
     MultiDimImage<T> newImage(newDims);
+
     std::size_t n = newImage.size();
     std::vector<std::size_t> newCoords(newImage.m_dims.size(), 0);
     
     for (std::size_t i = 0; i < n; ++i) {
         std::vector<std::size_t> oldCoords(newCoords);
 
-        size_t k = 0;
         for (size_t d : dims) {
-            oldCoords.insert(oldCoords.begin() + d + k++, 0);
+            oldCoords.insert(oldCoords.begin() + d, 0);
         }
 
         newImage.unsafeAt(newCoords) = unsafeAt(oldCoords);
@@ -424,6 +427,36 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
 
     m_viewRegistry.clear();
     std::swap(newImage, *this);
+}
+
+template <typename T>
+std::vector<MultiDimImage<T>> MultiDimImage<T>::splitDim(std::size_t dim)
+{
+    // TODO: find a faster solution
+    using namespace std;
+
+    if (dim >= m_dims.size()) {
+        throw std::range_error("no such dimension: " + std::to_string(dim));
+    }
+
+    vector<MultiDimImage<T>> result;
+    vector<size_t> newDims(m_dims);
+    newDims.erase(newDims.begin() + dim);
+
+    for (size_t k = 0; k < this->dim(dim); ++k) {
+        result.emplace_back(newDims);
+        vector<size_t> newCoords(newDims.size(), 0);
+        size_t n = result.back().size();
+        for (size_t i = 0; i < n; ++i) {
+            vector<size_t> oldCoords(newCoords);
+            oldCoords.insert(oldCoords.begin() + dim, k);
+            
+            result.back().unsafeAt(newCoords) = unsafeAt(oldCoords);
+            detail::stepCoords(newCoords, result.back().m_dims);
+        }
+    }
+
+    return result;
 }
 
 template <typename T>
