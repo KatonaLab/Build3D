@@ -29,7 +29,7 @@ win32 {
 HEADERS += \
     VolumeData.h \
     VolumeTexture.h \
-    NodePlatformBackend.h \
+    ModulePlatformBackend.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -40,7 +40,7 @@ SOURCES += \
     ../util/version.cpp \
     VolumeData.cpp \
     VolumeTexture.cpp \
-    NodePlatformBackend.cpp \
+    ModulePlatformBackend.cpp \
     main.cpp \
 
 SOURCES +=  \
@@ -109,7 +109,7 @@ macx {
         LIBS += -L"$$CRASHPAD_DIR/out/Release"
     }
 
-    LIBS += -framework Cocoa -framework Security -lbsm
+    LIBS += -framework Cocoa -framework Security -lbsm -lz
 
     crashpad.files = $$CRASHPAD_DIR/out/Release/crashpad_handler
     crashpad.path = Contents/MacOS

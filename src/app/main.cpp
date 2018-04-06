@@ -16,7 +16,7 @@
 
 #include "VolumeData.h"
 #include "VolumeTexture.h"
-#include "NodePlatformBackend.h"
+#include "ModulePlatformBackend.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
     setSurfaceFormat();
 
-    qmlRegisterType<NodePlatformBackend>("koki.katonalab.a3dc", 1, 0, "NodePlatformBackend");
+    qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "NodePlatformBackend");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
 
