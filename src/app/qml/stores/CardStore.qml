@@ -27,8 +27,8 @@ Item {
 
     ObjectModel {
         id: model
-        Rectangle { height: 30; width: 80; color: "red" }
-        Rectangle { height: 30; width: 80; color: "green" }
-        Rectangle { height: 30; width: 80; color: "blue" }
+        // Rectangle { height: 30; width: 80; color: "red" }
+        // Rectangle { height: 30; width: 80; color: "green" }
+        // Rectangle { height: 30; width: 80; color: "blue" }
     }
 }

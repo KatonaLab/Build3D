@@ -23,7 +23,7 @@ Entity {
     property vector4d lutParameters: Qt.vector4d(0, lutDataMax, lutLowCut, lutHighCut)
 
     property Layer layer
-    property Texture2D backFaceMap    
+    property Texture2D backFaceMap
 
     QtObject {
         id: d
@@ -60,8 +60,8 @@ Entity {
                             filterKeys: [FilterKey {name: "pass"; value: "BackFace"}]
                             
                             shaderProgram: ShaderProgram {
-                                vertexShaderCode: loadSource("qrc:/qml/views/shaders/backfacemap.vert")
-                                fragmentShaderCode: loadSource("qrc:/qml/views/shaders/backfacemap.frag")
+                                vertexShaderCode: loadSource("qrc:/qml/views/display/shaders/backfacemap.vert")
+                                fragmentShaderCode: loadSource("qrc:/qml/views/display/shaders/backfacemap.frag")
                             }
 
                             renderStates: [
@@ -73,9 +73,9 @@ Entity {
                             filterKeys: [FilterKey {name: "pass"; value: "FrontFaceAccumulate"}]
                             
                             shaderProgram: ShaderProgram {
-                                vertexShaderCode: loadSource("qrc:/qml/views/shaders/volume.vert")
-                                geometryShaderCode: loadSource("qrc:/qml/views/shaders/volume.geom")
-                                fragmentShaderCode: loadSource("qrc:/qml/views/shaders/volume.frag")
+                                vertexShaderCode: loadSource("qrc:/qml/views/display/shaders/volume.vert")
+                                geometryShaderCode: loadSource("qrc:/qml/views/display/shaders/volume.geom")
+                                fragmentShaderCode: loadSource("qrc:/qml/views/display/shaders/volume.frag")
                             }
 
                             renderStates: [

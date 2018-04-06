@@ -10,17 +10,17 @@ using namespace core::io_utils;
 using namespace core::multidim_image_platform;
 using namespace core::high_platform;
 
-BackendModule::BackendModule(uint32_t uid) : m_uid(uid)
+BackendModule::BackendModule(int uid) : m_uid(uid)
 {}
 
-uint32_t BackendModule::uid() const
+int BackendModule::uid() const
 {
     return m_uid;
 }
 
 // --------------------------------------------------------
 
-DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, uint32_t uid)
+DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
     : cp::ComputeModule(parent, m_inputs, m_outputs),
     BackendModule(uid),
     m_inputs(*this),
@@ -52,7 +52,7 @@ bool DataSourceModule::hasTexture(std::size_t outputPortId)
 VolumeTexture* DataSourceModule::getModuleTexture(std::size_t outputPortId)
 {
     VolumeTexture* tex = new VolumeTexture;
-    tex->init(*m_data, outputPortId);
+    tex->init(*m_data);
     return tex;
 }
 
@@ -63,7 +63,7 @@ cp::ComputeModule& DataSourceModule::getModule()
 
 // --------------------------------------------------------
 
-GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, uint32_t uid)
+GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
     : hp::PythonComputeModule(parent, script),
     BackendModule(uid)
 {}
@@ -98,7 +98,7 @@ ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
 : QObject(parent)
 {}
 
-QList<uint32_t> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& filename)
+QList<int> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& filename)
 {
     IcsAdapter ics;
     ics.open(filename.toLocalFile().toStdString());
@@ -123,7 +123,7 @@ QList<uint32_t> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl
             throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
     };
 
-    QList<uint32_t> uids;
+    QList<int> uids;
     for (auto& vol : volumes) {
         uids.push_back(nextUid());
         auto newModule = new DataSourceModule(m_platform, uids.back());
@@ -139,7 +139,7 @@ QList<uint32_t> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl
     return uids;
 }
 
-uint32_t ModulePlatformBackend::createGenericModule(const QUrl& scriptPath)
+int ModulePlatformBackend::createGenericModule(const QUrl& scriptPath)
 {
     const string path = scriptPath.toLocalFile().toStdString();
     auto newModule = new GenericModule(m_platform, path,nextUid());
@@ -149,12 +149,12 @@ uint32_t ModulePlatformBackend::createGenericModule(const QUrl& scriptPath)
     return newModule->uid();
 }
 
-bool ModulePlatformBackend::hasModule(uint32_t uid)
+bool ModulePlatformBackend::hasModule(int uid)
 {
     return m_modules.end() != m_modules.find(uid);
 }
 
-void ModulePlatformBackend::destroyModule(uint32_t uid)
+void ModulePlatformBackend::destroyModule(int uid)
 {
     if (!hasModule(uid)) {
         return;
@@ -167,7 +167,7 @@ void ModulePlatformBackend::destroyModule(uint32_t uid)
     Q_EMIT moduleDestroyed(uid);
 }
 
-QVariantMap ModulePlatformBackend::getModuleProperties(uint32_t uid)
+QVariantMap ModulePlatformBackend::getModuleProperties(int uid)
 {
     if (hasModule(uid)) {
         return m_modules[uid]->getProperties();
@@ -175,17 +175,17 @@ QVariantMap ModulePlatformBackend::getModuleProperties(uint32_t uid)
     return QVariantMap();
 }
 
-VolumeTexture* ModulePlatformBackend::getModuleTexture(uint32_t uid, std::size_t outputPortId)
+VolumeTexture* ModulePlatformBackend::getModuleTexture(int uid, int outputPortId)
 {
-    if (hasModule(uid) && m_modules[uid]->hasTexture(outputPortId)) {
-        return m_modules[uid]->getModuleTexture(outputPortId);
+    if (hasModule(uid) && m_modules[uid]->hasTexture((std::size_t)outputPortId)) {
+        return m_modules[uid]->getModuleTexture((std::size_t)outputPortId);
     }
     return nullptr;
 }
 
-QMultiMap<uint32_t, size_t> ModulePlatformBackend::getCompatibleModules(uint32_t uid, std::size_t inputPortId)
+QMultiMap<int, size_t> ModulePlatformBackend::getCompatibleModules(int uid, int inputPortId)
 {
-    QMultiMap<uint32_t, size_t> ports;
+    QMultiMap<int, size_t> ports;
     
     if (!hasModule(uid)) {
         return ports;
@@ -193,7 +193,7 @@ QMultiMap<uint32_t, size_t> ModulePlatformBackend::getCompatibleModules(uint32_t
 
     cp::ComputeModule& q = m_modules[uid]->getModule();
 
-    if (inputPortId >= q.numInputs()) {
+    if ((std::size_t)inputPortId >= q.numInputs()) {
         return ports;
     }
 
@@ -206,8 +206,8 @@ QMultiMap<uint32_t, size_t> ModulePlatformBackend::getCompatibleModules(uint32_t
         for (size_t i = 0; i < m.numOutputs(); ++i) {
             // TODO: it is not the most elegant way for the connection test
             // try to find a better solution
-            if (connectPorts(m, i, q, inputPortId)) {
-                disconnectPorts(m, i, q, inputPortId);
+            if (connectPorts(m, i, q, (std::size_t)inputPortId)) {
+                disconnectPorts(m, i, q, (std::size_t)inputPortId);
                 ports.insert(pr.first, i);
             }
         }
@@ -216,8 +216,8 @@ QMultiMap<uint32_t, size_t> ModulePlatformBackend::getCompatibleModules(uint32_t
     return ports;
 }
 
-inline uint32_t ModulePlatformBackend::nextUid() const
+int ModulePlatformBackend::nextUid() const
 {
-    static uint32_t counter = 0;
+    static int counter = 0;
     return counter++;
 }

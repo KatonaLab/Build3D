@@ -38,8 +38,8 @@ Entity {
                             filterKeys: [FilterKey {name: "pass"; value: "Final"}]
                         
                             shaderProgram: ShaderProgram {
-                                vertexShaderCode: loadSource("qrc:/qml/views/shaders/final.vert")
-                                fragmentShaderCode: loadSource("qrc:/qml/views/shaders/final.frag")
+                                vertexShaderCode: loadSource("qrc:/qml/views/display/shaders/final.vert")
+                                fragmentShaderCode: loadSource("qrc:/qml/views/display/shaders/final.frag")
                             } // ShaderProgram
 
                             renderStates: [

@@ -42,7 +42,7 @@ class VolumeTexture : public Qt3DRender::QAbstractTexture {
     Q_PROPERTY(QVector3D size READ size)
 public:
     explicit VolumeTexture(Qt3DCore::QNode* parent = nullptr);
-    void init(core::multidim_image_platform::MultiDimImage<float>& source, std::size_t channel);
+    void init(core::multidim_image_platform::MultiDimImage<float>& source);
     QVector3D size() const { return QVector3D(m_data->width(), m_data->height(), m_data->depth()); }
     virtual ~VolumeTexture() = default;
     bool smooth() const { return m_smooth; }

@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
     setSurfaceFormat();
 
-    qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "NodePlatformBackend");
+    qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "ModulePlatformBackend");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
 

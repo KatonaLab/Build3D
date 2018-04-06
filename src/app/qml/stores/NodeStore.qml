@@ -5,37 +5,26 @@ import "../actions"
 
 Item {
 
+    property alias backend: backend
+
     function onDispatched(actionType, args) {
         console.debug("action " + actionType + " reached NodeStore");
         
         var handlers = {};
 
         handlers[ActionTypes.ics_file_import] = function(args) {
-            volumeCollection.source = args.url;
+            var uids = backend.createSourceModulesFromIcsFile(args.url);
+            uids.forEach(function(uid) {
+                AppActions.notifyNodeAdded(uid);
+            });
         };
 
         handlers[ActionTypes.node_add_request] = function(args) {
-            var node = null;
-            switch (args.type) {
-                case "source":
-                    node = platform.createSourceNode(args.data);
-                    break;
-                case "generic":
-                    node = platform.createGenericNode(args.script);
-                    break;
-                default:
-                    // TODO: error handling
-                    console.error("no node type", args.type)
-                    return;
-            }
-            AppActions.notifyNodeAdded(node.uid, node.params);
+            
         };
 
         handlers[ActionTypes.node_remove_request] = function(uid) {
-            if (platform.hasNode(uid)) {
-                AppActions.notifyNodeRemoved(uid);
-                platform.removeNode(uid);
-            }
+            
         };
 
         var notHandled = function(args) {
@@ -44,19 +33,7 @@ Item {
         (handlers[actionType] || notHandled)(args);
     }
 
-    VolumeDataCollection {
-        id: volumeCollection
-        onStatusChanged: {
-            console.debug('status change received', status);
-            if (status === Component.Ready) {
-                for (var i = 0; i < volumes.length; ++i) {
-                    AppActions.requestAddNode({type: "source", data: volumes[i]});
-                }
-            }
-        }
-    }
-
-    NodePlatform {
-        id: platform
+    ModulePlatformBackend {
+        id: backend
     }
 }

@@ -12,9 +12,9 @@ VolumeTexture::VolumeTexture(Qt3DCore::QNode *parent)
     : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {}
 
-void VolumeTexture::init(MultiDimImage<float>& source, std::size_t channel)
+void VolumeTexture::init(MultiDimImage<float>& source)
 {
-    m_data = unique_ptr<VolumeData>(new VolumeData(source, channel));
+    m_data = unique_ptr<VolumeData>(new VolumeData(source));
     m_textureImage = unique_ptr<VolumeTextureImage>(new VolumeTextureImage(*m_data));
 
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));

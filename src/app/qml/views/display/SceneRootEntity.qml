@@ -49,30 +49,41 @@ Entity {
     // so we need a per object volume rendering and then merging the results
 
     NodeInstantiator {
-        // model: MainStore.sceneStore.model
-        // delegate: VolumeEntity {
-        //     uid: model.uid
+        model: MainStore.sceneStore.model
+        delegate: VolumeEntity {
+            uid: model.uid
 
-        //     width: model.size.x
-        //     height: model.size.y
-        //     depth: model.size.z
-        //     volumeTexture: model.volumeTexture
+            width: model.size.x
+            height: model.size.y
+            depth: model.size.z
+            volumeTexture: model.texture
 
-        //     backFaceMap: renderSettings.backFaceMap
-        //     // TODO: count only the visible channels
-        //     accumDivisor: 1.0 / MainStore.nodeStore.model.count
-        //     layer: sceneLayer
+            backFaceMap: renderSettings.backFaceMap
+            // TODO: count only the visible channels
+            // accumDivisor: 1.0 / MainStore.nodeStore.model.count
+            accumDivisor: 1.0
+            layer: sceneLayer
 
-        //     volumeColor: model.nodeViewParams.color
-        //     visible: model.nodeViewParams.visible
+            volumeColor: "red"
+            visible: true
 
-        //     lutLowCut: model.nodeViewParams.lowCut
-        //     lutHighCut: model.nodeViewParams.highCut
-        //     Component.onCompleted: {
-        //         //lutDataMax = model.data.dataLimits.y;
-        //         lutDataMax = 1000.;
-        //     }
-        // }
+            lutLowCut: 0
+            lutHighCut: 1
+            Component.onCompleted: {
+                // lutDataMax = model.data.dataLimits.y;
+                lutDataMax = 10.;
+            }
+
+            // volumeColor: model.nodeViewParams.color
+            // visible: model.nodeViewParams.visible
+
+            // lutLowCut: model.nodeViewParams.lowCut
+            // lutHighCut: model.nodeViewParams.highCut
+            // Component.onCompleted: {
+            //     //lutDataMax = model.data.dataLimits.y;
+            //     lutDataMax = 1000.;
+            // }
+        }
     }
 
     Layer {

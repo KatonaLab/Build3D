@@ -13,8 +13,8 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.node_add_request, {});
     }
 
-    function notifyNodeAdded(uid, params) {
-        AppDispatcher.dispatch(ActionTypes.node_added_notification, {uid: uid, params: params});
+    function notifyNodeAdded(uid) {
+        AppDispatcher.dispatch(ActionTypes.node_added_notification, {uid: uid});
     }
 
     function requestRemoveNode(uid) {
