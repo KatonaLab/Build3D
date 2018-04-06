@@ -72,3 +72,9 @@ bool core::compute_platform::connectPorts(ComputeModule& outputModule, std::size
 {
     return outputModule.outputPort(outputId).lock()->bind(inputModule.inputPort(inputId));
 }
+
+void core::compute_platform::disconnectPorts(ComputeModule& outputModule, std::size_t outputId,
+    ComputeModule& inputModule, std::size_t inputId)
+{
+    outputModule.outputPort(outputId).lock()->unbind(inputModule.inputPort(inputId));
+}

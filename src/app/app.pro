@@ -30,6 +30,7 @@ HEADERS += \
     VolumeData.h \
     VolumeTexture.h \
     ModulePlatformBackend.h \
+    UltimateSinkModule.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -41,6 +42,7 @@ SOURCES += \
     VolumeData.cpp \
     VolumeTexture.cpp \
     ModulePlatformBackend.cpp \
+    UltimateSinkModule.cpp \
     main.cpp \
 
 SOURCES +=  \

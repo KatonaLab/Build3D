@@ -15,6 +15,7 @@ public:
     ComputePlatform();
     void addModule(ComputeModule& module,
         core::directed_acyclic_graph::NodePtr node);
+    // TODO: removeModule
     size_t size() const;
     void run();
     bool checkCompleteness();

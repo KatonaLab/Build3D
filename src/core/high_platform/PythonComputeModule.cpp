@@ -34,7 +34,7 @@ PythonEnvironment::PythonEnvironment()
 
 void PythonEnvironment::reset()
 {
-
+    // TODO: implement or remove this function
 }
 
 void PythonEnvironment::exec(std::string code)

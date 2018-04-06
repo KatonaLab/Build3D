@@ -42,6 +42,10 @@ namespace compute_platform {
     
     bool connectPorts(ComputeModule& outputModule, std::size_t outputId,
         ComputeModule& inputModule, std::size_t inputId);
+
+    // TODO: write test for disconnectPorts
+    void disconnectPorts(ComputeModule& outputModule, std::size_t outputId,
+        ComputeModule& inputModule, std::size_t inputId);
 }}
 
 #endif
