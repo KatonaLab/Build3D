@@ -3,19 +3,20 @@ import QtQuick.Window 2.0
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 
-import "controls"
-
+import "../views/sidebar"
+import "CardPanel-sample.js" as SampleData
 
 Rectangle {
-    width: 200
-    height: 300
+    width: 400
+    height: 600
     color: "transparent"
 
     ListModel {
         id: model
-        ListElement {
-            title: "hello panel"
+        Component.onCompleted: {
+            model.append(SampleData.demoModules);
         }
+        
     }
 
     CardPanel {
