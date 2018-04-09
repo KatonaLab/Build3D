@@ -15,8 +15,8 @@ Item {
         var handlers = {};
         
         handlers[ActionTypes.node_added_notification] = function(args) {
-            var object = Qt.createQmlObject('import QtQuick 2.8; Rectangle {width:100; height:100; color:"blue"}', model);
-            model.append(object);
+            var props = MainStore.moduleStore.backend.getModuleProperties(args.uid);
+            model.append({uid: args.uid, });
         };
 
         var notHandled = function(args) {
@@ -25,10 +25,7 @@ Item {
         (handlers[actionType] || notHandled)(args);
     }
 
-    ObjectModel {
+    ListModel {
         id: model
-        // Rectangle { height: 30; width: 80; color: "red" }
-        // Rectangle { height: 30; width: 80; color: "green" }
-        // Rectangle { height: 30; width: 80; color: "blue" }
     }
 }

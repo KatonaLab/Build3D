@@ -3,12 +3,12 @@ import QtQuick 2.8
 
 Item {
 
-    property alias nodeStore: nodeStore
+    property alias moduleStore: moduleStore
     property alias sceneStore: sceneStore
     property alias cardStore: cardStore
 
-    NodeStore {
-        id: nodeStore
+    ModuleStore {
+        id: moduleStore
     }
 
     SceneStore {

@@ -60,7 +60,7 @@ Entity {
 
             backFaceMap: renderSettings.backFaceMap
             // TODO: count only the visible channels
-            // accumDivisor: 1.0 / MainStore.nodeStore.model.count
+            // accumDivisor: 1.0 / MainStore.moduleStore.model.count
             accumDivisor: 1.0
             layer: sceneLayer
 

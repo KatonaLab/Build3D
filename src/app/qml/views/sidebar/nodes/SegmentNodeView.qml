@@ -65,11 +65,11 @@ GroupBox {
                     textRole: "text"
                     model: ListModel {
                         Component.onCompleted: {
-                            var nodeStore = MainStore.nodeStore;
-                            var sm = nodeStore.sceneModel;
+                            var moduleStore = MainStore.moduleStore;
+                            var sm = moduleStore.sceneModel;
                             for (var i = 0; i < sm.count; ++i) {
                                 var uid = sm.get(i).uid;
-                                var node = nodeStore.getNode(uid);
+                                var node = moduleStore.getNode(uid);
                                 append({text: node.nodeName, uid: uid});
                             }
                         }
@@ -102,7 +102,7 @@ GroupBox {
             Layout.fillWidth: true
             onClicked: {
                 var inputUid = inputSelector.model.get(inputSelector.currentIndex).uid;
-                var inputSceneNode = MainStore.nodeStore.getSceneNode(inputUid);
+                var inputSceneNode = MainStore.moduleStore.getSceneNode(inputUid);
                 var inputData = inputSceneNode.data;
                 var param0 = inputSceneNode.nodeViewParams.lowCut;
                 var param1 = inputSceneNode.nodeViewParams.highCut;

@@ -11,7 +11,7 @@ Item {
         
         var handlers = {};
         handlers[ActionTypes.node_added_notification] = function(args) {
-            var vol = MainStore.nodeStore.backend.getModuleTexture(args.uid, 0);
+            var vol = MainStore.moduleStore.backend.getModuleTexture(args.uid, 0);
             var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
             var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
             model.append({uid: args.uid, texture: vol, size: size});

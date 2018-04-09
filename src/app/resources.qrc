@@ -9,7 +9,7 @@
     <file>qml/actions/AppDispatcher.qml</file>
 
     <file>qml/stores/MainStore.qml</file>
-    <file>qml/stores/NodeStore.qml</file>
+    <file>qml/stores/ModuleStore.qml</file>
     <file>qml/stores/SceneStore.qml</file>
     <file>qml/stores/CardStore.qml</file>
 
@@ -19,6 +19,7 @@
     <file>qml/views/MainWindow.qml</file>
 
     <file>qml/views/sidebar/CardPanel.qml</file>
+    <file>qml/views/sidebar/Card.qml</file>
 
     <file>qml/views/sidebar/controls/ColorIndicator.qml</file>
     <file>qml/views/sidebar/controls/DualSlider.qml</file>

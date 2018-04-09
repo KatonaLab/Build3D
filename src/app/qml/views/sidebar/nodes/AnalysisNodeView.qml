@@ -66,11 +66,11 @@ GroupBox {
                     textRole: "text"
                     model: ListModel {
                         Component.onCompleted: {
-                            var nodeStore = MainStore.nodeStore;
-                            var sm = nodeStore.sceneModel;
+                            var moduleStore = MainStore.moduleStore;
+                            var sm = moduleStore.sceneModel;
                             for (var i = 0; i < sm.count; ++i) {
                                 var uid = sm.get(i).uid;
-                                var node = nodeStore.getNode(uid);
+                                var node = moduleStore.getNode(uid);
                                 append({text: node.nodeName, uid: uid});
                             }
                         }
@@ -114,10 +114,10 @@ GroupBox {
                 var input2Uid = input2Selector.model.get(input2Selector.currentIndex).uid;
                 var input3Uid = input3Selector.model.get(input3Selector.currentIndex).uid;
 
-                var input0SceneNode = MainStore.nodeStore.getSceneNode(input0Uid);
-                var input1SceneNode = MainStore.nodeStore.getSceneNode(input1Uid);
-                var input2SceneNode = MainStore.nodeStore.getSceneNode(input2Uid);
-                var input3SceneNode = MainStore.nodeStore.getSceneNode(input3Uid);
+                var input0SceneNode = MainStore.moduleStore.getSceneNode(input0Uid);
+                var input1SceneNode = MainStore.moduleStore.getSceneNode(input1Uid);
+                var input2SceneNode = MainStore.moduleStore.getSceneNode(input2Uid);
+                var input3SceneNode = MainStore.moduleStore.getSceneNode(input3Uid);
 
                 var input0Data = input0SceneNode.data;
                 var input1Data = input1SceneNode.data;
@@ -160,7 +160,7 @@ GroupBox {
             height: 600
 
             function updateTable() {
-                var node = MainStore.nodeStore.getNode(box.uid);
+                var node = MainStore.moduleStore.getNode(box.uid);
                 list.clear();
                 for (var i = 0; i < node.nodeParams.count; ++i) {
                     list.append({

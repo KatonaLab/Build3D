@@ -8,7 +8,7 @@ Item {
     property alias backend: backend
 
     function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached NodeStore");
+        console.debug("action " + actionType + " reached ModuleStore");
         
         var handlers = {};
 
@@ -28,7 +28,7 @@ Item {
         };
 
         var notHandled = function(args) {
-            console.debug(actionType, "is not handled by NodeStore");
+            console.debug(actionType, "is not handled by ModuleStore");
         };
         (handlers[actionType] || notHandled)(args);
     }
