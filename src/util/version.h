@@ -11,10 +11,9 @@ extern const char * _A3DC_BUILD_PLATFORM;
 
 class A3DCVersion : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QString version READ version)
 public:
     explicit A3DCVersion(QObject* parent = nullptr);
-    QString version() { return m_version; }
+    Q_INVOKABLE QString version() { return m_version; }
 private:
     QString m_version;
 };

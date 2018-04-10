@@ -2,6 +2,7 @@ import QtQuick 2.8
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
+import QtQuick.Controls.Styles 1.4
 
 import "../../actions"
 
@@ -12,19 +13,36 @@ GroupBox {
     property var inputs
     property var parameters
     property var outputs
-    
+
     width: parent.width
 
-    Label {
-        id: nameLabel
-        text: displayName
+    RowLayout {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        id: header
+
+        Label {
+            id: nameLabel
+            text: displayName
+            Layout.fillWidth: true
+        }
+        Button {
+            text: "x"
+            Layout.alignment: Qt.AlignRight
+            implicitWidth: nameLabel.height
+            implicitHeight: nameLabel.height
+            style: ButtonStyle {}
+            onClicked: {
+                AppActions.requestRemoveModule(root.uid);
+            }
+        }
     }
 
     ColumnLayout {
         id: columnLayout
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.top: nameLabel.bottom
+        anchors.top: header.bottom
         anchors.topMargin: 8
         spacing: 4
 

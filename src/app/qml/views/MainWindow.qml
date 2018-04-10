@@ -17,7 +17,7 @@ ApplicationWindow {
 
     width: 480
     height: 480
-    title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version + ")"
+    title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
     Component.onCompleted: visible = true
 

@@ -16,6 +16,10 @@ Middleware {
             openDialog.open();
         };
 
+        handlers[ActionTypes.module_remove_request] = function(args) {
+            moduleRemoveDialog.open();
+        };
+
         var notHandled = function(args) {
             next(actionType, args);
         };
@@ -31,6 +35,21 @@ Middleware {
         onAccepted: {
             console.debug(openDialog.fileUrl);
             next(ActionTypes.ics_file_import, {url: openDialog.fileUrl});
+        }
+    }
+
+    Dialog {
+        id: moduleRemoveDialog
+        visible: false
+        title: "Removal Confirmation"
+        standardButtons: StandardButton.No | StandardButton.Ok
+
+        Text {
+            text: "Remove?"
+        }
+
+        onAccepted: {
+            next(ActionTypes.module_remove_request, {uid: openDialog.fileUrl});
         }
     }
 }
