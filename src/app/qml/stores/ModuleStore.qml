@@ -21,7 +21,8 @@ Item {
         };
 
         handlers[ActionTypes.module_add_request] = function(args) {
-            var uid = backend.createGenericModule(args.script);
+            console.log(JSON.stringify(args), args.script);
+            var uid = backend.createGenericModule(Qt.resolvedUrl(args.script));
             AppActions.notifyModuleAdded(uid);
         };
 

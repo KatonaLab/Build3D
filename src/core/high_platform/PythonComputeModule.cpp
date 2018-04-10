@@ -182,12 +182,12 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
     #define CASE_POD(E, T) \
         case PyTypes::E: \
             {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
-            return PyInputPortWrapperPtr(new PyInputPortWrapperPod<T>(tp));}
+            return PyInputPortWrapperPtr(new PyInputPortWrapperPod<T>(tp, PyTypes::E));}
 
     #define CASE_NON_POD(E, T) \
         case PyTypes::E: \
             {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
-            return PyInputPortWrapperPtr(new PyInputPortWrapperNonPod<T>(tp));}
+            return PyInputPortWrapperPtr(new PyInputPortWrapperNonPod<T>(tp, PyTypes::E));}
 
     switch (t) {
         CASE_POD(TYPE_int8_t, int8_t)
@@ -221,12 +221,12 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
     #define CASE_POD(E, T) \
         case PyTypes::E: \
             {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
-            return PyOutputPortWrapperPtr(new PyOutputPortWrapperPod<T>(tp));}
+            return PyOutputPortWrapperPtr(new PyOutputPortWrapperPod<T>(tp, PyTypes::E));}
 
     #define CASE_NON_POD(E, T) \
         case PyTypes::E: \
             {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
-            return PyOutputPortWrapperPtr(new PyOutputPortWrapperNonPod<T>(tp));}
+            return PyOutputPortWrapperPtr(new PyOutputPortWrapperNonPod<T>(tp, PyTypes::E));}
 
     switch (t) {
         CASE_POD(TYPE_int8_t, int8_t)
@@ -253,6 +253,32 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
     }
     #undef CASE_POD
     #undef CASE_NON_POD
+}
+
+PyTypes PythonComputeModule::inputPortPyType(std::string name)
+{
+    auto item = find_if(m_inputPorts.begin(), m_inputPorts.end(),
+        [&name](const pair<std::string, PyInputPortWrapperPtr>& p)
+        {
+            return p.first == name;
+        });
+    if (item != m_inputPorts.end()) {
+        return item->second->pyType();
+    }
+    return PyTypes::TYPE_unknown;
+}
+
+PyTypes PythonComputeModule::outputPortPyType(std::string name)
+{
+    auto item = find_if(m_outputPorts.begin(), m_outputPorts.end(),
+        [&name](const pair<std::string, PyOutputPortWrapperPtr>& p)
+        {
+            return p.first == name;
+        });
+    if (item != m_outputPorts.end()) {
+        return item->second->pyType();
+    }
+    return PyTypes::TYPE_unknown;
 }
 
 void PythonComputeModule::buildPorts()
@@ -318,6 +344,7 @@ std::weak_ptr<InputPort> DynamicInputPortCollection::get(size_t portId)
 
 void DynamicInputPortCollection::push(std::string name, PyInputPortWrapperPtr portWrapper)
 {
+    portWrapper->port()->setName(name);
     m_orderedInputs.push_back(portWrapper->port());
     m_map[name] = portWrapper;
 }
@@ -348,6 +375,7 @@ size_t DynamicOutputPortCollection::size() const
 
 void DynamicOutputPortCollection::push(std::string name, PyOutputPortWrapperPtr portWrapper)
 {
+    portWrapper->port()->setName(name);
     m_orderedOutputs.push_back(portWrapper->port());
     m_map[name] = portWrapper;
 }

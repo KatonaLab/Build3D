@@ -28,6 +28,7 @@ namespace md = core::multidim_image_platform;
 // --------------------------------------------------------
 
 enum class PyTypes {
+    TYPE_unknown,
     TYPE_int8_t,
     TYPE_int16_t,
     TYPE_int32_t,
@@ -72,6 +73,12 @@ protected:
 
 class PyInputPortWrapper {
 public:
+    PyInputPortWrapper(PyTypes type) : m_type(type)
+    {}
+    PyTypes pyType() const
+    {
+        return m_type;
+    }
     virtual pybind11::object toPyObject()
     {
         return pybind11::none();
@@ -82,12 +89,20 @@ public:
         return std::shared_ptr<cp::InputPort>();
     }
     virtual ~PyInputPortWrapper() = default;
+protected:
+    PyTypes m_type;
 };
 
 typedef std::shared_ptr<PyInputPortWrapper> PyInputPortWrapperPtr;
 
 class PyOutputPortWrapper {
 public:
+    PyOutputPortWrapper(PyTypes type) : m_type(type)
+    {}
+    PyTypes pyType() const
+    {
+        return m_type;
+    }
     virtual pybind11::object toPyObject()
     {
         return pybind11::none();
@@ -100,6 +115,8 @@ public:
         return std::shared_ptr<cp::OutputPort>();
     }
     virtual ~PyOutputPortWrapper() = default;
+protected:
+    PyTypes m_type;
 };
 
 typedef std::shared_ptr<PyOutputPortWrapper> PyOutputPortWrapperPtr;
@@ -109,8 +126,8 @@ typedef std::shared_ptr<PyOutputPortWrapper> PyOutputPortWrapperPtr;
 template <typename T>
 class PyInputPortWrapperPod : public PyInputPortWrapper {
 public:
-    PyInputPortWrapperPod(std::shared_ptr<cp::TypedInputPort<T>> port)
-        : m_port(port)
+    PyInputPortWrapperPod(std::shared_ptr<cp::TypedInputPort<T>> port, PyTypes type)
+        : PyInputPortWrapper(type), m_port(port)
     {}
     pybind11::object toPyObject() override
     {
@@ -127,8 +144,8 @@ protected:
 template <typename T>
 class PyInputPortWrapperNonPod : public PyInputPortWrapper {
 public:
-    PyInputPortWrapperNonPod(std::shared_ptr<cp::TypedInputPort<T>> port)
-        : m_port(port)
+    PyInputPortWrapperNonPod(std::shared_ptr<cp::TypedInputPort<T>> port, PyTypes type)
+        : PyInputPortWrapper(type), m_port(port)
     {}
     pybind11::object toPyObject() override
     {
@@ -145,8 +162,8 @@ protected:
 template <typename T>
 class PyOutputPortWrapperPod : public PyOutputPortWrapper {
 public:
-    PyOutputPortWrapperPod(std::shared_ptr<cp::TypedOutputPort<T>> port)
-        : m_port(port)
+    PyOutputPortWrapperPod(std::shared_ptr<cp::TypedOutputPort<T>> port, PyTypes type)
+        : PyOutputPortWrapper(type), m_port(port)
     {}
     pybind11::object toPyObject() override
     {
@@ -167,8 +184,8 @@ protected:
 template <typename T>
 class PyOutputPortWrapperNonPod : public PyOutputPortWrapper {
 public:
-    PyOutputPortWrapperNonPod(std::shared_ptr<cp::TypedOutputPort<T>> port)
-        : m_port(port)
+    PyOutputPortWrapperNonPod(std::shared_ptr<cp::TypedOutputPort<T>> port, PyTypes type)
+        : PyOutputPortWrapper(type), m_port(port)
     {}
     pybind11::object toPyObject() override
     {
@@ -229,6 +246,8 @@ protected:
     void execute() override;
     PyInputPortWrapperPtr createInputPortWrapper(PyTypes t);
     PyOutputPortWrapperPtr createOutputPortWrapper(PyTypes t);
+    PyTypes inputPortPyType(std::string name);
+    PyTypes outputPortPyType(std::string name);
 private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;

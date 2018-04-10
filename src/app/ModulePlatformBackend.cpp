@@ -80,7 +80,9 @@ cp::ComputeModule& DataSourceModule::getModule()
 GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
     : hp::PythonComputeModule(parent, script),
     BackendModule(uid)
-{}
+{
+    std::cout << script << std::endl;
+}
 
 QVariantMap GenericModule::getProperties()
 {
@@ -89,6 +91,43 @@ QVariantMap GenericModule::getProperties()
     map["inputs"] = QVariantList();
     map["parameters"] = QVariantList();
     map["outputs"] = QVariantList();
+
+    {
+        std::cout << numInputs() << " " << numOutputs() << std::endl;
+        QVariantList vlist;
+        for (size_t i = 0; i < numInputs(); ++i) {
+            QVariantMap vmap;
+            auto portName = inputPort(i).lock()->name();
+            PyTypes portType = inputPortPyType(portName);
+            vmap["displayName"] = QVariant(QString::fromStdString(portName));
+            if (portType == PyTypes::TYPE_MultiDimImageFloat) {
+                vmap["type"] = QVariant("volume");
+            } else {
+                vmap["type"] = QVariant("?");
+            }
+            vlist.append(vmap);
+        }
+        map["inputs"] = vlist;
+    }
+
+    {
+        QVariantList vlist;
+        for (size_t i = 0; i < numOutputs(); ++i) {
+            QVariantMap vmap;
+            auto portName = outputPort(i).lock()->name();
+            PyTypes portType = outputPortPyType(portName);
+            vmap["displayName"] = QVariant(QString::fromStdString(portName));
+            if (portType == PyTypes::TYPE_MultiDimImageFloat) {
+                vmap["type"] = QVariant("volume");
+            } else {
+                vmap["type"] = QVariant("?");
+            }
+            vlist.append(vmap);
+        }
+        map["outputs"] = QVariant(vlist);
+    }
+
+    map["parameters"] = QVariantList();
 
     return map;
 }
@@ -161,9 +200,13 @@ int ModulePlatformBackend::createGenericModule(const QUrl& scriptPath)
 {
     const string path = scriptPath.toLocalFile().toStdString();
 
+    // std::cout << scriptPath << std::endl;
+
+    std::cout << path << std::endl;
     ifstream f(path);
     stringstream buffer;
     buffer << f.rdbuf();
+    std::cout << buffer.str() << std::endl;
 
     auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());
 

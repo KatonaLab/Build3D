@@ -2,6 +2,7 @@
 #define _core_compute_platform_ports_h_
 
 #include <memory>
+#include <string>
 
 namespace core {
 namespace compute_platform {
@@ -12,6 +13,8 @@ class ComputeModule;
 class OutputPort : public std::enable_shared_from_this<OutputPort> {
 public:
     OutputPort(ComputeModule& parent);
+    std::string name() const;
+    void setName(const std::string& name);
     bool bind(std::weak_ptr<InputPort> inputPort);
     void unbind(std::weak_ptr<InputPort> inputPort);
     size_t numBinds() const;
@@ -25,12 +28,15 @@ protected:
     size_t m_numBinds = 0;
     size_t m_numInputServed = 0;
     ComputeModule& m_parent;
+    std::string m_name;
 };
 
 class InputPort {
     friend class OutputPort;
 public:
     InputPort(ComputeModule& parent);
+    std::string name() const;
+    void setName(const std::string& name);
     virtual void fetch() = 0;
     ComputeModule& parent();
     virtual size_t typeHash() const = 0;
@@ -39,6 +45,7 @@ public:
 protected:
     std::weak_ptr<OutputPort> m_source;
     ComputeModule& m_parent;
+    std::string m_name;
 };
 
 class InputPortCollection {

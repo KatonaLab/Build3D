@@ -37,7 +37,10 @@ ScrollView {
                     model: root.supportedModules
                     MenuItem {
                         text: model.displayName
-                        onTriggered: AppActions.requestAddModule(model.type)
+                        onTriggered: {
+                            console.log("triggered", model.script);
+                            AppActions.requestAddModule(model.script);
+                        }
                     }
                     onObjectAdded: menu.insertItem(index, object)
                     onObjectRemoved: menu.removeItem(object)

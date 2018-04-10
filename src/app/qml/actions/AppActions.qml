@@ -9,8 +9,9 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.ics_file_import, {url: url});
     }
 
-    function requestAddModule(type) {
-        AppDispatcher.dispatch(ActionTypes.module_add_request, {type: type});
+    function requestAddModule(script) {
+        console.log("requestAddModule", script);
+        AppDispatcher.dispatch(ActionTypes.module_add_request, {script: script});
     }
 
     function notifyModuleAdded(uid) {

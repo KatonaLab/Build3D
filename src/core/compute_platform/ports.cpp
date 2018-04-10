@@ -8,6 +8,16 @@ using namespace std;
 OutputPort::OutputPort(ComputeModule& parent) : m_parent(parent)
 {}
 
+std::string OutputPort::name() const
+{
+    return m_name;
+}
+
+void OutputPort::setName(const std::string& name)
+{
+    m_name = name;
+}
+
 bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
 {
     if (compatible(inputPort)) {
@@ -62,6 +72,16 @@ OutputPort::~OutputPort()
 
 InputPort::InputPort(ComputeModule& parent) : m_parent(parent)
 {}
+
+std::string InputPort::name() const
+{
+    return m_name;
+}
+
+void InputPort::setName(const std::string& name)
+{
+    m_name = name;
+}
 
 ComputeModule& InputPort::parent()
 {
