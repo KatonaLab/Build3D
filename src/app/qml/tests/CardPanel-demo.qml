@@ -18,8 +18,25 @@ Rectangle {
         }
     }
 
+    ListModel {
+        id: supportedModules
+        ListElement {
+            displayName: "DataSource"
+            type: "source"
+        }
+        ListElement {
+            displayName: "Threshold"
+            type: "threshold"
+        }
+        ListElement {
+            displayName: "Magic"
+            type: "magic"
+        }
+    }
+
     CardPanel {
-        anchors.fill: parent        
+        anchors.fill: parent
         model: model
+        supportedModules: supportedModules
     }
 }

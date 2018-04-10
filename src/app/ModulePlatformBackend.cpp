@@ -1,6 +1,8 @@
 #include "ModulePlatformBackend.h"
 
 #include <core/io_utils/IcsAdapter.h>
+#include <fstream>
+#include <sstream>
 #include "VolumeTexture.h"
 #include "VolumeData.h"
 #include <core/high_platform/PythonComputeModule.h>
@@ -158,7 +160,12 @@ QList<int> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& fil
 int ModulePlatformBackend::createGenericModule(const QUrl& scriptPath)
 {
     const string path = scriptPath.toLocalFile().toStdString();
-    auto newModule = new GenericModule(m_platform, path,nextUid());
+
+    ifstream f(path);
+    stringstream buffer;
+    buffer << f.rdbuf();
+
+    auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());
 
     m_modules.emplace(make_pair(newModule->uid(), newModule));
     Q_EMIT moduleCreated(newModule->uid());

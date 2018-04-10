@@ -66,6 +66,7 @@ ApplicationWindow {
             Layout.preferredWidth: 240
             Layout.fillHeight: true
             model: MainStore.cardStore.model
+            supportedModules: MainStore.moduleStore.supportedModules
         }
 
         Scene3D {

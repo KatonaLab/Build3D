@@ -6,6 +6,7 @@ import "../actions"
 Item {
 
     property alias backend: backend
+    property alias supportedModules: supportedModules
 
     function onDispatched(actionType, args) {
         console.debug("action " + actionType + " reached ModuleStore");
@@ -20,7 +21,8 @@ Item {
         };
 
         handlers[ActionTypes.module_add_request] = function(args) {
-            
+            var uid = backend.createGenericModule(args.script);
+            AppActions.notifyModuleAdded(uid);
         };
 
         handlers[ActionTypes.module_remove_request] = function(uid) {
@@ -35,5 +37,13 @@ Item {
 
     ModulePlatformBackend {
         id: backend
+    }
+
+    ListModel {
+        id: supportedModules
+        ListElement {
+            displayName: "Test Module"
+            script: "scripts/test_module.py"
+        }
     }
 }

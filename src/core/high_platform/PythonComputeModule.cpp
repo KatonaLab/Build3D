@@ -273,25 +273,6 @@ void PythonComputeModule::buildPorts()
     }
 }
 
-template <typename T, bool U = std::is_pod<T>::value>
-struct foo {};
-
-template <typename T>
-struct foo<T, true> {
-    py::object conv(std::shared_ptr<T> x)
-    {
-        return py::cast(*x);
-    }
-};
-
-template <typename T>
-struct foo<T, false> {
-    py::object conv(std::shared_ptr<T> x)
-    {
-        return py::cast(x);
-    }
-};
-
 void PythonComputeModule::execute()
 {
     py::module m = py::module::import("a3dc");
