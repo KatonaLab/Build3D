@@ -42,13 +42,13 @@ Middleware {
         id: moduleRemoveDialog
         visible: false
         title: "Removal Confirmation"
-        standardButtons: StandardButton.No | StandardButton.Ok
+        standardButtons: StandardButton.Yes | StandardButton.No
 
         Text {
-            text: "Remove?"
+            text: "Remove?" // TODO: proper message
         }
 
-        onAccepted: {
+        onYes: {
             next(ActionTypes.module_remove_request, {uid: openDialog.fileUrl});
         }
     }

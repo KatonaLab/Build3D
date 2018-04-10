@@ -304,6 +304,7 @@ void PythonComputeModule::execute()
     py::module m = py::module::import("a3dc");
     py::object inputs = m.attr("inputs");
     py::object outputs = m.attr("outputs");
+    py::object parameters = m.attr("parameters");
 
     inputs.attr("clear")();
 

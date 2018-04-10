@@ -63,6 +63,7 @@ public:
     void exec(std::string code);
     ~PythonEnvironment();
     ProcessArg inputs;
+    ProcessArg parameters;
     ProcessArg outputs;
     ProcessFunc func;
 protected:
