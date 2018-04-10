@@ -196,16 +196,14 @@ QList<int> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& fil
     return uids;
 }
 
-int ModulePlatformBackend::createGenericModule(const QUrl& scriptPath)
+int ModulePlatformBackend::createGenericModule(const QString& scriptPath)
 {
-    const string path = scriptPath.toLocalFile().toStdString();
+    string path = scriptPath.toStdString();
 
-    // std::cout << scriptPath << std::endl;
-
-    std::cout << path << std::endl;
     ifstream f(path);
     stringstream buffer;
     buffer << f.rdbuf();
+
     std::cout << buffer.str() << std::endl;
 
     auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());

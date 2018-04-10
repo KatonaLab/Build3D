@@ -38,8 +38,7 @@ ScrollView {
                     MenuItem {
                         text: model.displayName
                         onTriggered: {
-                            console.log("triggered", model.script);
-                            AppActions.requestAddModule(model.script);
+                            AppActions.requestAddModule(model.scriptPath);
                         }
                     }
                     onObjectAdded: menu.insertItem(index, object)

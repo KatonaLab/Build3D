@@ -62,7 +62,7 @@ public:
     explicit ModulePlatformBackend(QObject* parent = Q_NULLPTR);
     virtual ~ModulePlatformBackend() = default;
     Q_INVOKABLE QList<int> createSourceModulesFromIcsFile(const QUrl& filename);
-    Q_INVOKABLE int createGenericModule(const QUrl& scriptPath);
+    Q_INVOKABLE int createGenericModule(const QString& scriptPath);
     Q_INVOKABLE bool hasModule(int uid);
     Q_INVOKABLE void destroyModule(int uid);
     Q_INVOKABLE QVariantMap getModuleProperties(int uid);

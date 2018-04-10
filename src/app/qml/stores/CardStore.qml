@@ -16,7 +16,7 @@ Item {
         
         handlers[ActionTypes.module_added_notification] = function(args) {
             var props = MainStore.moduleStore.backend.getModuleProperties(args.uid);
-            console.log(JSON.stringify(props));
+            console.debug(JSON.stringify(props));
             model.append({
                 uid: args.uid,
                 displayName: props.displayName,

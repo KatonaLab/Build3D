@@ -44,6 +44,7 @@ GroupBox {
                 sourceComponent: {
                     switch(model.type) {
                         case "volume": return volumeInputDelegate;
+                        case "?": return volumeInputDelegate;
                     }
                 }
             }
@@ -91,6 +92,7 @@ GroupBox {
                 sourceComponent: {
                     switch(model.type) {
                         case "volume": return volumeOutputDelegate;
+                        case "?": return volumeOutputDelegate;
                     }
                 }
             }

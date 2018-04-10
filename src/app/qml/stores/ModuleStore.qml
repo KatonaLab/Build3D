@@ -21,8 +21,7 @@ Item {
         };
 
         handlers[ActionTypes.module_add_request] = function(args) {
-            console.log(JSON.stringify(args), args.script);
-            var uid = backend.createGenericModule(Qt.resolvedUrl(args.script));
+            var uid = backend.createGenericModule(args.scriptPath);
             AppActions.notifyModuleAdded(uid);
         };
 
@@ -44,7 +43,7 @@ Item {
         id: supportedModules
         ListElement {
             displayName: "Test Module"
-            script: "scripts/test_module.py"
+            scriptPath: "scripts/test_module.py"
         }
     }
 }
