@@ -9,19 +9,23 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.ics_file_import, {url: url});
     }
 
-    function requestAddNode() {
-        AppDispatcher.dispatch(ActionTypes.node_add_request, {});
+    function requestAddModule() {
+        AppDispatcher.dispatch(ActionTypes.module_add_request, {});
     }
 
-    function notifyNodeAdded(uid) {
-        AppDispatcher.dispatch(ActionTypes.node_added_notification, {uid: uid});
+    function notifyModuleAdded(uid) {
+        AppDispatcher.dispatch(ActionTypes.module_added_notification, {uid: uid});
     }
 
-    function requestRemoveNode(uid) {
-        AppDispatcher.dispatch(ActionTypes.node_remove_request, {uid: uid});
+    function changeModuleProperties(uid, props) {
+        AppDispatcher.dispatch(ActionTypes.module_properties_change, {uid: uid, props: props});
     }
 
-    function notifyNodeRemoved(uid) {
-        AppDispatcher.dispatch(ActionTypes.node_removed_notification, {uid: uid});
+    function requestRemoveModule(uid) {
+        AppDispatcher.dispatch(ActionTypes.module_remove_request, {uid: uid});
+    }
+
+    function notifyModuleRemoved(uid) {
+        AppDispatcher.dispatch(ActionTypes.module_removed_notification, {uid: uid});
     }
 }

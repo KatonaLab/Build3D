@@ -15,15 +15,15 @@ Item {
         handlers[ActionTypes.ics_file_import] = function(args) {
             var uids = backend.createSourceModulesFromIcsFile(args.url);
             uids.forEach(function(uid) {
-                AppActions.notifyNodeAdded(uid);
+                AppActions.notifyModuleAdded(uid);
             });
         };
 
-        handlers[ActionTypes.node_add_request] = function(args) {
+        handlers[ActionTypes.module_add_request] = function(args) {
             
         };
 
-        handlers[ActionTypes.node_remove_request] = function(uid) {
+        handlers[ActionTypes.module_remove_request] = function(uid) {
             
         };
 

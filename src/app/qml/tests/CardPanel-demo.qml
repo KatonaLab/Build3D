@@ -16,10 +16,10 @@ Rectangle {
         Component.onCompleted: {
             model.append(SampleData.demoModules);
         }
-        
     }
 
     CardPanel {
+        anchors.fill: parent        
         model: model
     }
 }

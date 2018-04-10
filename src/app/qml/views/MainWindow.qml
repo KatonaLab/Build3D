@@ -7,6 +7,7 @@ import Qt.labs.settings 1.0
 import koki.katonalab.a3dc 1.0
 
 import "../actions"
+import "../stores"
 import "sidebar"
 import "display"
 import "sidebar/controls"
@@ -64,6 +65,7 @@ ApplicationWindow {
         CardPanel {
             Layout.preferredWidth: 240
             Layout.fillHeight: true
+            model: MainStore.cardStore.model
         }
 
         Scene3D {

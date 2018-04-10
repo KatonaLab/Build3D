@@ -3,17 +3,21 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.1
 import QtQml.Models 2.2
 
+import "../../actions"
+
 GroupBox {
     id: root
     property int uid
-    property string moduleName
-    property var controls
+    property string displayName
+    property var inputs
+    property var parameters
+    property var outputs
     
     width: parent.width
 
     Label {
         id: nameLabel
-        text: root.moduleName
+        text: displayName
     }
 
     ColumnLayout {
@@ -24,11 +28,38 @@ GroupBox {
         anchors.topMargin: 8
         spacing: 4
 
+        Rectangle {
+            color: "lightgray"
+            height: 1
+            Layout.fillWidth: true
+        }
+
         Repeater {
-            model: controls
+            model: root.inputs
             delegate: Loader {
-                property var properties: model
                 property int uid: root.uid
+                property var details: model
+                Layout.fillWidth: true
+
+                sourceComponent: {
+                    switch(model.type) {
+                        case "volume": return volumeInputDelegate;
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            color: "lightgray"
+            height: 1
+            Layout.fillWidth: true
+        }
+
+        Repeater {
+            model: root.parameters
+            delegate: Loader {
+                property int uid: root.uid
+                property var details: model
                 Layout.fillWidth: true
 
                 sourceComponent: {
@@ -43,19 +74,54 @@ GroupBox {
                 }
             }
         }
+    
+        Rectangle {
+            color: "lightgray"
+            height: 1
+            Layout.fillWidth: true
+        }
+
+        Repeater {
+            model: root.outputs
+            delegate: Loader {
+                property int uid: root.uid
+                property var details: model
+                Layout.fillWidth: true
+
+                sourceComponent: {
+                    switch(model.type) {
+                        case "volume": return volumeOutputDelegate;
+                    }
+                }
+            }
+        }
+
+        Component {
+            id: volumeInputDelegate
+            Label {
+                text: details.displayName
+            }
+        }
+
+        Component {
+            id: volumeOutputDelegate
+            Label {
+                text: details.displayName
+            }
+        }
 
         Component {
             id: buttonDelegate
             Button {
-                text: properties.name
+                text: details.displayName
             }
         }
 
         Component {
             id: editDelegate
             RowLayout {
-                Text {
-                    text: properties.name
+                Label {
+                    text: details.displayName
                 }
                 TextField {
                     Layout.alignment: Qt.AlignRight
@@ -67,7 +133,7 @@ GroupBox {
         Component {
             id: comboboxDelegate
             ComboBox {
-                model: properties.options
+                model: details.options
             }
         }
 
@@ -121,8 +187,8 @@ GroupBox {
         Component {
             id: switchDelegate
             RowLayout {
-                Text {
-                    text: properties.name
+                Label {
+                    text: details.displayName
                 }
                 Switch {
                     Layout.alignment: Qt.AlignRight

@@ -14,9 +14,14 @@ Item {
         
         var handlers = {};
         
-        handlers[ActionTypes.node_added_notification] = function(args) {
+        handlers[ActionTypes.module_added_notification] = function(args) {
             var props = MainStore.moduleStore.backend.getModuleProperties(args.uid);
-            model.append({uid: args.uid, });
+            model.append({
+                uid: args.uid,
+                displayName: props.displayName,
+                inputs: props.inputs,
+                parameters: props.parameters,
+                outputs: props.outputs});
         };
 
         var notHandled = function(args) {

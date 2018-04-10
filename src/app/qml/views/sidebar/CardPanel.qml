@@ -7,7 +7,6 @@ import QtQml.Models 2.2
 ScrollView {
     id: root
     property ListModel model
-    anchors.fill: parent
 
     ListView {
         anchors.fill: parent
@@ -15,8 +14,10 @@ ScrollView {
         spacing: 4
         delegate: Card {
             uid: model.uid
-            moduleName: model.moduleName
-            controls: model.properties
+            displayName: model.displayName
+            inputs: model.inputs
+            parameters: model.parameters
+            outputs: model.outputs
         }
     }
 

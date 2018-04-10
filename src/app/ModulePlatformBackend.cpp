@@ -40,7 +40,19 @@ void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
 QVariantMap DataSourceModule::getProperties()
 {
     QVariantMap map;
-    map["name"] = QVariant(QString::fromStdString("DataSource" + to_string(uid())));
+    map["displayName"] = QVariant(QString::fromStdString("DataSource" + to_string(uid())));
+    map["inputs"] = QVariantList();
+    map["parameters"] = QVariantList();
+
+    QVariantList outputList;
+    {
+        QVariantMap out;
+        out["displayName"] = QVariant("output");
+        out["type"] = QVariant("volume");
+        outputList.append(out);
+    }
+    map["outputs"] = outputList;
+
     return map;
 }
 
@@ -71,7 +83,11 @@ GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& scr
 QVariantMap GenericModule::getProperties()
 {
     QVariantMap map;
-    map["name"] = QVariant(QString::fromStdString("GenericModule" + to_string(uid())));
+    map["displayName"] = QVariant(QString::fromStdString("GenericModule" + to_string(uid())));
+    map["inputs"] = QVariantList();
+    map["parameters"] = QVariantList();
+    map["outputs"] = QVariantList();
+
     return map;
 }
 
