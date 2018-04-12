@@ -1,83 +1,99 @@
-import QtQuick 2.8
-import QtQuick.Controls 1.5
-import QtQuick.Layouts 1.1
-import QtQml.Models 2.2
-import QtQuick.Controls.Styles 1.4
+import QtQuick 2.9
+import QtQuick.Layouts 1.3
+import QtQml.Models 2.3
+import QtQuick.Controls 2.2
+import QtQuick.Extras 1.4
+import QtQuick.Controls.Material 2.2
 
 import "../../actions"
+import "../components"
 
-GroupBox {
-    id: root
+Pane {
+    id: card
     property int uid
     property string displayName
-    property var inputs
-    property var parameters
-    property var outputs
+    property ListModel inputs
+    property ListModel parameters
+    property ListModel outputs
+    property int fontPointSize: 12
 
-    width: parent.width
+    Material.elevation: 8
 
-    RowLayout {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        id: header
+    contentWidth: layout.implicitWidth
+    contentHeight: header.implicitHeight
 
-        Label {
-            id: nameLabel
-            text: displayName
-            Layout.fillWidth: true
+    states: State {
+        name: "opened"
+        when: header.checked
+        PropertyChanges {
+            target: card
+            contentHeight: layout.implicitHeight
         }
-        Button {
-            text: "x"
-            Layout.alignment: Qt.AlignRight
-            implicitWidth: nameLabel.height
-            implicitHeight: nameLabel.height
-            style: ButtonStyle {}
-            onClicked: {
-                AppActions.requestRemoveModule(root.uid);
-            }
+    }
+
+    transitions: Transition {
+        from: ""; to: "opened"; reversible: true
+        NumberAnimation {
+            properties: "contentHeight"
+            easing.type: Easing.InOutQuad
+            duration: 250
         }
     }
 
     ColumnLayout {
-        id: columnLayout
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: header.bottom
-        anchors.topMargin: 8
-        spacing: 4
+        id: layout
+        anchors.fill: parent
+        clip: true
 
-        Rectangle {
-            color: "lightgray"
-            height: 1
+        ArrowCheckBox {
+            id: header
+            text: "module name"
             Layout.fillWidth: true
+            font.pointSize: fontPointSize + 2
         }
 
+//        Rectangle {
+//            Layout.fillWidth: true
+//            height: 1
+//            color: Material.color(Material.Grey)
+//            anchors.topMargin: 8
+//            anchors.bottomMargin: 8
+//        }
+
         Repeater {
-            model: root.inputs
-            delegate: Loader {
-                property int uid: root.uid
-                property var details: model
+            id: inputsRepeater
+            model: card.inputs
+            delegate: ColumnLayout {
                 Layout.fillWidth: true
 
-                sourceComponent: {
-                    switch(model.type) {
-                        case "volume": return volumeInputDelegate;
-                        case "?": return volumeInputDelegate;
-                    }
+                Label {
+                    font.pointSize: fontPointSize - 2
+                    text: model.displayName
+                    Layout.fillWidth: true
+                }
+
+                ComboBox {
+                    font.pointSize: fontPointSize
+                    Layout.fillWidth: true
+                    model: ["DataSource1/output", "threshold.1/output"]
                 }
             }
         }
 
-        Rectangle {
-            color: "lightgray"
-            height: 1
-            Layout.fillWidth: true
-        }
+//        Rectangle {
+//            Layout.fillWidth: true
+//            height: 1
+//            color: Material.color(Material.Grey)
+//            anchors.topMargin: 16
+//            anchors.bottomMargin: 16
+//        }
 
         Repeater {
-            model: root.parameters
+            id: parametersRepeater
+            visible: false
+            model: card.parameters
             delegate: Loader {
-                property int uid: root.uid
+                property int uid: card.uid
                 property var details: model
                 Layout.fillWidth: true
 
@@ -93,19 +109,21 @@ GroupBox {
                 }
             }
         }
-    
-        Rectangle {
-            color: "lightgray"
-            height: 1
-            Layout.fillWidth: true
-        }
+
+//        Rectangle {
+//            Layout.fillWidth: true
+//            height: 1
+//            color: Material.color(Material.Grey)
+//            anchors.topMargin: 16
+//            anchors.bottomMargin: 16
+//        }
 
         Repeater {
-            model: root.outputs
+            id: outputsRepeater
+            model: card.outputs
             delegate: Loader {
-                property int uid: root.uid
+                property int uid: card.uid
                 property var details: model
-                Layout.fillWidth: true
 
                 sourceComponent: {
                     switch(model.type) {
@@ -120,6 +138,7 @@ GroupBox {
             id: volumeInputDelegate
             Label {
                 text: details.displayName
+                font.pointSize: fontPointSize
             }
         }
 
@@ -127,6 +146,7 @@ GroupBox {
             id: volumeOutputDelegate
             Label {
                 text: details.displayName
+                font.pointSize: fontPointSize
             }
         }
 
@@ -134,18 +154,20 @@ GroupBox {
             id: buttonDelegate
             Button {
                 text: details.displayName
+                font.pointSize: fontPointSize
             }
         }
 
         Component {
             id: editDelegate
-            RowLayout {
+            ColumnLayout {
                 Label {
                     text: details.displayName
+                    font.pointSize: fontPointSize
                 }
                 TextField {
-                    Layout.alignment: Qt.AlignRight
-                    Layout.preferredWidth: 80
+                    font.pointSize: fontPointSize
+                    Layout.fillWidth: true
                 }
             }
         }
@@ -154,54 +176,20 @@ GroupBox {
             id: comboboxDelegate
             ComboBox {
                 model: details.options
+                font.pointSize: fontPointSize
             }
         }
 
         Component {
             id: sliderDelegate
-            ColumnLayout {
-                Slider {
-                    tickmarksEnabled: true
-                    Layout.fillWidth: true
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    Rectangle {
-                        Layout.fillWidth: true
-                    }
-                    SpinBox {
-                        Layout.preferredWidth: 80
-                        Layout.alignment: Qt.AlignRight
-                    }
-                }
+            PreciseSlider {
+//                font.pointSize: fontPointSize
             }
         }
 
         Component {
             id: rangeDelegate
-            ColumnLayout {
-                Slider {
-                    tickmarksEnabled: true
-                    Layout.fillWidth: true
-                }
-                Slider {
-                    tickmarksEnabled: true
-                    Layout.fillWidth: true
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    SpinBox {
-                        Layout.preferredWidth: 80
-                    }
-                    Rectangle {
-                        Layout.fillWidth: true
-                    }
-                    SpinBox {
-                        Layout.preferredWidth: 80
-                        Layout.alignment: Qt.AlignRight
-                    }
-                }
-            }
+            PreciseRangeSlider {}
         }
 
         Component {
@@ -209,11 +197,94 @@ GroupBox {
             RowLayout {
                 Label {
                     text: details.displayName
+                    font.pointSize: fontPointSize
                 }
                 Switch {
-                    Layout.alignment: Qt.AlignRight
+                    font.pointSize: fontPointSize
                 }
             }
         }
     }
+//    contentWidth: layout.implicitWidth
+
+//    ColumnLayout {
+//        id: layout
+//        anchors.fill: parent
+
+//        Rectangle {
+//            Layout.fillWidth: true
+//            height: 10
+//            color: "red"
+//            Label {
+//                text: displayName
+//                anchors.left: parent.leftMargin
+//                font.pointSize: fontPointSize
+//            }
+
+//            RoundButton {
+//                text: "x"
+//                font.pointSize: fontPointSize
+//                Layout.alignment: Qt.AlignRight
+//                onClicked: {
+//                    AppActions.requestRemoveModule(card.uid);
+//                }
+//            }
+//        }
+
+//        Repeater {
+//            model: card.inputs
+//            delegate: RowLayout {
+//                Label {
+//                    font.pointSize: 12
+////                    Layout.fillWidth: true
+//                    text: model.displayName
+//                }
+
+//                ComboBox {
+//                    font.pointSize: 12
+//                    anchors.right: card.right
+//                    flat: true
+//                    model: ["DataSource1/output", "threshold.1/output"]
+//                }
+//            }
+//        }
+
+//        Repeater {
+//            model: card.parameters
+//            delegate: Loader {
+//                property int uid: card.uid
+//                property var details: model
+////                Layout.fillWidth: true
+
+//                sourceComponent: {
+//                    switch(model.type) {
+//                        case "button": return buttonDelegate;
+//                        case "edit": return editDelegate;
+//                        case "combobox": return comboboxDelegate;
+//                        case "slider": return sliderDelegate;
+//                        case "range": return rangeDelegate;
+//                        case "switch": return switchDelegate;
+//                    }
+//                }
+//            }
+//        }
+
+
+//        Repeater {
+//            model: card.outputs
+//            delegate: Loader {
+//                property int uid: card.uid
+//                property var details: model
+////                Layout.fillWidth: true
+
+//                sourceComponent: {
+//                    switch(model.type) {
+//                        case "volume": return volumeOutputDelegate;
+//                        case "?": return volumeOutputDelegate;
+//                    }
+//                }
+//            }
+//        }
+
+//    }
 }
