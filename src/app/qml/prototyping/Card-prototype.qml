@@ -16,11 +16,11 @@ Window {
 
     Card {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 100
-        width: 300
-        uid: 42
         displayName: "Demo Card"
         font.pointSize: 12
+        width: 300
+        uid: 42
+        y: 100
 
         inputs: ListModel {
             Component.onCompleted: {

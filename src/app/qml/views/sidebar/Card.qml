@@ -54,10 +54,6 @@ Pane {
                 font: card.font
             }
 
-            HorizontalDivider {
-                Layout.fillWidth: true;
-            }
-
             CardInputs {
                 id: inputsRepeater
                 model: card.inputs
@@ -65,19 +61,11 @@ Pane {
                 font: card.font
             }
 
-            HorizontalDivider {
-                Layout.fillWidth: true;
-            }
-
             CardParameters {
                 id: parametersRepeater
                 model: card.parameters
                 uid: card.uid
                 font: card.font
-            }
-
-            HorizontalDivider {
-                Layout.fillWidth: true;
             }
 
             CardOutputs {
