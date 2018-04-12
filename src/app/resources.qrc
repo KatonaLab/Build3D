@@ -1,52 +1,47 @@
 <!DOCTYPE RCC><RCC version="1.0">
+<!-- find . -type f \( -name "*.qml" -o -name "qmldir" -o -name "*.vert" -o -name "*.frag" -o -name "*.geom" \) | sed -e "s/\(.*\)/<file>\1<\/file>/" | pbcopy -->
 <qresource>
     <file>../../assets/fonts/fontello.ttf</file>
     
-    <file>qml/main.qml</file>
-
-    <file>qml/actions/ActionTypes.qml</file>
-    <file>qml/actions/AppActions.qml</file>
-    <file>qml/actions/AppDispatcher.qml</file>
-
-    <file>qml/stores/MainStore.qml</file>
-    <file>qml/stores/ModuleStore.qml</file>
-    <file>qml/stores/SceneStore.qml</file>
-    <file>qml/stores/CardStore.qml</file>
-
-    <file>qml/middlewares/Middleware.qml</file>
-    <file>qml/middlewares/DialogMiddleware.qml</file>
-
-    <file>qml/views/MainWindow.qml</file>
-
-    <file>qml/views/sidebar/CardPanel.qml</file>
-    <file>qml/views/sidebar/Card.qml</file>
-
-    <file>qml/views/sidebar/controls/ColorIndicator.qml</file>
-    <file>qml/views/sidebar/controls/DualSlider.qml</file>
-    <file>qml/views/sidebar/controls/FontelloButton.qml</file>
-    <file>qml/views/sidebar/controls/Palette.qml</file>
-    <file>qml/views/sidebar/controls/SliderHandle.qml</file>
-    
-    <file>qml/views/sidebar/nodes/SegmentNodeView.qml</file>
-    <file>qml/views/sidebar/nodes/AnalysisNodeView.qml</file>
-    <file>qml/views/sidebar/nodes/SourceNodeView.qml</file>
-    <file>qml/views/sidebar/nodes/NodeViewOptions.qml</file>
-
-    <file>qml/views/display/SceneRootEntity.qml</file>
-    <file>qml/views/display/VolumeEntity.qml</file>
-    <file>qml/views/display/SceneRenderSettings.qml</file>
-    <file>qml/views/display/ScreenQuadEntity.qml</file>
-
-    <file>qml/views/display/shaders/backfacemap.vert</file>
-    <file>qml/views/display/shaders/volume.vert</file>
-    <file>qml/views/display/shaders/final.vert</file>
-    <file>qml/views/display/shaders/backfacemap.frag</file>
-    <file>qml/views/display/shaders/volume.frag</file>
-    <file>qml/views/display/shaders/final.frag</file>
-    <file>qml/views/display/shaders/volume.geom</file>
-
-    <file>qml/actions/qmldir</file>
-    <file>qml/stores/qmldir</file>
+    <file>./qml/middlewares/DialogMiddleware.qml</file>
+    <file>./qml/middlewares/Middleware.qml</file>
+    <file>./qml/stores/qmldir</file>
+    <file>./qml/stores/CardStore.qml</file>
+    <file>./qml/stores/ModuleStore.qml</file>
+    <file>./qml/stores/MainStore.qml</file>
+    <file>./qml/stores/SceneStore.qml</file>
+    <file>./qml/main.qml</file>
+    <file>./qml/prototyping/Card-prototype.qml</file>
+    <file>./qml/prototyping/PreciseSlider-prototype.qml</file>
+    <file>./qml/prototyping/HorizontalDivider-prototype.qml</file>
+    <file>./qml/prototyping/PreciseRangeSlider-prototype.qml</file>
+    <file>./qml/prototyping/CardPanel-prototype.qml</file>
+    <file>./qml/prototyping/ArrowCheckBox-prototype.qml</file>
+    <file>./qml/actions/AppActions.qml</file>
+    <file>./qml/actions/qmldir</file>
+    <file>./qml/actions/AppDispatcher.qml</file>
+    <file>./qml/actions/ActionTypes.qml</file>
+    <file>./qml/views/sidebar/CardInputs.qml</file>
+    <file>./qml/views/sidebar/Card.qml</file>
+    <file>./qml/views/sidebar/CardOutputs.qml</file>
+    <file>./qml/views/sidebar/CardPanel.qml</file>
+    <file>./qml/views/sidebar/CardParameters.qml</file>
+    <file>./qml/views/MainWindow.qml</file>
+    <file>./qml/views/components/PreciseRangeSlider.qml</file>
+    <file>./qml/views/components/PreciseSlider.qml</file>
+    <file>./qml/views/components/ArrowCheckBox.qml</file>
+    <file>./qml/views/components/HorizontalDivider.qml</file>
+    <file>./qml/views/display/SceneRenderSettings.qml</file>
+    <file>./qml/views/display/SceneRootEntity.qml</file>
+    <file>./qml/views/display/ScreenQuadEntity.qml</file>
+    <file>./qml/views/display/shaders/volume.geom</file>
+    <file>./qml/views/display/shaders/volume.frag</file>
+    <file>./qml/views/display/shaders/final.vert</file>
+    <file>./qml/views/display/shaders/backfacemap.frag</file>
+    <file>./qml/views/display/shaders/volume.vert</file>
+    <file>./qml/views/display/shaders/final.frag</file>
+    <file>./qml/views/display/shaders/backfacemap.vert</file>
+    <file>./qml/views/display/VolumeEntity.qml</file>
 
 </qresource>
 </RCC>

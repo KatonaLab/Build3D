@@ -1,16 +1,18 @@
-import QtQuick 2.8
-import QtQuick.Window 2.0
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.1
+import QtQuick 2.9
+import QtQuick.Window 2.3
+import QtQuick.Controls 2.3
+import QtQuick.Controls.Material 2.2
+import QtQuick.Layouts 1.3
 import QtQuick.Scene3D 2.0
 import Qt.labs.settings 1.0
+import Qt.labs.platform 1.0
 import koki.katonalab.a3dc 1.0
 
 import "../actions"
 import "../stores"
 import "sidebar"
 import "display"
-import "sidebar/controls"
+import "components"
 
 ApplicationWindow {
     id: appWindow
@@ -19,26 +21,32 @@ ApplicationWindow {
     height: 480
     title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
+    Material.theme: Material.Dark
+    Material.accent: Material.Teal
+
     Component.onCompleted: visible = true
 
-    menuBar: MenuBar {
+    MenuBar {
         Menu {
             title: "File"
-            MenuItem { action: importAction }
-        }
-    }
-
-    toolBar: ToolBar {
-        RowLayout {
-            anchors.fill: parent
-            FontelloButton {
-                text: "\uE807"
-                action: importAction
+            MenuItem {
+                text: importAction.text
+                onTriggered: importAction.onTriggered();
             }
         }
     }
 
-    statusBar: Rectangle {
+    // header: ToolBar {
+    //     RowLayout {
+    //         anchors.fill: parent
+    //         Button {
+    //             text: "\uE807"
+    //             action: importAction
+    //         }
+    //     }
+    // }
+
+    footer: Rectangle {
         // TODO
         height: 16
     }
@@ -61,9 +69,9 @@ ApplicationWindow {
     RowLayout {
         anchors.fill: parent
         spacing: 0
-    
+
         CardPanel {
-            Layout.preferredWidth: 240
+            Layout.preferredWidth: 300
             Layout.fillHeight: true
             model: MainStore.cardStore.model
             supportedModules: MainStore.moduleStore.supportedModules

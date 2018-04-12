@@ -15,8 +15,9 @@ Pane {
     property ListModel inputs
     property ListModel parameters
     property ListModel outputs
+    property alias expanded: header.checked
 
-    Material.elevation: 8
+    Material.elevation: 4
 
     contentWidth: layout.implicitWidth
     contentHeight: header.implicitHeight
@@ -34,7 +35,7 @@ Pane {
         from: ""; to: "opened"; reversible: true
         NumberAnimation {
             properties: "contentHeight"
-            easing.type: Easing.InOutQuad
+            easing.type: Easing.OutBack
             duration: 150
         }
     }
@@ -49,7 +50,7 @@ Pane {
 
             ArrowCheckBox {
                 id: header
-                text: "module name"
+                text: card.displayName
                 Layout.fillWidth: true
                 font: card.font
             }
