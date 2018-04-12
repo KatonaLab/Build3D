@@ -43,7 +43,7 @@ RowLayout {
             target: arrow
             property: "rotation"
             duration: spinDuration
-            easing.type: Easing.InOutQuad
+            easing.type: Easing.InOutBack
         }
     }
 }

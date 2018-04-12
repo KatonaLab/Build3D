@@ -15,10 +15,12 @@ Window {
     Material.accent: Material.Teal
 
     Card {
-        anchors.centerIn: parent
-        width: 250
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 100
+        width: 300
         uid: 42
         displayName: "Demo Card"
+        font.pointSize: 12
 
         inputs: ListModel {
             Component.onCompleted: {

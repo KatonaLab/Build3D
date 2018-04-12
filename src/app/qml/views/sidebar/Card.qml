@@ -15,7 +15,6 @@ Pane {
     property ListModel inputs
     property ListModel parameters
     property ListModel outputs
-    property int fontPointSize: 12
 
     Material.elevation: 8
 
@@ -36,255 +35,56 @@ Pane {
         NumberAnimation {
             properties: "contentHeight"
             easing.type: Easing.InOutQuad
-            duration: 250
+            duration: 150
         }
     }
 
-    ColumnLayout {
-        id: layout
+    Container {
         anchors.fill: parent
+        leftPadding: 4
+        rightPadding: 4
         clip: true
+        contentItem: ColumnLayout {
+            id: layout
 
-        ArrowCheckBox {
-            id: header
-            text: "module name"
-            Layout.fillWidth: true
-            font.pointSize: fontPointSize + 2
-        }
-
-//        Rectangle {
-//            Layout.fillWidth: true
-//            height: 1
-//            color: Material.color(Material.Grey)
-//            anchors.topMargin: 8
-//            anchors.bottomMargin: 8
-//        }
-
-        Repeater {
-            id: inputsRepeater
-            model: card.inputs
-            delegate: ColumnLayout {
+            ArrowCheckBox {
+                id: header
+                text: "module name"
                 Layout.fillWidth: true
-
-                Label {
-                    font.pointSize: fontPointSize - 2
-                    text: model.displayName
-                    Layout.fillWidth: true
-                }
-
-                ComboBox {
-                    font.pointSize: fontPointSize
-                    Layout.fillWidth: true
-                    model: ["DataSource1/output", "threshold.1/output"]
-                }
+                font: card.font
             }
-        }
 
-//        Rectangle {
-//            Layout.fillWidth: true
-//            height: 1
-//            color: Material.color(Material.Grey)
-//            anchors.topMargin: 16
-//            anchors.bottomMargin: 16
-//        }
-
-        Repeater {
-            id: parametersRepeater
-            visible: false
-            model: card.parameters
-            delegate: Loader {
-                property int uid: card.uid
-                property var details: model
-                Layout.fillWidth: true
-
-                sourceComponent: {
-                    switch(model.type) {
-                        case "button": return buttonDelegate;
-                        case "edit": return editDelegate;
-                        case "combobox": return comboboxDelegate;
-                        case "slider": return sliderDelegate;
-                        case "range": return rangeDelegate;
-                        case "switch": return switchDelegate;
-                    }
-                }
+            HorizontalDivider {
+                Layout.fillWidth: true;
             }
-        }
 
-//        Rectangle {
-//            Layout.fillWidth: true
-//            height: 1
-//            color: Material.color(Material.Grey)
-//            anchors.topMargin: 16
-//            anchors.bottomMargin: 16
-//        }
-
-        Repeater {
-            id: outputsRepeater
-            model: card.outputs
-            delegate: Loader {
-                property int uid: card.uid
-                property var details: model
-
-                sourceComponent: {
-                    switch(model.type) {
-                        case "volume": return volumeOutputDelegate;
-                        case "?": return volumeOutputDelegate;
-                    }
-                }
+            CardInputs {
+                id: inputsRepeater
+                model: card.inputs
+                uid: card.uid
+                font: card.font
             }
-        }
 
-        Component {
-            id: volumeInputDelegate
-            Label {
-                text: details.displayName
-                font.pointSize: fontPointSize
+            HorizontalDivider {
+                Layout.fillWidth: true;
             }
-        }
 
-        Component {
-            id: volumeOutputDelegate
-            Label {
-                text: details.displayName
-                font.pointSize: fontPointSize
+            CardParameters {
+                id: parametersRepeater
+                model: card.parameters
+                uid: card.uid
+                font: card.font
             }
-        }
 
-        Component {
-            id: buttonDelegate
-            Button {
-                text: details.displayName
-                font.pointSize: fontPointSize
+            HorizontalDivider {
+                Layout.fillWidth: true;
             }
-        }
 
-        Component {
-            id: editDelegate
-            ColumnLayout {
-                Label {
-                    text: details.displayName
-                    font.pointSize: fontPointSize
-                }
-                TextField {
-                    font.pointSize: fontPointSize
-                    Layout.fillWidth: true
-                }
-            }
-        }
-
-        Component {
-            id: comboboxDelegate
-            ComboBox {
-                model: details.options
-                font.pointSize: fontPointSize
-            }
-        }
-
-        Component {
-            id: sliderDelegate
-            PreciseSlider {
-//                font.pointSize: fontPointSize
-            }
-        }
-
-        Component {
-            id: rangeDelegate
-            PreciseRangeSlider {}
-        }
-
-        Component {
-            id: switchDelegate
-            RowLayout {
-                Label {
-                    text: details.displayName
-                    font.pointSize: fontPointSize
-                }
-                Switch {
-                    font.pointSize: fontPointSize
-                }
+            CardOutputs {
+                model: card.outputs
+                uid: card.uid
+                font: card.font
             }
         }
     }
-//    contentWidth: layout.implicitWidth
-
-//    ColumnLayout {
-//        id: layout
-//        anchors.fill: parent
-
-//        Rectangle {
-//            Layout.fillWidth: true
-//            height: 10
-//            color: "red"
-//            Label {
-//                text: displayName
-//                anchors.left: parent.leftMargin
-//                font.pointSize: fontPointSize
-//            }
-
-//            RoundButton {
-//                text: "x"
-//                font.pointSize: fontPointSize
-//                Layout.alignment: Qt.AlignRight
-//                onClicked: {
-//                    AppActions.requestRemoveModule(card.uid);
-//                }
-//            }
-//        }
-
-//        Repeater {
-//            model: card.inputs
-//            delegate: RowLayout {
-//                Label {
-//                    font.pointSize: 12
-////                    Layout.fillWidth: true
-//                    text: model.displayName
-//                }
-
-//                ComboBox {
-//                    font.pointSize: 12
-//                    anchors.right: card.right
-//                    flat: true
-//                    model: ["DataSource1/output", "threshold.1/output"]
-//                }
-//            }
-//        }
-
-//        Repeater {
-//            model: card.parameters
-//            delegate: Loader {
-//                property int uid: card.uid
-//                property var details: model
-////                Layout.fillWidth: true
-
-//                sourceComponent: {
-//                    switch(model.type) {
-//                        case "button": return buttonDelegate;
-//                        case "edit": return editDelegate;
-//                        case "combobox": return comboboxDelegate;
-//                        case "slider": return sliderDelegate;
-//                        case "range": return rangeDelegate;
-//                        case "switch": return switchDelegate;
-//                    }
-//                }
-//            }
-//        }
-
-
-//        Repeater {
-//            model: card.outputs
-//            delegate: Loader {
-//                property int uid: card.uid
-//                property var details: model
-////                Layout.fillWidth: true
-
-//                sourceComponent: {
-//                    switch(model.type) {
-//                        case "volume": return volumeOutputDelegate;
-//                        case "?": return volumeOutputDelegate;
-//                    }
-//                }
-//            }
-//        }
-
-//    }
 }
