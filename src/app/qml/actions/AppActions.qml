@@ -28,4 +28,12 @@ QtObject {
     function notifyModuleRemoved(uid) {
         AppDispatcher.dispatch(ActionTypes.module_removed_notification, {uid: uid});
     }
+
+    function requestModulePropertyChange(uid, propIndex, values) {
+        AppDispatcher.dispatch(ActionTypes.module_property_change_request, {uid: uid, index: propIndex, values: values});
+    }
+
+    function notifyModulePropertyChanged(uid, propIndex, values) {
+        AppDispatcher.dispatch(ActionTypes.module_property_changed_notification, {uid: uid, index: propIndex, values: values});
+    }
 }

@@ -19,14 +19,28 @@ Repeater {
         Layout.fillWidth: true
 
         sourceComponent: {
-            switch(model.type) {
-                case "button": return buttonDelegate;
-                case "edit": return editDelegate;
-                case "combobox": return comboboxDelegate;
-                case "slider": return sliderDelegate;
-                case "range": return rangeDelegate;
-                case "switch": return switchDelegate;
+            var typeToDelegate = {
+                "int": {
+                    "default": intSliderDelegate,
+                    "slider": intSliderDelegate
+                },
+                "float": {
+                    "default": floatSliderDelegate,
+                    "slider": floatSliderDelegate
+                },
+                "bool": {
+                    "default": switchDelegate
+                }
+            };
+
+            var type = model.type || "unknown";
+            var hint = model.hint || "default";
+            if (typeToDelegate[type]) {
+                if (typeToDelegate[type][hint]) {
+                    return typeToDelegate[type][hint];
+                }
             }
+            return unknownControllerDelegate;
         }
 
         Component {
@@ -34,6 +48,17 @@ Repeater {
             Button {
                 text: details.displayName
                 font: root.font
+                // TODO: action
+            }
+        }
+
+        Component {
+            id: unknownControllerDelegate
+            Label {
+                text: "invalid type for property '" + details.displayName + "'"
+                font: root.font
+                color: Material.color(Material.Red)
+                // TODO: action
             }
         }
 
@@ -48,6 +73,7 @@ Repeater {
                     font: root.font
                     Layout.fillWidth: true
                 }
+                // TODO: action
             }
         }
 
@@ -57,12 +83,38 @@ Repeater {
                 model: details.options
                 font: root.font
             }
+            // TODO: action
         }
 
         Component {
-            id: sliderDelegate
+            id: intSliderDelegate
             PreciseSlider {
                 font: root.font
+                stepSize: 1
+                snapMode: Slider.SnapAlways
+                from: details.from || 0
+                to: details.to || 10
+                text: details.displayName
+
+                onValueChanged: {
+                    var values = {value: value};
+                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                }
+            }
+        }
+
+        Component {
+            id: floatSliderDelegate
+            PreciseSlider {
+                font: root.font
+                from: details.from || 0
+                to: details.to || 1
+                text: details.displayName
+
+                onValueChanged: {
+                    var values = {value: value};
+                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                }
             }
         }
 
@@ -70,6 +122,7 @@ Repeater {
             id: rangeDelegate
             PreciseRangeSlider {
                 font: root.font
+                // TODO: action
             }
         }
 
@@ -78,6 +131,10 @@ Repeater {
             Switch {
                 text: details.displayName
                 font: root.font
+                onCheckedChanged: {
+                    var values = {value: checked};
+                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                }
             }
         }
     }

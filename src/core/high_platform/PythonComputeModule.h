@@ -254,6 +254,10 @@ protected:
     PyOutputPortWrapperPtr createOutputPortWrapper(PyTypes t);
     PyTypes inputPortPyType(std::string name);
     PyTypes outputPortPyType(std::string name);
+    PyTypes parameterPyType(std::string name);
+    PyTypes parameterPyType(std::size_t index);
+    template<typename T> setParameter(std::string name, const T& value);
+    template<typename T> setParameter(std::size_t index, const T& value);
 private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;

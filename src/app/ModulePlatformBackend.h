@@ -24,6 +24,7 @@ public:
     BackendModule(int uid);
     int uid() const;
     virtual QVariantMap getProperties() = 0;
+    virtual void setProperties(const QVariantMap& props) = 0;
     virtual VolumeTexture* getModuleTexture(std::size_t outputPortId) = 0;
     virtual bool hasTexture(std::size_t outputPortId) = 0;
     virtual cp::ComputeModule& getModule() = 0;
@@ -38,6 +39,7 @@ public:
     void execute() override;
     void setData(std::shared_ptr<md::MultiDimImage<float>> data);
     QVariantMap getProperties() override;
+    void setProperties(const QVariantMap& props) override;
     bool hasTexture(std::size_t outputPortId) override;
     VolumeTexture* getModuleTexture(std::size_t outputPortId) override;
     cp::ComputeModule& getModule() override;
@@ -51,10 +53,14 @@ class GenericModule : public hp::PythonComputeModule, public BackendModule {
 public:
     GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid);
     QVariantMap getProperties() override;
+    void setProperties(const QVariantMap& props) override;
     bool hasTexture(std::size_t outputPortId) override;
     VolumeTexture* getModuleTexture(std::size_t outputPortId) override;
     cp::ComputeModule& getModule() override;
 };
+
+// TODO: expose BackendModule to QML and return BackendModule object
+// when calling getModule(uid) e.g.
 
 class ModulePlatformBackend: public QObject {
     Q_OBJECT
@@ -66,6 +72,7 @@ public:
     Q_INVOKABLE bool hasModule(int uid);
     Q_INVOKABLE void destroyModule(int uid);
     Q_INVOKABLE QVariantMap getModuleProperties(int uid);
+    Q_INVOKABLE void setModuleProperties(const QVariantMap& props);
     Q_INVOKABLE VolumeTexture* getModuleTexture(int uid, int outputPortId);
     Q_INVOKABLE QMultiMap<int, std::size_t> getCompatibleModules(int uid, int inputPortId);
 Q_SIGNALS:
@@ -77,5 +84,13 @@ private:
     cp::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
 };
+
+struct QVariantMapDiffResult {
+    QStringList leftOnlyKeys;
+    QStringList rightOnlyKeys;
+    QStringList commonKeys;
+};
+
+QVariantMapDiffResult diffQVariantMaps(const QVariantMap& left, const QVariantMap& right);
 
 #endif

@@ -53,7 +53,10 @@ Pane {
                 text: card.displayName
                 Layout.fillWidth: true
                 font: card.font
+                // TODO: indicate the output image colors even if the card is closed
             }
+
+            HorizontalDivider {Layout.fillWidth: true}
 
             CardInputs {
                 id: inputsRepeater
@@ -62,12 +65,16 @@ Pane {
                 font: card.font
             }
 
+            HorizontalDivider {Layout.fillWidth: true}
+
             CardParameters {
                 id: parametersRepeater
                 model: card.parameters
                 uid: card.uid
                 font: card.font
             }
+
+            HorizontalDivider {Layout.fillWidth: true}
 
             CardOutputs {
                 model: card.outputs

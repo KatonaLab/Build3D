@@ -58,6 +58,11 @@ QVariantMap DataSourceModule::getProperties()
     return map;
 }
 
+void DataSourceModule::setModuleProperties(const QVariantMap& props)
+{
+    // TODO:
+}
+
 bool DataSourceModule::hasTexture(std::size_t outputPortId)
 {
     return outputPortId == 0;
@@ -81,6 +86,7 @@ GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& scr
     : hp::PythonComputeModule(parent, script),
     BackendModule(uid)
 {
+    // TODO: remove or move to qDebug output
     std::cout << script << std::endl;
 }
 
@@ -130,6 +136,20 @@ QVariantMap GenericModule::getProperties()
     map["parameters"] = QVariantList();
 
     return map;
+}
+
+void GenericModule::setProperties(const QVariantMap& props)
+{
+    for (auto p: props) {
+        auto z = paramType(p.key);
+        if (z == PyTypes::akarmi) {
+            setParameter<akarmi_type>(p.key, p.value.toAkarmiType);
+        }
+        if (z == PyTypes::akarmi2) {
+            setParameter<akarmi_type2>(p.key, p.value.toAkarmi2Type);
+        }
+        // ...
+    }
 }
 
 bool GenericModule::hasTexture(std::size_t outputPortId)
@@ -284,4 +304,30 @@ int ModulePlatformBackend::nextUid() const
 {
     static int counter = 0;
     return counter++;
+}
+
+QVariantMapDiffResult diffQVariantMaps(const QVariantMap& left, const QVariantMap& right)
+{
+    QVariantMapDiffResult result;
+    QList keys = left.keys();
+    keys.append(right.keys());
+
+    for (auto k: keys) {
+        bool leftHasIt = left.contains(k);
+        bool rightHasIt = right.contains(k);
+        
+        if (leftHasIt && !rightHasIt) {
+            result.leftOnlyKeys.append(k);
+            continue;
+        }
+
+        if (rightHasIt && !leftHasIt) {
+            result.rightOnlyKeys.append(k);
+            continue;
+        }
+
+        result.commonKeys.append(k);
+    }
+
+    return result;
 }

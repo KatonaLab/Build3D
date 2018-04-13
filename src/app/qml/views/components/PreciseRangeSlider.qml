@@ -10,7 +10,17 @@ ColumnLayout {
     property real firstValue: slider.first.value
     property real secondValue: slider.second.value
     property int editWidth: 80
+    property alias text: label.text
 
+    Component.onCompleted: {
+        slider.first.valueChanged(from);
+        slider.second.valueChanged(to);
+    }
+
+    Label {
+        id: label
+        visible: text != ""
+    }
 
     RangeSlider {
         id: slider

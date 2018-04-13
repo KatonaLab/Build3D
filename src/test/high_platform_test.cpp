@@ -232,6 +232,39 @@ a3dc.def_process_module([], [], [a3dc.Arg('out_image', a3dc.types.ImageFloat)], 
     }
 }
 
+SCENARIO("high_platform module parameter", "[core/high_platform]")
+{
+    string codeSource =
+    R"(
+import a3dc
+
+def module_main():
+    im = a3dc.MultiDimImageFloat([16, 24])
+    param = a3dc.parameters['level']
+    im[7, 23] = param
+    a3dc.outputs['out_image'] = im
+
+a3dc.def_process_module([], [a3dc.Arg('level', a3dc.type.int8)], [a3dc.Arg('out_image', a3dc.types.ImageFloat)], module_main)";
+
+    GIVEN("a simple net") {
+        ComputePlatform p;
+
+        PythonComputeModule source(p, codeSource);
+        ImageSink imSink(p);
+
+        // imSink.setParameter<(0, )
+
+        REQUIRE(source.outputPort(0).lock()->bind(imSink.inputPort(0)) == true);
+
+        WHEN("run is called") {
+            p.run();
+            THEN("it outputs the correct result") {
+                REQUIRE(imSink.getImage().at({7, 23}) == 42);
+            }
+        }
+    }
+}
+
 SCENARIO("high_platform sink py module test", "[core/high_platform]")
 {
     string codeSource =

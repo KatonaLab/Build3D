@@ -15,6 +15,7 @@ Repeater {
 
     delegate: ColumnLayout {
         Layout.fillWidth: true
+        property var moduleModel: model
 
         Label {
             font: root.font
@@ -25,7 +26,30 @@ Repeater {
         ComboBox {
             font: root.font
             Layout.fillWidth: true
-            model: ["DataSource1/output", "threshold.1/output"]
+            textRole: "displayName"
+
+            model: ListModel {
+                id: comboModel
+                ListElement {
+                    displayName: "module2/port0"
+                    targetUid: 2
+                    targetOutputIndex: 0
+                }
+                ListElement {
+                    displayName: "module4/port1"
+                    targetUid: 4
+                    targetOutputIndex: 1
+                }
+            }
+
+            onCurrentIndexChanged: {
+                var item = comboModel.get(currentIndex);
+                var values = {
+                    targetUid: item.targetUid,
+                    targetOutputIndex: item.targetOutputIndex
+                };
+                AppActions.requestModulePropertyChange(root.uid, moduleModel.index, values);
+            }
         }
     }
 }
