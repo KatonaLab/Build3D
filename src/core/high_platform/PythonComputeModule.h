@@ -51,12 +51,17 @@ enum class PyTypes {
     TYPE_MultiDimImageDouble
 };
 
-typedef std::map<std::string, PyTypes> ProcessArg;
+struct Arg {
+    std::string name;
+    PyTypes type;
+};
+
+typedef std::vector<Arg> ProcessArg;
 typedef std::function<void()> ProcessFunc;
 
 // --------------------------------------------------------
 
-class PythonEnvironment {
+class PythonEnvironment {    
 public:
     static PythonEnvironment& instance();
     void reset();
@@ -252,6 +257,8 @@ protected:
 private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;
+    // TODO: it is not really a port, should be handled separate from ports
+    std::vector<std::pair<std::string, PyInputPortWrapperPtr>> m_parameters;
     std::string m_code;
     ProcessFunc m_func;
 };
