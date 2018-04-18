@@ -92,11 +92,7 @@ cp::ComputeModule& GenericModule::getComputeModule()
 
 // --------------------------------------------------------
 
-ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
-: QObject(parent)
-{}
-
-QList<int> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& filename)
+QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& filename)
 {
     IcsAdapter ics;
     ics.open(filename.toLocalFile().toStdString());
@@ -136,7 +132,7 @@ QList<int> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& fil
     return uids;
 }
 
-int ModulePlatformBackend::createGenericModule(const QString& scriptPath)
+int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
 {
     string path = scriptPath.toStdString();
 
@@ -153,12 +149,12 @@ int ModulePlatformBackend::createGenericModule(const QString& scriptPath)
     return newModule->uid();
 }
 
-bool ModulePlatformBackend::hasModule(int uid)
+bool PrivateModulePlatformBackend::hasModule(int uid)
 {
     return m_modules.end() != m_modules.find(uid);
 }
 
-void ModulePlatformBackend::destroyModule(int uid)
+void PrivateModulePlatformBackend::destroyModule(int uid)
 {
     if (!hasModule(uid)) {
         return;
@@ -167,7 +163,7 @@ void ModulePlatformBackend::destroyModule(int uid)
     // TODO: remove the module -> implement ComputePlatform::removeModule + its test
 }
 
-VolumeTexture* ModulePlatformBackend::getModuleTexture(int uid, int outputPortId)
+VolumeTexture* PrivateModulePlatformBackend::getModuleTexture(int uid, int outputPortId)
 {
     if (hasModule(uid) && m_modules[uid]->hasTexture((std::size_t)outputPortId)) {
         return m_modules[uid]->getModuleTexture((std::size_t)outputPortId);
@@ -175,7 +171,7 @@ VolumeTexture* ModulePlatformBackend::getModuleTexture(int uid, int outputPortId
     return nullptr;
 }
 
-QVariantList ModulePlatformBackend::getInputOptions(int uid, int inputPortId)
+QVariantList PrivateModulePlatformBackend::getInputOptions(int uid, int inputPortId)
 {
     auto portType = getInputPort(uid, inputPortId).lock()->typeHash();
     QVariantList vlist;
@@ -197,7 +193,7 @@ QVariantList ModulePlatformBackend::getInputOptions(int uid, int inputPortId)
     return vlist;
 }
 
-bool ModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,
+bool PrivateModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,
     int inputModuleUid, int inputPortId)
 {
     auto input = getInputPort(inputModuleUid, inputPortId);
@@ -205,13 +201,13 @@ bool ModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPo
     return output->bind(input);
 }
 
-void ModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
+void PrivateModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
 {
     auto input = getInputPort(inputModuleUid, inputPortId);
     input.lock()->getSource().lock()->unbind(input);
 }
 
-QVariantList ModulePlatformBackend::getInputs(int uid)
+QVariantList PrivateModulePlatformBackend::getInputs(int uid)
 {
     BackendModule& m = getBackendModule(uid);
     QVariantList vlist;
@@ -230,7 +226,7 @@ QVariantList ModulePlatformBackend::getInputs(int uid)
     return vlist;
 }
 
-QVariantList ModulePlatformBackend::getParameters(int uid)
+QVariantList PrivateModulePlatformBackend::getParameters(int uid)
 {
     BackendModule& m = getBackendModule(uid);
     QVariantList vlist;
@@ -250,12 +246,12 @@ QVariantList ModulePlatformBackend::getParameters(int uid)
     return vlist;
 }
 
-void ModulePlatformBackend::setParameter(int uid, int paramId, QVariant value)
+void PrivateModulePlatformBackend::setParameter(int uid, int paramId, QVariant value)
 {
     // TODO:
 }
 
-QVariantList ModulePlatformBackend::getOutputs(int uid)
+QVariantList PrivateModulePlatformBackend::getOutputs(int uid)
 {
     BackendModule& m = getBackendModule(uid);
     QVariantList vlist;
@@ -271,13 +267,13 @@ QVariantList ModulePlatformBackend::getOutputs(int uid)
     return vlist;
 }
 
-int ModulePlatformBackend::nextUid() const
+int PrivateModulePlatformBackend::nextUid() const
 {
-    static int counter = 0;
+    static int counter = 1;
     return counter++;
 }
 
-BackendModule& ModulePlatformBackend::getBackendModule(int uid)
+BackendModule& PrivateModulePlatformBackend::getBackendModule(int uid)
 {
     if(!hasModule(uid)) {
         throw std::runtime_error("backend: no module with uid " + to_string(uid));
@@ -286,7 +282,7 @@ BackendModule& ModulePlatformBackend::getBackendModule(int uid)
     return *m_modules[uid];
 }
 
-std::weak_ptr<InputPort> ModulePlatformBackend::getInputPort(int uid, int portId)
+std::weak_ptr<InputPort> PrivateModulePlatformBackend::getInputPort(int uid, int portId)
 {
     auto& m = getBackendModule(uid);
     if (m.getComputeModule().numInputs() <= portId) {
@@ -295,7 +291,7 @@ std::weak_ptr<InputPort> ModulePlatformBackend::getInputPort(int uid, int portId
     return m.getComputeModule().inputPort(portId);
 }
 
-std::weak_ptr<OutputPort> ModulePlatformBackend::getOutputPort(int uid, int portId)
+std::weak_ptr<OutputPort> PrivateModulePlatformBackend::getOutputPort(int uid, int portId)
 {
     auto& m = getBackendModule(uid);
     if (m.getComputeModule().numOutputs() <= portId) {
