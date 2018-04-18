@@ -21,16 +21,16 @@ namespace md = core::multidim_image_platform;
 
 class BackendModule {
 public:
-    BackendModule(int uid);
+    BackendModule(int uid, const std::string& name);
     int uid() const;
-    virtual QVariantMap getProperties() = 0;
-    virtual void setProperties(const QVariantMap& props) = 0;
+    std::string name() const;
     virtual VolumeTexture* getModuleTexture(std::size_t outputPortId) = 0;
     virtual bool hasTexture(std::size_t outputPortId) = 0;
-    virtual cp::ComputeModule& getModule() = 0;
+    virtual cp::ComputeModule& getComputeModule() = 0;
     virtual ~BackendModule() = default;
 protected:
     int m_uid;
+    std::string m_name;
 };
 
 class DataSourceModule : public cp::ComputeModule, public BackendModule {
@@ -38,11 +38,9 @@ public:
     DataSourceModule(cp::ComputePlatform& parent, int uid);
     void execute() override;
     void setData(std::shared_ptr<md::MultiDimImage<float>> data);
-    QVariantMap getProperties() override;
-    void setProperties(const QVariantMap& props) override;
     bool hasTexture(std::size_t outputPortId) override;
     VolumeTexture* getModuleTexture(std::size_t outputPortId) override;
-    cp::ComputeModule& getModule() override;
+    cp::ComputeModule& getComputeModule() override;
 protected:
     std::shared_ptr<md::MultiDimImage<float>> m_data;
     cp::InputPortCollection m_inputs;
@@ -52,15 +50,13 @@ protected:
 class GenericModule : public hp::PythonComputeModule, public BackendModule {
 public:
     GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid);
-    QVariantMap getProperties() override;
-    void setProperties(const QVariantMap& props) override;
     bool hasTexture(std::size_t outputPortId) override;
     VolumeTexture* getModuleTexture(std::size_t outputPortId) override;
-    cp::ComputeModule& getModule() override;
+    cp::ComputeModule& getComputeModule() override;
 };
 
 // TODO: expose BackendModule to QML and return BackendModule object
-// when calling getModule(uid) e.g.
+// when calling getComputeModule(uid) e.g.
 
 class ModulePlatformBackend: public QObject {
     Q_OBJECT
@@ -71,26 +67,23 @@ public:
     Q_INVOKABLE int createGenericModule(const QString& scriptPath);
     Q_INVOKABLE bool hasModule(int uid);
     Q_INVOKABLE void destroyModule(int uid);
-    Q_INVOKABLE QVariantMap getModuleProperties(int uid);
-    Q_INVOKABLE void setModuleProperties(const QVariantMap& props);
+    Q_INVOKABLE QVariantList getInputOptions(int uid, int inputPortId);
+    Q_INVOKABLE bool connectInputOutput(int outputModuleUid, int outputPortId, int inputModuleUid, int inputPortId);
+    Q_INVOKABLE void disconnectInput(int inputModuleUid, int inputPortId);
+    Q_INVOKABLE QVariantList getInputs(int uid);
+    Q_INVOKABLE QVariantList getParameters(int uid);
+    Q_INVOKABLE void setParameter(int uid, int paramId, QVariant value);
+    Q_INVOKABLE QVariantList getOutputs(int uid);
     Q_INVOKABLE VolumeTexture* getModuleTexture(int uid, int outputPortId);
-    Q_INVOKABLE QMultiMap<int, std::size_t> getCompatibleModules(int uid, int inputPortId);
-Q_SIGNALS:
-    void moduleCreated(int uid);
-    void moduleWillBeDestroyed(int uid);
-    void moduleDestroyed(int uid);
 private:
-    inline int nextUid() const;
     cp::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
+    std::map<QString, QObjectList> m_inputOptions;
+private:
+    inline int nextUid() const;
+    BackendModule& getBackendModule(int uid);
+    std::weak_ptr<cp::InputPort> getInputPort(int uid, int portId);
+    std::weak_ptr<cp::OutputPort> getOutputPort(int uid, int portId);
 };
-
-struct QVariantMapDiffResult {
-    QStringList leftOnlyKeys;
-    QStringList rightOnlyKeys;
-    QStringList commonKeys;
-};
-
-QVariantMapDiffResult diffQVariantMaps(const QVariantMap& left, const QVariantMap& right);
 
 #endif

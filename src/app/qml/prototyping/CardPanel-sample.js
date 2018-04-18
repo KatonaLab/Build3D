@@ -1,11 +1,23 @@
+var type1PortModel = [
+    {"displayName": "foo port type1", "targetUid": 7, "targetOutput": 1},
+    {"displayName": "bar port type1", "targetUid": 5, "targetOutput": 2},
+    {"displayName": "abc port type1", "targetUid": 5, "targetOutput": 4}
+]
+
+var type2PortModel = [
+    {"displayName": "foo port type2", "targetUid": 17, "targetOutput": 11},
+    {"displayName": "bar port type2", "targetUid": 15, "targetOutput": 12},
+    {"displayName": "abc port type2", "targetUid": 15, "targetOutput": 14}
+]
+
 var demoModules = [
 {
     "uid": 1,
     "displayName": "Data Source 1",
     "inputs": [
-        {"displayName": "first input", "index": 0},
-        {"displayName": "second input", "index": 1},
-        {"displayName": "third input", "index": 2}
+        {"displayName": "first input", "portId": 0, "optionsList": 0},
+        {"displayName": "second input", "portId": 1, "optionsList": 0},
+        {"displayName": "third input", "portId": 2, "optionsList": 1}
     ],
     "parameters": [
         {"displayName": "amount of foo", "index": 3, "type": "int", "hint": "slider", "from": 2, "to": 8},
@@ -18,67 +30,4 @@ var demoModules = [
         {"displayName": "second output", "index": 8, "type": "float"},
         {"displayName": "third output", "index": 9, "type": "int"}
     ]
-},
-{
-    "uid": 2,
-    "displayName": "Data Processing",
-    "inputs": [
-        {"displayName": "Fancy Input", "type": "volume"}
-    ],
-    "parameters": [
-        {"displayName": "Do Other Things", "type": "button"},
-        {"displayName": "Edit Other Things", "type": "edit"},
-        {"displayName": "Select Something",
-            "type": "combobox",
-            "options": [
-                {"text": "Red"},
-                {"text": "Green"},
-                {"text": "Blue"},
-                {"text": "Violet"}
-            ]
-        },
-        {"displayName": "Range That Value", "type": "range"},
-        {"displayName": "Switch That Switch", "type": "switch"},
-        {"displayName": "Switch That Too", "type": "switch"}
-    ],
-    "outputs": []
-},
-{
-    "uid": 3,
-    "displayName": "Data Processing 3",
-    "inputs": [
-        {"displayName": "Fancy Input", "type": "volume"}
-    ],
-    "parameters": [
-        {"displayName": "Do Other Things", "type": "button"},
-        {"displayName": "Edit Other Things", "type": "edit"},
-        {"displayName": "Select Something",
-            "type": "combobox",
-            "options": [
-                {"text": "Red"},
-                {"text": "Green"},
-                {"text": "Blue"},
-                {"text": "Violet"}
-            ]
-        },
-        {"displayName": "Range That Value", "type": "range"},
-        {"displayName": "Switch That Switch", "type": "switch"},
-        {"displayName": "Switch That Too", "type": "switch"}
-    ],
-    "outputs": []
-},
-{
-    "uid": 4,
-    "displayName": "Data Source 4",
-    "inputs": [],
-    "parameters": [
-        {"displayName": "Do Something", "type": "button"},
-        {"displayName": "Edit Something", "type": "edit"},
-        {"displayName": "Slide That Value", "type": "slider"}
-    ],
-    "outputs": [
-        {"displayName": "Fancy Output", "type": "volume"},
-        {"displayName": "Fancy Number Output", "type": "number"}
-    ]
-}
-]
+}]

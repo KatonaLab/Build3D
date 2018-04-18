@@ -1,5 +1,7 @@
 CONFIG += c++14
 
+QMAKE_CXXFLAGS += -fdiagnostics-absolute-paths
+
 TARGET = test
 SOURCES += \
     test.cpp \

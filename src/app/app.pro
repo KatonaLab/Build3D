@@ -4,6 +4,10 @@ CONFIG += force_debug_info # for crashpad
 CONFIG += separate_debug_info # for crashpad
 CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slot *slots; /* terminated by slot==0. */ in Python.h (since slots is a restricted keyword in Qt)
 
+QMAKE_CXXFLAGS += -fdiagnostics-absolute-paths
+QMAKE_CXXFLAGS += -Wshadow
+# QMAKE_CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
+
 # CONFIG -= app_bundle
 
 # used in version.h/cpp

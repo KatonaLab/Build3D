@@ -13,42 +13,33 @@ Repeater {
     property int uid: -1
     property font font
 
-    delegate: ColumnLayout {
-        Layout.fillWidth: true
-        property var moduleModel: model
+    delegate: inputDelegate
 
-        Label {
-            font: root.font
-            text: model.displayName
+    Component {
+        id: inputDelegate
+        ColumnLayout {
             Layout.fillWidth: true
-        }
 
-        ComboBox {
-            font: root.font
-            Layout.fillWidth: true
-            textRole: "displayName"
-
-            model: ListModel {
-                id: comboModel
-                ListElement {
-                    displayName: "module2/port0"
-                    targetUid: 2
-                    targetOutputIndex: 0
-                }
-                ListElement {
-                    displayName: "module4/port1"
-                    targetUid: 4
-                    targetOutputIndex: 1
-                }
+            Label {
+                font: root.font
+                text: displayName
+                Layout.fillWidth: true
             }
 
-            onCurrentIndexChanged: {
-                var item = comboModel.get(currentIndex);
-                var values = {
-                    targetUid: item.targetUid,
-                    targetOutputIndex: item.targetOutputIndex
-                };
-                AppActions.requestModulePropertyChange(root.uid, moduleModel.index, values);
+            ComboBox {
+                font: root.font
+                Layout.fillWidth: true
+                textRole: "displayName"
+                model: options
+
+                onCurrentIndexChanged: {
+                    var item = model.get(currentIndex);
+                    var values = {
+                        targetUid: item.targetUid,
+                        targetOutputIndex: item.targetOutputIndex
+                    };
+                    AppActions.requestModulePropertyChange(root.uid, portId, values);
+                }
             }
         }
     }

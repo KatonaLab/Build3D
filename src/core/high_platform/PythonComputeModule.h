@@ -54,6 +54,7 @@ enum class PyTypes {
 struct Arg {
     std::string name;
     PyTypes type;
+    std::string tag;
 };
 
 typedef std::vector<Arg> ProcessArg;
@@ -68,7 +69,6 @@ public:
     void exec(std::string code);
     ~PythonEnvironment();
     ProcessArg inputs;
-    ProcessArg parameters;
     ProcessArg outputs;
     ProcessFunc func;
 protected:
@@ -254,15 +254,9 @@ protected:
     PyOutputPortWrapperPtr createOutputPortWrapper(PyTypes t);
     PyTypes inputPortPyType(std::string name);
     PyTypes outputPortPyType(std::string name);
-    PyTypes parameterPyType(std::string name);
-    PyTypes parameterPyType(std::size_t index);
-    template<typename T> setParameter(std::string name, const T& value);
-    template<typename T> setParameter(std::size_t index, const T& value);
 private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;
-    // TODO: it is not really a port, should be handled separate from ports
-    std::vector<std::pair<std::string, PyInputPortWrapperPtr>> m_parameters;
     std::string m_code;
     ProcessFunc m_func;
 };

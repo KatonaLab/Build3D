@@ -9,10 +9,12 @@
 
 using namespace std;
 using namespace core::io_utils;
+using namespace core::compute_platform;
 using namespace core::multidim_image_platform;
 using namespace core::high_platform;
 
-BackendModule::BackendModule(int uid) : m_uid(uid)
+BackendModule::BackendModule(int uid, const std::string& name)
+    : m_uid(uid), m_name(name)
 {}
 
 int BackendModule::uid() const
@@ -20,11 +22,16 @@ int BackendModule::uid() const
     return m_uid;
 }
 
+std::string BackendModule::name() const
+{
+    return m_name;
+}
+
 // --------------------------------------------------------
 
 DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
     : cp::ComputeModule(parent, m_inputs, m_outputs),
-    BackendModule(uid),
+    BackendModule(uid, "DataSource" + to_string(uid)),
     m_inputs(*this),
     m_outputs(*this)
 {}
@@ -39,30 +46,6 @@ void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
     m_data = data;
 }
 
-QVariantMap DataSourceModule::getProperties()
-{
-    QVariantMap map;
-    map["displayName"] = QVariant(QString::fromStdString("DataSource" + to_string(uid())));
-    map["inputs"] = QVariantList();
-    map["parameters"] = QVariantList();
-
-    QVariantList outputList;
-    {
-        QVariantMap out;
-        out["displayName"] = QVariant("output");
-        out["type"] = QVariant("volume");
-        outputList.append(out);
-    }
-    map["outputs"] = outputList;
-
-    return map;
-}
-
-void DataSourceModule::setModuleProperties(const QVariantMap& props)
-{
-    // TODO:
-}
-
 bool DataSourceModule::hasTexture(std::size_t outputPortId)
 {
     return outputPortId == 0;
@@ -75,7 +58,7 @@ VolumeTexture* DataSourceModule::getModuleTexture(std::size_t outputPortId)
     return tex;
 }
 
-cp::ComputeModule& DataSourceModule::getModule()
+cp::ComputeModule& DataSourceModule::getComputeModule()
 {
     return *this;
 }
@@ -84,72 +67,10 @@ cp::ComputeModule& DataSourceModule::getModule()
 
 GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
     : hp::PythonComputeModule(parent, script),
-    BackendModule(uid)
+    BackendModule(uid, "Generic" + to_string(uid))
 {
     // TODO: remove or move to qDebug output
     std::cout << script << std::endl;
-}
-
-QVariantMap GenericModule::getProperties()
-{
-    QVariantMap map;
-    map["displayName"] = QVariant(QString::fromStdString("GenericModule" + to_string(uid())));
-    map["inputs"] = QVariantList();
-    map["parameters"] = QVariantList();
-    map["outputs"] = QVariantList();
-
-    {
-        std::cout << numInputs() << " " << numOutputs() << std::endl;
-        QVariantList vlist;
-        for (size_t i = 0; i < numInputs(); ++i) {
-            QVariantMap vmap;
-            auto portName = inputPort(i).lock()->name();
-            PyTypes portType = inputPortPyType(portName);
-            vmap["displayName"] = QVariant(QString::fromStdString(portName));
-            if (portType == PyTypes::TYPE_MultiDimImageFloat) {
-                vmap["type"] = QVariant("volume");
-            } else {
-                vmap["type"] = QVariant("?");
-            }
-            vlist.append(vmap);
-        }
-        map["inputs"] = vlist;
-    }
-
-    {
-        QVariantList vlist;
-        for (size_t i = 0; i < numOutputs(); ++i) {
-            QVariantMap vmap;
-            auto portName = outputPort(i).lock()->name();
-            PyTypes portType = outputPortPyType(portName);
-            vmap["displayName"] = QVariant(QString::fromStdString(portName));
-            if (portType == PyTypes::TYPE_MultiDimImageFloat) {
-                vmap["type"] = QVariant("volume");
-            } else {
-                vmap["type"] = QVariant("?");
-            }
-            vlist.append(vmap);
-        }
-        map["outputs"] = QVariant(vlist);
-    }
-
-    map["parameters"] = QVariantList();
-
-    return map;
-}
-
-void GenericModule::setProperties(const QVariantMap& props)
-{
-    for (auto p: props) {
-        auto z = paramType(p.key);
-        if (z == PyTypes::akarmi) {
-            setParameter<akarmi_type>(p.key, p.value.toAkarmiType);
-        }
-        if (z == PyTypes::akarmi2) {
-            setParameter<akarmi_type2>(p.key, p.value.toAkarmi2Type);
-        }
-        // ...
-    }
 }
 
 bool GenericModule::hasTexture(std::size_t outputPortId)
@@ -164,7 +85,7 @@ VolumeTexture* GenericModule::getModuleTexture(std::size_t outputPortId)
     return nullptr;
 }
 
-cp::ComputeModule& GenericModule::getModule()
+cp::ComputeModule& GenericModule::getComputeModule()
 {
     return *this;
 }
@@ -210,7 +131,6 @@ QList<int> ModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& fil
         newModule->setData(p);
 
         m_modules.emplace(make_pair(newModule->uid(), newModule));
-        Q_EMIT moduleCreated(newModule->uid());
     }
 
     return uids;
@@ -224,12 +144,12 @@ int ModulePlatformBackend::createGenericModule(const QString& scriptPath)
     stringstream buffer;
     buffer << f.rdbuf();
 
+    // TODO: remove or put to qDebug
     std::cout << buffer.str() << std::endl;
 
     auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());
 
     m_modules.emplace(make_pair(newModule->uid(), newModule));
-    Q_EMIT moduleCreated(newModule->uid());
     return newModule->uid();
 }
 
@@ -244,19 +164,7 @@ void ModulePlatformBackend::destroyModule(int uid)
         return;
     }
 
-    Q_EMIT moduleWillBeDestroyed(uid);
-
     // TODO: remove the module -> implement ComputePlatform::removeModule + its test
-
-    Q_EMIT moduleDestroyed(uid);
-}
-
-QVariantMap ModulePlatformBackend::getModuleProperties(int uid)
-{
-    if (hasModule(uid)) {
-        return m_modules[uid]->getProperties();
-    }
-    return QVariantMap();
 }
 
 VolumeTexture* ModulePlatformBackend::getModuleTexture(int uid, int outputPortId)
@@ -267,37 +175,100 @@ VolumeTexture* ModulePlatformBackend::getModuleTexture(int uid, int outputPortId
     return nullptr;
 }
 
-QMultiMap<int, size_t> ModulePlatformBackend::getCompatibleModules(int uid, int inputPortId)
+QVariantList ModulePlatformBackend::getInputOptions(int uid, int inputPortId)
 {
-    QMultiMap<int, size_t> ports;
-    
-    if (!hasModule(uid)) {
-        return ports;
-    }
-
-    cp::ComputeModule& q = m_modules[uid]->getModule();
-
-    if ((std::size_t)inputPortId >= q.numInputs()) {
-        return ports;
-    }
+    auto portType = getInputPort(uid, inputPortId).lock()->typeHash();
+    QVariantList vlist;
 
     for (auto& pr : m_modules) {
-        if (uid == pr.first) {
-            continue;
-        }
-
-        cp::ComputeModule& m = pr.second->getModule();
-        for (size_t i = 0; i < m.numOutputs(); ++i) {
-            // TODO: it is not the most elegant way for the connection test
-            // try to find a better solution
-            if (connectPorts(m, i, q, (std::size_t)inputPortId)) {
-                disconnectPorts(m, i, q, (std::size_t)inputPortId);
-                ports.insert(pr.first, i);
+        auto& m = pr.second;
+        for (std::size_t i = 0; i < m->getComputeModule().numOutputs(); ++i) {
+            auto p = m->getComputeModule().outputPort(i).lock();
+            if (p->typeHash() == portType) {
+                QVariantMap vmap;
+                vmap["uid"] = pr.first;
+                vmap["portId"] = (int)i;
+                vmap["displayName"] = QString::fromStdString(m->name() + "/" + p->name());
+                vlist.append(QVariant(vmap));
             }
         }
     }
 
-    return ports;
+    return vlist;
+}
+
+bool ModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,
+    int inputModuleUid, int inputPortId)
+{
+    auto input = getInputPort(inputModuleUid, inputPortId);
+    auto output = getOutputPort(outputModuleUid, outputPortId).lock();
+    return output->bind(input);
+}
+
+void ModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
+{
+    auto input = getInputPort(inputModuleUid, inputPortId);
+    input.lock()->getSource().lock()->unbind(input);
+}
+
+QVariantList ModulePlatformBackend::getInputs(int uid)
+{
+    BackendModule& m = getBackendModule(uid);
+    QVariantList vlist;
+
+    for (size_t i = 0; i < m.getComputeModule().numInputs(); ++i) {
+        auto p = m.getComputeModule().inputPort(i).lock();
+        string tag = p->tag();
+        if (tag.empty() || tag.find("regular") != string::npos) {
+            QVariantMap vmap;
+            vmap["displayName"] = QString::fromStdString(p->name());
+            vmap["portIndex"] = (int)i;
+            vlist.append(vmap);
+        }
+    }
+
+    return vlist;
+}
+
+QVariantList ModulePlatformBackend::getParameters(int uid)
+{
+    BackendModule& m = getBackendModule(uid);
+    QVariantList vlist;
+
+    for (size_t i = 0; i < m.getComputeModule().numInputs(); ++i) {
+        auto p = m.getComputeModule().inputPort(i).lock();
+        string tag = p->tag();
+        if (tag.find("parameter") != string::npos) {
+            QVariantMap vmap;
+            vmap["displayName"] = QString::fromStdString(p->name());
+            vmap["portIndex"] = (int)i;
+            vmap["hint"] = QString("TODO: hint");
+            vlist.append(vmap);
+        }
+    }
+    
+    return vlist;
+}
+
+void ModulePlatformBackend::setParameter(int uid, int paramId, QVariant value)
+{
+    // TODO:
+}
+
+QVariantList ModulePlatformBackend::getOutputs(int uid)
+{
+    BackendModule& m = getBackendModule(uid);
+    QVariantList vlist;
+
+    for (size_t i = 0; i < m.getComputeModule().numOutputs(); ++i) {
+        auto p = m.getComputeModule().outputPort(i);
+        QVariantMap vmap;
+        vmap["displayName"] = QString::fromStdString(p.lock()->name());
+        vmap["portIndex"] = (int)i;
+        vlist.append(vmap);
+    }
+
+    return vlist;
 }
 
 int ModulePlatformBackend::nextUid() const
@@ -306,28 +277,29 @@ int ModulePlatformBackend::nextUid() const
     return counter++;
 }
 
-QVariantMapDiffResult diffQVariantMaps(const QVariantMap& left, const QVariantMap& right)
+BackendModule& ModulePlatformBackend::getBackendModule(int uid)
 {
-    QVariantMapDiffResult result;
-    QList keys = left.keys();
-    keys.append(right.keys());
-
-    for (auto k: keys) {
-        bool leftHasIt = left.contains(k);
-        bool rightHasIt = right.contains(k);
-        
-        if (leftHasIt && !rightHasIt) {
-            result.leftOnlyKeys.append(k);
-            continue;
-        }
-
-        if (rightHasIt && !leftHasIt) {
-            result.rightOnlyKeys.append(k);
-            continue;
-        }
-
-        result.commonKeys.append(k);
+    if(!hasModule(uid)) {
+        throw std::runtime_error("backend: no module with uid " + to_string(uid));
     }
 
-    return result;
+    return *m_modules[uid];
+}
+
+std::weak_ptr<InputPort> ModulePlatformBackend::getInputPort(int uid, int portId)
+{
+    auto& m = getBackendModule(uid);
+    if (m.getComputeModule().numInputs() <= portId) {
+        throw std::runtime_error("backend: no input port with id " + to_string(portId) + " at module uid " + to_string(uid));
+    }
+    return m.getComputeModule().inputPort(portId);
+}
+
+std::weak_ptr<OutputPort> ModulePlatformBackend::getOutputPort(int uid, int portId)
+{
+    auto& m = getBackendModule(uid);
+    if (m.getComputeModule().numOutputs() <= portId) {
+        throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
+    }
+    return m.getComputeModule().outputPort(portId);
 }

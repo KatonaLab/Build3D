@@ -28,6 +28,7 @@ namespace compute_platform {
         std::weak_ptr<OutputPort> outputPort(std::size_t id);
         core::directed_acyclic_graph::NodePtr node();
         void reset();
+        virtual ~ComputeModule() = default;
     protected:
         ComputeModule(ComputePlatform& parent,
             InputPortCollection& inputs,

@@ -212,7 +212,7 @@ def module_main():
     im[7, 23] = 42
     a3dc.outputs['out_image'] = im
 
-a3dc.def_process_module([], [], [a3dc.Arg('out_image', a3dc.types.ImageFloat)], module_main)
+a3dc.def_process_module([], [a3dc.Arg('out_image', a3dc.types.ImageFloat)], module_main)
     )";
 
     GIVEN("a simple net") {
@@ -220,39 +220,6 @@ a3dc.def_process_module([], [], [a3dc.Arg('out_image', a3dc.types.ImageFloat)], 
 
         PythonComputeModule source(p, codeSource);
         ImageSink imSink(p);
-
-        REQUIRE(source.outputPort(0).lock()->bind(imSink.inputPort(0)) == true);
-
-        WHEN("run is called") {
-            p.run();
-            THEN("it outputs the correct result") {
-                REQUIRE(imSink.getImage().at({7, 23}) == 42);
-            }
-        }
-    }
-}
-
-SCENARIO("high_platform module parameter", "[core/high_platform]")
-{
-    string codeSource =
-    R"(
-import a3dc
-
-def module_main():
-    im = a3dc.MultiDimImageFloat([16, 24])
-    param = a3dc.parameters['level']
-    im[7, 23] = param
-    a3dc.outputs['out_image'] = im
-
-a3dc.def_process_module([], [a3dc.Arg('level', a3dc.type.int8)], [a3dc.Arg('out_image', a3dc.types.ImageFloat)], module_main)";
-
-    GIVEN("a simple net") {
-        ComputePlatform p;
-
-        PythonComputeModule source(p, codeSource);
-        ImageSink imSink(p);
-
-        // imSink.setParameter<(0, )
 
         REQUIRE(source.outputPort(0).lock()->bind(imSink.inputPort(0)) == true);
 
@@ -277,7 +244,7 @@ def module_main():
     if im[7, 23] != 42:
         raise Exception('im[7, 23] != 42')
 
-a3dc.def_process_module([Arg('in_image', a3dc.types.ImageFloat)], [], [], module_main)
+a3dc.def_process_module([Arg('in_image', a3dc.types.ImageFloat)], [], module_main)
     )";
 
     GIVEN("a simple net") {
@@ -320,12 +287,11 @@ inputs = [
     Arg('in_image', a3dc.types.ImageFloat),
     Arg('in_int_param', a3dc.types.int64),
     Arg('in_double_param', a3dc.types.double)]
-params = []
 outputs = [
     Arg('out_image', a3dc.types.ImageFloat),
     Arg('out_uint_param', a3dc.types.uint64),
     Arg('out_float_param', a3dc.types.float)]
-a3dc.def_process_module(inputs, params, outputs, module_main)
+a3dc.def_process_module(inputs, outputs, module_main)
     )";
 
     GIVEN("a simple net") {
@@ -383,7 +349,7 @@ def module_main():
 
 inputs = []
 outputs = [a3dc.Arg('out_image', a3dc.types.ImageUInt8)]
-a3dc.def_process_module(inputs, [], outputs, module_main)
+a3dc.def_process_module(inputs, outputs, module_main)
     )";
 
     string incrementCode =
@@ -400,7 +366,7 @@ def module_main():
 
 inputs = [a3dc.Arg('in_image', a3dc.types.ImageUInt8)]
 outputs = [a3dc.Arg('out_image', a3dc.types.ImageUInt8)]
-a3dc.def_process_module(inputs, [], outputs, module_main)
+a3dc.def_process_module(inputs, outputs, module_main)
     )";
 
     string addCode =
@@ -423,7 +389,7 @@ inputs = [
     Arg('in_image1', a3dc.types.ImageUInt8),
     Arg('in_image2', a3dc.types.ImageUInt8)]
 outputs = [Arg('out_image', a3dc.types.ImageUInt8)]
-a3dc.def_process_module(inputs, [], outputs, module_main)
+a3dc.def_process_module(inputs, outputs, module_main)
     )";
 
     string sinkCode =
@@ -441,7 +407,7 @@ def module_main():
 inputs = [a3dc.Arg('in_image', a3dc.types.ImageUInt8),
     a3dc.Arg('require', a3dc.types.uint8)]
 outputs = []
-a3dc.def_process_module(inputs, [], outputs, module_main)
+a3dc.def_process_module(inputs, outputs, module_main)
     )";
 
     GIVEN("a simple net") {

@@ -37,15 +37,20 @@ public:
     InputPort(ComputeModule& parent);
     std::string name() const;
     void setName(const std::string& name);
+    std::string tag() const;
+    void setTag(const std::string& tag);
     virtual void fetch() = 0;
     ComputeModule& parent();
     virtual size_t typeHash() const = 0;
     bool connected() const;
+    // TODO: write test for this function
+    std::weak_ptr<OutputPort> getSource() const;
     virtual ~InputPort();
 protected:
     std::weak_ptr<OutputPort> m_source;
     ComputeModule& m_parent;
     std::string m_name;
+    std::string m_tag;
 };
 
 class InputPortCollection {

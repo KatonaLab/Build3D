@@ -141,26 +141,24 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
     using namespace pybind11::literals;
 
     m.def("def_process_module",
-        [](ProcessArg inputs, ProcessArg parameters, ProcessArg outputs, const ProcessFunc& func)
+        [](ProcessArg inputs, ProcessArg outputs, const ProcessFunc& func)
         {
             auto& env = PythonEnvironment::instance();
             env.inputs = inputs;
-            env.parameters = parameters;
             env.outputs = outputs;
             env.func = func;
         },
-        "inputs"_a, "parameters"_a, "outputs"_a, "function"_a);
+        "inputs"_a, "outputs"_a, "function"_a);
 
     py::class_<Arg>(m, "Arg")
-    .def(py::init([](string name, PyTypes type)
+    .def(py::init([](string name, PyTypes type, string tag = "")
     {
-        return Arg{name, type};
-    }))
+        return Arg{name, type, tag};
+    }), "name"_a, "type"_a, "tag"_a = "")
     .def_readwrite("name", &Arg::name)
     .def_readwrite("type", &Arg::type);
 
     m.attr("inputs") = py::dict();
-    m.attr("parameters") = py::dict();
     m.attr("outputs") = py::dict();
 
     pyDeclareMetaType(m);
@@ -306,12 +304,6 @@ void PythonComputeModule::buildPorts()
         m_inputPorts.push(p.name, pw);
     }
 
-    for (auto& p : env.parameters) {
-        // TODO: it is not really a port, should be handled separate from ports
-        auto pw = createInputPortWrapper(p.type);
-        m_parameters.push_back(make_pair(p.name, pw));
-    }
-
     for (auto& p : env.outputs) {
         auto pw = createOutputPortWrapper(p.type);
         m_outputPorts.push(p.name, pw);
@@ -323,16 +315,11 @@ void PythonComputeModule::execute()
     py::module m = py::module::import("a3dc");
     py::object inputs = m.attr("inputs");
     py::object outputs = m.attr("outputs");
-    py::object parameters = m.attr("parameters");
 
     inputs.attr("clear")();
 
     for (auto& p : m_inputPorts) {
         inputs.attr("__setitem__")(p.first, p.second->toPyObject());
-    }
-
-    for (auto& p : m_parameters) {
-        parameters.attr("__setitem__")(p.first, p.second->toPyObject());
     }
 
     for (auto& p : m_outputPorts) {

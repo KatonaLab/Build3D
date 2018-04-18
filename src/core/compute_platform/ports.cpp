@@ -83,6 +83,16 @@ void InputPort::setName(const std::string& name)
     m_name = name;
 }
 
+std::string InputPort::tag() const
+{
+    return m_tag;
+}
+
+void InputPort::setTag(const std::string& tag)
+{
+    m_tag = tag;
+}
+
 ComputeModule& InputPort::parent()
 {
     return m_parent;
@@ -91,6 +101,11 @@ ComputeModule& InputPort::parent()
 bool InputPort::connected() const
 {
     return m_source.lock() != nullptr;
+}
+
+std::weak_ptr<OutputPort> InputPort::getSource() const
+{
+    return m_source;
 }
 
 InputPort::~InputPort()
