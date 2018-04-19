@@ -18,6 +18,16 @@ void OutputPort::setName(const std::string& name)
     m_name = name;
 }
 
+std::string OutputPort::tag() const
+{
+    return m_tag;
+}
+
+void OutputPort::setTag(const std::string& tag)
+{
+    m_tag = tag;
+}
+
 bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
 {
     if (compatible(inputPort)) {

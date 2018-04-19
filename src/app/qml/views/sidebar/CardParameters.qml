@@ -98,7 +98,7 @@ Repeater {
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                    AppActions.requestModulePropertyChange(uid, details.portId, values);
                 }
             }
         }
@@ -113,7 +113,7 @@ Repeater {
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                    AppActions.requestModulePropertyChange(uid, details.portId, values);
                 }
             }
         }
@@ -133,7 +133,7 @@ Repeater {
                 font: root.font
                 onCheckedChanged: {
                     var values = {value: checked};
-                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                    AppActions.requestModulePropertyChange(uid, details.portId, values);
                 }
             }
         }

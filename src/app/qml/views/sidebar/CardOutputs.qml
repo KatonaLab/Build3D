@@ -72,7 +72,7 @@ Repeater {
                         secondValue: rangeSlider.secondValue,
                         color: colorSelector.color
                     };
-                    AppActions.requestModulePropertyChange(uid, details.index, values);
+                    AppActions.requestModulePropertyChange(uid, details.portId, values);
                 }
 
                 Label {

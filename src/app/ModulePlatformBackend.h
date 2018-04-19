@@ -55,36 +55,31 @@ public:
     cp::ComputeModule& getComputeModule() override;
 };
 
-class PrivateModulePlatformBackend;
+// --------------------------------------------------------
+// TODO: move to a util file and write test for it
 
-template <typename R, typename... Args>
-struct TryCatchDecorator {
-    TryCatchDecorator(R(PrivateModulePlatformBackend::*memberFunction)(Args...),
-        PrivateModulePlatformBackend& instance)
-    : m_function(memberFunction), m_instance(instance)
-    {}
-
-    R call(Args&&... args)
-    {
-        try {
-            return (m_instance.*m_function)(std::forward<Args>(args)...);
-        } catch (std::exception& e) {
-            std::cerr << "exception: " << e.what() << std::endl;
-        }
-        return R();
-    }
-    R(PrivateModulePlatformBackend::*m_function)(Args...);
-    PrivateModulePlatformBackend& m_instance;
-};
-
-template <typename R, typename... Args, typename... Args2>
-R callDecorator(R(PrivateModulePlatformBackend::*function)(Args...),
-    PrivateModulePlatformBackend& instance,
-    Args2&&... args)
+template <typename T, typename R, typename... Args, typename... Args2>
+R decorateTryCatch(R(T::*f)(Args...), T& inst, R&& returnValueOnError, Args2&&... args)
 {
-    TryCatchDecorator<R, Args...> d(function, instance);
-    return d.call(std::forward<Args>(args)...);
+    try {
+        return (inst.*f)(std::forward<Args2>(args)...);
+    } catch (std::exception& e) {
+        std::cerr << "exception: " << e.what() << std::endl;
+    }
+    return returnValueOnError;
 }
+
+template <typename T, typename... Args, typename... Args2>
+void decorateTryCatch(void(T::*f)(Args...), T& inst, Args2&&... args)
+{
+    try {
+        (inst.*f)(std::forward<Args2>(args)...);
+    } catch (std::exception& e) {
+        std::cerr << "exception: " << e.what() << std::endl;
+    }
+}
+
+// --------------------------------------------------------
 
 class PrivateModulePlatformBackend {
 public:
@@ -112,6 +107,8 @@ private:
     std::weak_ptr<cp::OutputPort> getOutputPort(int uid, int portId);
 };
 
+// TODO: write test for the backend
+
 class ModulePlatformBackend: public QObject {
     Q_OBJECT
 public:
@@ -121,75 +118,75 @@ public:
     virtual ~ModulePlatformBackend() = default;
     Q_INVOKABLE QList<int> createSourceModulesFromIcsFile(const QUrl& filename)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::createSourceModulesFromIcsFile,
-            m_private, filename);
+            m_private, QList<int>(), filename);
     }
     Q_INVOKABLE int createGenericModule(const QString& scriptPath)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::createGenericModule,
-            m_private, scriptPath);
+            m_private, -1, scriptPath);
     }
     Q_INVOKABLE bool hasModule(int uid)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::hasModule,
-            m_private, uid);
+            m_private, false, uid);
     }
     Q_INVOKABLE void destroyModule(int uid)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::destroyModule,
             m_private, uid);
     }
     Q_INVOKABLE QVariantList getInputOptions(int uid, int inputPortId)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::getInputOptions,
-            m_private, uid, inputPortId);
+            m_private, QVariantList(), uid, inputPortId);
     }
     Q_INVOKABLE bool connectInputOutput(int outputModuleUid, int outputPortId, int inputModuleUid, int inputPortId)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::connectInputOutput,
-            m_private, outputModuleUid, outputPortId, inputModuleUid, inputPortId);
+            m_private, false, outputModuleUid, outputPortId, inputModuleUid, inputPortId);
     }
     Q_INVOKABLE void disconnectInput(int inputModuleUid, int inputPortId)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::disconnectInput,
             m_private, inputModuleUid, inputPortId);
     }
     Q_INVOKABLE QVariantList getInputs(int uid)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::getInputs,
-            m_private, uid);
+            m_private, QVariantList(), uid);
     }
     Q_INVOKABLE QVariantList getParameters(int uid)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::getParameters,
-            m_private, uid);
+            m_private, QVariantList(), uid);
     }
     Q_INVOKABLE void setParameter(int uid, int paramId, QVariant value)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::setParameter,
             m_private, uid, paramId, value);
     }
     Q_INVOKABLE QVariantList getOutputs(int uid)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::getOutputs,
-            m_private, uid);
+            m_private, QVariantList(), uid);
     }
     Q_INVOKABLE VolumeTexture* getModuleTexture(int uid, int outputPortId)
     {
-        return callDecorator(
+        return decorateTryCatch(
             &PrivateModulePlatformBackend::getModuleTexture,
-            m_private, uid, outputPortId);
+            m_private, static_cast<VolumeTexture*>(nullptr), uid, outputPortId);
     }
 private:
     PrivateModulePlatformBackend m_private;

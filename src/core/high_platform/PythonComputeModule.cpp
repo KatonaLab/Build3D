@@ -301,11 +301,15 @@ void PythonComputeModule::buildPorts()
 
     for (auto& p : env.inputs) {
         auto pw = createInputPortWrapper(p.type);
+        pw->port()->setName(p.name);
+        pw->port()->setTag(p.tag);
         m_inputPorts.push(p.name, pw);
     }
 
     for (auto& p : env.outputs) {
         auto pw = createOutputPortWrapper(p.type);
+        pw->port()->setName(p.name);
+        pw->port()->setTag(p.tag);
         m_outputPorts.push(p.name, pw);
     }
 }

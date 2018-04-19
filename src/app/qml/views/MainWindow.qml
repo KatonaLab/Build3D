@@ -21,7 +21,7 @@ ApplicationWindow {
     height: 480
     title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
-    Material.theme: Material.Dark
+    Material.theme: Material.Light
     Material.accent: Material.Teal
 
     Component.onCompleted: visible = true

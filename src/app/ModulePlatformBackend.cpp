@@ -68,10 +68,7 @@ cp::ComputeModule& DataSourceModule::getComputeModule()
 GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
     : hp::PythonComputeModule(parent, script),
     BackendModule(uid, "Generic" + to_string(uid))
-{
-    // TODO: remove or move to qDebug output
-    std::cout << script << std::endl;
-}
+{}
 
 bool GenericModule::hasTexture(std::size_t outputPortId)
 {
@@ -139,9 +136,6 @@ int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
     ifstream f(path);
     stringstream buffer;
     buffer << f.rdbuf();
-
-    // TODO: remove or put to qDebug
-    std::cout << buffer.str() << std::endl;
 
     auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());
 
@@ -218,7 +212,7 @@ QVariantList PrivateModulePlatformBackend::getInputs(int uid)
         if (tag.empty() || tag.find("regular") != string::npos) {
             QVariantMap vmap;
             vmap["displayName"] = QString::fromStdString(p->name());
-            vmap["portIndex"] = (int)i;
+            vmap["portId"] = (int)i;
             vlist.append(vmap);
         }
     }
@@ -237,8 +231,33 @@ QVariantList PrivateModulePlatformBackend::getParameters(int uid)
         if (tag.find("parameter") != string::npos) {
             QVariantMap vmap;
             vmap["displayName"] = QString::fromStdString(p->name());
-            vmap["portIndex"] = (int)i;
-            vmap["hint"] = QString("TODO: hint");
+            vmap["portId"] = (int)i;
+            
+            vmap["type"] = "unknown";
+            vmap["hint"] = "default";
+
+            // TODO: see TODO in PrivateModulePlatformBackend::getOutputs
+            const size_t tp = p->typeHash();
+            if (tp == typeid(float).hash_code()
+                || tp == typeid(double).hash_code()) {
+                vmap["type"] = "float";
+            }
+
+            if (tp == typeid(uint8_t).hash_code()
+                || tp == typeid(uint16_t).hash_code()
+                || tp == typeid(uint32_t).hash_code()
+                || tp == typeid(uint64_t).hash_code()
+                || tp == typeid(int8_t).hash_code()
+                || tp == typeid(int16_t).hash_code()
+                || tp == typeid(int32_t).hash_code()
+                || tp == typeid(int64_t).hash_code()) {
+                vmap["type"] = "int";
+            }
+
+            if (tp == typeid(bool).hash_code()) {
+                vmap["type"] = "bool";
+            }
+
             vlist.append(vmap);
         }
     }
@@ -260,7 +279,37 @@ QVariantList PrivateModulePlatformBackend::getOutputs(int uid)
         auto p = m.getComputeModule().outputPort(i);
         QVariantMap vmap;
         vmap["displayName"] = QString::fromStdString(p.lock()->name());
-        vmap["portIndex"] = (int)i;
+        vmap["portId"] = (int)i;
+        // don't worry, will be overwritten in case of a type match
+        vmap["type"] = "unknown";
+        vmap["hint"] = "default";
+
+        // TODO: do not hack around with typeHash
+        // implement a proper system-through rtti mechanism to
+        // decide input/output types and use it in the PythonModule
+        // stuff too
+        // FIXME: this is a whole bunch of bad stuff:
+        const size_t tp = p.lock()->typeHash();
+        if (tp == typeid(MultiDimImage<float>).hash_code()) {
+            vmap["type"] = "float-image";
+        }
+
+        if (tp == typeid(MultiDimImage<int>).hash_code()) {
+            vmap["type"] = "int-image";
+        }
+
+        if (tp == typeid(float).hash_code()
+            || tp == typeid(double).hash_code()) {
+            vmap["type"] = "float";
+        }
+
+        if (tp == typeid(char).hash_code()
+            || tp == typeid(short).hash_code()
+            || tp == typeid(int).hash_code()
+            || tp == typeid(long).hash_code()) {
+            vmap["type"] = "int";
+        }
+
         vlist.append(vmap);
     }
 

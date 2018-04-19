@@ -13,16 +13,26 @@ Item {
         console.debug("action " + actionType + " reached CardStore");
         
         var handlers = {};
+        var backend = MainStore.moduleStore.backend;
         
         handlers[ActionTypes.module_added_notification] = function(args) {
-            var props = MainStore.moduleStore.backend.getModuleProperties(args.uid);
-            console.debug(JSON.stringify(props));
+            var inputs = backend.getInputs(args.uid);
+            var params = backend.getParameters(args.uid);
+            var outputs = backend.getOutputs(args.uid);
+            console.debug(JSON.stringify(outputs));
+            
+            inputs.forEach(function(part, index, theArray) {
+                if (part.uid != args.uid) {
+                    theArray[index].options = backend.getInputOptions(args.uid, part.portId);
+                }
+            });
+
             model.append({
                 uid: args.uid,
-                displayName: props.displayName,
-                inputs: props.inputs,
-                parameters: props.parameters,
-                outputs: props.outputs});
+                displayName: "TODO: query name",
+                inputs: inputs,
+                parameters: params,
+                outputs: outputs});
         };
 
         var notHandled = function(args) {

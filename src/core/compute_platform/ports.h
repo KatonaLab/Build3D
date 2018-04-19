@@ -15,6 +15,8 @@ public:
     OutputPort(ComputeModule& parent);
     std::string name() const;
     void setName(const std::string& name);
+    std::string tag() const;
+    void setTag(const std::string& tag);
     bool bind(std::weak_ptr<InputPort> inputPort);
     void unbind(std::weak_ptr<InputPort> inputPort);
     size_t numBinds() const;
@@ -29,6 +31,7 @@ protected:
     size_t m_numInputServed = 0;
     ComputeModule& m_parent;
     std::string m_name;
+    std::string m_tag;
 };
 
 class InputPort {
