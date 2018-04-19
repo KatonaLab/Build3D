@@ -56,6 +56,7 @@ Pane {
                 // TODO: indicate the output image colors even if the card is closed
             }
 
+            // TODO: hide when no inputs
             HorizontalDivider {Layout.fillWidth: true}
 
             CardInputs {
@@ -65,6 +66,7 @@ Pane {
                 font: card.font
             }
 
+            // TODO: hide when no params
             HorizontalDivider {Layout.fillWidth: true}
 
             CardParameters {
@@ -74,6 +76,7 @@ Pane {
                 font: card.font
             }
 
+            // TODO: hide when no outputs
             HorizontalDivider {Layout.fillWidth: true}
 
             CardOutputs {

@@ -19,12 +19,15 @@ Item {
             var inputs = backend.getInputs(args.uid);
             var params = backend.getParameters(args.uid);
             var outputs = backend.getOutputs(args.uid);
+            console.debug(JSON.stringify(inputs));
             console.debug(JSON.stringify(outputs));
             
             inputs.forEach(function(part, index, theArray) {
-                if (part.uid != args.uid) {
-                    theArray[index].options = backend.getInputOptions(args.uid, part.portId);
-                }
+                var opts = backend.getInputOptions(args.uid, part.portId);
+                opts = opts.filter(function(item) {
+                    return args.uid != item.uid;
+                });
+                theArray[index].options = opts;
             });
 
             model.append({

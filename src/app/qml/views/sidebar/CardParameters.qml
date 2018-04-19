@@ -98,7 +98,7 @@ Repeater {
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModulePropertyChange(uid, details.portId, values);
+                    AppActions.requestModuleInputChange(uid, details.portId, values);
                 }
             }
         }
@@ -113,7 +113,7 @@ Repeater {
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModulePropertyChange(uid, details.portId, values);
+                    AppActions.requestModuleInputChange(uid, details.portId, values);
                 }
             }
         }

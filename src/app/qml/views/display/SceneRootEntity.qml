@@ -67,8 +67,8 @@ Entity {
             volumeColor: "red"
             visible: true
 
-            lutLowCut: 0
-            lutHighCut: 1
+            lutLowCut: model.lut.low
+            lutHighCut: model.lut.high
             Component.onCompleted: {
                 // lutDataMax = model.data.dataLimits.y;
                 lutDataMax = 10.;

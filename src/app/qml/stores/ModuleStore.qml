@@ -26,7 +26,15 @@ Item {
         };
 
         handlers[ActionTypes.module_remove_request] = function(uid) {
-            
+            // TODO:    
+        };
+
+        handlers[ActionTypes.module_input_change_request] = function(args) {
+            AppActions.notifyModuleInputChanged(args.uid, args.portId, args.values);
+        };
+
+        handlers[ActionTypes.module_output_change_request] = function(args) {
+            AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };
 
         var notHandled = function(args) {
@@ -42,7 +50,7 @@ Item {
     ListModel {
         id: supportedModules
         ListElement {
-            displayName: "Test Module"
+            displayName: "create test module"
             scriptPath: "scripts/test_module.py"
         }
     }

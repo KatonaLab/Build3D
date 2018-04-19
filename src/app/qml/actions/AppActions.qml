@@ -17,10 +17,6 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.module_added_notification, {uid: uid});
     }
 
-    function changeModuleProperties(uid, props) {
-        AppDispatcher.dispatch(ActionTypes.module_properties_change, {uid: uid, props: props});
-    }
-
     function requestRemoveModule(uid) {
         AppDispatcher.dispatch(ActionTypes.module_remove_request, {uid: uid});
     }
@@ -29,11 +25,19 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.module_removed_notification, {uid: uid});
     }
 
-    function requestModulePropertyChange(uid, propIndex, values) {
-        AppDispatcher.dispatch(ActionTypes.module_property_change_request, {uid: uid, index: propIndex, values: values});
+    function requestModuleInputChange(uid, portId, values) {
+        AppDispatcher.dispatch(ActionTypes.module_input_change_request, {uid: uid, portId: portId, values: values});
     }
 
-    function notifyModulePropertyChanged(uid, propIndex, values) {
-        AppDispatcher.dispatch(ActionTypes.module_property_changed_notification, {uid: uid, index: propIndex, values: values});
+    function notifyModuleInputChanged(uid, portId, values) {
+        AppDispatcher.dispatch(ActionTypes.module_input_changed_notification, {uid: uid, portId: portId, values: values});
+    }
+
+    function requestModuleOutputChange(uid, portId, values) {
+        AppDispatcher.dispatch(ActionTypes.module_output_change_request, {uid: uid, portId: portId, values: values});
+    }
+
+    function notifyModuleOutputChanged(uid, portId, values) {
+        AppDispatcher.dispatch(ActionTypes.module_output_changed_notification, {uid: uid, portId: portId, values: values});
     }
 }

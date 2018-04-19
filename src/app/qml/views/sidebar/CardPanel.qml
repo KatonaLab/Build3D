@@ -53,6 +53,12 @@ Pane {
                         onObjectAdded: menu.insertItem(index, object)
                         onObjectRemoved: menu.removeItem(object)
                     }
+                    MenuItem {
+                        text: "import ics"
+                        onTriggered: {
+                            AppActions.importIcsFile({});
+                        }
+                    }
                 }
             }
         }

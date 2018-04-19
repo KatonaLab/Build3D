@@ -38,7 +38,7 @@ Repeater {
                         targetUid: item.targetUid,
                         targetOutputIndex: item.targetOutputIndex
                     };
-                    AppActions.requestModulePropertyChange(root.uid, portId, values);
+                    AppActions.requestModuleInputChange(root.uid, portId, values);
                 }
             }
         }
