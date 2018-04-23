@@ -1,5 +1,7 @@
 #include "UltimateSinkModule.h"
 
+using namespace core::compute_platform;
+
 SinkInputPort::SinkInputPort(cp::ComputeModule& parent)
     : core::compute_platform::InputPort(parent)
 {}
@@ -7,14 +9,18 @@ SinkInputPort::SinkInputPort(cp::ComputeModule& parent)
 void SinkInputPort::fetch()
 {}
 
-std::size_t SinkInputPort::typeHash() const
+const PortTypeTraitsBase& SinkInputPort::traits() const
 {
-    return m_fakeTypeHash;
+    if (m_fakeTraits) {
+        return *m_fakeTraits;
+    } else {
+        return PortTypeTraits<void>::instance();
+    }
 }
 
-void SinkInputPort::fakeTypeHash(std::size_t typeHash)
+void SinkInputPort::fakeTraits(const PortTypeTraitsBase& traits)
 {
-    m_fakeTypeHash = typeHash;
+    m_fakeTraits = &traits;
 }
 
 SinkInputPortCollection::SinkInputPortCollection(cp::ComputeModule& parent)
@@ -34,7 +40,7 @@ std::size_t SinkInputPortCollection::size() const
 void SinkInputPortCollection::sinkOutputPort(std::shared_ptr<cp::OutputPort> output)
 {
     auto newInput = std::make_shared<SinkInputPort>(m_parent);
-    newInput->fakeTypeHash(output->typeHash());
+    newInput->fakeTraits(output->traits());
     output->bind(newInput);
     m_ports.push_back(newInput);
 }

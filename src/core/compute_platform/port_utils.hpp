@@ -20,14 +20,14 @@ class TypedOutputPort : public OutputPort {
 public:
     TypedOutputPort(ComputeModule& parent);
     std::weak_ptr<T> serve();
-    virtual size_t typeHash() const;
+    const PortTypeTraitsBase& traits() const override;
     T& value();
     std::shared_ptr<T> sharedValue();
     void forwardFromInput(std::weak_ptr<TypedInputPort<T>> input);
     void forwardFromSharedPtr(std::shared_ptr<T> data);
 protected:
-    virtual bool compatible(std::weak_ptr<InputPort> input) const;
-    virtual void cleanOnReset();
+    virtual bool compatible(std::weak_ptr<InputPort> input) const override;
+    virtual void cleanOnReset() override;
 private:
     std::shared_ptr<T> m_original;
     std::list<std::shared_ptr<T>> m_replicas;
@@ -38,8 +38,8 @@ class TypedInputPort : public InputPort {
     friend class TypedOutputPort<T>;
 public:
     TypedInputPort(ComputeModule& parent);
-    virtual void fetch();
-    virtual size_t typeHash() const;
+    virtual void fetch() override;
+    const PortTypeTraitsBase& traits() const override;
     T& value();
     std::shared_ptr<T> sharedValue();
     std::weak_ptr<T> inputPtr();

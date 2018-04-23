@@ -2,6 +2,7 @@
 #define _core_compute_platform_ports_h_
 
 #include <memory>
+#include <set>
 #include <string>
 
 namespace core {
@@ -10,50 +11,82 @@ namespace compute_platform {
 class InputPort;
 class ComputeModule;
 
-class OutputPort : public std::enable_shared_from_this<OutputPort> {
+class PortTypeTraitsBase {
 public:
-    OutputPort(ComputeModule& parent);
+    bool equals(const PortTypeTraitsBase& ptt) const
+    {
+        return hash() == ptt.hash();
+    }
+    virtual bool hasTrait(const std::string& trait) const = 0;
+protected:
+    virtual std::size_t hash() const = 0;
+};
+
+template <typename T>
+class PortTypeTraits : public PortTypeTraitsBase {
+public:
+    bool hasTrait(const std::string& trait) const override
+    {
+        return m_traits.find(trait) != m_traits.end();
+    }
+    static const PortTypeTraits& instance()
+    {
+        static const PortTypeTraits theOne;
+        return theOne;
+    }
+protected:
+    std::size_t hash() const override
+    {
+        return typeid(T).hash_code();
+    }
+    static const std::set<std::string> m_traits;
+};
+
+template <typename T> const std::set<std::string> PortTypeTraits<T>::m_traits;
+
+#define PORT_TYPE_TRAITS(Type) template <> const std::set<std::string> PortTypeTraits<Type>::m_traits
+
+// --------------------------
+
+class PortBase {
+public:
+    PortBase(ComputeModule& parent);
     std::string name() const;
     void setName(const std::string& name);
-    std::string tag() const;
-    void setTag(const std::string& tag);
+    ComputeModule& parent();
+    virtual const PortTypeTraitsBase& traits() const = 0;
+    virtual ~PortBase() = default;
+protected:
+    std::string m_name;
+    ComputeModule& m_parent;
+};
+
+class OutputPort : public PortBase, public std::enable_shared_from_this<OutputPort> {
+public:
+    OutputPort(ComputeModule& parent);
     bool bind(std::weak_ptr<InputPort> inputPort);
     void unbind(std::weak_ptr<InputPort> inputPort);
     size_t numBinds() const;
     void reset();
-    ComputeModule& parent();
-    virtual size_t typeHash() const = 0;
     virtual ~OutputPort();
 protected:
     virtual bool compatible(std::weak_ptr<InputPort> input) const = 0;
     virtual void cleanOnReset() = 0;
     size_t m_numBinds = 0;
     size_t m_numInputServed = 0;
-    ComputeModule& m_parent;
-    std::string m_name;
-    std::string m_tag;
 };
 
-class InputPort {
+class InputPort : public PortBase {
     friend class OutputPort;
 public:
     InputPort(ComputeModule& parent);
-    std::string name() const;
-    void setName(const std::string& name);
-    std::string tag() const;
-    void setTag(const std::string& tag);
     virtual void fetch() = 0;
-    ComputeModule& parent();
-    virtual size_t typeHash() const = 0;
     bool connected() const;
     // TODO: write test for this function
     std::weak_ptr<OutputPort> getSource() const;
     virtual ~InputPort();
 protected:
     std::weak_ptr<OutputPort> m_source;
-    ComputeModule& m_parent;
-    std::string m_name;
-    std::string m_tag;
 };
 
 class InputPortCollection {

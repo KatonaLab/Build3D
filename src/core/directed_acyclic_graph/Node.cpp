@@ -139,8 +139,8 @@ void Node::disconnect(NodePtr with)
     auto inIt = findInputIterator(with);
     if (inIt != m_inputs.end()) {
         m_inputs.erase(inIt);
-        auto outIt = with->findOutputIterator(shared_from_this());
-        with->m_outputs.erase(outIt);
+        auto oIt = with->findOutputIterator(shared_from_this());
+        with->m_outputs.erase(oIt);
     }
 }
 

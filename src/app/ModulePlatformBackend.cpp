@@ -75,10 +75,10 @@ bool GenericModule::hasTexture(std::size_t outputPortId)
     auto& m = getComputeModule();
     auto p = m.outputPort(outputPortId).lock();
     // TODO: wipe out this hash comparison and implement a proper rtti system
-    const size_t tp = p->typeHash();
-    if (tp == typeid(MultiDimImage<float>).hash_code()) {
-        return true;
-    }
+    // const size_t tp = p->typeHash();
+    // if (tp == typeid(MultiDimImage<float>).hash_code()) {
+    //     return true;
+    // }
     return false;
 }
 
@@ -88,12 +88,12 @@ VolumeTexture* GenericModule::getModuleTexture(std::size_t outputPortId)
     auto p = m.outputPort(outputPortId).lock();
     // TODO: FIXME: HELPME: SAVEME:
     // please perform exorcism
-    auto tp = dynamic_cast<TypedOutputPort<MultiDimImage<float>>*>(p.get());
-    if (tp) {
-        VolumeTexture* tex = new VolumeTexture;
-        tex->init(tp->value());
-        return tex;
-    }
+    // auto tp = dynamic_cast<TypedOutputPort<MultiDimImage<float>>*>(p.get());
+    // if (tp) {
+    //     VolumeTexture* tex = new VolumeTexture;
+    //     tex->init(tp->value());
+    //     return tex;
+    // }
     return nullptr;
 }
 
@@ -182,20 +182,20 @@ VolumeTexture* PrivateModulePlatformBackend::getModuleTexture(int uid, int outpu
 
 QVariantList PrivateModulePlatformBackend::getInputOptions(int uid, int inputPortId)
 {
-    auto portType = getInputPort(uid, inputPortId).lock()->typeHash();
+    // auto portType = getInputPort(uid, inputPortId).lock()->typeHash();
     QVariantList vlist;
 
     for (auto& pr : m_modules) {
         auto& m = pr.second;
         for (std::size_t i = 0; i < m->getComputeModule().numOutputs(); ++i) {
             auto p = m->getComputeModule().outputPort(i).lock();
-            if (p->typeHash() == portType) {
-                QVariantMap vmap;
-                vmap["uid"] = pr.first;
-                vmap["portId"] = (int)i;
-                vmap["displayName"] = QString::fromStdString(m->name() + "/" + p->name());
-                vlist.append(QVariant(vmap));
-            }
+            // if (p->typeHash() == portType) {
+            //     QVariantMap vmap;
+            //     vmap["uid"] = pr.first;
+            //     vmap["portId"] = (int)i;
+            //     vmap["displayName"] = QString::fromStdString(m->name() + "/" + p->name());
+            //     vlist.append(QVariant(vmap));
+            // }
         }
     }
 
@@ -223,13 +223,13 @@ QVariantList PrivateModulePlatformBackend::getInputs(int uid)
 
     for (size_t i = 0; i < m.getComputeModule().numInputs(); ++i) {
         auto p = m.getComputeModule().inputPort(i).lock();
-        string tag = p->tag();
-        if (tag.empty() || tag.find("regular") != string::npos) {
-            QVariantMap vmap;
-            vmap["displayName"] = QString::fromStdString(p->name());
-            vmap["portId"] = (int)i;
-            vlist.append(vmap);
-        }
+        // string tag = p->tag();
+        // if (tag.empty() || tag.find("regular") != string::npos) {
+        //     QVariantMap vmap;
+        //     vmap["displayName"] = QString::fromStdString(p->name());
+        //     vmap["portId"] = (int)i;
+        //     vlist.append(vmap);
+        // }
     }
 
     return vlist;
@@ -242,39 +242,39 @@ QVariantList PrivateModulePlatformBackend::getParameters(int uid)
 
     for (size_t i = 0; i < m.getComputeModule().numInputs(); ++i) {
         auto p = m.getComputeModule().inputPort(i).lock();
-        string tag = p->tag();
-        if (tag.find("parameter") != string::npos) {
-            QVariantMap vmap;
-            vmap["displayName"] = QString::fromStdString(p->name());
-            vmap["portId"] = (int)i;
+        // string tag = p->tag();
+        // if (tag.find("parameter") != string::npos) {
+        //     QVariantMap vmap;
+        //     vmap["displayName"] = QString::fromStdString(p->name());
+        //     vmap["portId"] = (int)i;
             
-            vmap["type"] = "unknown";
-            vmap["hint"] = "default";
+        //     vmap["type"] = "unknown";
+        //     vmap["hint"] = "default";
 
-            // TODO: see TODO in PrivateModulePlatformBackend::getOutputs
-            const size_t tp = p->typeHash();
-            if (tp == typeid(float).hash_code()
-                || tp == typeid(double).hash_code()) {
-                vmap["type"] = "float";
-            }
+        //     // TODO: see TODO in PrivateModulePlatformBackend::getOutputs
+        //     const size_t tp = p->typeHash();
+        //     if (tp == typeid(float).hash_code()
+        //         || tp == typeid(double).hash_code()) {
+        //         vmap["type"] = "float";
+        //     }
 
-            if (tp == typeid(uint8_t).hash_code()
-                || tp == typeid(uint16_t).hash_code()
-                || tp == typeid(uint32_t).hash_code()
-                || tp == typeid(uint64_t).hash_code()
-                || tp == typeid(int8_t).hash_code()
-                || tp == typeid(int16_t).hash_code()
-                || tp == typeid(int32_t).hash_code()
-                || tp == typeid(int64_t).hash_code()) {
-                vmap["type"] = "int";
-            }
+        //     if (tp == typeid(uint8_t).hash_code()
+        //         || tp == typeid(uint16_t).hash_code()
+        //         || tp == typeid(uint32_t).hash_code()
+        //         || tp == typeid(uint64_t).hash_code()
+        //         || tp == typeid(int8_t).hash_code()
+        //         || tp == typeid(int16_t).hash_code()
+        //         || tp == typeid(int32_t).hash_code()
+        //         || tp == typeid(int64_t).hash_code()) {
+        //         vmap["type"] = "int";
+        //     }
 
-            if (tp == typeid(bool).hash_code()) {
-                vmap["type"] = "bool";
-            }
+        //     if (tp == typeid(bool).hash_code()) {
+        //         vmap["type"] = "bool";
+        //     }
 
-            vlist.append(vmap);
-        }
+        //     vlist.append(vmap);
+        // }
     }
     
     return vlist;
@@ -290,43 +290,43 @@ QVariantList PrivateModulePlatformBackend::getOutputs(int uid)
     BackendModule& m = getBackendModule(uid);
     QVariantList vlist;
 
-    for (size_t i = 0; i < m.getComputeModule().numOutputs(); ++i) {
-        auto p = m.getComputeModule().outputPort(i);
-        QVariantMap vmap;
-        vmap["displayName"] = QString::fromStdString(p.lock()->name());
-        vmap["portId"] = (int)i;
-        // don't worry, will be overwritten in case of a type match
-        vmap["type"] = "unknown";
-        vmap["hint"] = "default";
+    // for (size_t i = 0; i < m.getComputeModule().numOutputs(); ++i) {
+    //     auto p = m.getComputeModule().outputPort(i);
+    //     QVariantMap vmap;
+    //     vmap["displayName"] = QString::fromStdString(p.lock()->name());
+    //     vmap["portId"] = (int)i;
+    //     // don't worry, will be overwritten in case of a type match
+    //     vmap["type"] = "unknown";
+    //     vmap["hint"] = "default";
 
-        // TODO: do not hack around with typeHash
-        // implement a proper system-through rtti mechanism to
-        // decide input/output types and use it in the PythonModule
-        // stuff too
-        // FIXME: this is a whole bunch of bad stuff:
-        const size_t tp = p.lock()->typeHash();
-        if (tp == typeid(MultiDimImage<float>).hash_code()) {
-            vmap["type"] = "float-image";
-        }
+    //     // TODO: do not hack around with typeHash
+    //     // implement a proper system-through rtti mechanism to
+    //     // decide input/output types and use it in the PythonModule
+    //     // stuff too
+    //     // FIXME: this is a whole bunch of bad stuff:
+    //     const size_t tp = p.lock()->typeHash();
+    //     if (tp == typeid(MultiDimImage<float>).hash_code()) {
+    //         vmap["type"] = "float-image";
+    //     }
 
-        if (tp == typeid(MultiDimImage<int>).hash_code()) {
-            vmap["type"] = "int-image";
-        }
+    //     if (tp == typeid(MultiDimImage<int>).hash_code()) {
+    //         vmap["type"] = "int-image";
+    //     }
 
-        if (tp == typeid(float).hash_code()
-            || tp == typeid(double).hash_code()) {
-            vmap["type"] = "float";
-        }
+    //     if (tp == typeid(float).hash_code()
+    //         || tp == typeid(double).hash_code()) {
+    //         vmap["type"] = "float";
+    //     }
 
-        if (tp == typeid(char).hash_code()
-            || tp == typeid(short).hash_code()
-            || tp == typeid(int).hash_code()
-            || tp == typeid(long).hash_code()) {
-            vmap["type"] = "int";
-        }
+    //     if (tp == typeid(char).hash_code()
+    //         || tp == typeid(short).hash_code()
+    //         || tp == typeid(int).hash_code()
+    //         || tp == typeid(long).hash_code()) {
+    //         vmap["type"] = "int";
+    //     }
 
-        vlist.append(vmap);
-    }
+    //     vlist.append(vmap);
+    // }
 
     return vlist;
 }
@@ -349,7 +349,7 @@ BackendModule& PrivateModulePlatformBackend::getBackendModule(int uid)
 std::weak_ptr<InputPort> PrivateModulePlatformBackend::getInputPort(int uid, int portId)
 {
     auto& m = getBackendModule(uid);
-    if (m.getComputeModule().numInputs() <= portId) {
+    if (m.getComputeModule().numInputs() <= (size_t)portId) {
         throw std::runtime_error("backend: no input port with id " + to_string(portId) + " at module uid " + to_string(uid));
     }
     return m.getComputeModule().inputPort(portId);
@@ -358,7 +358,7 @@ std::weak_ptr<InputPort> PrivateModulePlatformBackend::getInputPort(int uid, int
 std::weak_ptr<OutputPort> PrivateModulePlatformBackend::getOutputPort(int uid, int portId)
 {
     auto& m = getBackendModule(uid);
-    if (m.getComputeModule().numOutputs() <= portId) {
+    if (m.getComputeModule().numOutputs() <= (size_t)portId) {
         throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
     }
     return m.getComputeModule().outputPort(portId);

@@ -11,10 +11,10 @@ class SinkInputPort: public cp::InputPort {
 public:
     SinkInputPort(cp::ComputeModule& parent);
     void fetch() override;
-    std::size_t typeHash() const override;
-    void fakeTypeHash(std::size_t typeHash);
+    const cp::PortTypeTraitsBase& traits() const override;
+    void fakeTraits(const cp::PortTypeTraitsBase& traits);
 protected:
-    std::size_t m_fakeTypeHash = 0;
+    const cp::PortTypeTraitsBase* m_fakeTraits = nullptr;
 };
 
 class SinkInputPortCollection: public cp::InputPortCollection {

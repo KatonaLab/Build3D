@@ -10,7 +10,7 @@ inline
 bool TypedOutputPort<T>::compatible(std::weak_ptr<InputPort> input) const
 {
     if (auto ptr = input.lock()) {
-        return ptr->typeHash() == typeHash();
+        return ptr->traits().equals(traits());
     }
     return false;
 }
@@ -34,9 +34,9 @@ std::weak_ptr<T> TypedOutputPort<T>::serve()
 
 template <typename T>
 inline
-size_t TypedOutputPort<T>::typeHash() const
+const PortTypeTraitsBase& TypedOutputPort<T>::traits() const
 {
-    return typeid(T).hash_code();
+    return PortTypeTraits<T>::instance();
 }
 
 template <typename T>
@@ -108,9 +108,9 @@ void TypedInputPort<T>::fetch()
 
 template <typename T>
 inline
-size_t TypedInputPort<T>::typeHash() const
+const PortTypeTraitsBase& TypedInputPort<T>::traits() const
 {
-    return typeid(T).hash_code();
+    return PortTypeTraits<T>::instance();
 }
 
 template <typename T>

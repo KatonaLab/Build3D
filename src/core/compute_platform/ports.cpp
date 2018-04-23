@@ -5,28 +5,30 @@
 using namespace core::compute_platform;
 using namespace std;
 
-OutputPort::OutputPort(ComputeModule& parent) : m_parent(parent)
+PortBase::PortBase(ComputeModule& parent)
+    : m_parent(parent)
 {}
 
-std::string OutputPort::name() const
+std::string PortBase::name() const
 {
     return m_name;
 }
 
-void OutputPort::setName(const std::string& name)
+void PortBase::setName(const std::string& name)
 {
     m_name = name;
 }
 
-std::string OutputPort::tag() const
+ComputeModule& PortBase::parent()
 {
-    return m_tag;
+    return m_parent;
 }
 
-void OutputPort::setTag(const std::string& tag)
-{
-    m_tag = tag;
-}
+// TODO: separate classes into files
+// ---------------------
+
+OutputPort::OutputPort(ComputeModule& parent) : PortBase(parent)
+{}
 
 bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
 {
@@ -72,41 +74,11 @@ void OutputPort::reset()
     m_numInputServed = 0;
 }
 
-ComputeModule& OutputPort::parent()
-{
-    return m_parent;
-}
-
 OutputPort::~OutputPort()
 {}
 
-InputPort::InputPort(ComputeModule& parent) : m_parent(parent)
+InputPort::InputPort(ComputeModule& parent) : PortBase(parent)
 {}
-
-std::string InputPort::name() const
-{
-    return m_name;
-}
-
-void InputPort::setName(const std::string& name)
-{
-    m_name = name;
-}
-
-std::string InputPort::tag() const
-{
-    return m_tag;
-}
-
-void InputPort::setTag(const std::string& tag)
-{
-    m_tag = tag;
-}
-
-ComputeModule& InputPort::parent()
-{
-    return m_parent;
-}
 
 bool InputPort::connected() const
 {
