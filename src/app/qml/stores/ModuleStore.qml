@@ -37,6 +37,11 @@ Item {
             AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };
 
+        handlers[ActionTypes.platform_evaluation] = function(args) {
+            backend.evaluatePlatform();
+            AppActions.refreshAllModuleOutput();
+        };
+
         var notHandled = function(args) {
             console.debug(actionType, "is not handled by ModuleStore");
         };
@@ -52,6 +57,10 @@ Item {
         ListElement {
             displayName: "create test module"
             scriptPath: "scripts/test_module.py"
+        }
+        ListElement {
+            displayName: "create sine generator module"
+            scriptPath: "scripts/test_sine_module.py"
         }
     }
 }

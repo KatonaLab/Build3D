@@ -79,16 +79,11 @@ Repeater {
                     text: details.displayName
                 }
 
-                Rectangle {
+                ColorIndicator {
                     id: colorSelector
-                    width: 24
-                    height: 24
-                    color: "purple"
-                    radius: 12
+                    color: details.color
                     Layout.alignment: Qt.AlignRight
-                    Material.elevation: 3
                     onColorChanged: floatImageOutput.update()
-                    // TODO: change it to a color selector
                 }
 
                 PreciseRangeSlider {

@@ -96,6 +96,7 @@ public:
     void setParameter(int uid, int paramId, QVariant value);
     QVariantList getOutputs(int uid);
     VolumeTexture* getModuleTexture(int uid, int outputPortId);
+    void evaluatePlatform();
 private:
     cp::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
@@ -187,6 +188,12 @@ public:
         return decorateTryCatch(
             &PrivateModulePlatformBackend::getModuleTexture,
             m_private, static_cast<VolumeTexture*>(nullptr), uid, outputPortId);
+    }
+    Q_INVOKABLE void evaluatePlatform()
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::evaluatePlatform,
+            m_private);
     }
 private:
     PrivateModulePlatformBackend m_private;

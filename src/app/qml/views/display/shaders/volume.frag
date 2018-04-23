@@ -17,14 +17,15 @@ float lut(in sampler3D tex, in vec3 pos, in vec4 params)
     // normalize to [0, 1] by dividing with max data value
     float x = texture(tex, pos).r / params.y;
     float a = params.z;
-    float b = params.w;
-    float r = max(b - a, 0.001); // prevent division by zero, TODO: do something with it, it doesnt work
+    float b = params.w + 0.0001;
+    // float r = max(b - a, 0.0001); // prevent division by zero, TODO: do something with it, it doesnt work
+    float r = b - a;
     // return 0 if x < a
     // return x if a < x < b
     // return 0 if b < x
     // https://www.wolframalpha.com/input/?i=((min(max(x,+2.5),+4)+-+2.5)%2F(4-2.5)+-+step(x-4)
-    // return (clamp(x, a, b) - a) / r - step(b, x);
-    return (clamp(x, a, b) - a) / r;
+    return (clamp(x, a, b) - a) / r - step(b, x);
+    // return (clamp(x, a, b) - a) / r;
     //return a;
 }
 
@@ -35,7 +36,7 @@ void main()
     float alpha = 0.;
     for (int i = 0; i <= 32; ++i) {
         vec3 pos = mix(far, near, float(i) * 1./32.);
-        alpha = alpha + lut(volumeTexture, pos, lutParameters);
+        alpha = alpha + lut(volumeTexture, pos, lutParameters) * 1./32.;
     }
     outputColor = vec4(accumDivisor * visible * alpha * volumeColor.rgb, 1.0);
 }

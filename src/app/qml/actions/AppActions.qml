@@ -40,4 +40,12 @@ QtObject {
     function notifyModuleOutputChanged(uid, portId, values) {
         AppDispatcher.dispatch(ActionTypes.module_output_changed_notification, {uid: uid, portId: portId, values: values});
     }
+
+    function evaluatePlatform() {
+        AppDispatcher.dispatch(ActionTypes.platform_evaluation, {});
+    }
+
+    function refreshAllModuleOutput() {
+        AppDispatcher.dispatch(ActionTypes.all_module_output_refresh, {});
+    }
 }

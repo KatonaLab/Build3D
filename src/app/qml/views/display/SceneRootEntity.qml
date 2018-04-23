@@ -64,14 +64,15 @@ Entity {
             accumDivisor: 1.0
             layer: sceneLayer
 
-            volumeColor: "red"
+            // note: JSValue to QColor conversion
+            volumeColor: Qt.rgba(model.color.r, model.color.g, model.color.b, model.color.a);
             visible: true
 
-            lutLowCut: model.lut.low
-            lutHighCut: model.lut.high
+            lutLowCut: model.lutLow
+            lutHighCut: model.lutHigh
             Component.onCompleted: {
                 // lutDataMax = model.data.dataLimits.y;
-                lutDataMax = 10.;
+                lutDataMax = 1.;
             }
 
             // volumeColor: model.nodeViewParams.color

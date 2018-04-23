@@ -29,6 +29,18 @@ Pane {
             expanded: true
         }
 
+        header: Column {
+            anchors.horizontalCenter: parent.horizontalCenter
+            RoundButton {
+                text: "run"
+                onClicked: {
+                    AppActions.evaluatePlatform();
+                }
+            }
+
+            Rectangle { color: "transparent"; height: 16; width: 1 }
+        }
+
         footer: Column {
             anchors.horizontalCenter: parent.horizontalCenter
 

@@ -72,13 +72,28 @@ GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& scr
 
 bool GenericModule::hasTexture(std::size_t outputPortId)
 {
-    // TODO
+    auto& m = getComputeModule();
+    auto p = m.outputPort(outputPortId).lock();
+    // TODO: wipe out this hash comparison and implement a proper rtti system
+    const size_t tp = p->typeHash();
+    if (tp == typeid(MultiDimImage<float>).hash_code()) {
+        return true;
+    }
     return false;
 }
 
 VolumeTexture* GenericModule::getModuleTexture(std::size_t outputPortId)
 {
-    // TODO
+    auto& m = getComputeModule();
+    auto p = m.outputPort(outputPortId).lock();
+    // TODO: FIXME: HELPME: SAVEME:
+    // please perform exorcism
+    auto tp = dynamic_cast<TypedOutputPort<MultiDimImage<float>>*>(p.get());
+    if (tp) {
+        VolumeTexture* tex = new VolumeTexture;
+        tex->init(tp->value());
+        return tex;
+    }
     return nullptr;
 }
 
@@ -347,4 +362,9 @@ std::weak_ptr<OutputPort> PrivateModulePlatformBackend::getOutputPort(int uid, i
         throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
     }
     return m.getComputeModule().outputPort(portId);
+}
+
+void PrivateModulePlatformBackend::evaluatePlatform()
+{
+    m_platform.run();
 }
