@@ -267,3 +267,68 @@ SCENARIO("efficient data handling and leakage free checks with complex net", "[c
         }
     }
 }
+
+SCENARIO("disconnect ports", "[core/compute_platform]")
+{
+    GIVEN("a simple connected net") {
+        ComputePlatform p;
+        
+        IntSource src1(p);
+        IntSource src2(p);
+        Add mid1(p);
+        Add mid2(p);
+        Add mid3(p);
+        IntDestination dst1(p);
+        IntDestination dst2(p);
+        IntDestination dst3(p);
+
+        REQUIRE(p.size() == 8);
+
+        REQUIRE(connectPorts(src1, 0, mid1, 0) == true);
+        REQUIRE(connectPorts(src1, 0, mid2, 1) == true);
+        REQUIRE(connectPorts(src2, 0, mid1, 1) == true);
+        REQUIRE(connectPorts(src2, 0, mid2, 0) == true);
+        REQUIRE(connectPorts(src1, 0, mid3, 0) == true);
+        REQUIRE(connectPorts(src1, 0, mid3, 1) == true);
+        REQUIRE(connectPorts(mid1, 0, dst1, 0) == true);
+        REQUIRE(connectPorts(mid2, 0, dst2, 0) == true);
+        REQUIRE(connectPorts(mid3, 0, dst3, 0) == true);
+
+        REQUIRE(src1.outputPort(0).lock()->numBinds() == 4);
+        REQUIRE(src2.outputPort(0).lock()->numBinds() == 2);
+        REQUIRE(mid1.outputPort(0).lock()->numBinds() == 1);
+        REQUIRE(mid2.outputPort(0).lock()->numBinds() == 1);
+        REQUIRE(mid3.outputPort(0).lock()->numBinds() == 1);
+
+        src1.setData(1);
+        src2.setData(2);
+
+        WHEN("run is called") {
+            p.run();
+            THEN("it outputs the correct results") {
+                REQUIRE(dst1.getResult() == 3);
+                REQUIRE(dst2.getResult() == 3);
+                REQUIRE(dst3.getResult() == 2);
+            }
+        }
+
+        WHEN("some connections removed") {
+            disconnectPorts(src1, 0, mid1, 0);
+            // note that there is no such connection src2:0 -> mid1:0
+            disconnectPorts(src2, 0, mid1, 0);
+            disconnectPorts(mid3, 0, dst3, 0);
+
+            THEN("the connections are removed") {
+                REQUIRE(src1.outputPort(0).lock()->numBinds() == 3);
+                REQUIRE(src2.outputPort(0).lock()->numBinds() == 2);
+                REQUIRE(mid1.outputPort(0).lock()->numBinds() == 1);
+                REQUIRE(mid2.outputPort(0).lock()->numBinds() == 1);
+                REQUIRE(mid3.outputPort(0).lock()->numBinds() == 0);
+            }
+
+            AND_THEN("the net is not valid, so can not be run") {
+                REQUIRE_THROWS(p.run());
+            }
+        }
+    }
+}
