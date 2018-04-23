@@ -300,6 +300,11 @@ SCENARIO("disconnect ports", "[core/compute_platform]")
         REQUIRE(mid2.outputPort(0).lock()->numBinds() == 1);
         REQUIRE(mid3.outputPort(0).lock()->numBinds() == 1);
 
+        REQUIRE(mid1.inputPort(0).lock()->getSource().lock() == src1.outputPort(0).lock());
+        REQUIRE(mid1.inputPort(1).lock()->getSource().lock() == src2.outputPort(0).lock());
+        REQUIRE(mid3.inputPort(0).lock()->getSource().lock() == src1.outputPort(0).lock());
+        REQUIRE(mid3.inputPort(1).lock()->getSource().lock() == src1.outputPort(0).lock());
+
         src1.setData(1);
         src2.setData(2);
 
@@ -324,6 +329,11 @@ SCENARIO("disconnect ports", "[core/compute_platform]")
                 REQUIRE(mid1.outputPort(0).lock()->numBinds() == 1);
                 REQUIRE(mid2.outputPort(0).lock()->numBinds() == 1);
                 REQUIRE(mid3.outputPort(0).lock()->numBinds() == 0);
+
+                REQUIRE(mid1.inputPort(0).lock()->getSource().lock() == nullptr);
+                REQUIRE(mid1.inputPort(1).lock()->getSource().lock() == src2.outputPort(0).lock());
+                REQUIRE(mid3.inputPort(0).lock()->getSource().lock() == src1.outputPort(0).lock());
+                REQUIRE(mid3.inputPort(1).lock()->getSource().lock() == src1.outputPort(0).lock());
             }
 
             AND_THEN("the net is not valid, so can not be run") {
