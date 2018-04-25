@@ -13,6 +13,8 @@ class ComputeModule;
 
 class PortTypeTraitsBase {
 public:
+    // TODO: naming can be confusing -> we only want type equality not
+    // all traits equality, rename it like typeEquals or so
     bool equals(const PortTypeTraitsBase& ptt) const
     {
         return hash() == ptt.hash();
@@ -23,11 +25,16 @@ protected:
 };
 
 template <typename T>
+struct TraitSet {
+    std::set<std::string> set = {};
+};
+
+template <typename T>
 class PortTypeTraits : public PortTypeTraitsBase {
 public:
     bool hasTrait(const std::string& trait) const override
     {
-        return m_traits.find(trait) != m_traits.end();
+        return m_traits.set.find(trait) != m_traits.set.end();
     }
     static const PortTypeTraits& instance()
     {
@@ -39,12 +46,24 @@ protected:
     {
         return typeid(T).hash_code();
     }
-    static const std::set<std::string> m_traits;
+    static const TraitSet<T> m_traits;
 };
 
-template <typename T> const std::set<std::string> PortTypeTraits<T>::m_traits;
+template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
 
-#define PORT_TYPE_TRAITS(Type) template <> const std::set<std::string> PortTypeTraits<Type>::m_traits
+#define PORT_TYPE_TRAITS(Type, x) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = x; };
+
+PORT_TYPE_TRAITS(uint8_t, {"int-like"});
+PORT_TYPE_TRAITS(uint16_t, {"int-like"});
+PORT_TYPE_TRAITS(uint32_t, {"int-like"});
+PORT_TYPE_TRAITS(uint64_t, {"int-like"});
+PORT_TYPE_TRAITS(int8_t, {"int-like"});
+PORT_TYPE_TRAITS(int16_t, {"int-like"});
+PORT_TYPE_TRAITS(int32_t, {"int-like"});
+PORT_TYPE_TRAITS(int64_t, {"int-like"});
+PORT_TYPE_TRAITS(float, {"float-like"});
+PORT_TYPE_TRAITS(double, {"float-like"});
+PORT_TYPE_TRAITS(bool, {"bool-like"});
 
 // --------------------------
 

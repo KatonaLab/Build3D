@@ -74,7 +74,7 @@ Item {
             for(var i = 0; i < model.count; ++i) {
                 console.log("-- updating output!!!");
                 var x = model.get(i);
-                var vol = backend.getModuleTexture(x.uid, x.portId);
+                var vol = backend.getOutputTexture(x.uid, x.portId);
                 console.log("-- updating output!!!", vol);
                 var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
                 var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);

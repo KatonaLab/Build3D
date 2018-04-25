@@ -24,8 +24,6 @@ public:
     BackendModule(int uid, const std::string& name);
     int uid() const;
     std::string name() const;
-    virtual VolumeTexture* getModuleTexture(std::size_t outputPortId) = 0;
-    virtual bool hasTexture(std::size_t outputPortId) = 0;
     virtual cp::ComputeModule& getComputeModule() = 0;
     virtual ~BackendModule() = default;
 protected:
@@ -38,8 +36,6 @@ public:
     DataSourceModule(cp::ComputePlatform& parent, int uid);
     void execute() override;
     void setData(std::shared_ptr<md::MultiDimImage<float>> data);
-    bool hasTexture(std::size_t outputPortId) override;
-    VolumeTexture* getModuleTexture(std::size_t outputPortId) override;
     cp::ComputeModule& getComputeModule() override;
 protected:
     std::shared_ptr<md::MultiDimImage<float>> m_data;
@@ -50,8 +46,6 @@ protected:
 class GenericModule : public hp::PythonComputeModule, public BackendModule {
 public:
     GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid);
-    bool hasTexture(std::size_t outputPortId) override;
-    VolumeTexture* getModuleTexture(std::size_t outputPortId) override;
     cp::ComputeModule& getComputeModule() override;
 };
 
@@ -59,23 +53,34 @@ public:
 // TODO: move to a util file and write test for it
 
 template <typename T, typename R, typename... Args, typename... Args2>
-R decorateTryCatch(R(T::*f)(Args...), T& inst, R&& returnValueOnError, Args2&&... args)
+R decorateTryCatch(
+    R(T::*f)(Args...),
+    T& inst,
+    std::function<void(const std::string&)> errorReporter,
+    R&& returnValueOnError,
+    Args2&&... args)
 {
     try {
         return (inst.*f)(std::forward<Args2>(args)...);
     } catch (std::exception& e) {
         std::cerr << "exception: " << e.what() << std::endl;
+        errorReporter(e.what());
     }
     return returnValueOnError;
 }
 
 template <typename T, typename... Args, typename... Args2>
-void decorateTryCatch(void(T::*f)(Args...), T& inst, Args2&&... args)
+void decorateTryCatch(
+    void(T::*f)(Args...),
+    T& inst,
+    std::function<void(const std::string&)> errorReporter,
+    Args2&&... args)
 {
     try {
         (inst.*f)(std::forward<Args2>(args)...);
     } catch (std::exception& e) {
         std::cerr << "exception: " << e.what() << std::endl;
+        errorReporter(e.what());
     }
 }
 
@@ -86,16 +91,18 @@ public:
     virtual ~PrivateModulePlatformBackend() = default;
     QList<int> createSourceModulesFromIcsFile(const QUrl& filename);
     int createGenericModule(const QString& scriptPath);
-    bool hasModule(int uid);
     void destroyModule(int uid);
-    QVariantList getInputOptions(int uid, int inputPortId);
+    bool hasModule(int uid);
+    QVariantMap getModuleProperties(int uid);
+    QList<int> enumerateInputPorts(int uid);
+    QList<int> enumerateParamPorts(int uid);
+    QList<int> enumerateOutputPorts(int uid);
+    QVariantMap getInputPortProperties(int uid, int portId);
+    QVariantMap getOutputPortProperties(int uid, int portId);
+    VolumeTexture* getOutputTexture(int uid, int portId);
     bool connectInputOutput(int outputModuleUid, int outputPortId, int inputModuleUid, int inputPortId);
     void disconnectInput(int inputModuleUid, int inputPortId);
-    QVariantList getInputs(int uid);
-    QVariantList getParameters(int uid);
-    void setParameter(int uid, int paramId, QVariant value);
-    QVariantList getOutputs(int uid);
-    VolumeTexture* getModuleTexture(int uid, int outputPortId);
+    bool setParamPortProperty(int uid, int portId, QVariant value);
     void evaluatePlatform();
 private:
     cp::ComputePlatform m_platform;
@@ -103,9 +110,14 @@ private:
     std::map<QString, QObjectList> m_inputOptions;
 private:
     inline int nextUid() const;
-    BackendModule& getBackendModule(int uid);
-    std::weak_ptr<cp::InputPort> getInputPort(int uid, int portId);
-    std::weak_ptr<cp::OutputPort> getOutputPort(int uid, int portId);
+    BackendModule& fetchBackendModule(int uid);
+    std::weak_ptr<cp::InputPort> fetchInputPort(int uid, int portId);
+    std::weak_ptr<cp::OutputPort> fetchOutputPort(int uid, int portId);
+    QList<int> enumeratePorts(int uid,
+        std::function<std::size_t(cp::ComputeModule&)> numInputsFunc,
+        std::function<bool(cp::ComputeModule&, std::size_t)> predFunc);
+    std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port);
+    std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port);
 };
 
 // TODO: write test for the backend
@@ -117,84 +129,133 @@ public:
         : QObject(parent)
     {}
     virtual ~ModulePlatformBackend() = default;
+
     Q_INVOKABLE QList<int> createSourceModulesFromIcsFile(const QUrl& filename)
     {
         return decorateTryCatch(
             &PrivateModulePlatformBackend::createSourceModulesFromIcsFile,
-            m_private, QList<int>(), filename);
+            m_private, m_errorFunc, QList<int>(),
+            filename
+        );
     }
     Q_INVOKABLE int createGenericModule(const QString& scriptPath)
     {
         return decorateTryCatch(
             &PrivateModulePlatformBackend::createGenericModule,
-            m_private, -1, scriptPath);
-    }
-    Q_INVOKABLE bool hasModule(int uid)
-    {
-        return decorateTryCatch(
-            &PrivateModulePlatformBackend::hasModule,
-            m_private, false, uid);
+            m_private, m_errorFunc, -1,
+            scriptPath
+        );
     }
     Q_INVOKABLE void destroyModule(int uid)
     {
         return decorateTryCatch(
             &PrivateModulePlatformBackend::destroyModule,
-            m_private, uid);
+            m_private, m_errorFunc,
+            uid
+        );
     }
-    Q_INVOKABLE QVariantList getInputOptions(int uid, int inputPortId)
+    Q_INVOKABLE bool hasModule(int uid)
     {
         return decorateTryCatch(
-            &PrivateModulePlatformBackend::getInputOptions,
-            m_private, QVariantList(), uid, inputPortId);
+            &PrivateModulePlatformBackend::hasModule,
+            m_private, m_errorFunc, false,
+            uid
+        );
+    }
+    Q_INVOKABLE QVariantMap getModuleProperties(int uid)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::getModuleProperties,
+            m_private, m_errorFunc, QVariantMap(),
+            uid
+        );
+    }
+    Q_INVOKABLE QList<int> enumerateInputPorts(int uid)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::enumerateInputPorts,
+            m_private, m_errorFunc, QList<int>(),
+            uid
+        );
+    }
+    Q_INVOKABLE QList<int> enumerateParamPorts(int uid)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::enumerateParamPorts,
+            m_private, m_errorFunc, QList<int>(),
+            uid
+        );
+    }
+    Q_INVOKABLE QList<int> enumerateOutputPorts(int uid)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::enumerateOutputPorts,
+            m_private, m_errorFunc, QList<int>(),
+            uid
+        );
+    }
+    Q_INVOKABLE QVariantMap getInputPortProperties(int uid, int portId)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::getInputPortProperties,
+            m_private, m_errorFunc, QVariantMap(),
+            uid, portId
+        );
+    }
+    Q_INVOKABLE QVariantMap getOutputPortProperties(int uid, int portId)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::getOutputPortProperties,
+            m_private, m_errorFunc, QVariantMap(),
+            uid, portId
+        );
+    }
+    Q_INVOKABLE VolumeTexture* getOutputTexture(int uid, int portId)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::getOutputTexture,
+            m_private, m_errorFunc, (VolumeTexture*)nullptr,
+            uid, portId
+        );
     }
     Q_INVOKABLE bool connectInputOutput(int outputModuleUid, int outputPortId, int inputModuleUid, int inputPortId)
     {
         return decorateTryCatch(
             &PrivateModulePlatformBackend::connectInputOutput,
-            m_private, false, outputModuleUid, outputPortId, inputModuleUid, inputPortId);
+            m_private, m_errorFunc, false,
+            outputModuleUid, outputPortId, inputModuleUid, inputPortId
+        );
     }
     Q_INVOKABLE void disconnectInput(int inputModuleUid, int inputPortId)
     {
         return decorateTryCatch(
             &PrivateModulePlatformBackend::disconnectInput,
-            m_private, inputModuleUid, inputPortId);
+            m_private, m_errorFunc,
+            inputModuleUid, inputPortId
+        );
     }
-    Q_INVOKABLE QVariantList getInputs(int uid)
+    Q_INVOKABLE bool setParamPortProperty(int uid, int portId, QVariant value)
     {
         return decorateTryCatch(
-            &PrivateModulePlatformBackend::getInputs,
-            m_private, QVariantList(), uid);
-    }
-    Q_INVOKABLE QVariantList getParameters(int uid)
-    {
-        return decorateTryCatch(
-            &PrivateModulePlatformBackend::getParameters,
-            m_private, QVariantList(), uid);
-    }
-    Q_INVOKABLE void setParameter(int uid, int paramId, QVariant value)
-    {
-        return decorateTryCatch(
-            &PrivateModulePlatformBackend::setParameter,
-            m_private, uid, paramId, value);
-    }
-    Q_INVOKABLE QVariantList getOutputs(int uid)
-    {
-        return decorateTryCatch(
-            &PrivateModulePlatformBackend::getOutputs,
-            m_private, QVariantList(), uid);
-    }
-    Q_INVOKABLE VolumeTexture* getModuleTexture(int uid, int outputPortId)
-    {
-        return decorateTryCatch(
-            &PrivateModulePlatformBackend::getModuleTexture,
-            m_private, static_cast<VolumeTexture*>(nullptr), uid, outputPortId);
+            &PrivateModulePlatformBackend::setParamPortProperty,
+            m_private, m_errorFunc, false,
+            uid, portId, value
+        );
     }
     Q_INVOKABLE void evaluatePlatform()
     {
         return decorateTryCatch(
             &PrivateModulePlatformBackend::evaluatePlatform,
-            m_private);
+            m_private, m_errorFunc
+        );
     }
+Q_SIGNALS:
+    void backendErrorOccured(QString msg);
+protected:
+    std::function<void(const std::string&)> m_errorFunc = [this](const std::string& msg)
+    {
+        Q_EMIT this->backendErrorOccured(QString::fromStdString(msg));
+    };
 private:
     PrivateModulePlatformBackend m_private;
 };

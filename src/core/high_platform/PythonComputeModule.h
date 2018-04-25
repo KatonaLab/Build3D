@@ -17,6 +17,11 @@
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 
+// --------------------------------------------------------
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<float>, {"float-image"});
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint32_t>, {"int-image"});
+// --------------------------------------------------------
+
 namespace core {
 namespace high_platform {
 

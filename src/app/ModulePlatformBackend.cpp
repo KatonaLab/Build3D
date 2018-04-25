@@ -46,18 +46,6 @@ void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
     m_data = data;
 }
 
-bool DataSourceModule::hasTexture(std::size_t outputPortId)
-{
-    return outputPortId == 0;
-}
-
-VolumeTexture* DataSourceModule::getModuleTexture(std::size_t outputPortId)
-{
-    VolumeTexture* tex = new VolumeTexture;
-    tex->init(*m_data);
-    return tex;
-}
-
 cp::ComputeModule& DataSourceModule::getComputeModule()
 {
     return *this;
@@ -69,33 +57,6 @@ GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& scr
     : hp::PythonComputeModule(parent, script),
     BackendModule(uid, "Generic" + to_string(uid))
 {}
-
-bool GenericModule::hasTexture(std::size_t outputPortId)
-{
-    auto& m = getComputeModule();
-    auto p = m.outputPort(outputPortId).lock();
-    // TODO: wipe out this hash comparison and implement a proper rtti system
-    // const size_t tp = p->typeHash();
-    // if (tp == typeid(MultiDimImage<float>).hash_code()) {
-    //     return true;
-    // }
-    return false;
-}
-
-VolumeTexture* GenericModule::getModuleTexture(std::size_t outputPortId)
-{
-    auto& m = getComputeModule();
-    auto p = m.outputPort(outputPortId).lock();
-    // TODO: FIXME: HELPME: SAVEME:
-    // please perform exorcism
-    // auto tp = dynamic_cast<TypedOutputPort<MultiDimImage<float>>*>(p.get());
-    // if (tp) {
-    //     VolumeTexture* tex = new VolumeTexture;
-    //     tex->init(tp->value());
-    //     return tex;
-    // }
-    return nullptr;
-}
 
 cp::ComputeModule& GenericModule::getComputeModule()
 {
@@ -172,163 +133,201 @@ void PrivateModulePlatformBackend::destroyModule(int uid)
     // TODO: remove the module -> implement ComputePlatform::removeModule + its test
 }
 
-VolumeTexture* PrivateModulePlatformBackend::getModuleTexture(int uid, int outputPortId)
+QList<int> PrivateModulePlatformBackend::enumeratePorts(
+    int uid,
+    std::function<std::size_t(ComputeModule&)> numInputsFunc,
+    std::function<bool(ComputeModule&, std::size_t)> predFunc)
 {
-    if (hasModule(uid) && m_modules[uid]->hasTexture((std::size_t)outputPortId)) {
-        return m_modules[uid]->getModuleTexture((std::size_t)outputPortId);
-    }
-    return nullptr;
-}
-
-QVariantList PrivateModulePlatformBackend::getInputOptions(int uid, int inputPortId)
-{
-    // auto portType = getInputPort(uid, inputPortId).lock()->typeHash();
-    QVariantList vlist;
-
-    for (auto& pr : m_modules) {
-        auto& m = pr.second;
-        for (std::size_t i = 0; i < m->getComputeModule().numOutputs(); ++i) {
-            auto p = m->getComputeModule().outputPort(i).lock();
-            // if (p->typeHash() == portType) {
-            //     QVariantMap vmap;
-            //     vmap["uid"] = pr.first;
-            //     vmap["portId"] = (int)i;
-            //     vmap["displayName"] = QString::fromStdString(m->name() + "/" + p->name());
-            //     vlist.append(QVariant(vmap));
-            // }
+    ComputeModule& m = fetchBackendModule(uid).getComputeModule();
+    QList<int> list;
+    size_t k = numInputsFunc(m);
+    for (size_t i = 0; i < k; ++i) {
+        if (predFunc(m, i)) {
+            list.append(i);
         }
     }
+    return list;
+}
 
-    return vlist;
+QList<int> PrivateModulePlatformBackend::enumerateInputPorts(int uid)
+{
+    return enumeratePorts(uid,
+        [](ComputeModule& m) { return m.numInputs(); },
+        [](ComputeModule& m, size_t i) { return ! m.inputPort(i).lock()->traits().hasTrait("parameter"); });
+}
+
+QList<int> PrivateModulePlatformBackend::enumerateParamPorts(int uid)
+{
+    return enumeratePorts(uid,
+        [](ComputeModule& m) { return m.numInputs(); },
+        [](ComputeModule& m, size_t i) { return m.inputPort(i).lock()->traits().hasTrait("parameter"); });
+}
+
+QList<int> PrivateModulePlatformBackend::enumerateOutputPorts(int uid)
+{
+    return enumeratePorts(uid,
+        [](ComputeModule& m) { return m.numOutputs(); },
+        [](ComputeModule& m, size_t i) { return true; });
+}
+
+QVariantMap PrivateModulePlatformBackend::getModuleProperties(int uid)
+{
+    auto& m = fetchBackendModule(uid);
+
+    QVariantMap vmap;
+    vmap["uid"] = uid;
+    vmap["displayName"] = QString::fromStdString(m.name());
+    return vmap;
+}
+
+std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port)
+{
+    auto& outTraits = port->traits();
+    std::vector<std::pair<int, int>> list;
+
+    for (auto& pr : m_modules) {
+        QList<int> result = enumeratePorts(
+            pr.first,
+            [](ComputeModule& m) { return m.numInputs(); },
+            [&outTraits](ComputeModule& m, size_t i)
+            {
+                return m.inputPort(i).lock()->traits().equals(outTraits); 
+            }
+        );
+        for (int x : result) {
+            list.push_back(make_pair(pr.first, x));
+        }
+    }
+    return list;
+}
+
+std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port)
+{
+    auto& inTraits = port->traits();
+    std::vector<std::pair<int, int>> list;
+    
+    for (auto& pr : m_modules) {
+        QList<int> result = enumeratePorts(
+            pr.first,
+            [](ComputeModule& m) { return m.numOutputs(); },
+            [&inTraits](ComputeModule& m, size_t i) { return m.outputPort(i).lock()->traits().equals(inTraits); }
+        );
+        for (int x : result) {
+            list.push_back(make_pair(pr.first, x));
+        }
+    }
+    return list;
+}
+
+QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int portId)
+{
+    auto& m = fetchBackendModule(uid);
+    auto p = fetchInputPort(uid, portId).lock();
+
+    QVariantMap vmap;
+    vmap["uid"] = uid;
+    vmap["portId"] = portId;
+    vmap["displayName"] = QString::fromStdString(p->name());
+    vmap["isParameter"] = p->traits().hasTrait("parameter");
+    if (p->traits().hasTrait("int-like")) {
+        vmap["type"] = "int";
+    }
+    if (p->traits().hasTrait("float-like")) {
+        vmap["type"] = "float";
+    }
+    if (p->traits().hasTrait("bool-like")) {
+        vmap["type"] = "bool";
+    }
+
+    auto portList = fetchOutputPortsCompatibleTo(p);
+    QVariantList vlist;
+    for (auto pr : portList) {
+        QVariantMap listItemMap;
+        listItemMap["targetUid"] = pr.first;
+        listItemMap["targetPortId"] = pr.second;
+        auto& targetModule = fetchBackendModule(pr.first);
+        auto targetPort = fetchOutputPort(pr.first, pr.second).lock();
+        listItemMap["targetModuleDisplayName"] = QString::fromStdString(targetModule.name());
+        listItemMap["targetPortDisplayName"] = QString::fromStdString(targetPort->name());
+    }
+    vmap["options"] = vlist;
+    return vmap;
+}
+
+QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int portId)
+{
+    auto& m = fetchBackendModule(uid);
+    auto p = fetchOutputPort(uid, portId).lock();
+
+    QVariantMap vmap;
+    vmap["uid"] = uid;
+    vmap["portId"] = portId;
+    vmap["displayName"] = QString::fromStdString(p->name());
+    
+    if (p->traits().hasTrait("int-like")) {
+        vmap["type"] = "int";
+    }
+    if (p->traits().hasTrait("float-like")) {
+        vmap["type"] = "float";
+    }
+    if (p->traits().hasTrait("bool-like")) {
+        vmap["type"] = "bool";
+    }
+    if (p->traits().hasTrait("float-image")) {
+        vmap["type"] = "float-image";
+    }
+    if (p->traits().hasTrait("int-image")) {
+        vmap["type"] = "int-image";
+    }
+
+    return vmap;
+}
+
+VolumeTexture* PrivateModulePlatformBackend::getOutputTexture(int uid, int portId)
+{
+    // TOOD: plug a typed Sink module to this output and read the sink modules multidim
+    // image instead of the nast dyncast
+
+    auto& m = fetchBackendModule(uid);
+    auto p = fetchOutputPort(uid, portId).lock();
+    if (p->traits().hasTrait("float-image")) {
+        // TODO: kind of nasty, try to find a better way
+        TypedOutputPort<MultiDimImage<float>>* tp = 
+            dynamic_cast<TypedOutputPort<MultiDimImage<float>>*>(p.get());
+
+        if (!tp) {
+            throw std::runtime_error("internal output format error");
+        }
+        // TODO: double check these dangerous naked pointers
+        VolumeTexture* tex = new VolumeTexture;
+        tex->init(tp->value());
+        return tex;
+    }
+    return nullptr;
 }
 
 bool PrivateModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,
     int inputModuleUid, int inputPortId)
 {
-    auto input = getInputPort(inputModuleUid, inputPortId);
-    auto output = getOutputPort(outputModuleUid, outputPortId).lock();
+    auto input = fetchInputPort(inputModuleUid, inputPortId);
+    auto output = fetchOutputPort(outputModuleUid, outputPortId).lock();
     return output->bind(input);
 }
 
 void PrivateModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
 {
-    auto input = getInputPort(inputModuleUid, inputPortId);
+    auto input = fetchInputPort(inputModuleUid, inputPortId);
     input.lock()->getSource().lock()->unbind(input);
 }
 
-QVariantList PrivateModulePlatformBackend::getInputs(int uid)
+bool PrivateModulePlatformBackend::setParamPortProperty(int uid, int portId, QVariant value)
 {
-    BackendModule& m = getBackendModule(uid);
-    QVariantList vlist;
+    // auto input = fetchInputPort(uid, portId);
+    // auto& t = input.lock()->traits();
+    // if (t.hasTrait("int-like")) {
 
-    for (size_t i = 0; i < m.getComputeModule().numInputs(); ++i) {
-        auto p = m.getComputeModule().inputPort(i).lock();
-        // string tag = p->tag();
-        // if (tag.empty() || tag.find("regular") != string::npos) {
-        //     QVariantMap vmap;
-        //     vmap["displayName"] = QString::fromStdString(p->name());
-        //     vmap["portId"] = (int)i;
-        //     vlist.append(vmap);
-        // }
-    }
-
-    return vlist;
-}
-
-QVariantList PrivateModulePlatformBackend::getParameters(int uid)
-{
-    BackendModule& m = getBackendModule(uid);
-    QVariantList vlist;
-
-    for (size_t i = 0; i < m.getComputeModule().numInputs(); ++i) {
-        auto p = m.getComputeModule().inputPort(i).lock();
-        // string tag = p->tag();
-        // if (tag.find("parameter") != string::npos) {
-        //     QVariantMap vmap;
-        //     vmap["displayName"] = QString::fromStdString(p->name());
-        //     vmap["portId"] = (int)i;
-            
-        //     vmap["type"] = "unknown";
-        //     vmap["hint"] = "default";
-
-        //     // TODO: see TODO in PrivateModulePlatformBackend::getOutputs
-        //     const size_t tp = p->typeHash();
-        //     if (tp == typeid(float).hash_code()
-        //         || tp == typeid(double).hash_code()) {
-        //         vmap["type"] = "float";
-        //     }
-
-        //     if (tp == typeid(uint8_t).hash_code()
-        //         || tp == typeid(uint16_t).hash_code()
-        //         || tp == typeid(uint32_t).hash_code()
-        //         || tp == typeid(uint64_t).hash_code()
-        //         || tp == typeid(int8_t).hash_code()
-        //         || tp == typeid(int16_t).hash_code()
-        //         || tp == typeid(int32_t).hash_code()
-        //         || tp == typeid(int64_t).hash_code()) {
-        //         vmap["type"] = "int";
-        //     }
-
-        //     if (tp == typeid(bool).hash_code()) {
-        //         vmap["type"] = "bool";
-        //     }
-
-        //     vlist.append(vmap);
-        // }
-    }
-    
-    return vlist;
-}
-
-void PrivateModulePlatformBackend::setParameter(int uid, int paramId, QVariant value)
-{
-    // TODO:
-}
-
-QVariantList PrivateModulePlatformBackend::getOutputs(int uid)
-{
-    BackendModule& m = getBackendModule(uid);
-    QVariantList vlist;
-
-    // for (size_t i = 0; i < m.getComputeModule().numOutputs(); ++i) {
-    //     auto p = m.getComputeModule().outputPort(i);
-    //     QVariantMap vmap;
-    //     vmap["displayName"] = QString::fromStdString(p.lock()->name());
-    //     vmap["portId"] = (int)i;
-    //     // don't worry, will be overwritten in case of a type match
-    //     vmap["type"] = "unknown";
-    //     vmap["hint"] = "default";
-
-    //     // TODO: do not hack around with typeHash
-    //     // implement a proper system-through rtti mechanism to
-    //     // decide input/output types and use it in the PythonModule
-    //     // stuff too
-    //     // FIXME: this is a whole bunch of bad stuff:
-    //     const size_t tp = p.lock()->typeHash();
-    //     if (tp == typeid(MultiDimImage<float>).hash_code()) {
-    //         vmap["type"] = "float-image";
-    //     }
-
-    //     if (tp == typeid(MultiDimImage<int>).hash_code()) {
-    //         vmap["type"] = "int-image";
-    //     }
-
-    //     if (tp == typeid(float).hash_code()
-    //         || tp == typeid(double).hash_code()) {
-    //         vmap["type"] = "float";
-    //     }
-
-    //     if (tp == typeid(char).hash_code()
-    //         || tp == typeid(short).hash_code()
-    //         || tp == typeid(int).hash_code()
-    //         || tp == typeid(long).hash_code()) {
-    //         vmap["type"] = "int";
-    //     }
-
-    //     vlist.append(vmap);
     // }
-
-    return vlist;
+    return false;
 }
 
 int PrivateModulePlatformBackend::nextUid() const
@@ -337,7 +336,7 @@ int PrivateModulePlatformBackend::nextUid() const
     return counter++;
 }
 
-BackendModule& PrivateModulePlatformBackend::getBackendModule(int uid)
+BackendModule& PrivateModulePlatformBackend::fetchBackendModule(int uid)
 {
     if(!hasModule(uid)) {
         throw std::runtime_error("backend: no module with uid " + to_string(uid));
@@ -346,18 +345,18 @@ BackendModule& PrivateModulePlatformBackend::getBackendModule(int uid)
     return *m_modules[uid];
 }
 
-std::weak_ptr<InputPort> PrivateModulePlatformBackend::getInputPort(int uid, int portId)
+std::weak_ptr<InputPort> PrivateModulePlatformBackend::fetchInputPort(int uid, int portId)
 {
-    auto& m = getBackendModule(uid);
+    auto& m = fetchBackendModule(uid);
     if (m.getComputeModule().numInputs() <= (size_t)portId) {
         throw std::runtime_error("backend: no input port with id " + to_string(portId) + " at module uid " + to_string(uid));
     }
     return m.getComputeModule().inputPort(portId);
 }
 
-std::weak_ptr<OutputPort> PrivateModulePlatformBackend::getOutputPort(int uid, int portId)
+std::weak_ptr<OutputPort> PrivateModulePlatformBackend::fetchOutputPort(int uid, int portId)
 {
-    auto& m = getBackendModule(uid);
+    auto& m = fetchBackendModule(uid);
     if (m.getComputeModule().numOutputs() <= (size_t)portId) {
         throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
     }

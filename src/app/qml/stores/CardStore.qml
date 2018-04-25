@@ -16,26 +16,37 @@ Item {
         var backend = MainStore.moduleStore.backend;
         
         handlers[ActionTypes.module_added_notification] = function(args) {
-            var inputs = backend.getInputs(args.uid);
-            var params = backend.getParameters(args.uid);
-            var outputs = backend.getOutputs(args.uid);
-            console.debug(JSON.stringify(inputs));
-            console.debug(JSON.stringify(outputs));
+            var module = backend.getModuleProperties(args.uid);
+            var inputs = backend.enumerateInputPorts(args.uid);
+            var params = backend.enumerateParamPorts(args.uid);
+            var outputs = backend.enumerateOutputPorts(args.uid);
             
-            inputs.forEach(function(part, index, theArray) {
-                var opts = backend.getInputOptions(args.uid, part.portId);
-                opts = opts.filter(function(item) {
-                    return args.uid != item.uid;
-                });
-                theArray[index].options = opts;
+            var inputProps = [];
+            inputs.forEach(function(x) {
+                inputProps.push(backend.getInputPortProperties(args.uid, x));
             });
+
+            var paramProps = [];
+            params.forEach(function(x) {
+                paramProps.push(backend.getInputPortProperties(args.uid, x));
+            });
+
+            var outputProps = [];
+            outputs.forEach(function(x) {
+                outputProps.push(backend.getOutputPortProperties(args.uid, x));
+            });
+
+            console.log(JSON.stringify(module));
+            console.log(JSON.stringify(inputProps));
+            console.log(JSON.stringify(paramProps));
+            console.log(JSON.stringify(outputProps));
 
             model.append({
                 uid: args.uid,
-                displayName: "TODO: query name",
-                inputs: inputs,
-                parameters: params,
-                outputs: outputs});
+                displayName: module.displayName,
+                inputs: inputProps,
+                parameters: paramProps,
+                outputs: outputProps});
         };
 
         var notHandled = function(args) {
