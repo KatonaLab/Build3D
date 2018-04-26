@@ -27,16 +27,25 @@ Repeater {
             }
 
             ComboBox {
+                property int currentUid: -1
+                property int currentPort: -1
+
                 font: root.font
                 Layout.fillWidth: true
                 textRole: "displayName"
                 model: options
 
+                onActivated: {
+                    var item = model.get(currentIndex);
+                    currentUid = values.targetUid;
+                    currentPort = values.targetPortId;
+                }
+
                 onCurrentIndexChanged: {
                     var item = model.get(currentIndex);
                     var values = {
                         targetUid: item.targetUid,
-                        targetOutputIndex: item.targetOutputIndex
+                        targetPortId: item.targetPortId
                     };
                     AppActions.requestModuleInputChange(root.uid, portId, values);
                 }

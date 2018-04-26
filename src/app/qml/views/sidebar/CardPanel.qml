@@ -27,6 +27,7 @@ Pane {
             outputs: model.outputs
             width: parent.width
             expanded: true
+            font.pointSize: 12
         }
 
         header: Column {

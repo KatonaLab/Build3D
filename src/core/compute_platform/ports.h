@@ -46,10 +46,11 @@ protected:
     {
         return typeid(T).hash_code();
     }
-    static const TraitSet<T> m_traits;
+    // static const
+     TraitSet<T> m_traits;
 };
 
-template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
+// template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
 
 #define PORT_TYPE_TRAITS(Type, x) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = x; };
 

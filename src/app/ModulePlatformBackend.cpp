@@ -249,6 +249,7 @@ QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int po
         auto targetPort = fetchOutputPort(pr.first, pr.second).lock();
         listItemMap["targetModuleDisplayName"] = QString::fromStdString(targetModule.name());
         listItemMap["targetPortDisplayName"] = QString::fromStdString(targetPort->name());
+        vlist.append(listItemMap);
     }
     vmap["options"] = vlist;
     return vmap;

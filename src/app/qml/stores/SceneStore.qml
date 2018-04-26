@@ -38,24 +38,13 @@ Item {
 
         var handlers = {};
         handlers[ActionTypes.module_added_notification] = function(args) {
-            // var outputs = backend.getOutputs(args.uid);
-            // console.log("____________________________________________");
-            // console.log(outputs);
-            // console.log(outputs.length);
-            // outputs.forEach(function (x) {
-            //     console.log("MODULE ADDINF ", x.type);
-            //     if (x.type == "float-image") {
-            //         model.append({
-            //             uid: args.uid,
-            //             portId: x.portId,
-            //             texture: null,
-            //             size: Qt.vector2d(0, 0),
-            //             color: starterColors[model.count % starterColors.length],
-            //             lutLow: 0,
-            //             lutHigh: 1});
-            //         console.log("MODULE ADDED ", model.count);
-            //     }
-            // });
+            var outputs = backend.enumerateOutputPorts(args.uid);
+            outputs.forEach(function (x) {
+                var props = backend.getOutputPortProperties(args.uid, x);
+                if (props.type == "float-image") {
+                    preModel.append({"uid": args.uid, "portId": props.portId});
+                }
+            });
         };
 
         handlers[ActionTypes.module_output_changed_notification] = function(args) {
@@ -70,26 +59,23 @@ Item {
         };
 
         handlers[ActionTypes.all_module_output_refresh] = function(args) {
-            console.log("-- updating output!!!", model.count);
-            for(var i = 0; i < model.count; ++i) {
-                console.log("-- updating output!!!");
-                var x = model.get(i);
+            model.clear();
+            for(var i = 0; i < preModel.count; ++i) {
+                var x = preModel.get(i);
+
                 var vol = backend.getOutputTexture(x.uid, x.portId);
-                console.log("-- updating output!!!", vol);
                 var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
                 var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
-                console.log("-- updating output!!!", size);
-                model.get(i).texture = vol;
-                model.get(i).size = size;
 
-                        model.append({
-                        uid: args.uid,
-                        portId: x.portId,
-                        texture: null,
-                        size: Qt.vector2d(0, 0),
-                        color: starterColors[model.count % starterColors.length],
-                        lutLow: 0,
-                        lutHigh: 1});
+                var newItem = {
+                    uid: x.uid,
+                    portId: x.portId,
+                    texture: vol,
+                    size: size,
+                    color: Qt.rgba(1, 0, 0, 1),
+                    lutLow: 0,
+                    lutHigh: 1};
+                model.append(newItem);
             }
         };
 
@@ -97,6 +83,10 @@ Item {
             console.debug(actionType, "is not handled by SceneStore");
         };
         (handlers[actionType] || notHandled)(args);
+    }
+
+    ListModel {
+        id: preModel
     }
 
     ListModel {

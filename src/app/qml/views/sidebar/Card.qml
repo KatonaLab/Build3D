@@ -12,9 +12,9 @@ Pane {
     id: card
     property int uid
     property string displayName
-    property ListModel inputs
-    property ListModel parameters
-    property ListModel outputs
+    property var inputs
+    property var parameters
+    property var outputs
     property alias expanded: header.checked
 
     Material.elevation: 4
