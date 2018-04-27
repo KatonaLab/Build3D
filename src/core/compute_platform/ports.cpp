@@ -19,6 +19,23 @@ void PortBase::setName(const std::string& name)
     m_name = name;
 }
 
+std::string PortBase::tags() const
+{
+    return m_tags;
+}
+
+bool PortBase::hasTag(const std::string& tag) const
+{
+    // TODO: !!! hasTag("param") will return true with m_tags == "non-parameter" !!!
+    // FIXME:
+    return m_tags.find(tag) != std::string::npos;
+}
+
+void PortBase::setTags(const std::string& tags)
+{
+    m_tags = tags;
+}
+
 ComputeModule& PortBase::parent()
 {
     return m_parent;

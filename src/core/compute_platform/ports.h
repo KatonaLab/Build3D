@@ -46,11 +46,10 @@ protected:
     {
         return typeid(T).hash_code();
     }
-    // static const
-     TraitSet<T> m_traits;
+    static const TraitSet<T> m_traits;
 };
 
-// template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
+template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
 
 #define PORT_TYPE_TRAITS(Type, x) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = x; };
 
@@ -73,11 +72,17 @@ public:
     PortBase(ComputeModule& parent);
     std::string name() const;
     void setName(const std::string& name);
+    
+    std::string tags() const;
+    bool hasTag(const std::string& tag) const;
+    void setTags(const std::string& tags);
+
     ComputeModule& parent();
     virtual const PortTypeTraitsBase& traits() const = 0;
     virtual ~PortBase() = default;
 protected:
     std::string m_name;
+    std::string m_tags;
     ComputeModule& m_parent;
 };
 
