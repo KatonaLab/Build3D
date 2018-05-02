@@ -12,23 +12,15 @@ Item {
     function createCardForNewModule(newUid) {
         var backend = MainStore.moduleStore.backend;
         var module = backend.getModuleProperties(newUid);
-        // var inputs = backend.enumerateInputPorts(newUid);
+        var inputs = backend.enumerateInputPorts(newUid);
         var params = backend.enumerateParamPorts(newUid);
         var outputs = backend.enumerateOutputPorts(newUid);
-        
-        // var inputProps = [];
-        // inputs.forEach(function(x) {
-        //     var props = backend.getInputPortProperties(newUid, x);
-        //     var opts = [];
-        //     props.options.forEach(function(y) {
-        //         opts.push({
-        //             "displayName": y.targetModuleDisplayName + ":" + y.targetPortDisplayName,
-        //             "targetUid": y.targetUid,
-        //             "targetPortId": y.targetPortId});
-        //     });
-        //     props.options = opts;
-        //     inputProps.push(props);
-        // });
+
+        var inputProps = [];
+        inputs.forEach(function(x) {
+            var props = backend.getInputPortProperties(newUid, x);
+            inputProps.push(props);
+        });
 
         var paramProps = [];
         params.forEach(function(x) {
@@ -43,7 +35,7 @@ Item {
         return {
             uid: newUid,
             displayName: module.displayName,
-            inputs: [],
+            inputs: inputProps,
             parameters: paramProps,
             outputs: outputProps};
     }
@@ -55,25 +47,15 @@ Item {
         }
 
         var backend = MainStore.moduleStore.backend;
-        var uid = model.get(modelIndex).uid;
-        console.debug("update input uid " + uid);
-        var inputs = backend.enumerateInputPorts(uid);
+        var obj = model.get(modelIndex);
+        var uid = obj.uid;
+        var n = obj.inputs.count;
 
-        var inputProps = [];
-        inputs.forEach(function(x) {
-            var props = backend.getInputPortProperties(uid, x);
-            var opts = [];
-            props.options.forEach(function(y) {
-                opts.push({
-                    "displayName": y.targetModuleDisplayName + ":" + y.targetPortDisplayName,
-                    "targetUid": y.targetUid,
-                    "targetPortId": y.targetPortId});
-            });
-            props.options = opts;
-            inputProps.push(props);
-        });
-
-        model.get(modelIndex).inputs = inputProps;
+        for (var i = 0; i < n; ++i) {
+            var input = obj.inputs.get(i);
+            var props = backend.getInputPortProperties(uid, input.portId);
+            input.options = props.options;
+        }
     }
 
     function onDispatched(actionType, args) {

@@ -11,12 +11,6 @@
     <file>./qml/stores/MainStore.qml</file>
     <file>./qml/stores/SceneStore.qml</file>
     <file>./qml/main.qml</file>
-    <file>./qml/prototyping/Card-prototype.qml</file>
-    <file>./qml/prototyping/PreciseSlider-prototype.qml</file>
-    <file>./qml/prototyping/HorizontalDivider-prototype.qml</file>
-    <file>./qml/prototyping/PreciseRangeSlider-prototype.qml</file>
-    <file>./qml/prototyping/CardPanel-prototype.qml</file>
-    <file>./qml/prototyping/ArrowCheckBox-prototype.qml</file>
     <file>./qml/actions/AppActions.qml</file>
     <file>./qml/actions/qmldir</file>
     <file>./qml/actions/AppDispatcher.qml</file>
@@ -31,6 +25,7 @@
     <file>./qml/views/components/PreciseSlider.qml</file>
     <file>./qml/views/components/ColorIndicator.qml</file>
     <file>./qml/views/components/ArrowCheckBox.qml</file>
+    <file>./qml/views/components/DynamicComboBox.qml</file>
     <file>./qml/views/components/HorizontalDivider.qml</file>
     <file>./qml/views/display/SceneRenderSettings.qml</file>
     <file>./qml/views/display/SceneRootEntity.qml</file>

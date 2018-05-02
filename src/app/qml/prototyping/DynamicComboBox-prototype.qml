@@ -3,6 +3,8 @@ import QtQuick.Window 2.3
 import QtQuick.Controls.Material 2.2
 import QtQuick.Controls 2.2
 
+import "../views/components"
+
 Window {
     visible: true
     width: 1024
@@ -27,11 +29,15 @@ Window {
     Column {
         anchors.centerIn: parent
 
+        ListModel {
+            id: dummyModel
+            ListElement {targetUid: 17; targetPortId: 3; targetModuleDisplayName: "module17"; targetPortDisplayName: "port3"}
+            ListElement {targetUid: 19; targetPortId: 1; targetModuleDisplayName: "module19"; targetPortDisplayName: "port1"}
+        }
+
         DynamicComboBox {
             id: comboBox
-            options: [
-                {targetUid: 17, targetPortId: 3, targetModuleDisplayName: "module17", targetPortDisplayName: "port3"},
-                {targetUid: 19, targetPortId: 1, targetModuleDisplayName: "module19", targetPortDisplayName: "port1"}]
+            options: dummyModel
             optionNameGenerator: function (item) {
                 return item.targetModuleDisplayName + ":" + item.targetPortDisplayName;
             }
@@ -57,18 +63,14 @@ Window {
         Button {
             text: "add"
             onClicked: {
-                var newList = comboBox.options;
-                newList.push(randomItem());
-                comboBox.options = newList;
+                comboBox.options.append(randomItem());
             }
         }
 
         Button {
             text: "remove"
             onClicked: {
-                var newList = comboBox.options;
-                newList.splice(-1, 1);
-                comboBox.options = newList;
+                comboBox.options.remove(comboBox.options.count - 1);
             }
         }
     }

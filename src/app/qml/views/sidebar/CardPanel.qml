@@ -5,6 +5,7 @@ import QtQml 2.2
 import "../../actions"
 
 Pane {
+    id: root
     property ListModel supportedModules
     property alias model: listView.model
 

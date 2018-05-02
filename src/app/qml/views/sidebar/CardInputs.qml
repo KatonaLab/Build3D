@@ -17,37 +17,46 @@ Repeater {
 
     Component {
         id: inputDelegate
+
         ColumnLayout {
             Layout.fillWidth: true
 
             Label {
                 font: root.font
-                text: displayName
+                text: model.displayName
                 Layout.fillWidth: true
             }
 
-            ComboBox {
-                property int currentUid: -1
-                property int currentPort: -1
+            Binding {
+                target: comboBox
+                property: "options"
+                value: options
+                delayed: true
+            }
 
-                font: root.font
+            DynamicComboBox {
+                id: comboBox
+                
+                hasDefaultOption: true
+                defaultOptionName: "- none -"
                 Layout.fillWidth: true
-                textRole: "displayName"
-                model: options
 
-                onActivated: {
-                    var item = model.get(currentIndex);
-                    currentUid = values.targetUid;
-                    currentPort = values.targetPortId;
+                optionNameGenerator: function (item) {
+                    return item.targetModuleDisplayName + ":" + item.targetPortDisplayName;
+                }
+                itemEqualsFunction: function(a, b) {
+                    return (a.targetUid === b.targetUid) && (a.targetPortId === b.targetPortId);
                 }
 
-                onCurrentIndexChanged: {
-                    var item = model.get(currentIndex);
-                    var values = {
-                        targetUid: item.targetUid,
-                        targetPortId: item.targetPortId
-                    };
-                    AppActions.requestModuleInputChange(root.uid, portId, values);
+                onOptionSelected: function (curr, prev) {
+                    console.debug("onOptionSelected:");
+                    console.debug("\t", JSON.stringify(curr));
+                    console.debug("\t", JSON.stringify(prev));
+                }
+
+                onOptionRemoved: function (prev) {
+                    console.debug("onOptionRemoved:");
+                    console.debug("\t", JSON.stringify(prev));
                 }
             }
         }
