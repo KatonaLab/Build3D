@@ -1,0 +1,8 @@
+
+import QmlProject 1.1
+Project {
+    mainFile: "DynamicComboBox-prototype.qml"
+    QmlFiles { directory: "." }
+    JavaScriptFiles { directory: "." }
+    ImageFiles { directory: "."}
+}
