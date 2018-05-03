@@ -4,12 +4,13 @@ import QtQuick.Controls 2.2
 ComboBox {
     property ListModel options: ListModel{}
     property var activeItem
+    property bool optionForceReset: false
     property var optionNameGenerator: function(item) { return item.name; }
     property var itemEqualsFunction: function(a, b) { return a === b; }
     property bool hasDefaultOption: false
     property string defaultOptionName: "<not selected>"
 
-    signal optionSelected(var selected, var prev)
+    signal optionSelected(var selected, var prev, int optionIndex)
     signal optionRemoved(var prev)
 
     textRole: "name"
@@ -17,7 +18,14 @@ ComboBox {
     onActivated: function (index) {
         var prev = activeItem;
         activeItem = model[index].details;
-        optionSelected(activeItem, prev);
+        optionSelected(activeItem, prev, currentIndex);
+    }
+
+    onOptionForceResetChanged: {
+        if (optionForceReset == true) {
+            console.log("force reset true");
+            currentIndex = hasDefaultOption ? 0 : -1;
+        }
     }
 
     // TODO: make it a util function and import it

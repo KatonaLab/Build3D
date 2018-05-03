@@ -30,6 +30,14 @@ Item {
         };
 
         handlers[ActionTypes.module_input_change_request] = function(args) {
+            var success = backend.connectInputOutput(
+                args.values.targetUid, args.values.targetPortId,
+                args.uid, args.portId);
+            if (!success) {
+                // TODO: proper error messaging
+                console.warn("can not connect ports");
+            }
+            args.values.inputOptionForceReset = !success;
             AppActions.notifyModuleInputChanged(args.uid, args.portId, args.values);
         };
 

@@ -19,6 +19,7 @@ Item {
         var inputProps = [];
         inputs.forEach(function(x) {
             var props = backend.getInputPortProperties(newUid, x);
+            props.inputOptionForceReset = false;
             inputProps.push(props);
         });
 
@@ -40,7 +41,9 @@ Item {
             outputs: outputProps};
     }
 
-    function updateInputs(modelIndex) {
+    function updateInputs(modelIndex, inputPropCallback) {
+        inputPropCallback = inputPropCallback || function (prop) { return prop; };
+
         if (modelIndex < 0 || modelIndex >= model.count) {
             console.warn("can not perform 'updateInputs' for modelIndex: " + modelIndex);
             return;
@@ -58,6 +61,26 @@ Item {
         }
     }
 
+    function findModule(uid) {
+        for (var i = 0; i < model.count; ++i) {
+            if (model.get(i).uid === uid) {
+                return model.get(i);
+            }
+        }
+        return null;
+    }
+
+    function findInputPort(uid, portId) {
+        var m = findModule(uid);
+        // TODO: handle bad indices
+        for (var i = 0; i < m.inputs.count; ++i) {
+            if (m.inputs.get(i).portId === portId) {
+                return m.inputs.get(i);
+            }
+        }
+        return null;
+    }
+
     function onDispatched(actionType, args) {
         console.debug("action " + actionType + " reached CardStore");
         
@@ -70,6 +93,15 @@ Item {
             for (var i = 0; i < model.count; ++i) {
                 updateInputs(i);
             }
+        };
+
+        handlers[ActionTypes.module_input_changed_notification] = function(args) {
+            console.log(JSON.stringify(args));
+            var p = findInputPort(args.uid, args.portId);
+            // TODO: nasty way to send 'inputOptionForceReset' signal to DynamicComboBox
+            // find a better way, this is basicaly a function call
+            p.inputOptionForceReset = args.values.inputOptionForceReset;
+            p.inputOptionForceReset = false;
         };
 
         var notHandled = function(args) {

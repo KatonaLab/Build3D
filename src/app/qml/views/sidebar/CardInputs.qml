@@ -34,6 +34,13 @@ Repeater {
                 delayed: true
             }
 
+            Binding {
+                target: comboBox
+                property: "optionForceReset"
+                value: inputOptionForceReset
+                delayed: false
+            }
+
             DynamicComboBox {
                 id: comboBox
                 
@@ -49,14 +56,11 @@ Repeater {
                 }
 
                 onOptionSelected: function (curr, prev) {
-                    console.debug("onOptionSelected:");
-                    console.debug("\t", JSON.stringify(curr));
-                    console.debug("\t", JSON.stringify(prev));
+                    AppActions.requestModuleInputChange(uid, portId, curr);
                 }
 
                 onOptionRemoved: function (prev) {
-                    console.debug("onOptionRemoved:");
-                    console.debug("\t", JSON.stringify(prev));
+                    // TOOD: nothing to do?
                 }
             }
         }
