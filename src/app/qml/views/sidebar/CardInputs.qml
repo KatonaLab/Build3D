@@ -31,13 +31,16 @@ Repeater {
                 target: comboBox
                 property: "options"
                 value: options
-                delayed: true
+                delayed: false
             }
 
             Binding {
                 target: comboBox
                 property: "optionForceReset"
                 value: inputOptionForceReset
+                // NOTE: pretty important, see CardStore's handler
+                // of ActionTypes.module_input_changed_notification
+                // TODO: find a cleaner way
                 delayed: false
             }
 

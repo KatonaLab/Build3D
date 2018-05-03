@@ -96,7 +96,6 @@ Item {
         };
 
         handlers[ActionTypes.module_input_changed_notification] = function(args) {
-            console.log(JSON.stringify(args));
             var p = findInputPort(args.uid, args.portId);
             // TODO: nasty way to send 'inputOptionForceReset' signal to DynamicComboBox
             // find a better way, this is basicaly a function call

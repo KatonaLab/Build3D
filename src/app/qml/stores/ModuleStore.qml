@@ -26,10 +26,11 @@ Item {
         };
 
         handlers[ActionTypes.module_remove_request] = function(uid) {
-            // TODO:    
+            // TODO:
         };
 
         handlers[ActionTypes.module_input_change_request] = function(args) {
+            backend.disconnectInput(args.uid, args.portId);
             var success = backend.connectInputOutput(
                 args.values.targetUid, args.values.targetPortId,
                 args.uid, args.portId);

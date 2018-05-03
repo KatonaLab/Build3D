@@ -23,8 +23,8 @@ ComboBox {
 
     onOptionForceResetChanged: {
         if (optionForceReset == true) {
-            console.log("force reset true");
             currentIndex = hasDefaultOption ? 0 : -1;
+            activeItem = null;
         }
     }
 
@@ -56,7 +56,8 @@ ComboBox {
 
         for (var i = 0; i < options.count; ++i) {
             var item = options.get(i);
-            // TODO: really important to deep copy, find out why and make the implementation cleaner
+            // TODO: really important to deep copy, not sure why
+            // find out why exactly and make the implementation cleaner
             newModel.push({"name": optionNameGenerator(item), "details": deepCopy(item)});
         }
 
