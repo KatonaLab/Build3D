@@ -19,6 +19,8 @@ public:
     size_t size() const;
     void run();
     bool checkCompleteness();
+    // TODO: test this function
+    void printModuleConnections();
 private:
     std::list<std::reference_wrapper<ComputeModule>> m_modules;
     core::directed_acyclic_graph::GraphPtr m_graph;

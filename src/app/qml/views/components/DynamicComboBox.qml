@@ -20,8 +20,6 @@ ComboBox {
         optionSelected(activeItem, prev);
     }
 
-    property real rnd: 0
-
     // TODO: make it a util function and import it
     // credits to: https://stackoverflow.com/questions/11353311/qml-items-children-list-deep-copy?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
     function deepCopy(p) {

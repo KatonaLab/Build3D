@@ -21,14 +21,14 @@ namespace md = core::multidim_image_platform;
 
 class BackendModule {
 public:
-    BackendModule(int uid, const std::string& name);
+    BackendModule(int uid);
     int uid() const;
     std::string name() const;
     virtual cp::ComputeModule& getComputeModule() = 0;
+    virtual const cp::ComputeModule& getComputeModule() const = 0;
     virtual ~BackendModule() = default;
 protected:
     int m_uid;
-    std::string m_name;
 };
 
 class DataSourceModule : public cp::ComputeModule, public BackendModule {
@@ -37,6 +37,7 @@ public:
     void execute() override;
     void setData(std::shared_ptr<md::MultiDimImage<float>> data);
     cp::ComputeModule& getComputeModule() override;
+    const cp::ComputeModule& getComputeModule() const override;
 protected:
     std::shared_ptr<md::MultiDimImage<float>> m_data;
     cp::InputPortCollection m_inputs;
@@ -47,6 +48,7 @@ class GenericModule : public hp::PythonComputeModule, public BackendModule {
 public:
     GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid);
     cp::ComputeModule& getComputeModule() override;
+    const cp::ComputeModule& getComputeModule() const override;
 };
 
 // --------------------------------------------------------

@@ -251,7 +251,9 @@ protected:
 
 class PythonComputeModule : public cp::ComputeModule {
 public:
-    PythonComputeModule(cp::ComputePlatform& platform, std::string code);
+    PythonComputeModule(cp::ComputePlatform& platform,
+        std::string code,
+        const std::string& name = "");
 protected:
     void buildPorts();
     void execute() override;

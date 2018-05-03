@@ -13,8 +13,8 @@ using namespace core::compute_platform;
 using namespace core::multidim_image_platform;
 using namespace core::high_platform;
 
-BackendModule::BackendModule(int uid, const std::string& name)
-    : m_uid(uid), m_name(name)
+BackendModule::BackendModule(int uid)
+    : m_uid(uid)
 {}
 
 int BackendModule::uid() const
@@ -24,14 +24,14 @@ int BackendModule::uid() const
 
 std::string BackendModule::name() const
 {
-    return m_name;
+    return getComputeModule().name();
 }
 
 // --------------------------------------------------------
 
 DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
-    : cp::ComputeModule(parent, m_inputs, m_outputs),
-    BackendModule(uid, "DataSource" + to_string(uid)),
+    : cp::ComputeModule(parent, m_inputs, m_outputs, "DataSource" + to_string(uid)),
+    BackendModule(uid),
     m_inputs(*this),
     m_outputs(*this)
 {}
@@ -48,17 +48,27 @@ void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
 
 cp::ComputeModule& DataSourceModule::getComputeModule()
 {
+    return const_cast<cp::ComputeModule&>(static_cast<const DataSourceModule&>(*this).getComputeModule());
+}
+
+const cp::ComputeModule& DataSourceModule::getComputeModule() const
+{
     return *this;
 }
 
 // --------------------------------------------------------
 
 GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
-    : hp::PythonComputeModule(parent, script),
-    BackendModule(uid, "Generic" + to_string(uid))
+    : hp::PythonComputeModule(parent, script, "Generic" + to_string(uid)),
+    BackendModule(uid)
 {}
 
 cp::ComputeModule& GenericModule::getComputeModule()
+{
+    return const_cast<cp::ComputeModule&>(static_cast<const GenericModule&>(*this).getComputeModule());
+}
+
+const cp::ComputeModule& GenericModule::getComputeModule() const
 {
     return *this;
 }
@@ -366,5 +376,6 @@ std::weak_ptr<OutputPort> PrivateModulePlatformBackend::fetchOutputPort(int uid,
 
 void PrivateModulePlatformBackend::evaluatePlatform()
 {
+    m_platform.printModuleConnections();
     m_platform.run();
 }

@@ -47,9 +47,10 @@ std::weak_ptr<OutputPort> ComputeModule::outputPort(size_t id)
 
 ComputeModule::ComputeModule(ComputePlatform& parent,
     InputPortCollection& inputs,
-    OutputPortCollection& outputs)
+    OutputPortCollection& outputs,
+    const std::string& name)
     : m_parent(parent), m_inputs(inputs),
-    m_outputs(outputs)
+    m_outputs(outputs), m_name(name)
 {
     m_node = std::make_shared<TriggerNode>(*this);
     m_parent.addModule(*this, m_node);
@@ -65,6 +66,16 @@ void ComputeModule::reset()
     for (size_t i = 0; i < m_outputs.size(); ++i) {
         m_outputs.get(i).lock()->reset();
     }
+}
+
+std::string ComputeModule::name() const
+{
+    return m_name;
+}
+
+void ComputeModule::setName(const std::string& name)
+{
+    m_name = name;
 }
 
 bool core::compute_platform::connectPorts(ComputeModule& outputModule, std::size_t outputId,

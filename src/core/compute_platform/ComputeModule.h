@@ -4,6 +4,7 @@
 #include "ports.h"
 #include <cstddef>
 #include <core/directed_acyclic_graph/Node.h>
+#include <string>
 
 namespace core {
 namespace compute_platform {
@@ -28,17 +29,23 @@ namespace compute_platform {
         std::weak_ptr<OutputPort> outputPort(std::size_t id);
         core::directed_acyclic_graph::NodePtr node();
         void reset();
+        // TODO: test this function
+        std::string name() const;
+        // TODO: test this function
+        void setName(const std::string& name);
         virtual ~ComputeModule() = default;
     protected:
         ComputeModule(ComputePlatform& parent,
             InputPortCollection& inputs,
-            OutputPortCollection& outputs);
+            OutputPortCollection& outputs,
+            const std::string& name = "");
         virtual void execute() = 0;
     private:
         ComputePlatform& m_parent;
         InputPortCollection& m_inputs;
         OutputPortCollection& m_outputs;
         std::shared_ptr<TriggerNode> m_node;
+        std::string m_name;
     };
     
     bool connectPorts(ComputeModule& outputModule, std::size_t outputId,

@@ -179,8 +179,10 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
 
 // --------------------------------------------------------
 
-PythonComputeModule::PythonComputeModule(ComputePlatform& platform, std::string code)
-    : ComputeModule(platform, m_inputPorts, m_outputPorts),
+PythonComputeModule::PythonComputeModule(ComputePlatform& platform,
+    std::string code,
+    const std::string& name)
+    : ComputeModule(platform, m_inputPorts, m_outputPorts, name),
     m_inputPorts(*this),
     m_outputPorts(*this),
     m_code(code)

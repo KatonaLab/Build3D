@@ -51,3 +51,31 @@ bool ComputePlatform::checkCompleteness()
     }
     return true;
 }
+
+// TODO: test this function
+void ComputePlatform::printModuleConnections()
+{
+    for (auto& mr : m_modules) {
+        auto& m = mr.get();
+        cout << "module " << m.name() << endl;
+        for (size_t i = 0; i < m.numInputs(); ++i) {
+            auto inPort = m.inputPort(i).lock();
+            if (inPort->getSource().lock()) {
+                cout << "\t" << inPort->getSource().lock()->parent().name()
+                    << ":" << inPort->getSource().lock()->name() << " --> "
+                    << inPort->name() << endl;
+            } else {
+                cout << "\t" << inPort->name() << endl;
+            }
+        }
+
+        for (size_t i = 0; i < m.numOutputs(); ++i) {
+            auto outPort = m.outputPort(i).lock();
+            if (outPort->numBinds()) {
+                cout << "\t" << outPort->name() << " --> " << outPort->numBinds() << endl;
+            } else {
+                cout << "\t" << outPort->name() << endl;
+            }
+        }
+    }
+}

@@ -107,6 +107,7 @@ public:
     InputPort(ComputeModule& parent);
     virtual void fetch() = 0;
     bool connected() const;
+    // TODO: test this function
     std::weak_ptr<OutputPort> getSource() const;
     virtual ~InputPort();
 protected:
