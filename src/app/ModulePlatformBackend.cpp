@@ -123,10 +123,39 @@ int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
     stringstream buffer;
     buffer << f.rdbuf();
 
+    // TODO: don't summon objects through naked pointers
     auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());
 
     m_modules.emplace(make_pair(newModule->uid(), newModule));
+    buildParamHelperModules(newModule->uid());
     return newModule->uid();
+}
+
+void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
+{
+    QList<int> paramList = enumerateParamPorts(uid);
+    auto& m = fetchBackendModule(uid);
+
+    for (int portId : paramList) {
+        auto port = fetchInputPort(uid, portId).lock();
+        const auto& t = port->traits();
+
+        // TODO: don't use naked pointers
+        ParamHelperModule* helperModule = nullptr;
+
+        if (t.hasTrait("int-like")) {
+            helperModule = new TypedParamHelperModule<int>(m_platform, 0);
+        } else if (t.hasTrait("float-like")) {
+            helperModule = new TypedParamHelperModule<float>(m_platform, 0);
+        } else if (t.hasTrait("bool-like")) {
+            helperModule = new TypedParamHelperModule<bool>(m_platform, 0);
+        } else {
+            throw std::runtime_error("unknown input parameter type, can not create input module for that");
+        }
+
+        connectPorts(*helperModule, 0, m.getComputeModule(), portId);
+        m_paramHelpers[make_pair(uid, portId)] = unique_ptr<ParamHelperModule>(helperModule);
+    }
 }
 
 bool PrivateModulePlatformBackend::hasModule(int uid)
@@ -141,6 +170,7 @@ void PrivateModulePlatformBackend::destroyModule(int uid)
     }
 
     // TODO: remove the module -> implement ComputePlatform::removeModule + its test
+    // TODO: also remove helper params too from m_paramHelpers
 }
 
 QList<int> PrivateModulePlatformBackend::enumeratePorts(
@@ -333,12 +363,7 @@ void PrivateModulePlatformBackend::disconnectInput(int inputModuleUid, int input
 
 bool PrivateModulePlatformBackend::setParamPortProperty(int uid, int portId, QVariant value)
 {
-    // auto input = fetchInputPort(uid, portId);
-    // auto& t = input.lock()->traits();
-    // if (t.hasTrait("int-like")) {
-
-    // }
-    return false;
+    return fetchParamHelperModule(uid, portId).setData(value);
 }
 
 int PrivateModulePlatformBackend::nextUid() const
@@ -372,6 +397,15 @@ std::weak_ptr<OutputPort> PrivateModulePlatformBackend::fetchOutputPort(int uid,
         throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
     }
     return m.getComputeModule().outputPort(portId);
+}
+
+ParamHelperModule& PrivateModulePlatformBackend::fetchParamHelperModule(int uid, int portId)
+{
+    auto& ptr = m_paramHelpers[make_pair(uid, portId)];
+    if (!ptr) {
+        throw std::runtime_error("no helper param module for uid " + to_string(uid) + " portId " + to_string(portId));
+    }
+    return *ptr;
 }
 
 void PrivateModulePlatformBackend::evaluatePlatform()

@@ -86,6 +86,63 @@ void decorateTryCatch(
     }
 }
 
+class ParameterModule: public cp::ComputeModule {
+public:
+    ParameterModule(cp::ComputePlatform& parent);
+    void execute() override;
+    void setData(QVariant value);
+protected:
+    std::shared_ptr<md::MultiDimImage<float>> m_data;
+    cp::InputPortCollection m_inputs;
+    cp::TypedOutputPortCollection<md::MultiDimImage<float>> m_outputs;
+};
+
+// --------------------------------------------------------
+
+class ParamHelperModule : public cp::ComputeModule {
+public:
+    // TODO: separate decl from def
+    ParamHelperModule(cp::ComputePlatform& parent,
+        const std::string& name,
+        cp::OutputPortCollection& outputs)
+        :
+        cp::ComputeModule(parent, m_inputs, outputs, name),
+        m_inputs(*this)
+    {}
+    virtual bool setData(QVariant value) = 0;
+protected:
+    cp::InputPortCollection m_inputs;
+};
+
+template <typename T>
+class TypedParamHelperModule: public ParamHelperModule {
+public:
+    // TODO: separate decl from def
+    TypedParamHelperModule(cp::ComputePlatform& parent, T initialValue)
+        :
+        ParamHelperModule(parent, "ParamHelper-" + std::string(typeid(T).name()), m_outputs),
+        m_outputs(*this),
+        m_data(std::make_shared<T>(initialValue))
+    {}
+    bool setData(QVariant var) override
+    {
+        if (var.canConvert<T>()) {
+            *m_data = var.value<T>();
+        } else {
+            throw std::runtime_error("can not convert from "
+                + std::string(var.typeName()) + " to " + typeid(T).name()
+                + " in parameter input " + name());
+        }
+    }
+    void execute() override
+    {
+        m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
+    }
+protected:
+    cp::TypedOutputPortCollection<T> m_outputs;
+    std::shared_ptr<T> m_data;
+};
+
 // --------------------------------------------------------
 
 class PrivateModulePlatformBackend {
@@ -110,6 +167,8 @@ private:
     cp::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
     std::map<QString, QObjectList> m_inputOptions;
+    typedef std::pair<int, int> IdPair;
+    std::map<IdPair, std::unique_ptr<ParamHelperModule>> m_paramHelpers;
 private:
     inline int nextUid() const;
     BackendModule& fetchBackendModule(int uid);
@@ -120,6 +179,8 @@ private:
         std::function<bool(cp::ComputeModule&, std::size_t)> predFunc);
     std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port);
     std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port);
+    ParamHelperModule& fetchParamHelperModule(int uid, int portId);
+    void buildParamHelperModules(int uid);
 };
 
 // TODO: write test for the backend
