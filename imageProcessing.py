@@ -11,7 +11,6 @@ import os
 import multiprocessing as mp
 import copy
 from itertools import chain
-import matplotlib.pyplot as plt
 import pickle
 from operator import add
 
