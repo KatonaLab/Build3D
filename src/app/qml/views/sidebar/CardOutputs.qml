@@ -70,20 +70,31 @@ Repeater {
                     var values = {
                         firstValue: rangeSlider.firstValue,
                         secondValue: rangeSlider.secondValue,
-                        color: colorSelector.color
+                        color: colorSelector.color,
+                        visible: visibilitySwitch.checked
                     };
                     AppActions.requestModuleOutputChange(uid, details.portId, values);
                 }
 
-                Label {
-                    text: details.displayName
-                }
+                RowLayout {
+                    Layout.fillWidth: true
 
-                ColorIndicator {
-                    id: colorSelector
-                    color: details.color
-                    Layout.alignment: Qt.AlignRight
-                    onColorChanged: floatImageOutput.update()
+                    Switch {
+                        id: visibilitySwitch
+                        Layout.fillWidth: true
+                        text: details.displayName
+                        font: root.font
+                        onCheckedChanged: {
+                            floatImageOutput.update();
+                        }
+                    }
+
+                    ColorIndicator {
+                        id: colorSelector
+                        color: details.color
+                        Layout.alignment: Qt.AlignRight
+                        onColorChanged: floatImageOutput.update()
+                    }
                 }
 
                 PreciseRangeSlider {

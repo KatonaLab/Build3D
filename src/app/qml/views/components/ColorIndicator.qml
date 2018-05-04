@@ -2,11 +2,11 @@ import QtQuick 2.0
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.2
 
 Rectangle {
     id: root
     property string title: "Choose a color"
-//    property color color: dialog.currentColor
 
     ColorDialog {
         id: dialog
@@ -27,8 +27,8 @@ Rectangle {
         }
     }
 
-    implicitWidth: 16
-    implicitHeight: 16
+    implicitWidth: 18
+    implicitHeight: 18
     radius: width * 0.5
 
     MouseArea {
