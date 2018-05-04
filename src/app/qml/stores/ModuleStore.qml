@@ -46,6 +46,11 @@ Item {
             AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };
 
+        handlers[ActionTypes.module_param_change_request] = function(args) {
+            backend.setParamPortProperty(args.uid, args.portId, args.values.value);
+            AppActions.notifyModuleParamChanged(args.uid, args.portId, args.values);
+        };
+
         handlers[ActionTypes.platform_evaluation] = function(args) {
             backend.evaluatePlatform();
             AppActions.refreshAllModuleOutput();

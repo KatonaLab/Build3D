@@ -10,6 +10,8 @@ QtObject {
     readonly property string module_removed_notification: "MODULE_REMOVED_NOTIFICATION"
     readonly property string module_input_change_request: "MODULE_INPUT_CHANGE_REQUEST"
     readonly property string module_input_changed_notification: "MODULE_INPUT_CHANGED_NOTIFICATION"
+    readonly property string module_param_change_request: "MODULE_PARAM_CHANGE_REQUEST"
+    readonly property string module_param_changed_notification: "MODULE_PARAM_CHANGED_NOTIFICATION"
     readonly property string module_output_change_request: "MODULE_OUTPUT_CHANGE_REQUEST"
     readonly property string module_output_changed_notification: "MODULE_OUTPUT_CHANGED_NOTIFICATION"
     readonly property string platform_evaluation: "PLATFORM_EVALUATION"

@@ -103,6 +103,10 @@ Item {
             p.inputOptionForceReset = false;
         };
 
+        handlers[ActionTypes.module_param_changed_notification] = function(args) {
+            var p = findInputPort(args.uid, args.portId);
+        };
+
         var notHandled = function(args) {
             console.debug(actionType, "is not handled by CardStore");
         };
