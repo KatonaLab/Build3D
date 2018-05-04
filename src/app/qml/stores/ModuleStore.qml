@@ -76,5 +76,9 @@ Item {
             displayName: "create sine generator module"
             scriptPath: "scripts/test_sine_module.py"
         }
+        ListElement {
+            displayName: "create test threshold module"
+            scriptPath: "scripts/test_threshold_module.py"
+        }
     }
 }
