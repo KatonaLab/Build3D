@@ -43,7 +43,6 @@ Item {
         };
 
         handlers[ActionTypes.module_output_change_request] = function(args) {
-            
             AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };
 
