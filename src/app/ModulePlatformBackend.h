@@ -145,6 +145,29 @@ protected:
 
 // --------------------------------------------------------
 
+class ImageOutputHelperModule : public cp::ComputeModule {
+public:
+    ImageOutputHelperModule(cp::ComputePlatform& parent)
+        : cp::ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        m_result = m_inputs.input<0>()->inputPtr().lock();
+    }
+    md::MultiDimImage<float>& getImage()
+    {
+        return *m_result;
+    }
+protected:
+    std::shared_ptr<md::MultiDimImage<float>> m_result;
+    cp::TypedInputPortCollection<md::MultiDimImage<float>> m_inputs;
+    cp::OutputPortCollection m_outputs;
+};
+
+// --------------------------------------------------------
+
 class PrivateModulePlatformBackend {
 public:
     virtual ~PrivateModulePlatformBackend() = default;
@@ -169,6 +192,7 @@ private:
     std::map<QString, QObjectList> m_inputOptions;
     typedef std::pair<int, int> IdPair;
     std::map<IdPair, std::unique_ptr<ParamHelperModule>> m_paramHelpers;
+    std::map<IdPair, std::unique_ptr<ImageOutputHelperModule>> m_imageOutputHelpers;
 private:
     inline int nextUid() const;
     BackendModule& fetchBackendModule(int uid);
@@ -180,7 +204,9 @@ private:
     std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port);
     std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port);
     ParamHelperModule& fetchParamHelperModule(int uid, int portId);
+    ImageOutputHelperModule& fetchImageOutputHelperModule(int uid, int portId);
     void buildParamHelperModules(int uid);
+    void buildimageOutputHelperModules(int uid);
 };
 
 // TODO: write test for the backend
