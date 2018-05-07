@@ -91,4 +91,15 @@ ApplicationWindow {
         }
     }
 
+    ScrollView {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 100
+        TextArea {
+            font.pointSize: 10
+            text: MainStore.moduleStore.backendConsole
+        }
+    }
+
 }

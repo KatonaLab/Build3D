@@ -7,6 +7,7 @@ Item {
 
     property alias backend: backend
     property alias supportedModules: supportedModules
+    property string backendConsole: ""
 
     function onDispatched(actionType, args) {
         console.debug("action " + actionType + " reached ModuleStore");
@@ -64,6 +65,9 @@ Item {
 
     ModulePlatformBackend {
         id: backend
+        onBackendErrorOccured: function (msg) {
+            backendConsole += "\n" + msg
+        }
     }
 
     ListModel {
