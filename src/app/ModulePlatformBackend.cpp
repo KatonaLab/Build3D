@@ -353,9 +353,14 @@ VolumeTexture* PrivateModulePlatformBackend::getOutputTexture(int uid, int portI
     ImageOutputHelperModule& helper = fetchImageOutputHelperModule(uid, portId);
 
     // TODO: don't use naked ptrs
-    VolumeTexture* tex = new VolumeTexture;
-    tex->init(helper.getImage());
-    return tex;
+    
+    auto imPtr = helper.getImage();
+    if (imPtr) {
+        VolumeTexture* tex = new VolumeTexture;
+        tex->init(*imPtr);
+        return tex;
+    }
+    return nullptr;
 }
 
 bool PrivateModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,

@@ -156,9 +156,9 @@ public:
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }
-    md::MultiDimImage<float>& getImage()
+    std::shared_ptr<md::MultiDimImage<float>> getImage()
     {
-        return *m_result;
+        return m_result;
     }
 protected:
     std::shared_ptr<md::MultiDimImage<float>> m_result;
