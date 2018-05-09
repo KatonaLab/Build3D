@@ -57,7 +57,10 @@ Pane {
             }
 
             // TODO: hide when no inputs
-            HorizontalDivider {Layout.fillWidth: true}
+            HorizontalDivider {
+                Layout.fillWidth: true
+                visible: card.inputs.count != 0
+            }
 
             CardInputs {
                 id: inputsRepeater
@@ -67,7 +70,10 @@ Pane {
             }
 
             // TODO: hide when no params
-            HorizontalDivider {Layout.fillWidth: true}
+            HorizontalDivider {
+                Layout.fillWidth: true
+                visible: card.parameters.count != 0
+            }
 
             CardParameters {
                 id: parametersRepeater
@@ -77,7 +83,10 @@ Pane {
             }
 
             // TODO: hide when no outputs
-            HorizontalDivider {Layout.fillWidth: true}
+            HorizontalDivider {
+                Layout.fillWidth: true
+                visible: card.outputs.count != 0
+            }
 
             CardOutputs {
                 model: card.outputs

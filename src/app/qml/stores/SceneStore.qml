@@ -31,9 +31,11 @@ Item {
         return null;
     }
 
-    function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached SceneStore");
+    VolumeTexture {
+        id: defaultTexture
+    }
 
+    function onDispatched(actionType, args) {
         var backend = MainStore.moduleStore.backend;
 
         var handlers = {};
@@ -42,7 +44,15 @@ Item {
             outputs.forEach(function (x) {
                 var props = backend.getOutputPortProperties(args.uid, x);
                 if (props.type == "float-image") {
-                    preModel.append({"uid": args.uid, "portId": props.portId});
+                    model.append({
+                        "uid": args.uid,
+                        "portId": props.portId,
+                        "color": Qt.rgba(1, 0, 0, 1),
+                        "lutLow": 0,
+                        "lutHigh": 1,
+                        "visible": true,
+                        "texture": defaultTexture,
+                        "size": Qt.vector3d(0, 0, 0)});
                 }
             });
         };
@@ -51,42 +61,64 @@ Item {
             var idx = findModelIndex(model, function (item) {
                 return (args.uid == item.uid) && (args.portId == item.portId);
             });
+
+            // // TODO: FIXME: find a neat way to handle this preModle - model mess
+            // var preIdx = findModelIndex(preModel, function (item) {
+            //     return (args.uid == item.uid) && (args.portId == item.portId);
+            // });
+
             if (idx !== null) {
                 model.get(idx).lutLow = args.values.firstValue;
                 model.get(idx).lutHigh = args.values.secondValue;
                 model.get(idx).color = args.values.color;
+                model.get(idx).visible = args.values.visible;
             }
+
+            // if (preIdx !== null) {
+            //     preModel.get(preIdx).lutLow = args.values.firstValue;
+            //     preModel.get(preIdx).lutHigh = args.values.secondValue;
+            //     preModel.get(preIdx).color = args.values.color;
+            //     preModel.get(preIdx).visible = args.values.visible;
+            // }
         };
 
         handlers[ActionTypes.all_module_output_refresh] = function(args) {
-            model.clear();
-            for(var i = 0; i < preModel.count; ++i) {
-                var x = preModel.get(i);
+            for(var i = 0; i < model.count; ++i) {
+                var x = model.get(i);
 
                 var vol = backend.getOutputTexture(x.uid, x.portId);
                 var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
                 var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
 
-                var newItem = {
-                    uid: x.uid,
-                    portId: x.portId,
-                    texture: vol,
-                    size: size,
-                    color: Qt.rgba(1, 0, 0, 1),
-                    lutLow: 0,
-                    lutHigh: 1};
-                model.append(newItem);
+                model.get(i).texture = vol;
+                model.get(i).size = size;
             }
+
+            // TODO: it would be more desirable to create the qml texture object once and
+            // update it afterwards
+            // model.clear();
+            // for(var i = 0; i < preModel.count; ++i) {
+            //     var x = preModel.get(i);
+
+            //     var vol = backend.getOutputTexture(x.uid, x.portId);
+            //     var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
+            //     var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
+
+            //     var newItem = {
+            //         uid: x.uid,
+            //         portId: x.portId,
+            //         texture: vol,
+            //         size: size,
+            //         color: x.color,
+            //         visible: x.visible,
+            //         lutLow: x.lutLow,
+            //         lutHigh: x.lutHigh};
+            //     model.append(newItem);
+            // }
         };
 
-        var notHandled = function(args) {
-            console.debug(actionType, "is not handled by SceneStore");
-        };
+        var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
-    }
-
-    ListModel {
-        id: preModel
     }
 
     ListModel {

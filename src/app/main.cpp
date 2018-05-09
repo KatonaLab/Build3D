@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QApplication>
+#include <QtGlobal>
 #include <QOpenGLContext>
 #include <QQmlApplicationEngine>
 #include <QFontDatabase>
@@ -13,7 +14,7 @@
 #include "client/settings.h"
 
 #include "version.h"
-
+#include "LogCollector.h"
 #include "VolumeData.h"
 #include "VolumeTexture.h"
 #include "ModulePlatformBackend.h"
@@ -93,7 +94,6 @@ int main(int argc, char* argv[])
     // }
 
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     QApplication app(argc, argv);
     app.setOrganizationName("MTA KOKI KatonaLab");
     app.setOrganizationDomain("koki.hu");
@@ -104,6 +104,9 @@ int main(int argc, char* argv[])
     qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "ModulePlatformBackend");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
+    // NOTE: it will initialize LogCollector and routes the all qDebug/qInfo... log through this instance
+    // see LogCollector.cpp for details
+    qmlRegisterSingletonType<LogCollector>("koki.katonalab.a3dc", 1, 0, "LogCollector", singletonLogCollectorProvider);
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";

@@ -66,7 +66,7 @@ Entity {
 
             // note: JSValue to QColor conversion
             volumeColor: Qt.rgba(model.color.r, model.color.g, model.color.b, model.color.a);
-            visible: true
+            visible: model.visible
 
             lutLowCut: model.lutLow
             lutHighCut: model.lutHigh

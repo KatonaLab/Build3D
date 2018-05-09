@@ -5,6 +5,7 @@
 #include <QtCore>
 #include <QQmlComponent>
 #include <QMultiMap>
+#include <QtDebug>
 #include <core/compute_platform/ports.h>
 #include <core/compute_platform/ComputeModule.h>
 #include <core/compute_platform/ComputePlatform.h>
@@ -86,6 +87,86 @@ void decorateTryCatch(
     }
 }
 
+class ParameterModule: public cp::ComputeModule {
+public:
+    ParameterModule(cp::ComputePlatform& parent);
+    void execute() override;
+    void setData(QVariant value);
+protected:
+    std::shared_ptr<md::MultiDimImage<float>> m_data;
+    cp::InputPortCollection m_inputs;
+    cp::TypedOutputPortCollection<md::MultiDimImage<float>> m_outputs;
+};
+
+// --------------------------------------------------------
+
+class ParamHelperModule : public cp::ComputeModule {
+public:
+    // TODO: separate decl from def
+    ParamHelperModule(cp::ComputePlatform& parent,
+        const std::string& name,
+        cp::OutputPortCollection& outputs)
+        :
+        cp::ComputeModule(parent, m_inputs, outputs, name),
+        m_inputs(*this)
+    {}
+    virtual bool setData(QVariant value) = 0;
+protected:
+    cp::InputPortCollection m_inputs;
+};
+
+template <typename T>
+class TypedParamHelperModule: public ParamHelperModule {
+public:
+    // TODO: separate decl from def
+    TypedParamHelperModule(cp::ComputePlatform& parent, T initialValue)
+        :
+        ParamHelperModule(parent, "ParamHelper-" + std::string(typeid(T).name()), m_outputs),
+        m_outputs(*this),
+        m_data(std::make_shared<T>(initialValue))
+    {}
+    bool setData(QVariant var) override
+    {
+        if (var.canConvert<T>()) {
+            *m_data = var.value<T>();
+        } else {
+            throw std::runtime_error("can not convert from "
+                + std::string(var.typeName()) + " to " + typeid(T).name()
+                + " in parameter input " + name());
+        }
+    }
+    void execute() override
+    {
+        m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
+    }
+protected:
+    cp::TypedOutputPortCollection<T> m_outputs;
+    std::shared_ptr<T> m_data;
+};
+
+// --------------------------------------------------------
+
+class ImageOutputHelperModule : public cp::ComputeModule {
+public:
+    ImageOutputHelperModule(cp::ComputePlatform& parent)
+        : cp::ComputeModule(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        m_result = m_inputs.input<0>()->inputPtr().lock();
+    }
+    std::shared_ptr<md::MultiDimImage<float>> getImage()
+    {
+        return m_result;
+    }
+protected:
+    std::shared_ptr<md::MultiDimImage<float>> m_result;
+    cp::TypedInputPortCollection<md::MultiDimImage<float>> m_inputs;
+    cp::OutputPortCollection m_outputs;
+};
+
 // --------------------------------------------------------
 
 class PrivateModulePlatformBackend {
@@ -110,6 +191,9 @@ private:
     cp::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
     std::map<QString, QObjectList> m_inputOptions;
+    typedef std::pair<int, int> IdPair;
+    std::map<IdPair, std::unique_ptr<ParamHelperModule>> m_paramHelpers;
+    std::map<IdPair, std::unique_ptr<ImageOutputHelperModule>> m_imageOutputHelpers;
 private:
     inline int nextUid() const;
     BackendModule& fetchBackendModule(int uid);
@@ -120,6 +204,10 @@ private:
         std::function<bool(cp::ComputeModule&, std::size_t)> predFunc);
     std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port);
     std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port);
+    ParamHelperModule& fetchParamHelperModule(int uid, int portId);
+    ImageOutputHelperModule& fetchImageOutputHelperModule(int uid, int portId);
+    void buildParamHelperModules(int uid);
+    void buildimageOutputHelperModules(int uid);
 };
 
 // TODO: write test for the backend
@@ -127,9 +215,7 @@ private:
 class ModulePlatformBackend: public QObject {
     Q_OBJECT
 public:
-    explicit ModulePlatformBackend(QObject* parent = Q_NULLPTR)
-        : QObject(parent)
-    {}
+    explicit ModulePlatformBackend(QObject* parent = Q_NULLPTR);
     virtual ~ModulePlatformBackend() = default;
 
     Q_INVOKABLE QList<int> createSourceModulesFromIcsFile(const QUrl& filename)
@@ -251,12 +337,10 @@ public:
             m_private, m_errorFunc
         );
     }
-Q_SIGNALS:
-    void backendErrorOccured(QString msg);
 protected:
-    std::function<void(const std::string&)> m_errorFunc = [this](const std::string& msg)
+    std::function<void(const std::string&)> m_errorFunc = [](const std::string& msg)
     {
-        Q_EMIT this->backendErrorOccured(QString::fromStdString(msg));
+        qCritical() << QString::fromStdString(msg);
     };
 private:
     PrivateModulePlatformBackend m_private;

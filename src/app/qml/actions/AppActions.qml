@@ -33,6 +33,14 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.module_input_changed_notification, {uid: uid, portId: portId, values: values});
     }
 
+    function requestModuleParamChange(uid, portId, values) {
+        AppDispatcher.dispatch(ActionTypes.module_param_change_request, {uid: uid, portId: portId, values: values});
+    }
+
+    function notifyModuleParamChanged(uid, portId, values) {
+        AppDispatcher.dispatch(ActionTypes.module_param_changed_notification, {uid: uid, portId: portId, values: values});
+    }
+
     function requestModuleOutputChange(uid, portId, values) {
         AppDispatcher.dispatch(ActionTypes.module_output_change_request, {uid: uid, portId: portId, values: values});
     }

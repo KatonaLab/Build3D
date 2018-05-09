@@ -39,6 +39,17 @@ void PythonEnvironment::reset()
 
 void PythonEnvironment::exec(std::string code)
 {
+    py::module m = py::module::import("a3dc");
+    m.attr("stdout") = outStreamRouters.stdOut;
+    m.attr("stderr") = outStreamRouters.stdErr;
+    py::exec(R"(
+import a3dc
+import sys
+if a3dc.stdout is not None:
+    sys.stdout = a3dc.stdout
+if a3dc.stderr is not None:
+    sys.stderr = a3dc.stderr
+    )");
     py::exec(code);
 }
 
@@ -136,7 +147,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
     .value("ImageUInt32", PyTypes::TYPE_MultiDimImageUInt32)
     .value("ImageUInt64", PyTypes::TYPE_MultiDimImageUInt64)
     .value("ImageFloat", PyTypes::TYPE_MultiDimImageFloat)
-    .value("ImageDouble", PyTypes::TYPE_MultiDimImageDouble);
+    .value("ImageDouble", PyTypes::TYPE_MultiDimImageDouble)
+    .value("GeneralPyType", PyTypes::TYPE_GeneralPyType);
 
     using namespace pybind11::literals;
 
@@ -158,8 +170,14 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
     .def_readwrite("name", &Arg::name)
     .def_readwrite("type", &Arg::type);
 
+    py::class_<CustomOutStream>(m, "CustomOutStream")
+    .def(py::init<>())
+    .def("write", &CustomOutStream::write);
+
     m.attr("inputs") = py::dict();
     m.attr("outputs") = py::dict();
+    m.attr("stdout") = py::none();
+    m.attr("stderr") = py::none();
 
     pyDeclareMetaType(m);
 
@@ -223,6 +241,10 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
         CASE_NON_POD(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
         CASE_NON_POD(TYPE_MultiDimImageFloat, MultiDimImage<float>)
         CASE_NON_POD(TYPE_MultiDimImageDouble, MultiDimImage<double>)
+        case PyTypes::TYPE_GeneralPyType: {
+            auto tp = shared_ptr<TypedInputPort<py::object>>(new TypedInputPort<py::object>(*this));
+            return PyInputPortWrapperPtr(new GeneralPyTypeInputPortWrapper(tp));
+        }
         default: throw std::runtime_error("unknown input port type");
     }
     #undef CASE_POD
@@ -262,6 +284,10 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
         CASE_NON_POD(TYPE_MultiDimImageUInt64, MultiDimImage<uint64_t>)
         CASE_NON_POD(TYPE_MultiDimImageFloat, MultiDimImage<float>)
         CASE_NON_POD(TYPE_MultiDimImageDouble, MultiDimImage<double>)
+        case PyTypes::TYPE_GeneralPyType: {
+            auto tp = shared_ptr<TypedOutputPort<py::object>>(new TypedOutputPort<py::object>(*this));
+            return PyOutputPortWrapperPtr(new GeneralPyTypeOutputPortWrapper(tp));
+        }
         default: throw std::runtime_error("unknown input port type");
     }
     #undef CASE_POD

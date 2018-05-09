@@ -26,7 +26,7 @@ std::string PortBase::tags() const
 
 bool PortBase::hasTag(const std::string& tag) const
 {
-    // TODO: !!! hasTag("param") will return true with m_tags == "non-parameter" !!!
+    // TODO: !!! hasTag("param") will return true when e.g. m_tags == "non-parameter" !!!
     // FIXME:
     return m_tags.find(tag) != std::string::npos;
 }

@@ -9,8 +9,6 @@ Item {
     property alias supportedModules: supportedModules
 
     function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached ModuleStore");
-        
         var handlers = {};
 
         handlers[ActionTypes.ics_file_import] = function(args) {
@@ -46,14 +44,17 @@ Item {
             AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };
 
+        handlers[ActionTypes.module_param_change_request] = function(args) {
+            backend.setParamPortProperty(args.uid, args.portId, args.values.value);
+            AppActions.notifyModuleParamChanged(args.uid, args.portId, args.values);
+        };
+
         handlers[ActionTypes.platform_evaluation] = function(args) {
             backend.evaluatePlatform();
             AppActions.refreshAllModuleOutput();
         };
 
-        var notHandled = function(args) {
-            console.debug(actionType, "is not handled by ModuleStore");
-        };
+        var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
 
@@ -70,6 +71,22 @@ Item {
         ListElement {
             displayName: "create sine generator module"
             scriptPath: "scripts/test_sine_module.py"
+        }
+        ListElement {
+            displayName: "create test threshold module"
+            scriptPath: "scripts/test_threshold_module.py"
+        }
+        ListElement {
+            displayName: "test 'no such file xyz.py'"
+            scriptPath: "scripts/xyz.py"
+        }
+        ListElement {
+            displayName: "test_generalpytype_source_module.py"
+            scriptPath: "scripts/test_generalpytype_source_module.py"
+        }
+        ListElement {
+            displayName: "test_generalpytype_sink_module.py"
+            scriptPath: "scripts/test_generalpytype_sink_module.py"
         }
     }
 }

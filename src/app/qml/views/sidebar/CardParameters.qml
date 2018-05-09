@@ -98,7 +98,7 @@ Repeater {
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModuleInputChange(uid, details.portId, values);
+                    AppActions.requestModuleParamChange(uid, details.portId, values);
                 }
             }
         }
@@ -113,7 +113,7 @@ Repeater {
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModuleInputChange(uid, details.portId, values);
+                    AppActions.requestModuleParamChange(uid, details.portId, values);
                 }
             }
         }
@@ -123,6 +123,12 @@ Repeater {
             PreciseRangeSlider {
                 font: root.font
                 // TODO: action
+                onFirstValueChanged: {
+                    console.warn("not implemented CardParameters/PreciseRangeSlider")
+                }
+                onSecondValueChanged: {
+                    console.warn("not implemented CardParameters/PreciseRangeSlider")
+                }
             }
         }
 
@@ -133,7 +139,7 @@ Repeater {
                 font: root.font
                 onCheckedChanged: {
                     var values = {value: checked};
-                    AppActions.requestModulePropertyChange(uid, details.portId, values);
+                    AppActions.requestModuleParamChange(uid, details.portId, values);
                 }
             }
         }

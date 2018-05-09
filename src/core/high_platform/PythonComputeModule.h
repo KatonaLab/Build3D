@@ -20,6 +20,7 @@
 // --------------------------------------------------------
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<float>, {"float-image"});
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint32_t>, {"int-image"});
+PORT_TYPE_TRAITS(pybind11::object, {"py-object"});
 // --------------------------------------------------------
 
 namespace core {
@@ -53,7 +54,8 @@ enum class PyTypes {
     TYPE_MultiDimImageUInt32,
     TYPE_MultiDimImageUInt64,
     TYPE_MultiDimImageFloat,
-    TYPE_MultiDimImageDouble
+    TYPE_MultiDimImageDouble,
+    TYPE_GeneralPyType
 };
 
 struct Arg {
@@ -67,15 +69,32 @@ typedef std::function<void()> ProcessFunc;
 
 // --------------------------------------------------------
 
+struct CustomOutStream {
+    void write(const std::string& str)
+    {
+        callback(str);
+    }
+    std::function<void(const std::string&)> callback;
+};
+
+struct OutStreamRouters {
+    CustomOutStream stdOut = {[](const std::string& str) { std::cout << "custom " << str; }};
+    CustomOutStream stdErr = {[](const std::string& str) { std::cerr << "custom " << str; }};
+};
+
 class PythonEnvironment {    
 public:
     static PythonEnvironment& instance();
     void reset();
     void exec(std::string code);
     ~PythonEnvironment();
+    // TODO: hide naked member variables
     ProcessArg inputs;
     ProcessArg outputs;
     ProcessFunc func;
+    // TODO: reassigning these will break things,
+    // hide these member variables
+    OutStreamRouters outStreamRouters;
 protected:
     PythonEnvironment();
 };
@@ -212,6 +231,49 @@ public:
     }
 protected:
     std::shared_ptr<cp::TypedOutputPort<T>> m_port;
+};
+
+// --------------------------------------------------------
+
+class GeneralPyTypeInputPortWrapper : public PyInputPortWrapper {
+public:
+    GeneralPyTypeInputPortWrapper(
+        std::shared_ptr<cp::TypedInputPort<pybind11::object>> port)
+        : PyInputPortWrapper(PyTypes::TYPE_GeneralPyType), m_port(port)
+    {}
+    pybind11::object toPyObject() override
+    {
+        return m_port->value();
+    }
+    std::shared_ptr<cp::InputPort> port() override
+    {
+        return m_port;
+    }
+protected:
+    std::shared_ptr<cp::TypedInputPort<pybind11::object>> m_port;
+};
+
+
+class GeneralPyTypeOutputPortWrapper : public PyOutputPortWrapper {
+public:
+    GeneralPyTypeOutputPortWrapper(
+        std::shared_ptr<cp::TypedOutputPort<pybind11::object>> port)
+        : PyOutputPortWrapper(PyTypes::TYPE_GeneralPyType), m_port(port)
+    {}
+    pybind11::object toPyObject() override
+    {
+        return m_port->value();
+    }
+    void fromPyObject(pybind11::object obj) override
+    {
+        m_port->forwardFromSharedPtr(std::make_shared<pybind11::object>(obj));
+    }
+    std::shared_ptr<cp::OutputPort> port() override
+    {
+        return m_port;
+    }
+protected:
+    std::shared_ptr<cp::TypedOutputPort<pybind11::object>> m_port;
 };
 
 // --------------------------------------------------------

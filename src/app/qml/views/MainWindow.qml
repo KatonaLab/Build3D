@@ -46,10 +46,10 @@ ApplicationWindow {
     //     }
     // }
 
-    footer: Rectangle {
-        // TODO
-        height: 16
-    }
+    // footer: Rectangle {
+    //     // TODO
+    //     height: 16
+    // }
 
     Settings {
         property alias x: appWindow.x
@@ -77,18 +77,53 @@ ApplicationWindow {
             supportedModules: MainStore.moduleStore.supportedModules
         }
 
-        Scene3D {
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             // prevent errors when shrinked size 0
             Layout.minimumWidth: 128
             Layout.minimumHeight: 128
 
-            aspects: ["input", "logic"]
-            cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+            Scene3D {
+                id: sceneView
+                anchors.fill: parent
+                aspects: ["input", "logic"]
+                cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+                SceneRootEntity {}
+            }
 
-            SceneRootEntity {}
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 160
+                color: "#1f000000"
+
+                ScrollView {
+                    id: textAreaScroll
+                    anchors.fill: parent
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                    clip: true
+                    Flickable {
+                        flickableDirection: Flickable.VerticalFlick
+                        contentY: contentHeight - height
+                        TextArea {
+                            font.pointSize: 11
+                            font.family: "Courier"
+                            text: LogCollector.unfilteredLog
+                            color: Material.accent
+                            textFormat: TextEdit.RichText
+                            readOnly: true
+                            selectByMouse: true
+                            selectByKeyboard: true
+                            wrapMode: TextEdit.WrapAnywhere
+                            background: Item {}
+                        }
+                    }
+                }
+            }
+
         }
     }
-
 }

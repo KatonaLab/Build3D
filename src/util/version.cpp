@@ -18,6 +18,7 @@ QObject* singletonA3DCVersionProvider(QQmlEngine *engine, QJSEngine *scriptEngin
     Q_UNUSED(engine)
     Q_UNUSED(scriptEngine)
 
+    // NOTE: the instance is owned by the QML engine, so destruction is handled
     A3DCVersion *theOne = new A3DCVersion;
     return theOne;
 }

@@ -82,8 +82,6 @@ Item {
     }
 
     function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached CardStore");
-        
         var handlers = {};
         var backend = MainStore.moduleStore.backend;
         
@@ -103,9 +101,11 @@ Item {
             p.inputOptionForceReset = false;
         };
 
-        var notHandled = function(args) {
-            console.debug(actionType, "is not handled by CardStore");
+        handlers[ActionTypes.module_param_changed_notification] = function(args) {
+            var p = findInputPort(args.uid, args.portId);
         };
+
+        var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
 
