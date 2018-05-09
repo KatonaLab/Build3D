@@ -121,6 +121,9 @@ int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
     string path = scriptPath.toStdString();
 
     ifstream f(path);
+    if (!f.is_open()) {
+        throw std::runtime_error("missing module script: " + path);
+    }
     stringstream buffer;
     buffer << f.rdbuf();
 

@@ -76,5 +76,9 @@ Item {
             displayName: "create test threshold module"
             scriptPath: "scripts/test_threshold_module.py"
         }
+        ListElement {
+            displayName: "test 'no such file xyz.py'"
+            scriptPath: "scripts/xyz.py"
+        }
     }
 }
