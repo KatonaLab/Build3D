@@ -8,19 +8,15 @@ Item {
     signal dispatchToStores(string actionType, var parameters)
 
     function dispatch(actionType, parameters) {
-        console.log("AppDispatcher received action: ", actionType, " parameters: ", JSON.stringify(parameters));
         if (middlewares.length > 0) {
-            console.log("  dispatching to middleware");
             middlewares[0].dispatch(actionType, parameters);
         } else {
-            console.log("  dispatching to stores");
             dispatchToStores(actionType, parameters);
         }
     }
 
     function addStoreListener(store) {
         // add another subscriber to the dispatchToStores signal
-        console.debug("added store", store);
         dispatchToStores.connect(store.onDispatched);
     }
 

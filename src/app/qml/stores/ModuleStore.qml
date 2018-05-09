@@ -9,8 +9,6 @@ Item {
     property alias supportedModules: supportedModules
 
     function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached ModuleStore");
-        
         var handlers = {};
 
         handlers[ActionTypes.ics_file_import] = function(args) {
@@ -56,9 +54,7 @@ Item {
             AppActions.refreshAllModuleOutput();
         };
 
-        var notHandled = function(args) {
-            console.debug(actionType, "is not handled by ModuleStore");
-        };
+        var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
 

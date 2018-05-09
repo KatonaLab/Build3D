@@ -36,8 +36,6 @@ Item {
     }
 
     function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached SceneStore");
-
         var backend = MainStore.moduleStore.backend;
 
         var handlers = {};
@@ -119,9 +117,7 @@ Item {
             // }
         };
 
-        var notHandled = function(args) {
-            console.debug(actionType, "is not handled by SceneStore");
-        };
+        var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
 

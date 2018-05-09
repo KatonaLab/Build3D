@@ -9,8 +9,6 @@ Middleware {
     property url folder: "."
 
     function dispatch(actionType, args) {
-        console.debug("action " + actionType + " reached DialogMiddleware");
-        
         var handlers = {};
         handlers[ActionTypes.ics_file_import] = function(args) {
             openDialog.open();

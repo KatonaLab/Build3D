@@ -82,8 +82,6 @@ Item {
     }
 
     function onDispatched(actionType, args) {
-        console.debug("action " + actionType + " reached CardStore");
-        
         var handlers = {};
         var backend = MainStore.moduleStore.backend;
         
@@ -107,9 +105,7 @@ Item {
             var p = findInputPort(args.uid, args.portId);
         };
 
-        var notHandled = function(args) {
-            console.debug(actionType, "is not handled by CardStore");
-        };
+        var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
 
