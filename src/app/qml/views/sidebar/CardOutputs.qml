@@ -31,6 +31,9 @@ Repeater {
                 },
                 "int-image": {
                     "default": intImageOutputDelegate
+                },
+                "py-object": {
+                    "default": pyObjectOutputDelegate
                 }
             };
 
@@ -42,6 +45,14 @@ Repeater {
                 }
             }
             return unknownControllerDelegate;
+        }
+
+        Component {
+            id: pyObjectOutputDelegate
+            Label {
+                text: details.displayName + "(py object)"
+                font: root.font
+            }
         }
 
         Component {

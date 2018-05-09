@@ -80,5 +80,13 @@ Item {
             displayName: "test 'no such file xyz.py'"
             scriptPath: "scripts/xyz.py"
         }
+        ListElement {
+            displayName: "test_generalpytype_source_module.py"
+            scriptPath: "scripts/test_generalpytype_source_module.py"
+        }
+        ListElement {
+            displayName: "test_generalpytype_sink_module.py"
+            scriptPath: "scripts/test_generalpytype_sink_module.py"
+        }
     }
 }

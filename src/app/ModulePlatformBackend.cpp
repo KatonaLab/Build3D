@@ -347,6 +347,9 @@ QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int p
     if (p->traits().hasTrait("int-image")) {
         vmap["type"] = "int-image";
     }
+    if (p->traits().hasTrait("py-object")) {
+        vmap["type"] = "py-object";
+    }
 
     return vmap;
 }
