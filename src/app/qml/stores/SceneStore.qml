@@ -52,7 +52,9 @@ Item {
                         "lutHigh": 1,
                         "visible": true,
                         "texture": defaultTexture,
-                        "size": Qt.vector3d(0, 0, 0)});
+                        // TODO: Qt.vector3d(1, 1, 1) is crucial, if it is Qt.vector3d(0, 0, 0) then
+                        // the program crashes on windows, find a way in the backend for protection
+                        "size": Qt.vector3d(1, 1, 1)});
                 }
             });
         };
