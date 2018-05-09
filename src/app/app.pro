@@ -35,6 +35,7 @@ HEADERS += \
     VolumeTexture.h \
     ModulePlatformBackend.h \
     UltimateSinkModule.h \
+    LogCollector.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -47,6 +48,7 @@ SOURCES += \
     VolumeTexture.cpp \
     ModulePlatformBackend.cpp \
     UltimateSinkModule.cpp \
+    LogCollector.cpp \
     main.cpp \
 
 SOURCES +=  \

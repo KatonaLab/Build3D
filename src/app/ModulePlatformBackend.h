@@ -5,6 +5,7 @@
 #include <QtCore>
 #include <QQmlComponent>
 #include <QMultiMap>
+#include <QtDebug>
 #include <core/compute_platform/ports.h>
 #include <core/compute_platform/ComputeModule.h>
 #include <core/compute_platform/ComputePlatform.h>
@@ -214,9 +215,7 @@ private:
 class ModulePlatformBackend: public QObject {
     Q_OBJECT
 public:
-    explicit ModulePlatformBackend(QObject* parent = Q_NULLPTR)
-        : QObject(parent)
-    {}
+    explicit ModulePlatformBackend(QObject* parent = Q_NULLPTR);
     virtual ~ModulePlatformBackend() = default;
 
     Q_INVOKABLE QList<int> createSourceModulesFromIcsFile(const QUrl& filename)
@@ -338,12 +337,10 @@ public:
             m_private, m_errorFunc
         );
     }
-Q_SIGNALS:
-    void backendErrorOccured(QString msg);
 protected:
-    std::function<void(const std::string&)> m_errorFunc = [this](const std::string& msg)
+    std::function<void(const std::string&)> m_errorFunc = [](const std::string& msg)
     {
-        Q_EMIT this->backendErrorOccured(QString::fromStdString(msg));
+        qCritical() << QString::fromStdString(msg);
     };
 private:
     PrivateModulePlatformBackend m_private;

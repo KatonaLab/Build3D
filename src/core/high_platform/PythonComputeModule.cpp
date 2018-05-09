@@ -39,6 +39,23 @@ void PythonEnvironment::reset()
 
 void PythonEnvironment::exec(std::string code)
 {
+    py::module m = py::module::import("a3dc");
+    m.attr("stdout") = outStreamRouters.stdOut;
+    m.attr("stderr") = outStreamRouters.stdErr;
+    outStreamRouters.stdOut.callback("TEST FROM EXEC");
+    py::exec(R"(
+import a3dc
+import sys
+if a3dc.stdout is not None:
+    print("--------setting stdout")
+    sys.stdout = a3dc.stdout
+    print("--------setting stdout2")
+else:
+    print("--------NONE stdout")
+if a3dc.stderr is not None:
+    print("--------setting stderr")
+    sys.stderr = a3dc.stderr
+    )");
     py::exec(code);
 }
 
@@ -158,8 +175,14 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
     .def_readwrite("name", &Arg::name)
     .def_readwrite("type", &Arg::type);
 
+    py::class_<CustomOutStream>(m, "CustomOutStream")
+    .def(py::init<>())
+    .def("write", &CustomOutStream::write);
+
     m.attr("inputs") = py::dict();
     m.attr("outputs") = py::dict();
+    m.attr("stdout") = py::none();
+    m.attr("stderr") = py::none();
 
     pyDeclareMetaType(m);
 

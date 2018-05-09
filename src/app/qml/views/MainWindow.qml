@@ -96,7 +96,7 @@ ApplicationWindow {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: 150
+                height: 160
                 color: "#1f000000"
 
                 ScrollView {
@@ -106,12 +106,14 @@ ApplicationWindow {
                     ScrollBar.vertical.policy: ScrollBar.AsNeeded
                     clip: true
                     Flickable {
+                        flickableDirection: Flickable.VerticalFlick
                         contentY: contentHeight - height
                         TextArea {
                             font.pointSize: 11
                             font.family: "Courier"
-                            text: MainStore.moduleStore.backendConsole
+                            text: LogCollector.unfilteredLog
                             color: Material.accent
+                            textFormat: TextEdit.RichText
                             readOnly: true
                             selectByMouse: true
                             selectByKeyboard: true

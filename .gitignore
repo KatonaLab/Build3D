@@ -992,3 +992,4 @@ paket-files/
 
 # End of https://www.gitignore.io/api/qt,python,windows,visualstudio
 **/assets*
+virtualenv

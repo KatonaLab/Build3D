@@ -67,15 +67,32 @@ typedef std::function<void()> ProcessFunc;
 
 // --------------------------------------------------------
 
+struct CustomOutStream {
+    void write(const std::string& str)
+    {
+        callback(str);
+    }
+    std::function<void(const std::string&)> callback;
+};
+
+struct OutStreamRouters {
+    CustomOutStream stdOut = {[](const std::string& str) { std::cout << "custom " << str; }};
+    CustomOutStream stdErr = {[](const std::string& str) { std::cerr << "custom " << str; }};
+};
+
 class PythonEnvironment {    
 public:
     static PythonEnvironment& instance();
     void reset();
     void exec(std::string code);
     ~PythonEnvironment();
+    // TODO: hide naked member variables
     ProcessArg inputs;
     ProcessArg outputs;
     ProcessFunc func;
+    // TODO: reassigning these will break things,
+    // hide these member variables
+    OutStreamRouters outStreamRouters;
 protected:
     PythonEnvironment();
 };

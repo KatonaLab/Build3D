@@ -438,3 +438,22 @@ void PrivateModulePlatformBackend::evaluatePlatform()
     m_platform.printModuleConnections();
     m_platform.run();
 }
+
+ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
+    : QObject(parent)
+{
+    // TODO: move to cpp
+    OutStreamRouters routers;
+    routers.stdOut.callback = [](const std::string& str)
+    {
+        qInfo() << QString::fromStdString(str);
+    };
+
+    routers.stdErr.callback = [](const std::string& str)
+    {
+        qCritical() << QString::fromStdString(str);
+    };
+
+    PythonEnvironment::instance().outStreamRouters = routers;
+
+}
