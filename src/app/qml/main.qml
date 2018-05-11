@@ -13,6 +13,8 @@ Item {
         AppDispatcher.addStoreListener(MainStore.cardStore);
         AppDispatcher.addMiddlewareListener(dialogMiddleware);
 
+        AppActions.refreshModuleList();
+
         // AppActions.autoImportIcsFile("file:///Users/fodorbalint/Sandbox/testset/K32_bassoon_TH_vGluT1_c01_cmle.ics");
         // AppActions.autoImportIcsFile("file:///Users/fodorbalint/Desktop/spheres.ics");        
     }

@@ -16,4 +16,5 @@ QtObject {
     readonly property string module_output_changed_notification: "MODULE_OUTPUT_CHANGED_NOTIFICATION"
     readonly property string platform_evaluation: "PLATFORM_EVALUATION"
     readonly property string all_module_output_refresh: "ALL_MODULE_OUTPUT_REFRESH"
+    readonly property string module_list_refresh: "MODULE_LIST_REFRESH"
 }

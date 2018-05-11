@@ -1,12 +1,13 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQml 2.2
+import QtQml.Models 2.2
 
 import "../../actions"
 
 Pane {
     id: root
-    property ListModel supportedModules
+    property var supportedModules
     property alias model: listView.model
 
     padding: 12
@@ -56,21 +57,47 @@ Pane {
 
                 Menu {
                     id: menu
-                    Instantiator {
-                        model: supportedModules
+                    width: 300
+                    Menu {
+                        id: defaultToolsMenu
+                        title: "general"
                         MenuItem {
-                            text: model.displayName
+                            text: "import ics"
                             onTriggered: {
-                                AppActions.requestAddModule(model.scriptPath);
+                                AppActions.importIcsFile({});
                             }
                         }
-                        onObjectAdded: menu.insertItem(index, object)
-                        onObjectRemoved: menu.removeItem(object)
                     }
+                    MenuSeparator {}
+
+                    Instantiator {
+                        model: supportedModules
+                        Menu {
+                            id: subMenu
+                            title: displayName
+                            width: 300
+                            Component.onCompleted: {
+                                for (var i = 0; i < files.count; ++i) {
+                                    insertItem(-1, Qt.createQmlObject('\
+                                        import QtQuick 2.9; \
+                                        import QtQuick.Controls 2.2; \
+                                        import "../../actions"; \
+                                        MenuItem { \
+                                            text: "' + files.get(i).displayName + '"; \
+                                            onTriggered: {AppActions.requestAddModule("' + files.get(i).path + '");} \
+                                        }', subMenu));
+                                }
+                            }
+                        }
+                        onObjectAdded: menu.insertMenu(2, object)
+                        onObjectRemoved: menu.removeMenu(object)
+                    }
+
+                    MenuSeparator {}
                     MenuItem {
-                        text: "import ics"
+                        text: "refresh module list"
                         onTriggered: {
-                            AppActions.importIcsFile({});
+                            AppActions.refreshModuleList();
                         }
                     }
                 }

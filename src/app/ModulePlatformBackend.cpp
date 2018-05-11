@@ -6,6 +6,8 @@
 #include "VolumeTexture.h"
 #include "VolumeData.h"
 #include <core/high_platform/PythonComputeModule.h>
+#include <QDirIterator>
+#include <QFileInfo>
 
 using namespace std;
 using namespace core::io_utils;
@@ -443,6 +445,48 @@ void PrivateModulePlatformBackend::evaluatePlatform()
 {
     m_platform.printModuleConnections();
     m_platform.run();
+}
+
+QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
+{
+    QVariantList vlist;
+    auto isModuleFile = [](const QFileInfo& f)
+    {
+        return f.isFile()
+            && f.fileName().toLower().startsWith("module")
+            && f.suffix().toLower() == "py";
+    };
+
+    QDirIterator level1("scripts");
+    while (level1.hasNext()) {
+        level1.next();
+        if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()) {
+            QVariantMap vmap;
+            vmap["displayName"] = level1.fileName();
+            QVariantList fileList;
+            QDirIterator level2(level1.filePath(), QDirIterator::Subdirectories);
+            while (level2.hasNext()) {
+                level2.next();
+                if (isModuleFile(level2.fileInfo() )) {
+                    QVariantMap fileVMap;
+                    fileVMap["path"] = level2.filePath();
+                    QString name = level2.fileName()
+                        .mid(QString("module").size())
+                        .replace('_', ' ')
+                        .simplified();
+                    name.chop(3);
+                    fileVMap["displayName"] = name;
+                    fileList.append(fileVMap);
+                }
+            }
+            if (!fileList.empty()) {
+                vmap["files"] = fileList;
+                vlist.append(vmap);
+            }
+        }
+    }
+
+    return vlist;
 }
 
 ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
