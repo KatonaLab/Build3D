@@ -77,6 +77,7 @@ Pane {
                             title: displayName
                             width: 300
                             Component.onCompleted: {
+                                // TODO: find a nicer QML-way to generate the submenu items
                                 for (var i = 0; i < files.count; ++i) {
                                     insertItem(-1, Qt.createQmlObject('\
                                         import QtQuick 2.9; \
