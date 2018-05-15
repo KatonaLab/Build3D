@@ -89,6 +89,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 aspects: ["input", "logic"]
                 cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+                hoverEnabled: false
                 SceneRootEntity {}
             }
 

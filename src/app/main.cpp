@@ -18,6 +18,7 @@
 #include "VolumeData.h"
 #include "VolumeTexture.h"
 #include "ModulePlatformBackend.h"
+#include "TurnTableCameraController.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -103,6 +104,7 @@ int main(int argc, char* argv[])
 
     qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "ModulePlatformBackend");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
+    qmlRegisterType<TurnTableCameraController>("koki.katonalab.a3dc", 1, 0, "TurnTableCameraController");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
     // NOTE: it will initialize LogCollector and routes the all qDebug/qInfo... log through this instance
     // see LogCollector.cpp for details

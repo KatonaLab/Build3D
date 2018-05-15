@@ -33,11 +33,27 @@ Entity {
         viewCenter: Qt.vector3d(0.0, 0.0, 0.0)
     }
 
-    OrbitCameraController {
-        camera: camera
-        lookSpeed: -180 * 2
-    }
+    // MouseDevice {
+    //     id: md
+    //     sensitivity: 10
+    // }
 
+    // MouseHandler {
+    //     sourceDevice: md
+    //     onPositionChanged: {
+    //         console.log(mouse.x, ",", mouse.y);
+    //     }
+    // }
+
+    // AnalogAxisInput {
+
+    // }
+
+    TurnTableCameraController {
+        camera: camera
+        lookSpeed: -180
+        linearSpeed: 1
+    }
 
     // TODO: find a way to do the rendering like this:
     // 
@@ -71,19 +87,8 @@ Entity {
             lutLowCut: model.lutLow
             lutHighCut: model.lutHigh
             Component.onCompleted: {
-                // lutDataMax = model.data.dataLimits.y;
                 lutDataMax = 1.;
             }
-
-            // volumeColor: model.nodeViewParams.color
-            // visible: model.nodeViewParams.visible
-
-            // lutLowCut: model.nodeViewParams.lowCut
-            // lutHighCut: model.nodeViewParams.highCut
-            // Component.onCompleted: {
-            //     //lutDataMax = model.data.dataLimits.y;
-            //     lutDataMax = 1000.;
-            // }
         }
     }
 
