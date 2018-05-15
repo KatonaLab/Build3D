@@ -8,11 +8,13 @@ import koki.katonalab.a3dc 1.0
 import "../../stores"
 
 Entity {
+    id: root
+    property size viewPortSize: Qt.size(1, 1);
 
     components: [
         SceneRenderSettings {
             id: renderSettings
-            camera: camera
+            camera: sceneCamera
             clearColor: Qt.rgba(0.2, 0.2, 0.2, 1.0)
             renderSize: Qt.size(width, height)
             sceneLayer: sceneLayer
@@ -22,10 +24,10 @@ Entity {
     ]
 
     Camera {
-        id: camera
+        id: sceneCamera
         projectionType: CameraLens.PerspectiveProjection
         fieldOfView: 45
-        aspectRatio: 16/9
+        aspectRatio: 3/4
         nearPlane : 0.1
         farPlane : 100.0
         position: Qt.vector3d(0.0, 0.0, -2.0)
@@ -33,25 +35,11 @@ Entity {
         viewCenter: Qt.vector3d(0.0, 0.0, 0.0)
     }
 
-    // MouseDevice {
-    //     id: md
-    //     sensitivity: 10
-    // }
-
-    // MouseHandler {
-    //     sourceDevice: md
-    //     onPositionChanged: {
-    //         console.log(mouse.x, ",", mouse.y);
-    //     }
-    // }
-
-    // AnalogAxisInput {
-
-    // }
-
     TurnTableCameraController {
-        camera: camera
-        lookSpeed: -180
+        camera: sceneCamera
+        viewPortSize: root.viewPortSize
+        rollBallRadius: viewPortSize.width * 0.4
+        lookSpeed: 180
         linearSpeed: 1
     }
 
