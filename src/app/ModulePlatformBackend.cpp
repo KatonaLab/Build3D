@@ -88,13 +88,16 @@ QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QU
     switch (image.dims()) {
         case 3: // xyz
             volumes.push_back(image);
+            qDebug() << "3 dims";
             break;
         case 5: // xyztc
             // removing dimension 't'
             image.removeDims({3});
+            qDebug() << "5 dims";
             // no break - let it flow
         case 4: // xyzc or xyzt
             volumes = image.splitDim(3);
+            qDebug() << "4 dims";
             break;
         // TODO: support XY images too
         default:
@@ -104,15 +107,25 @@ QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QU
 
     QList<int> uids;
     for (auto& vol : volumes) {
+        qDebug() << "processing vol";
         uids.push_back(nextUid());
         auto newModule = new DataSourceModule(m_platform, uids.back());
+        qDebug() << "datasource module created";
         // TODO: try to use move semantics to make a shared_ptr out of vol
         auto p = make_shared<MultiDimImage<float>>();
+        qDebug() << "p created";
         swap(*p, vol);
+        qDebug() << "swapped";
         newModule->setData(p);
+        qDebug() << "set";
+
+        m_modules.emplace(make_pair(newModule->uid(), newModule));
 
         buildimageOutputHelperModules(newModule->uid());
-        m_modules.emplace(make_pair(newModule->uid(), newModule));
+        
+        qDebug() << "buildimageOutputHelperModules";
+        // m_modules.emplace(make_pair(newModule->uid(), newModule));
+        qDebug() << "emplace";
     }
 
     return uids;
