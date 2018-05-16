@@ -9,9 +9,11 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <core/compute_platform/port_utils.hpp>
 
+#include <cstdlib>
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <stdlib.h>
 
 using namespace core::high_platform;
 using namespace core::compute_platform;
@@ -28,8 +30,18 @@ PythonEnvironment& PythonEnvironment::instance()
 
 PythonEnvironment::PythonEnvironment()
 {
+    if (auto venvPath = getenv("VIRTUAL_ENV")) {
+        setenv("PYTHONHOME", venvPath, true);
+    }
     py::initialize_interpreter();
     py::module::import("a3dc");
+    auto sys = py::module::import("sys");
+    py::print(sys.attr("path"));
+    py::print(sys.attr("executable"));
+    py::print(sys.attr("platform"));
+    py::print(sys.attr("platform"));
+    py::print(sys.attr("version"));
+    py::print(sys.attr("version_info"));
 }
 
 void PythonEnvironment::reset()
