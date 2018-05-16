@@ -9,7 +9,7 @@ def module_main():
     im = autoThreshold(im, 'Otsu')
     a3dc.outputs['out'] = a3dc.MultiDimImageFloat(a3dc.inputs['in'].dims())
     for i, plane in enumerate(multi_dim_image_plane_iterator(a3dc.outputs['out'])):
-        np.copyto(plane, im[i])
+        np.copyto(plane, im[:, :, i])
 
 inputs = [Arg('in', a3dc.types.ImageFloat)]
 outputs = [Arg('out', a3dc.types.ImageFloat)]
