@@ -8,11 +8,13 @@ import koki.katonalab.a3dc 1.0
 import "../../stores"
 
 Entity {
+    id: root
+    property size viewPortSize: Qt.size(1, 1);
 
     components: [
         SceneRenderSettings {
             id: renderSettings
-            camera: camera
+            camera: sceneCamera
             clearColor: Qt.rgba(0.2, 0.2, 0.2, 1.0)
             renderSize: Qt.size(width, height)
             sceneLayer: sceneLayer
@@ -22,10 +24,10 @@ Entity {
     ]
 
     Camera {
-        id: camera
+        id: sceneCamera
         projectionType: CameraLens.PerspectiveProjection
         fieldOfView: 45
-        aspectRatio: 16/9
+        aspectRatio: 3/4
         nearPlane : 0.1
         farPlane : 100.0
         position: Qt.vector3d(0.0, 0.0, -2.0)
@@ -33,11 +35,13 @@ Entity {
         viewCenter: Qt.vector3d(0.0, 0.0, 0.0)
     }
 
-    OrbitCameraController {
-        camera: camera
-        lookSpeed: -180 * 2
+    TurnTableCameraController {
+        camera: sceneCamera
+        viewPortSize: root.viewPortSize
+        rollBallRadius: viewPortSize.width * 0.4
+        lookSpeed: 180
+        linearSpeed: 1
     }
-
 
     // TODO: find a way to do the rendering like this:
     // 
@@ -71,19 +75,8 @@ Entity {
             lutLowCut: model.lutLow
             lutHighCut: model.lutHigh
             Component.onCompleted: {
-                // lutDataMax = model.data.dataLimits.y;
                 lutDataMax = 1.;
             }
-
-            // volumeColor: model.nodeViewParams.color
-            // visible: model.nodeViewParams.visible
-
-            // lutLowCut: model.nodeViewParams.lowCut
-            // lutHighCut: model.nodeViewParams.highCut
-            // Component.onCompleted: {
-            //     //lutDataMax = model.data.dataLimits.y;
-            //     lutDataMax = 1000.;
-            // }
         }
     }
 

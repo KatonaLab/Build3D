@@ -56,4 +56,8 @@ QtObject {
     function refreshAllModuleOutput() {
         AppDispatcher.dispatch(ActionTypes.all_module_output_refresh, {});
     }
+
+    function refreshModuleList() {
+        AppDispatcher.dispatch(ActionTypes.module_list_refresh, {});
+    }
 }

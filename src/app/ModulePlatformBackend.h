@@ -187,6 +187,7 @@ public:
     void disconnectInput(int inputModuleUid, int inputPortId);
     bool setParamPortProperty(int uid, int portId, QVariant value);
     void evaluatePlatform();
+    QVariantList getModuleScriptsList();
 private:
     cp::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
@@ -335,6 +336,14 @@ public:
         return decorateTryCatch(
             &PrivateModulePlatformBackend::evaluatePlatform,
             m_private, m_errorFunc
+        );
+    }
+
+    Q_INVOKABLE QVariantList getModuleScriptsList()
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::getModuleScriptsList,
+            m_private, m_errorFunc, QVariantList()
         );
     }
 protected:

@@ -54,6 +54,14 @@ Item {
             AppActions.refreshAllModuleOutput();
         };
 
+        handlers[ActionTypes.module_list_refresh] = function(args) {
+            var moduleFiles = backend.getModuleScriptsList();
+            supportedModules.clear();
+            moduleFiles.forEach(function(x) {
+                supportedModules.append(x);
+            });
+        };
+
         var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
@@ -64,29 +72,5 @@ Item {
 
     ListModel {
         id: supportedModules
-        ListElement {
-            displayName: "create test module"
-            scriptPath: "scripts/test_module.py"
-        }
-        ListElement {
-            displayName: "create sine generator module"
-            scriptPath: "scripts/test_sine_module.py"
-        }
-        ListElement {
-            displayName: "create test threshold module"
-            scriptPath: "scripts/test_threshold_module.py"
-        }
-        ListElement {
-            displayName: "test 'no such file xyz.py'"
-            scriptPath: "scripts/xyz.py"
-        }
-        ListElement {
-            displayName: "test_generalpytype_source_module.py"
-            scriptPath: "scripts/test_generalpytype_source_module.py"
-        }
-        ListElement {
-            displayName: "test_generalpytype_sink_module.py"
-            scriptPath: "scripts/test_generalpytype_sink_module.py"
-        }
     }
 }

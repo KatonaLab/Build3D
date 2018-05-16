@@ -78,6 +78,7 @@ ApplicationWindow {
         }
 
         Item {
+            id: displayItem
             Layout.fillWidth: true
             Layout.fillHeight: true
             // prevent errors when shrinked size 0
@@ -89,7 +90,10 @@ ApplicationWindow {
                 anchors.fill: parent
                 aspects: ["input", "logic"]
                 cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-                SceneRootEntity {}
+                hoverEnabled: false
+                SceneRootEntity {
+                    viewPortSize: Qt.size(displayItem.width, displayItem.height)
+                }
             }
 
             Rectangle {
