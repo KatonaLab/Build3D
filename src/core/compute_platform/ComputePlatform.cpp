@@ -4,6 +4,7 @@
 #include <core/directed_acyclic_graph/Node.h>
 
 #include "ComputeModule.h"
+#include <algorithm>
 #include <iostream>
 
 using namespace core::compute_platform;
