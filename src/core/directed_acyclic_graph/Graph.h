@@ -33,6 +33,7 @@ namespace directed_acyclic_graph {
         static GraphPtr create(const std::string& name = "");
         NodePtr add(const std::string& name = "");
         NodePtr add(NodePtr node);
+        // TODO: test remove thoroughly
         void remove(NodePtr node);
         void clear();
         DependencyTraversal traverse();

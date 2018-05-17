@@ -33,17 +33,17 @@ namespace compute_platform {
         std::string name() const;
         // TODO: test this function
         void setName(const std::string& name);
-        virtual ~ComputeModule() = default;
+        virtual ~ComputeModule();
     protected:
         ComputeModule(ComputePlatform& parent,
-            InputPortCollection& inputs,
-            OutputPortCollection& outputs,
+            InputPortCollectionBase& inputs,
+            OutputPortCollectionBase& outputs,
             const std::string& name = "");
         virtual void execute() = 0;
     private:
         ComputePlatform& m_parent;
-        InputPortCollection& m_inputs;
-        OutputPortCollection& m_outputs;
+        InputPortCollectionBase& m_inputs;
+        OutputPortCollectionBase& m_outputs;
         std::shared_ptr<TriggerNode> m_node;
         std::string m_name;
     };

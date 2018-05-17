@@ -66,11 +66,18 @@ void Graph::remove(NodePtr node)
 {
     auto it = find(m_nodes.begin(), m_nodes.end(), node);
     if (it != m_nodes.end()) {
-        for (auto w : (*it)->m_inputs) {
+        // NOTE: disconnect(node) implicitly can invalidate
+        // iterators to m_inputs!
+        // Here we iterate through a copy of m_inputs
+        // TODO: find a safer solution
+        vector<WeakNodePtr> inputsCopy((*it)->m_inputs);
+        for (auto w : inputsCopy) {
             w.lock()->disconnect(node);
         }
 
-        for (auto n : (*it)->m_outputs) {
+        // NOTE: same as above
+        std::vector<NodePtr> outputsCopy((*it)->m_outputs);
+        for (auto n : outputsCopy) {
             n->disconnect(node);
         }
 

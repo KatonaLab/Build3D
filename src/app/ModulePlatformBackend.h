@@ -105,7 +105,7 @@ public:
     // TODO: separate decl from def
     ParamHelperModule(cp::ComputePlatform& parent,
         const std::string& name,
-        cp::OutputPortCollection& outputs)
+        cp::OutputPortCollectionBase& outputs)
         :
         cp::ComputeModule(parent, m_inputs, outputs, name),
         m_inputs(*this)

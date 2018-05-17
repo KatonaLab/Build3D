@@ -224,12 +224,12 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
 {
     #define CASE_POD(E, T) \
         case PyTypes::E: \
-            {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
+            {auto tp = TypedInputPort<T>::create(*this); \
             return PyInputPortWrapperPtr(new PyInputPortWrapperPod<T>(tp, PyTypes::E));}
 
     #define CASE_NON_POD(E, T) \
         case PyTypes::E: \
-            {auto tp = shared_ptr<TypedInputPort<T>>(new TypedInputPort<T>(*this)); \
+            {auto tp = TypedInputPort<T>::create(*this); \
             return PyInputPortWrapperPtr(new PyInputPortWrapperNonPod<T>(tp, PyTypes::E));}
 
     switch (t) {
@@ -254,7 +254,7 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
         CASE_NON_POD(TYPE_MultiDimImageFloat, MultiDimImage<float>)
         CASE_NON_POD(TYPE_MultiDimImageDouble, MultiDimImage<double>)
         case PyTypes::TYPE_GeneralPyType: {
-            auto tp = shared_ptr<TypedInputPort<py::object>>(new TypedInputPort<py::object>(*this));
+            auto tp = TypedInputPort<py::object>::create(*this);
             return PyInputPortWrapperPtr(new GeneralPyTypeInputPortWrapper(tp));
         }
         default: throw std::runtime_error("unknown input port type");
@@ -267,12 +267,12 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
 {
     #define CASE_POD(E, T) \
         case PyTypes::E: \
-            {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
+            {auto tp = TypedOutputPort<T>::create(*this); \
             return PyOutputPortWrapperPtr(new PyOutputPortWrapperPod<T>(tp, PyTypes::E));}
 
     #define CASE_NON_POD(E, T) \
         case PyTypes::E: \
-            {auto tp = shared_ptr<TypedOutputPort<T>>(new TypedOutputPort<T>(*this)); \
+            {auto tp = TypedOutputPort<T>::create(*this); \
             return PyOutputPortWrapperPtr(new PyOutputPortWrapperNonPod<T>(tp, PyTypes::E));}
 
     switch (t) {
@@ -297,7 +297,7 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
         CASE_NON_POD(TYPE_MultiDimImageFloat, MultiDimImage<float>)
         CASE_NON_POD(TYPE_MultiDimImageDouble, MultiDimImage<double>)
         case PyTypes::TYPE_GeneralPyType: {
-            auto tp = shared_ptr<TypedOutputPort<py::object>>(new TypedOutputPort<py::object>(*this));
+            auto tp = TypedOutputPort<py::object>::create(*this);
             return PyOutputPortWrapperPtr(new GeneralPyTypeOutputPortWrapper(tp));
         }
         default: throw std::runtime_error("unknown input port type");

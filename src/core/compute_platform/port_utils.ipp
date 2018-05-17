@@ -21,14 +21,14 @@ std::weak_ptr<T> TypedOutputPort<T>::serve()
 {
     m_numInputServed++;
 
-    if (m_numInputServed < m_numBinds) {
+    if (m_numInputServed < numBinds()) {
         // T's copy constructor should do a deep copy
         m_replicas.push_back(std::make_shared<T>(*m_original));
         return std::weak_ptr<T>(m_replicas.back());
-    } else if (m_numInputServed == m_numBinds) {
+    } else if (m_numInputServed == numBinds()) {
         return std::weak_ptr<T>(m_original);
     }
-    // m_numInputServed > m_numBinds
+    // m_numInputServed > numBinds()
     throw std::runtime_error("more serve requests arrived than the number of the bindings");
 }
 
@@ -140,9 +140,9 @@ std::weak_ptr<T> TypedInputPort<T>::inputPtr()
 template <typename T, typename ...Ts>
 inline 
 TypedInputPortCollection<T, Ts...>::TypedInputPortCollection(ComputeModule& parent)
-    : InputPortCollection(parent),
-    m_inputPorts(std::make_shared<TypedInputPort<T>>(parent),
-    std::make_shared<TypedInputPort<Ts>>(parent)...)
+    : InputPortCollectionBase(parent),
+    m_inputPorts(TypedInputPort<T>::create(parent),
+    TypedInputPort<Ts>::create(parent)...)
 {
     detail::TupleToVectorHelper<sizeof...(Ts), decltype(m_inputPorts), decltype(m_typelessPorts)>
         ::tupleToVector(m_inputPorts, m_typelessPorts);
@@ -185,9 +185,9 @@ TypedInputPortCollection<T, Ts...>::input()
 
 template <typename T, typename ...Ts>
 inline TypedOutputPortCollection<T, Ts...>::TypedOutputPortCollection(ComputeModule& parent)
-    : OutputPortCollection(parent),
-    m_outputPorts(std::make_shared<TypedOutputPort<T>>(parent),
-        std::make_shared<TypedOutputPort<Ts>>(parent)...)
+    : OutputPortCollectionBase(parent),
+    m_outputPorts(TypedOutputPort<T>::create(parent),
+        TypedOutputPort<Ts>::create(parent)...)
 {
     detail::TupleToVectorHelper<sizeof...(Ts), decltype(m_outputPorts), decltype(m_typelessPorts)>
         ::tupleToVector(m_outputPorts, m_typelessPorts);
