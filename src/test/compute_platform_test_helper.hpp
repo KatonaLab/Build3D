@@ -1,7 +1,6 @@
 #ifndef _test_compute_platform_test_helper_hpp_
 #define _test_compute_platform_test_helper_hpp_
 
-#include <iostream>
 #include <memory>
 #include <string>
 

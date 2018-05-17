@@ -2,6 +2,8 @@
 
 #include "ComputeModule.h"
 
+#include <algorithm>
+
 using namespace core::compute_platform;
 using namespace std;
 
@@ -53,7 +55,7 @@ bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
         if (auto ptr = inputPort.lock()) {
             bool canConnect = m_parent.node()->connect(ptr->parent().node());
             if (canConnect) {
-                m_numBinds++;
+                m_destinations.push_back(inputPort);
                 ptr->m_source = shared_from_this();
                 return true;
             }
@@ -65,24 +67,41 @@ bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
 void OutputPort::unbind(std::weak_ptr<InputPort> inputPort)
 {
     if (auto inputPtr = inputPort.lock()) {
+
+        // do we have this input port?
+        bool outputHadInput = false;
+        auto dstIt = find_if(m_destinations.begin(), m_destinations.end(),
+            [inputPtr](std::weak_ptr<InputPort> item)
+            {
+                return item.lock() == inputPtr;
+            });
+        if (dstIt != m_destinations.end()) {
+            m_destinations.erase(dstIt);
+            outputHadInput = true;
+        }
+
+        // do the input port has this output port?
+        bool inputHadOutput = false;
         if (auto ptr = inputPtr->m_source.lock()) {
             if (ptr == shared_from_this()) {
                 inputPtr->m_source.reset();
-                if (m_numBinds == 1) {
-                    m_parent.node()->disconnect(inputPtr->parent().node());
-                } else if (m_numBinds < 1) {
-                    throw std::runtime_error(string("output bind count decreases below 0, ") +
-                        string("indicating some port managing issues in compute_platform library"));
-                }
-                m_numBinds--;
+                inputHadOutput = true;
             }
+        }
+
+        if (m_destinations.size() == 0) {
+            m_parent.node()->disconnect(inputPtr->parent().node());
+        }
+        
+        if ((outputHadInput && !inputHadOutput) || (!outputHadInput && inputHadOutput)) {
+            throw std::runtime_error("assymetric bookkeeping error while unbinding an output");
         }
     }
 }
 
 size_t OutputPort::numBinds() const
 {
-    return m_numBinds;
+    return m_destinations.size();
 }
 
 void OutputPort::reset()
@@ -91,8 +110,14 @@ void OutputPort::reset()
     m_numInputServed = 0;
 }
 
-OutputPort::~OutputPort()
-{}
+void OutputPort::purgeInvalidInputs()
+{
+    m_destinations.erase(remove_if(m_destinations.begin(),
+        m_destinations.end(), [](weak_ptr<InputPort> x)
+        {
+            return x.lock() == nullptr;
+        }));
+}
 
 InputPort::InputPort(ComputeModule& parent) : PortBase(parent)
 {}
@@ -108,9 +133,25 @@ std::weak_ptr<OutputPort> InputPort::getSource() const
 }
 
 InputPort::~InputPort()
+{
+    if (auto p = m_source.lock()) {
+        // NOTE: note that this dctr (~InputPort) is called because
+        // the shared_ptr ref counter of InputPort is decreased to 0
+        // so at this point the shared_ptr is invalidated
+        p->purgeInvalidInputs();
+    }
+}
+
+InputPortCollectionBase::InputPortCollectionBase(ComputeModule& parent)
+    : m_parent(parent)
 {}
 
-InputPortCollection::InputPortCollection(ComputeModule& parent) : m_parent(parent)
+OutputPortCollectionBase::OutputPortCollectionBase(ComputeModule& parent)
+    : m_parent(parent)
+{}
+
+InputPortCollection::InputPortCollection(ComputeModule& parent)
+    : InputPortCollectionBase(parent)
 {}
 
 void InputPortCollection::fetch()
@@ -126,10 +167,8 @@ size_t InputPortCollection::size() const
     return 0;
 }
 
-InputPortCollection::~InputPortCollection()
-{}
-
-OutputPortCollection::OutputPortCollection(ComputeModule& parent) : m_parent(parent)
+OutputPortCollection::OutputPortCollection(ComputeModule& parent)
+    : OutputPortCollectionBase(parent)
 {}
 
 std::weak_ptr<OutputPort> OutputPortCollection::get(size_t)
@@ -141,6 +180,3 @@ size_t OutputPortCollection::size() const
 {
     return 0;
 }
-
-OutputPortCollection::~OutputPortCollection()
-{}

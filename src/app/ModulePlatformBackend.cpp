@@ -111,8 +111,11 @@ QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QU
         swap(*p, vol);
         newModule->setData(p);
 
-        buildimageOutputHelperModules(newModule->uid());
         m_modules.emplace(make_pair(newModule->uid(), newModule));
+        // TODO: buildimageOutputHelperModules requires that m_modules has the module with the uid,
+        // make it explicit or modify the function, because swapping the line above and below will
+        // fail to do their job
+        buildimageOutputHelperModules(newModule->uid());
     }
 
     return uids;

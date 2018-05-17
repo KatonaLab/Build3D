@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace core {
 namespace compute_platform {
@@ -86,53 +87,77 @@ protected:
     ComputeModule& m_parent;
 };
 
+// TODO: rename InputPort and OutputPort to InputPortBase and OutputPortBase
+// since they can not be ctrd publicly: protected ctr
+class InputPort;
+
 class OutputPort : public PortBase, public std::enable_shared_from_this<OutputPort> {
 public:
-    OutputPort(ComputeModule& parent);
     bool bind(std::weak_ptr<InputPort> inputPort);
     void unbind(std::weak_ptr<InputPort> inputPort);
     size_t numBinds() const;
     void reset();
-    virtual ~OutputPort();
+    void purgeInvalidInputs();
+    // NOTE: no need for connection break with the input port
+    // since this shared_ptr is invalidated during (just before) dctr
+    virtual ~OutputPort() = default;
 protected:
+    OutputPort(ComputeModule& parent);
     virtual bool compatible(std::weak_ptr<InputPort> input) const = 0;
     virtual void cleanOnReset() = 0;
-    size_t m_numBinds = 0;
+    std::vector<std::weak_ptr<InputPort>> m_destinations;
     size_t m_numInputServed = 0;
 };
 
-class InputPort : public PortBase {
+class InputPort : public PortBase, public std::enable_shared_from_this<InputPort> {
     friend class OutputPort;
 public:
-    InputPort(ComputeModule& parent);
     virtual void fetch() = 0;
     bool connected() const;
     // TODO: test this function
     std::weak_ptr<OutputPort> getSource() const;
     virtual ~InputPort();
 protected:
+    InputPort(ComputeModule& parent);
     std::weak_ptr<OutputPort> m_source;
 };
 
-class InputPortCollection {
+class InputPortCollectionBase {
 public:
-    InputPortCollection(ComputeModule& parent);
-    virtual void fetch();
-    virtual std::weak_ptr<InputPort> get(size_t portId);
-    virtual size_t size() const;
-    virtual ~InputPortCollection();
+    InputPortCollectionBase(ComputeModule& parent);
+    virtual void fetch() = 0;
+    virtual std::weak_ptr<InputPort> get(size_t portId) = 0;
+    virtual size_t size() const = 0;
+    virtual ~InputPortCollectionBase() = default;
 protected:
     ComputeModule& m_parent;
 };
 
-class OutputPortCollection {
+class OutputPortCollectionBase {
 public:
-    OutputPortCollection(ComputeModule& parent);
-    virtual std::weak_ptr<OutputPort> get(size_t portId);
-    virtual size_t size() const;
-    virtual ~OutputPortCollection();
+    OutputPortCollectionBase(ComputeModule& parent);
+    virtual std::weak_ptr<OutputPort> get(size_t portId) = 0;
+    virtual size_t size() const = 0;
+    virtual ~OutputPortCollectionBase() = default;
 protected:
     ComputeModule& m_parent;
+};
+
+class InputPortCollection : public InputPortCollectionBase {
+public:
+    // TODO: rename this class to EmptyInputPortCollection
+    InputPortCollection(ComputeModule& parent);
+    void fetch() override;
+    std::weak_ptr<InputPort> get(size_t portId) override;
+    size_t size() const override;
+};
+
+class OutputPortCollection : public OutputPortCollectionBase {
+public:
+    // TODO: rename this class to EmptyOutputPortCollection
+    OutputPortCollection(ComputeModule& parent);
+    std::weak_ptr<OutputPort> get(size_t portId) override;
+    size_t size() const override;
 };
 
 }}

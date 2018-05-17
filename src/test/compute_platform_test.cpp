@@ -1,6 +1,5 @@
 #include "catch.hpp"
 
-#include <iostream>
 #include <memory>
 #include <tuple>
 
@@ -284,6 +283,14 @@ SCENARIO("disconnect ports", "[core/compute_platform]")
 
         REQUIRE(p.size() == 8);
 
+        //    __
+        //   / _ src1  src2
+        //  / /    |  X  |
+        // mid3   mid1  mid2
+        //  |      |     |
+        // dst3   dst1  dst2
+        //
+
         REQUIRE(connectPorts(src1, 0, mid1, 0) == true);
         REQUIRE(connectPorts(src1, 0, mid2, 1) == true);
         REQUIRE(connectPorts(src2, 0, mid1, 1) == true);
@@ -334,6 +341,93 @@ SCENARIO("disconnect ports", "[core/compute_platform]")
                 REQUIRE(mid1.inputPort(1).lock()->getSource().lock() == src2.outputPort(0).lock());
                 REQUIRE(mid3.inputPort(0).lock()->getSource().lock() == src1.outputPort(0).lock());
                 REQUIRE(mid3.inputPort(1).lock()->getSource().lock() == src1.outputPort(0).lock());
+            }
+
+            AND_THEN("the net is not valid, so can not be run") {
+                REQUIRE_THROWS(p.run());
+            }
+        }
+    }
+}
+
+SCENARIO("remove modules", "[core/compute_platform]")
+{
+    GIVEN("a simple connected net") {
+        ComputePlatform p;
+        
+        unique_ptr<IntSource> src1 = make_unique<IntSource>(p);
+        unique_ptr<IntSource> src2 = make_unique<IntSource>(p);
+        unique_ptr<Add> mid1 = make_unique<Add>(p);
+        unique_ptr<Add> mid2 = make_unique<Add>(p);
+        unique_ptr<Add> mid3 = make_unique<Add>(p);
+        unique_ptr<IntDestination> dst1 = make_unique<IntDestination>(p);
+        unique_ptr<IntDestination> dst2 = make_unique<IntDestination>(p);
+        unique_ptr<IntDestination> dst3 = make_unique<IntDestination>(p);
+
+        REQUIRE(p.size() == 8);
+
+        //    __
+        //   / _ src1  src2
+        //  / /    |  X  |
+        // mid3   mid1  mid2
+        //  |      |     |
+        // dst3   dst1  dst2
+        //
+
+        REQUIRE(connectPorts(*src1, 0, *mid1, 0) == true);
+        REQUIRE(connectPorts(*src1, 0, *mid2, 1) == true);
+        REQUIRE(connectPorts(*src2, 0, *mid1, 1) == true);
+        REQUIRE(connectPorts(*src2, 0, *mid2, 0) == true);
+        REQUIRE(connectPorts(*src1, 0, *mid3, 0) == true);
+        REQUIRE(connectPorts(*src1, 0, *mid3, 1) == true);
+        REQUIRE(connectPorts(*mid1, 0, *dst1, 0) == true);
+        REQUIRE(connectPorts(*mid2, 0, *dst2, 0) == true);
+        REQUIRE(connectPorts(*mid3, 0, *dst3, 0) == true);
+
+        REQUIRE(src1->outputPort(0).lock()->numBinds() == 4);
+        REQUIRE(src2->outputPort(0).lock()->numBinds() == 2);
+        REQUIRE(mid1->outputPort(0).lock()->numBinds() == 1);
+        REQUIRE(mid2->outputPort(0).lock()->numBinds() == 1);
+        REQUIRE(mid3->outputPort(0).lock()->numBinds() == 1);
+
+        REQUIRE(mid1->inputPort(0).lock()->getSource().lock() == src1->outputPort(0).lock());
+        REQUIRE(mid1->inputPort(1).lock()->getSource().lock() == src2->outputPort(0).lock());
+        REQUIRE(mid3->inputPort(0).lock()->getSource().lock() == src1->outputPort(0).lock());
+        REQUIRE(mid3->inputPort(1).lock()->getSource().lock() == src1->outputPort(0).lock());
+
+        src1->setData(1);
+        src2->setData(2);
+
+        WHEN("run is called") {
+            p.run();
+            THEN("it outputs the correct results") {
+                REQUIRE(dst1->getResult() == 3);
+                REQUIRE(dst2->getResult() == 3);
+                REQUIRE(dst3->getResult() == 2);
+            }
+        }
+
+        WHEN("some modules are removed") {
+            src1.reset();
+            dst2.reset();
+
+            THEN("the modules and the connections are removed") {
+                REQUIRE(src1.get() == nullptr);
+                REQUIRE(dst2.get() == nullptr);
+
+                REQUIRE(p.size() == 6);
+                
+                REQUIRE(mid3->inputPort(0).lock()->connected() == false);
+                REQUIRE(mid3->inputPort(1).lock()->connected() == false);
+                REQUIRE(mid1->inputPort(0).lock()->connected() == false);
+                REQUIRE(mid1->inputPort(1).lock()->connected() == true);
+                REQUIRE(mid2->inputPort(1).lock()->connected() == false);
+                REQUIRE(mid2->inputPort(0).lock()->connected() == true);
+
+                REQUIRE(src2->outputPort(0).lock()->numBinds() == 2);
+                REQUIRE(mid1->outputPort(0).lock()->numBinds() == 1);
+                REQUIRE(mid2->outputPort(0).lock()->numBinds() == 0);
+                REQUIRE(mid3->outputPort(0).lock()->numBinds() == 1);
             }
 
             AND_THEN("the net is not valid, so can not be run") {

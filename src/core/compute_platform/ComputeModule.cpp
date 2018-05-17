@@ -46,14 +46,19 @@ std::weak_ptr<OutputPort> ComputeModule::outputPort(size_t id)
 }
 
 ComputeModule::ComputeModule(ComputePlatform& parent,
-    InputPortCollection& inputs,
-    OutputPortCollection& outputs,
+    InputPortCollectionBase& inputs,
+    OutputPortCollectionBase& outputs,
     const std::string& name)
     : m_parent(parent), m_inputs(inputs),
     m_outputs(outputs), m_name(name)
 {
     m_node = std::make_shared<TriggerNode>(*this);
     m_parent.addModule(*this, m_node);
+}
+
+ComputeModule::~ComputeModule()
+{
+    m_parent.removeModule(*this);
 }
 
 NodePtr ComputeModule::node()

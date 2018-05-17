@@ -9,7 +9,7 @@ def multi_dim_image_to_numpy_array(image):
     """
     out = np.zeros(image.dims())
     for i, plane in enumerate(multi_dim_image_plane_iterator(image)):
-        np.copyto(out[i], plane)
+        np.copyto(out[:, :, i], plane)
 
     return out
 

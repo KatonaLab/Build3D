@@ -18,7 +18,10 @@ class TypedInputPort;
 template <typename T>
 class TypedOutputPort : public OutputPort {
 public:
-    TypedOutputPort(ComputeModule& parent);
+    static std::shared_ptr<TypedOutputPort> create(ComputeModule& parent)
+    {
+        return std::shared_ptr<TypedOutputPort>(new TypedOutputPort(parent));
+    }
     std::weak_ptr<T> serve();
     const PortTypeTraitsBase& traits() const override;
     T& value();
@@ -26,6 +29,7 @@ public:
     void forwardFromInput(std::weak_ptr<TypedInputPort<T>> input);
     void forwardFromSharedPtr(std::shared_ptr<T> data);
 protected:
+    TypedOutputPort(ComputeModule& parent);
     virtual bool compatible(std::weak_ptr<InputPort> input) const override;
     virtual void cleanOnReset() override;
 private:
@@ -37,27 +41,32 @@ template <typename T>
 class TypedInputPort : public InputPort {
     friend class TypedOutputPort<T>;
 public:
-    TypedInputPort(ComputeModule& parent);
+    static std::shared_ptr<TypedInputPort> create(ComputeModule& parent)
+    {
+        return std::shared_ptr<TypedInputPort>(new TypedInputPort(parent));
+    }
     virtual void fetch() override;
     const PortTypeTraitsBase& traits() const override;
     T& value();
     std::shared_ptr<T> sharedValue();
     std::weak_ptr<T> inputPtr();
+protected:
+    TypedInputPort(ComputeModule& parent);
 private:
     std::weak_ptr<T> m_ptr;
 };
 
 template <typename T, typename ...Ts>
-class TypedInputPortCollection : public InputPortCollection {
+class TypedInputPortCollection final : public InputPortCollectionBase {
     using PortTuple = std::tuple<
         std::shared_ptr<TypedInputPort<T>>,
         std::shared_ptr<TypedInputPort<Ts>>...>;
     using TypeTuple = std::tuple<T, Ts...>;
 public:
     TypedInputPortCollection(ComputeModule& parent);
-    virtual void fetch();
-    virtual std::weak_ptr<InputPort> get(size_t portId);
-    virtual size_t size() const;
+    void fetch() override;
+    std::weak_ptr<InputPort> get(size_t portId) override;
+    size_t size() const override;
     template <std::size_t N> typename std::tuple_element<N, PortTuple>::type input();
 private:
     PortTuple m_inputPorts;
@@ -65,15 +74,15 @@ private:
 };
 
 template <typename T, typename ...Ts>
-class TypedOutputPortCollection : public OutputPortCollection {
+class TypedOutputPortCollection final : public OutputPortCollectionBase {
     using PortTuple = std::tuple<
         std::shared_ptr<TypedOutputPort<T>>,
         std::shared_ptr<TypedOutputPort<Ts>>...>;
     using TypeTuple = std::tuple<T, Ts...>;
 public:
     TypedOutputPortCollection(ComputeModule& parent);
-    virtual std::weak_ptr<OutputPort> get(size_t portId);
-    virtual size_t size() const;
+    std::weak_ptr<OutputPort> get(size_t portId) override;
+    size_t size() const override;
     template <std::size_t N> typename std::tuple_element<N, PortTuple>::type output();
 private:
     PortTuple m_outputPorts;
