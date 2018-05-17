@@ -48,12 +48,20 @@ Pane {
         contentItem: ColumnLayout {
             id: layout
 
-            ArrowCheckBox {
-                id: header
-                text: card.displayName
+            RowLayout {
                 Layout.fillWidth: true
-                font: card.font
-                // TODO: indicate the output image colors even if the card is closed
+                ArrowCheckBox {
+                    id: header
+                    text: card.displayName
+                    Layout.fillWidth: true
+                    font: card.font
+                    // TODO: indicate the output image colors even if the card is closed
+                }
+
+                Button {
+                    text: "x"
+                    onClicked: AppActions.requestRemoveModule(card.uid)
+                }
             }
 
             // TODO: hide when no inputs

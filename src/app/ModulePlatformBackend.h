@@ -355,4 +355,18 @@ private:
     PrivateModulePlatformBackend m_private;
 };
 
+// TODO: move it to a namespace
+// credits to: https://stackoverflow.com/questions/800955/remove-if-equivalent-for-stdmap?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+template <typename MapType>
+void erase_if(MapType& container, std::function<bool(const typename MapType::value_type&)> predicate)
+{
+    for (auto it = container.begin(); it != container.end(); ) {
+        if (predicate(*it)) {
+            it = container.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 #endif

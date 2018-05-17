@@ -23,8 +23,10 @@ Item {
             AppActions.notifyModuleAdded(uid);
         };
 
-        handlers[ActionTypes.module_remove_request] = function(uid) {
-            // TODO:
+        handlers[ActionTypes.module_remove_request] = function(args) {
+            backend.destroyModule(args.uid);
+            AppActions.notifyModuleRemoved(args.uid);
+            AppActions.refreshAllModuleOutput();
         };
 
         handlers[ActionTypes.module_input_change_request] = function(args) {

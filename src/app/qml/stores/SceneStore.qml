@@ -21,7 +21,7 @@ Item {
         });
     }
     
-
+    // TODO: move this to some utils.js file
     function findModelIndex(m, criteria) {
         for(var i = 0; i < m.count; ++i) {
             if (criteria(m.get(i))) {
@@ -117,6 +117,15 @@ Item {
             //         lutHigh: x.lutHigh};
             //     model.append(newItem);
             // }
+        };
+
+        handlers[ActionTypes.module_removed_notification] = function(args) {
+            var idx = findModelIndex(model, function (item) {
+                return args.uid == item.uid;
+            });
+            if (idx !== null) {
+                model.remove(idx);
+            }
         };
 
         var notHandled = function(args) {};

@@ -70,6 +70,15 @@ Item {
         return null;
     }
 
+    function findModuleIndex(uid) {
+        for (var i = 0; i < model.count; ++i) {
+            if (model.get(i).uid === uid) {
+                return i;
+            }
+        }
+        return null;
+    }
+
     function findInputPort(uid, portId) {
         var m = findModule(uid);
         // TODO: handle bad indices
@@ -103,6 +112,13 @@ Item {
 
         handlers[ActionTypes.module_param_changed_notification] = function(args) {
             var p = findInputPort(args.uid, args.portId);
+        };
+
+        handlers[ActionTypes.module_removed_notification] = function(args) {
+            var i = findModuleIndex(args.uid);
+            if (i !== null) {
+                model.remove(i);
+            }
         };
 
         var notHandled = function(args) {};

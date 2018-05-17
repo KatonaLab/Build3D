@@ -7,6 +7,7 @@ Middleware {
     id: middleware
 
     property url folder: "."
+    property int tmpUid: -1;
 
     function dispatch(actionType, args) {
         var handlers = {};
@@ -15,6 +16,7 @@ Middleware {
         };
 
         handlers[ActionTypes.module_remove_request] = function(args) {
+            middleware.tmpUid = args.uid;
             moduleRemoveDialog.open();
         };
 
@@ -47,7 +49,8 @@ Middleware {
         }
 
         onYes: {
-            next(ActionTypes.module_remove_request, {uid: openDialog.fileUrl});
+            next(ActionTypes.module_remove_request, {uid: middleware.tmpUid});
+            middleware.tmpUid = -1;
         }
     }
 }

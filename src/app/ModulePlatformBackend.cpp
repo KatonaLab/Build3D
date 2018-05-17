@@ -196,13 +196,23 @@ bool PrivateModulePlatformBackend::hasModule(int uid)
 
 void PrivateModulePlatformBackend::destroyModule(int uid)
 {
-    if (!hasModule(uid)) {
-        return;
-    }
+    erase_if(m_paramHelpers,
+        [uid](const decltype(m_paramHelpers)::value_type& item)
+        {
+            return uid == item.first.first;
+        });
 
-    // TODO: remove the module -> implement ComputePlatform::removeModule + its test
-    // TODO: also remove helper param modules too from m_paramHelpers
-    // TODO: also remove helper image output modules too from m_imageOutputHelpers
+    erase_if(m_imageOutputHelpers,
+        [uid](const decltype(m_imageOutputHelpers)::value_type& item)
+        {
+            return uid == item.first.first;
+        });
+
+    erase_if(m_modules,
+        [uid](const decltype(m_modules)::value_type& item)
+        {
+            return uid == item.first;
+        });
 }
 
 QList<int> PrivateModulePlatformBackend::enumeratePorts(
@@ -379,13 +389,22 @@ bool PrivateModulePlatformBackend::connectInputOutput(int outputModuleUid, int o
 {
     auto input = fetchInputPort(inputModuleUid, inputPortId);
     auto output = fetchOutputPort(outputModuleUid, outputPortId).lock();
-    return output->bind(input);
+    if (output) {
+        return output->bind(input);
+    } else {
+        qDebug() << "no output port with id " << outputPortId << " for module with uid " << outputModuleUid << ", can not connect";
+        return false;
+    }
 }
 
 void PrivateModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
 {
     auto input = fetchInputPort(inputModuleUid, inputPortId);
-    input.lock()->getSource().lock()->unbind(input);
+    if (auto inPtr = input.lock()) {
+        if (auto srcPtr = inPtr->getSource().lock()) {
+            srcPtr->unbind(input);
+        }
+    }
 }
 
 bool PrivateModulePlatformBackend::setParamPortProperty(int uid, int portId, QVariant value)
