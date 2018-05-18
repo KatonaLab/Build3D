@@ -22,10 +22,27 @@ using namespace std;
 
 namespace py = pybind11;
 
+OutStreamRouters PythonEnvironment::outStreamRouters;
+
 PythonEnvironment& PythonEnvironment::instance()
 {
     static PythonEnvironment instance;
     return instance;
+}
+
+void PythonEnvironment::updateStreamRedirects()
+{
+    py::module m = py::module::import("a3dc");
+    m.attr("stdout") = outStreamRouters.stdOut;
+    m.attr("stderr") = outStreamRouters.stdErr;
+    py::exec(R"(
+import a3dc
+import sys
+if a3dc.stdout is not None:
+    sys.stdout = a3dc.stdout
+if a3dc.stderr is not None:
+    sys.stderr = a3dc.stderr
+    )");
 }
 
 // TODO: move to some platform_specific.h/cpp place
@@ -48,8 +65,17 @@ PythonEnvironment::PythonEnvironment()
         setenv("PYTHONHOME", venvPath, true);
     }
     py::initialize_interpreter();
+
+    // TODO: it is crucial on Windows to redirect the python
+    // stdout, because a Windows GUI program gets NoneType for
+    // sys.stdout, that is used by pybind11::print method
+    // find a safer way to eliminate the fatal error if not 
+    // redirected
+    updateStreamRedirects();
+
     py::module::import("a3dc");
     auto sys = py::module::import("sys");
+    py::print("python env info:");
     py::print(sys.attr("path"));
     py::print(sys.attr("executable"));
     py::print(sys.attr("platform"));
@@ -65,17 +91,7 @@ void PythonEnvironment::reset()
 
 void PythonEnvironment::exec(std::string code)
 {
-    py::module m = py::module::import("a3dc");
-    m.attr("stdout") = outStreamRouters.stdOut;
-    m.attr("stderr") = outStreamRouters.stdErr;
-    py::exec(R"(
-import a3dc
-import sys
-if a3dc.stdout is not None:
-    sys.stdout = a3dc.stdout
-if a3dc.stderr is not None:
-    sys.stderr = a3dc.stderr
-    )");
+    updateStreamRedirects();
     py::exec(code);
 }
 
@@ -198,7 +214,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc, m)
 
     py::class_<CustomOutStream>(m, "CustomOutStream")
     .def(py::init<>())
-    .def("write", &CustomOutStream::write);
+    .def("write", &CustomOutStream::write)
+    .def("flush", &CustomOutStream::flush);
 
     m.attr("inputs") = py::dict();
     m.attr("outputs") = py::dict();

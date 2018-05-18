@@ -518,14 +518,14 @@ ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
     OutStreamRouters routers;
     routers.stdOut.callback = [](const std::string& str)
     {
-        qInfo() << QString::fromStdString(str);
+        qInfo("%s", str.c_str());
     };
 
     routers.stdErr.callback = [](const std::string& str)
     {
-        qCritical() << QString::fromStdString(str);
+        qCritical("%s", str.c_str());
     };
 
-    PythonEnvironment::instance().outStreamRouters = routers;
-
+    PythonEnvironment::outStreamRouters = routers;
+    PythonEnvironment::instance();
 }

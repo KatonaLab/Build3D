@@ -88,6 +88,9 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
+    // ensure logging is alive from the first moment
+    LogCollector::instance();
+
     // FIXME: trial period has expired at bactrace.io so no minidump upload can be done
     // if (startCrashHandler() == false) {
     //     cout << "crash reporter could not start" << endl;

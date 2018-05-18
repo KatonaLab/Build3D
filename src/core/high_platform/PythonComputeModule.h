@@ -74,12 +74,14 @@ struct CustomOutStream {
     {
         callback(str);
     }
+    void flush() {}
+
     std::function<void(const std::string&)> callback;
 };
 
 struct OutStreamRouters {
-    CustomOutStream stdOut = {[](const std::string& str) { std::cout << "custom " << str; }};
-    CustomOutStream stdErr = {[](const std::string& str) { std::cerr << "custom " << str; }};
+    CustomOutStream stdOut = {[](const std::string& str) { std::cout << "py.sys.stdout: " << str; }};
+    CustomOutStream stdErr = {[](const std::string& str) { std::cerr << "py.sys.stderr: " << str; }};
 };
 
 class PythonEnvironment {    
@@ -94,9 +96,12 @@ public:
     ProcessFunc func;
     // TODO: reassigning these will break things,
     // hide these member variables
-    OutStreamRouters outStreamRouters;
+    // TODO: clean up this mess, find a better way
+    // to do this without a static member var
+    static OutStreamRouters outStreamRouters;
 protected:
     PythonEnvironment();
+    void updateStreamRedirects();
 };
 
 // --------------------------------------------------------
@@ -115,7 +120,6 @@ public:
     }
     virtual std::shared_ptr<cp::InputPort> port()
     {
-        throw std::runtime_error("PyInputPortWrapper");
         return std::shared_ptr<cp::InputPort>();
     }
     virtual ~PyInputPortWrapper() = default;
@@ -141,7 +145,6 @@ public:
     {}
     virtual std::shared_ptr<cp::OutputPort> port()
     {
-        throw std::runtime_error("PyOutputPortWrapper");
         return std::shared_ptr<cp::OutputPort>();
     }
     virtual ~PyOutputPortWrapper() = default;
