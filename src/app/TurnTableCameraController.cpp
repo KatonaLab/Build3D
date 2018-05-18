@@ -1,12 +1,25 @@
 #include "TurnTableCameraController.h"
 #include <QtMath>
+#include <algorithm>
+
+using namespace std;
 
 TurnTableCameraController::TurnTableCameraController(Qt3DCore::QNode *parent)
     : m_mouseDevice(new Qt3DInput::QMouseDevice()),
     m_mouseHandler(new Qt3DInput::QMouseHandler()),
     m_camera(nullptr),
+    m_linearSpeed(1.0),
+    m_lookSpeed(180),
+    m_viewPortSize(QSize(256, 256)), // for no particular reason
+    m_rollBallRadius(90), // should be smaller than the viewport half
+    m_zoomMin(0.1),
+    m_zoomMax(3),
+    m_zoomRate(0.2),
     m_upVector(QVector3D(0.0f, 1.0f, 0.0f))
 {
+    // calc m_coordMultiplier and m_coordCenter
+    setViewPortSize(m_viewPortSize);
+
     m_mouseHandler->setSourceDevice(m_mouseDevice);
     addComponent(m_mouseHandler);
 
@@ -37,6 +50,14 @@ TurnTableCameraController::TurnTableCameraController(Qt3DCore::QNode *parent)
         {
             handleWheelEvent(wheel->angleDelta().y());
         });
+
+    QObject::connect(m_mouseHandler, &Qt3DInput::QMouseHandler::doubleClicked, this,
+        [this] (Qt3DInput::QMouseEvent*)
+        {
+            if (m_camera) {
+                m_camera->viewAll();
+            }
+        });
 }
 
 void TurnTableCameraController::handleMouseEvent(QPoint prev, QPoint current)
@@ -44,6 +65,9 @@ void TurnTableCameraController::handleMouseEvent(QPoint prev, QPoint current)
     if (!m_camera) {
         return;
     }
+
+    // TODO: no need to recalculate the prev point details, store it
+    // somehow and use that
 
     auto posDetails = [this](QVector2D p)
     {
@@ -89,7 +113,23 @@ void TurnTableCameraController::handleMouseEvent(QPoint prev, QPoint current)
 
 void TurnTableCameraController::handleWheelEvent(float angleDelta)
 {
+    if (!m_camera) {
+        return;
+    }
 
+    QVector3D v = m_camera->position() - m_camera->viewCenter();
+    float factor = max(1.0 - angleDelta / 120. * m_zoomRate, 0.0);
+    QVector3D offset = factor * v;
+
+    if (offset.length() <= m_zoomMin) {
+        offset = v.normalized() * m_zoomMin;
+    }
+
+    if (offset.length() > m_zoomMax) {
+        offset = v.normalized() * m_zoomMax;
+    }
+    
+    m_camera->setPosition(m_camera->viewCenter() + offset);
 }
 
 Qt3DRender::QCamera* TurnTableCameraController::camera() const
@@ -115,6 +155,21 @@ QSize TurnTableCameraController::viewPortSize() const
 float TurnTableCameraController::rollBallRadius() const
 {
     return m_rollBallRadius;
+}
+
+float TurnTableCameraController::zoomMin() const
+{
+    return m_zoomMin;
+}
+
+float TurnTableCameraController::zoomMax() const
+{
+    return m_zoomMax;
+}
+
+float TurnTableCameraController::zoomRate() const
+{
+    return m_zoomRate;
 }
 
 void TurnTableCameraController::setCamera(Qt3DRender::QCamera *camera)
@@ -159,100 +214,26 @@ void TurnTableCameraController::setRollBallRadius(float rollBallRadius)
     }
 }
 
-// void TurnTableCameraController::moveCamera(
-//     const QAbstractCameraController::InputState &state,
-//     float dt)
-// {
-//     using namespace std;
+void TurnTableCameraController::setZoomMin(float zmin)
+{
+    if (m_zoomMin != zmin) {
+        m_zoomMin = zmin;
+        Q_EMIT zoomMinChanged();
+    }
+}
 
-//     if ((state.leftMouseButtonActive || state.rightMouseButtonActive) == false) {
-//         return;
-//     }
+void TurnTableCameraController::setZoomMax(float zmax)
+{
+    if (m_zoomMax != zmax) {
+        m_zoomMax = zmax;
+        Q_EMIT zoomMaxChanged();
+    }
+}
 
-//     // #define PP(t) std::cout << #t << ": " << state.t << ", "
-//     // std::cout << "{";
-//     // PP(altKeyActive);
-//     // PP(leftMouseButtonActive);
-//     // PP(middleMouseButtonActive);
-//     // PP(rightMouseButtonActive);
-//     // PP(rxAxisValue);
-//     // PP(ryAxisValue);
-//     // PP(shiftKeyActive);
-//     // PP(txAxisValue);
-//     // PP(tyAxisValue);
-//     // PP(tzAxisValue);
-//     // std::cout << "dt: " << dt << ", ";
-//     // std::cout << "}\n";
-
-//     Qt3DRender::QCamera *theCamera = camera();
-//     if (theCamera == nullptr) {
-//         return;
-//     }
-
-//     const QVector3D upVector(0.0f, 1.0f, 0.0f);
-//     // auto clampInputs = [](float input1, float input2)
-//     // {
-//     //     float axisValue = input1 + input2;
-//     //     return (axisValue < -1) ? -1 : (axisValue > 1) ? 1 : axisValue;
-//     // };
-
-//     if (state.leftMouseButtonActive) {
-//         // Orbit
-//         // std::cout << dt << std::endl;
-//         theCamera->panAboutViewCenter((state.rxAxisValue * lookSpeed()) * dt, upVector);
-//         theCamera->tiltAboutViewCenter((state.ryAxisValue * lookSpeed()) * dt);
-//         return;
-//     }
-
-//     if (state.rightMouseButtonActive) {
-//         // std::cout << dt << std::endl;
-//         theCamera->translate(
-//             QVector3D(
-//                 -1.0f * state.rxAxisValue * linearSpeed(),
-//                 -1.0f * state.ryAxisValue * linearSpeed(),
-//                 0.0f) * dt);
-//         return;
-//     }
-
-//     // const QVector3D upVector(0.0f, 1.0f, 0.0f);
-//     // // Mouse input
-//     // if (state.leftMouseButtonActive) {
-//     //     if (state.rightMouseButtonActive) {
-//     //         if (zoomDistance(camera()->position(), theCamera->viewCenter()) > d->m_zoomInLimit * d->m_zoomInLimit) {
-//     //             // Dolly up to limit
-//     //             theCamera->translate(QVector3D(0, 0, state.ryAxisValue), theCamera->DontTranslateViewCenter);
-//     //         } else {
-//     //             theCamera->translate(QVector3D(0, 0, -0.5), theCamera->DontTranslateViewCenter);
-//     //         }
-//     //     } else {
-//     //         // Translate
-//     //         theCamera->translate(QVector3D(clampInputs(state.rxAxisValue, state.txAxisValue) * linearSpeed(),
-//     //         clampInputs(state.ryAxisValue, state.tyAxisValue) * linearSpeed(),
-//     //         0) * dt);
-//     //     }
-//     //     return;
-//     // }
-//     // else if (state.rightMouseButtonActive) {
-//     //     // Orbit
-//     //     theCamera->panAboutViewCenter((state.rxAxisValue * lookSpeed()) * dt, upVector);
-//     //     theCamera->tiltAboutViewCenter((state.ryAxisValue * lookSpeed()) * dt);
-//     // }
-//     // // Keyboard Input
-//     // if (state.altKeyActive) {
-//     //     // Orbit
-//     //     theCamera->panAboutViewCenter((state.txAxisValue * lookSpeed()) * dt, upVector);
-//     //     theCamera->tiltAboutViewCenter((state.tyAxisValue * lookSpeed()) * dt);
-//     // } else if (state.shiftKeyActive) {
-//     //     if (zoomDistance(camera()->position(), theCamera->viewCenter()) > d->m_zoomInLimit * d->m_zoomInLimit) {
-//     //         // Dolly
-//     //         theCamera->translate(QVector3D(0, 0, state.tyAxisValue * linearSpeed() * dt), theCamera->DontTranslateViewCenter);
-//     //     } else {
-//     //         theCamera->translate(QVector3D(0, 0, -0.5), theCamera->DontTranslateViewCenter);
-//     //     }
-//     // } else {
-//     //     // Translate
-//     //     theCamera->translate(QVector3D(clampInputs(state.leftMouseButtonActive ? state.rxAxisValue : 0, state.txAxisValue) * linearSpeed(),
-//     //     clampInputs(state.leftMouseButtonActive ? state.ryAxisValue : 0, state.tyAxisValue) * linearSpeed(),
-//     //     state.tzAxisValue * linearSpeed()) * dt);
-//     // }
-// }
+void TurnTableCameraController::setZoomRate(float zrate)
+{
+    if (m_zoomRate != zrate) {
+        m_zoomRate = zrate;
+        Q_EMIT zoomRateChanged();
+    }
+}
