@@ -57,7 +57,6 @@ protected:
     float m_zoomMin;
     float m_zoomMax;
     float m_zoomRate;
-    const QVector3D m_upVector;
     QVector2D m_coordMultiplier;
     QVector2D m_coordCenter;
     QPoint m_currentMousePos;
