@@ -9,6 +9,10 @@ CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slo
 # used in version.h/cpp
 DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --abbrev=8 --dirty --always --tags)
 
+CONFIG(release, debug|release) {
+    config += optimize_full
+}
+
 win32 {
     DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=win32
     QMAKE_CXXFLAGS += -bigobj
@@ -93,9 +97,9 @@ INCLUDEPATH += \
     ../../lib/pybind11/include/
 
 win32 {
-    INCLUDEPATH += C:/Python36/include/
-    LIBS += "C:/Python36/libs/libpython36.a"
-    LIBS += -L"C:/Python36/libs/"
+    INCLUDEPATH += "C:\WinPython36\python-3.6.5.amd64/include/"
+    LIBS += "C:\WinPython36\python-3.6.5.amd64/libs/libpython36.a"
+    LIBS += -L"C:\WinPython36\python-3.6.5.amd64/libs/"
     DEFINES += "LIBICS_USE_ZLIB=Off" # for libics
     DEFINES += "DO_NOT_USE_WMAIN" # for catch.hpp
     SOURCES -= ../../lib/libics/libics_gzip.c

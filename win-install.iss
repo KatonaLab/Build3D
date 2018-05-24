@@ -1,16 +1,18 @@
 [Setup]
 AppName=A3DC
-AppVersion=0.11
+AppVersion=0.2
 DefaultDirName={localappdata}\A3DC
 DefaultGroupName=A3DC
-UninstallDisplayIcon={app}\a3dc.exe
 Compression=lzma2
+;Compression=none
 SolidCompression=yes
 OutputDir=.
-OutputBaseFilename=a3dc-setup-011
+OutputBaseFilename=a3dc-setup-0.2
+Uninstallable=yes
+CreateUninstallRegKey=yes
 
 [Files]
-Source: "build\src\app\debug\*"; Excludes: "*.obj"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "build\src\app\debug\*"; Excludes: "*.obj,*.pdb,*.ilk,*.h,*.cpp,*.c,*.hpp,*.ipp,*.cxx,*.hxx,__pycache__,*.DS_store,Thumbs.db"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
-Name: "{group}\A3DC"; Filename: "{app}\a3dc.exe"
+Name: "{group}\A3DC"; Filename: "{app}\app-starter.bat"

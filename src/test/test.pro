@@ -52,9 +52,9 @@ INCLUDEPATH += \
     ../../lib/libics
 
 win32 {
-    INCLUDEPATH += C:/Python36/include/
-    LIBS += "C:/Python36/libs/libpython36.a"
-    LIBS += -L"C:/Python36/libs/"
+    INCLUDEPATH += "C:\WinPython36\python-3.6.5.amd64/include/"
+    LIBS += "C:\WinPython36\python-3.6.5.amd64/libs/libpython36.a"
+    LIBS += -L"C:\WinPython36\python-3.6.5.amd64/libs/"
     QMAKE_CXXFLAGS += -bigobj
     SOURCES -= ../../lib/libics/libics_gzip.c
     DEFINES += "LIBICS_USE_ZLIB=Off" # for libics

@@ -96,6 +96,6 @@ void logMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
         case QtFatalMsg:
             LogCollector::instance().fatalMsg(msg);
             std::cerr << msg.toStdString() << "\n";
-            abort();
+            //abort();
     }
 }

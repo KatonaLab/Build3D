@@ -482,7 +482,9 @@ QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
     QDirIterator level1("scripts");
     while (level1.hasNext()) {
         level1.next();
-        if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()) {
+        if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()
+			&& level1.fileName() != "." && level1.fileName() != "..") {
+
             QVariantMap vmap;
             vmap["displayName"] = level1.fileName();
             QVariantList fileList;
