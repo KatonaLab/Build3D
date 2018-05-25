@@ -32,16 +32,16 @@ PythonEnvironment& PythonEnvironment::instance()
 
 void PythonEnvironment::updateStreamRedirects()
 {
-    py::module m = py::module::import("a3dc");
+    py::module m = py::module::import("a3dc_module_interface");
     m.attr("stdout") = outStreamRouters.stdOut;
     m.attr("stderr") = outStreamRouters.stdErr;
     py::exec(R"(
-import a3dc
+import a3dc_module_interface
 import sys
-if a3dc.stdout is not None:
-    sys.stdout = a3dc.stdout
-if a3dc.stderr is not None:
-    sys.stderr = a3dc.stderr
+if a3dc_module_interface.stdout is not None:
+    sys.stdout = a3dc_module_interface.stdout
+if a3dc_module_interface.stderr is not None:
+    sys.stderr = a3dc_module_interface.stderr
     )");
 }
 
@@ -61,10 +61,15 @@ int setenv(const char *name, const char *value, int overwrite)
 
 PythonEnvironment::PythonEnvironment()
 {
-    //if (auto venvPath = getenv("VIRTUAL_ENV")) {
-    //    setenv("PYTHONHOME", venvPath, true);
-    //}
-	//setenv("PYTHONHOME", "C:\WinPython36\python-3.6.5.amd64\Lib", true);
+    // TODO: unified python handling on all platforms
+    #ifdef _WIN32
+    #else
+
+        if (auto venvPath = getenv("VIRTUAL_ENV")) {
+            setenv("PYTHONHOME", venvPath, true);
+        }
+
+    #endif
 
     py::initialize_interpreter();
 
@@ -75,7 +80,7 @@ PythonEnvironment::PythonEnvironment()
     // redirected
     updateStreamRedirects();
 
-    py::module::import("a3dc");
+    py::module::import("a3dc_module_interface");
     auto sys = py::module::import("sys");
     py::print("python env info:");
     py::print(sys.attr("path"));
@@ -172,7 +177,7 @@ void pyDeclareMultiDimImageType(pybind11::module &m, string name)
     // TODO: volumes
 }
 
-PYBIND11_EMBEDDED_MODULE(a3dc, m)
+PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
 {
     py::enum_<PyTypes>(m, "types", py::arithmetic())
     .value("int8", PyTypes::TYPE_int8_t)
@@ -392,7 +397,7 @@ void PythonComputeModule::buildPorts()
 
 void PythonComputeModule::execute()
 {
-    py::module m = py::module::import("a3dc");
+    py::module m = py::module::import("a3dc_module_interface");
     py::object inputs = m.attr("inputs");
     py::object outputs = m.attr("outputs");
 
