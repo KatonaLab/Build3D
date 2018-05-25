@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 
 import a3dc
 
@@ -10,7 +11,10 @@ class main(object):
         tstart = time.clock()
         
         #Path for source files
-        path = 'D:\\Playground\\refactoring'
+        if len(sys.argv) <= 1:
+            path = 'D:\\Playground\\refactoring'
+        else:
+            path = sys.argv[1]
         
         
         channelName1='vGlut'
