@@ -12,7 +12,7 @@ Uninstallable=yes
 CreateUninstallRegKey=yes
 
 [Files]
-Source: "build\src\app\debug\*"; Excludes: "*.obj,*.pdb,*.ilk,*.h,*.cpp,*.c,*.hpp,*.ipp,*.cxx,*.hxx,__pycache__,*.DS_store,Thumbs.db"; DestDir: "{app}"; Flags: recursesubdirs
+Source: "build\src\app\release\*"; Excludes: "*.obj,*.pdb,*.ilk,*.h,*.cpp,*.c,*.hpp,*.ipp,*.cxx,*.hxx,__pycache__,*.DS_store,Thumbs.db"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
 Name: "{group}\A3DC"; Filename: "{app}\app-starter.bat"
