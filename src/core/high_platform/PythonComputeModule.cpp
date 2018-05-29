@@ -113,6 +113,31 @@ void pyDeclareMetaType(pybind11::module &m)
 template <typename T>
 void pyDeclareMultiDimImageType(pybind11::module &m, string name)
 {
+    // TODO: use type compatible array_t
+    m.def((name + "_from_ndarray").c_str(), [](py::array a)
+    {
+        if (a.ndim() != 3) {
+            throw std::runtime_error("ndarray should have 3 dimensions");
+        }
+
+        auto r = a.unchecked<T, 3>();
+
+        // TODO: try to find a faster copy
+        size_t w = (size_t)(r.shape(0));
+        size_t h = (size_t)(r.shape(1));
+        size_t d = (size_t)(r.shape(2));
+        MultiDimImage<T> im({w, h, d});
+        auto& data = im.unsafeData();
+        for (size_t i = 0; i < w; ++i) {
+            for (size_t j = 0; j < h; ++j) {
+                for (size_t k = 0; k < d; ++k) {
+                    data[k][j * r.shape(1) + i] = r(i, j, k);
+                }
+            }
+        }
+        return im;
+    });
+
     py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name.c_str())
     .def(py::init([](std::vector<std::size_t> dims)
     {

@@ -3,6 +3,7 @@
 #include "ComputeModule.h"
 
 #include <algorithm>
+#include <iostream>
 
 using namespace core::compute_platform;
 using namespace std;
@@ -59,6 +60,7 @@ bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
                 ptr->m_source = shared_from_this();
                 return true;
             }
+            std::cout << "can not connect types " << traits().typeName() << " -> " << ptr->traits().typeName() << std::endl;
         }
     }
     return false;

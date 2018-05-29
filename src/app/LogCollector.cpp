@@ -79,23 +79,23 @@ void logMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
     switch (type) {
         case QtDebugMsg:
             LogCollector::instance().debugMsg(msg);
-            std::cout << msg.toStdString();
+            std::cout << msg.toStdString() << "\n";
             break;
         case QtInfoMsg:
             LogCollector::instance().infoMsg(msg);
-            std::cout << msg.toStdString();
+            std::cout << msg.toStdString() << "\n";
             break;
         case QtWarningMsg:
             LogCollector::instance().warningMsg(msg);
-            std::cerr << msg.toStdString();
+            std::cerr << msg.toStdString() << "\n";
             break;
         case QtCriticalMsg:
             LogCollector::instance().criticalMsg(msg);
-            std::cerr << msg.toStdString();
+            std::cerr << msg.toStdString() << "\n";
             break;
         case QtFatalMsg:
             LogCollector::instance().fatalMsg(msg);
-            std::cerr << msg.toStdString();
+            std::cerr << msg.toStdString() << "\n";
             //abort();
     }
 }

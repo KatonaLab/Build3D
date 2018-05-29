@@ -21,6 +21,7 @@ public:
         return hash() == ptt.hash();
     }
     virtual bool hasTrait(const std::string& trait) const = 0;
+    virtual std::string typeName() const = 0;
 protected:
     virtual std::size_t hash() const = 0;
 };
@@ -41,6 +42,10 @@ public:
     {
         static const PortTypeTraits theOne;
         return theOne;
+    }
+    std::string typeName() const override
+    {
+        return typeid(T).name();
     }
 protected:
     std::size_t hash() const override

@@ -165,7 +165,9 @@ void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
             throw std::runtime_error("unknown input parameter type, can not create input module for that");
         }
 
-        connectPorts(*helperModule, 0, m.getComputeModule(), portId);
+        if (!connectPorts(*helperModule, 0, m.getComputeModule(), portId)) {
+            throw std::runtime_error("internal error, can not connect param helper modules");
+        }
         m_paramHelpers[make_pair(uid, portId)] = unique_ptr<ParamHelperModule>(helperModule);
     }
 }
