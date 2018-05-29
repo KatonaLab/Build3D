@@ -9,7 +9,7 @@ set VCREDIST_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community
 
 set SRC_DIR="C:\Users\balint\projects\A3DC"
 set PATH=%QT_DIR%\bin;%QT_CREATOR_DIR%\bin;%PATH%
-set SCRIPT_DIR="%SRC_DIR%\src\app\scripts"
+set SCRIPT_DIR="%SRC_DIR%\src\app\modules"
 
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
 cd "%SRC_DIR%"
@@ -31,7 +31,7 @@ windeployqt -verbose=1 "%BUILD_DIR%\src\app\%BUILD_MODE%\app.exe" -qmldir="%BUIL
 
 copy "%VCREDIST_PATH%" "%BUILD_DIR%\src\app\%BUILD_MODE%\"
 xcopy "%PYTHON_DIR_FULL_PATH%" "%BUILD_DIR%\src\app\%BUILD_MODE%\%PYTHON_DIR_NAME%" /s /e /y /i
-xcopy "%SCRIPT_DIR%" "%BUILD_DIR%\src\app\%BUILD_MODE%\scripts" /s /e /y /i
+xcopy "%SCRIPT_DIR%" "%BUILD_DIR%\src\app\%BUILD_MODE%\modules" /s /e /y /i
 copy "%SRC_DIR%\app-starter.bat" "%BUILD_DIR%\src\app\%BUILD_MODE%\"
 
 set A3DC_COMPILE_VERSION="%BUILD_MODE%"

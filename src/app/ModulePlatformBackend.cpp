@@ -479,7 +479,7 @@ QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
             && f.suffix().toLower() == "py";
     };
 
-    QDirIterator level1("scripts");
+    QDirIterator level1("modules");
     while (level1.hasNext()) {
         level1.next();
         if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()

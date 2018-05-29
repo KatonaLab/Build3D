@@ -66,6 +66,6 @@ macx {
     # INCLUDEPATH += \
         # ../../virtualenv/include/python3.6m
     # LIBS += -L"/Library/Frameworks/Python.framework/Versions/3.6/lib" -lpython3.6m
-    INCLUDEPATH += $$system(python3-config --includes)
+    QMAKE_CXXFLAGS += $$system(python3-config --includes)
     LIBS += $$system(python3-config --ldflags)
 }

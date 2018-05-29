@@ -1,7 +1,7 @@
 import a3dc
 from a3dc import Arg
 import numpy as np
-from scripts.a3dc_utils import multi_dim_image_apply, multi_dim_image_plane_iterator
+from modules.a3dc_utils import multi_dim_image_apply, multi_dim_image_plane_iterator
 
 def module_main():
     out = a3dc.MultiDimImageFloat([128, 128, 128])
