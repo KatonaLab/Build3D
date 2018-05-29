@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQml 2.2
 import QtQml.Models 2.2
+import QtQuick.Controls.Material 2.2
 
 import "../../actions"
 
@@ -9,6 +10,7 @@ Pane {
     id: root
     property var supportedModules
     property alias model: listView.model
+    property bool configurationUpToDate: true
 
     padding: 12
 
@@ -39,6 +41,7 @@ Pane {
                 onClicked: {
                     AppActions.evaluatePlatform();
                 }
+                Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
             }
 
             Rectangle { color: "transparent"; height: 16; width: 1 }

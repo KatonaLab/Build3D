@@ -9,6 +9,8 @@
 #include <QDirIterator>
 #include <QFileInfo>
 
+#include <iostream>
+
 using namespace std;
 using namespace core::io_utils;
 using namespace core::compute_platform;
@@ -518,15 +520,15 @@ ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
 {
     // TODO: move to cpp
     OutStreamRouters routers;
-    routers.stdOut.callback = [](const std::string& str)
+    routers.stdOut.setCallback([](const std::string& str)
     {
         qInfo("%s", str.c_str());
-    };
+    });
 
-    routers.stdErr.callback = [](const std::string& str)
+    routers.stdErr.setCallback([](const std::string& str)
     {
         qCritical("%s", str.c_str());
-    };
+    });
 
     PythonEnvironment::outStreamRouters = routers;
     PythonEnvironment::instance();

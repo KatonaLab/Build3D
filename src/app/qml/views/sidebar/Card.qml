@@ -15,7 +15,7 @@ Pane {
     property var inputs
     property var parameters
     property var outputs
-    property alias expanded: header.checked
+    property alias expanded: headerArrow.checked
 
     Material.elevation: 4
 
@@ -24,7 +24,7 @@ Pane {
 
     states: State {
         name: "opened"
-        when: header.checked
+        when: headerArrow.checked
         PropertyChanges {
             target: card
             contentHeight: layout.implicitHeight
@@ -49,9 +49,11 @@ Pane {
             id: layout
 
             RowLayout {
+                id: header
+
                 Layout.fillWidth: true
                 ArrowCheckBox {
-                    id: header
+                    id: headerArrow    
                     text: card.displayName
                     Layout.fillWidth: true
                     font: card.font

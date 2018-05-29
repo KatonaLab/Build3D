@@ -75,6 +75,7 @@ ApplicationWindow {
             Layout.fillHeight: true
             model: MainStore.cardStore.model
             supportedModules: MainStore.moduleStore.supportedModules
+            configurationUpToDate: MainStore.moduleStore.modelUpToDate
         }
 
         Item {
@@ -111,8 +112,11 @@ ApplicationWindow {
                     clip: true
                     Flickable {
                         flickableDirection: Flickable.VerticalFlick
+                        contentHeight: textArea.height
                         contentY: contentHeight - height
-                        TextArea {
+                        
+                        TextArea.flickable: TextArea {
+                            id : textArea
                             font.pointSize: 11
                             font.family: "Courier"
                             text: LogCollector.unfilteredLog

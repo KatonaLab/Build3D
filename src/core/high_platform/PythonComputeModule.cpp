@@ -82,16 +82,6 @@ PythonEnvironment::PythonEnvironment()
 
     py::module::import("a3dc_module_interface");
     auto sys = py::module::import("sys");
-    py::print("python env info:");
-    py::print(sys.attr("path"));
-    py::print(sys.attr("executable"));
-    py::print(sys.attr("platform"));
-    py::print(sys.attr("version"));
-    py::print(sys.attr("version_info"));
-	py::print(sys.attr("base_prefix"));
-	py::print(sys.attr("builtin_module_names"));
-	py::print(sys.attr("exec_prefix"));
-	py::print(sys.attr("meta_path"));
 }
 
 void PythonEnvironment::reset()

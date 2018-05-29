@@ -69,19 +69,35 @@ typedef std::function<void()> ProcessFunc;
 
 // --------------------------------------------------------
 
-struct CustomOutStream {
+class CustomOutStream {
+public:
+    CustomOutStream() {}
+    CustomOutStream(std::function<void(const std::string&)> callback) : m_callback(callback) {}
     void write(const std::string& str)
     {
-        callback(str);
+        m_buffer += str;
+        if (m_buffer[m_buffer.size() - 1] == '\n') {
+            flush();
+        }
     }
-    void flush() {}
+    void flush() {
+        m_callback(m_buffer);
+        m_buffer.clear();
+    }
 
-    std::function<void(const std::string&)> callback;
+    void setCallback(std::function<void(const std::string&)> callback)
+    {
+        m_callback = callback;
+    }
+private:
+    std::function<void(const std::string&)> m_callback;
+    // TODO: change to stringstream
+    std::string m_buffer;
 };
 
 struct OutStreamRouters {
-    CustomOutStream stdOut = {[](const std::string& str) { std::cout << "py.sys.stdout: " << str; }};
-    CustomOutStream stdErr = {[](const std::string& str) { std::cerr << "py.sys.stderr: " << str; }};
+    CustomOutStream stdOut = CustomOutStream([](const std::string& str) { std::cout << "py.sys.stdout: " << str; });
+    CustomOutStream stdErr = CustomOutStream([](const std::string& str) { std::cerr << "py.sys.stderr: " << str; });
 };
 
 class PythonEnvironment {    

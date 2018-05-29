@@ -7,6 +7,7 @@ Item {
 
     property alias backend: backend
     property alias supportedModules: supportedModules
+    property bool modelUpToDate: true
 
     function onDispatched(actionType, args) {
         var handlers = {};
@@ -20,13 +21,19 @@ Item {
 
         handlers[ActionTypes.module_add_request] = function(args) {
             var uid = backend.createGenericModule(args.scriptPath);
-            AppActions.notifyModuleAdded(uid);
+            if (uid >= 0) {
+                modelUpToDate = false;
+                AppActions.notifyModuleAdded(uid);
+            }
         };
 
         handlers[ActionTypes.module_remove_request] = function(args) {
-            backend.destroyModule(args.uid);
-            AppActions.notifyModuleRemoved(args.uid);
-            AppActions.refreshAllModuleOutput();
+            if (backend.hasModule(args.uid)) {
+                modelUpToDate = false;
+                backend.destroyModule(args.uid);
+                AppActions.notifyModuleRemoved(args.uid);
+                AppActions.refreshAllModuleOutput();
+            }
         };
 
         handlers[ActionTypes.module_input_change_request] = function(args) {
@@ -37,9 +44,11 @@ Item {
             if (!success) {
                 // TODO: proper error messaging
                 console.warn("can not connect ports");
+            } else {
+                modelUpToDate = false;
+                args.values.inputOptionForceReset = !success;
+                AppActions.notifyModuleInputChanged(args.uid, args.portId, args.values);
             }
-            args.values.inputOptionForceReset = !success;
-            AppActions.notifyModuleInputChanged(args.uid, args.portId, args.values);
         };
 
         handlers[ActionTypes.module_output_change_request] = function(args) {
@@ -47,13 +56,17 @@ Item {
         };
 
         handlers[ActionTypes.module_param_change_request] = function(args) {
-            backend.setParamPortProperty(args.uid, args.portId, args.values.value);
-            AppActions.notifyModuleParamChanged(args.uid, args.portId, args.values);
+            if (backend.hasModule(args.uid)) {
+                modelUpToDate = false;
+                backend.setParamPortProperty(args.uid, args.portId, args.values.value);
+                AppActions.notifyModuleParamChanged(args.uid, args.portId, args.values);
+            }
         };
 
         handlers[ActionTypes.platform_evaluation] = function(args) {
             backend.evaluatePlatform();
             AppActions.refreshAllModuleOutput();
+            modelUpToDate = true;
         };
 
         handlers[ActionTypes.module_list_refresh] = function(args) {
