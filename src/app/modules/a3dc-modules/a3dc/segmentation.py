@@ -15,7 +15,7 @@ def tag_image(ndarray):
     #itk_image=sitk.Cast(itk_image, sitk.sitkUInt8)
 
     # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
-    ndarray = sitk.ConnectedComponent(itk_image, fullyConnected=True)
+    ndarray = sitk.ConnectedComponent(itk_image, True)
 
     return sitk.GetArrayFromImage(ndarray)
  
