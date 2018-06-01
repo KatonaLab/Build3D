@@ -58,18 +58,20 @@ protected:
 template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
 
 #define PORT_TYPE_TRAITS(Type, x) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = x; };
+#define PORT_TYPE_TRAITS_EX(Type, x...) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = {x}; };
 
-PORT_TYPE_TRAITS(uint8_t, {"int-like"});
-PORT_TYPE_TRAITS(uint16_t, {"int-like"});
-PORT_TYPE_TRAITS(uint32_t, {"int-like"});
-PORT_TYPE_TRAITS(uint64_t, {"int-like"});
-PORT_TYPE_TRAITS(int8_t, {"int-like"});
-PORT_TYPE_TRAITS(int16_t, {"int-like"});
-PORT_TYPE_TRAITS(int32_t, {"int-like"});
-PORT_TYPE_TRAITS(int64_t, {"int-like"});
-PORT_TYPE_TRAITS(float, {"float-like"});
-PORT_TYPE_TRAITS(double, {"float-like"});
-PORT_TYPE_TRAITS(bool, {"bool-like"});
+// TODO: remove the exact type traits, it's a hack that should be fixed with a project-wide static-dynamic typeing system
+PORT_TYPE_TRAITS_EX(uint8_t, "int-like", "uint8_t");
+PORT_TYPE_TRAITS_EX(uint16_t, "int-like", "uint16_t");
+PORT_TYPE_TRAITS_EX(uint32_t, "int-like", "uint32_t");
+PORT_TYPE_TRAITS_EX(uint64_t, "int-like", "uint64_t");
+PORT_TYPE_TRAITS_EX(int8_t, "int-like", "int8_t");
+PORT_TYPE_TRAITS_EX(int16_t, "int-like", "int16_t");
+PORT_TYPE_TRAITS_EX(int32_t, "int-like", "int32_t");
+PORT_TYPE_TRAITS_EX(int64_t, "int-like", "int64_t");
+PORT_TYPE_TRAITS_EX(float, "float-like", "float");
+PORT_TYPE_TRAITS_EX(double, "float-like", "double");
+PORT_TYPE_TRAITS_EX(bool, "bool-like", "bool");
 
 // --------------------------
 

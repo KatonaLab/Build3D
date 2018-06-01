@@ -155,10 +155,35 @@ void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
         // TODO: don't use naked pointers
         ParamHelperModule* helperModule = nullptr;
 
+        // TODO: fix this mess, find a project-wide solution for static-dynamic type conversion
         if (t.hasTrait("int-like")) {
-            helperModule = new TypedParamHelperModule<int>(m_platform, 0);
+            if (t.hasTrait("uint8_t")) {
+                helperModule = new TypedParamHelperModule<uint8_t>(m_platform, 0);
+            } else if (t.hasTrait("uint16_t")) {
+                helperModule = new TypedParamHelperModule<uint16_t>(m_platform, 0);
+            } else if (t.hasTrait("uint32_t")) {
+                helperModule = new TypedParamHelperModule<uint32_t>(m_platform, 0);
+            } else if (t.hasTrait("uint64_t")) {
+                helperModule = new TypedParamHelperModule<uint64_t>(m_platform, 0);
+            } else if (t.hasTrait("int8_t")) {
+                helperModule = new TypedParamHelperModule<int8_t>(m_platform, 0);
+            } else if (t.hasTrait("int16_t")) {
+                helperModule = new TypedParamHelperModule<int16_t>(m_platform, 0);
+            } else if (t.hasTrait("int32_t")) {
+                helperModule = new TypedParamHelperModule<int32_t>(m_platform, 0);
+            } else if (t.hasTrait("int64_t")) {
+                helperModule = new TypedParamHelperModule<int64_t>(m_platform, 0);
+            } else {
+                throw std::runtime_error("unknown input parameter int-like type, can not create input module for that");
+            }
         } else if (t.hasTrait("float-like")) {
-            helperModule = new TypedParamHelperModule<float>(m_platform, 0);
+            if (t.hasTrait("float")) {
+                helperModule = new TypedParamHelperModule<float>(m_platform, 0);
+            } else if (t.hasTrait("double")) {
+                helperModule = new TypedParamHelperModule<double>(m_platform, 0);
+            } else {
+                throw std::runtime_error("unknown input parameter float-like type, can not create input module for that");
+            }
         } else if (t.hasTrait("bool-like")) {
             helperModule = new TypedParamHelperModule<bool>(m_platform, 0);
         } else {

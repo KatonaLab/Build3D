@@ -114,7 +114,7 @@ template <typename T>
 void pyDeclareMultiDimImageType(pybind11::module &m, string name)
 {
     // TODO: use type compatible array_t
-    m.def((name + "_from_ndarray").c_str(), [](py::array a)
+    m.def((name + "_from_ndarray").c_str(), [](py::array a) -> MultiDimImage<T>
     {
         if (a.ndim() != 3) {
             throw std::runtime_error("ndarray should have 3 dimensions");
@@ -135,6 +135,7 @@ void pyDeclareMultiDimImageType(pybind11::module &m, string name)
                 }
             }
         }
+
         return im;
     });
 

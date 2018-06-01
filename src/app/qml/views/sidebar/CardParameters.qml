@@ -93,7 +93,7 @@ Repeater {
                 stepSize: 1
                 snapMode: Slider.SnapAlways
                 from: details.from || 0
-                to: details.to || 10
+                to: details.to || 1000
                 text: details.displayName
 
                 onValueChanged: {
