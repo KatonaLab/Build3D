@@ -16,6 +16,7 @@
 
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 
 // --------------------------------------------------------
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<float>, {"float-image"});
@@ -351,6 +352,61 @@ private:
 
 // --------------------------------------------------------
 
+// TODO: move to a separate file/place
+template <typename T>
+multidim_image_platform::MultiDimImage<T> multiDimImageFromNdarray(pybind11::array_t<T> a)
+{
+    if (a.ndim() != 3) {
+        throw std::runtime_error("ndarray should have 3 dimensions for multiDimImageFromNdarray");
+    }
+
+    auto r = a.template unchecked<3>();
+
+    // TODO: try to find a faster copy
+    size_t w = (size_t)(r.shape(0));
+    size_t h = (size_t)(r.shape(1));
+    size_t d = (size_t)(r.shape(2));
+    multidim_image_platform::MultiDimImage<T> im({w, h, d});
+    auto& data = im.unsafeData();
+    for (size_t i = 0; i < w; ++i) {
+        for (size_t j = 0; j < h; ++j) {
+            for (size_t k = 0; k < d; ++k) {
+                data[k][j * w + i] = r(i, j, k);
+            }
+        }
+    }
+
+    return im;
+}
+
+template <typename T>
+pybind11::array_t<T> multiDimImageToNdarray(const multidim_image_platform::MultiDimImage<T> &a)
+{
+    if (a.dims() != 3) {
+        throw std::runtime_error("MultiDimImage should have 3 dimensions for multiDimImageToNdarray");
+    }
+
+    pybind11::array_t<T> result(a.dimList());
+    auto r = result.template mutable_unchecked<3>();
+
+    // // TODO: try to find a faster copy
+    size_t w = a.dim(0);
+    size_t h = a.dim(1);
+    size_t d = a.dim(2);    
+    auto& data = a.unsafeData();
+    for (size_t i = 0; i < w; ++i) {
+        for (size_t j = 0; j < h; ++j) {
+            for (size_t k = 0; k < d; ++k) {
+                r(i, j, k) = data[k][j * w + i];
+            }
+        }
+    }
+
+    return result;
+}
+
+// --------------------------------------------------------
+
 // TODO: review this class and consider removing it
 // TODO: this is a highly dangerous class along with the 
 // private-data-opening MultiDimImage mechanism, FIXME
@@ -404,5 +460,7 @@ protected:
 };
 
 }}
+
+// --------------------------------------------------------
 
 #endif

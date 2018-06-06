@@ -86,7 +86,27 @@ PythonEnvironment::PythonEnvironment()
 
 void PythonEnvironment::reset()
 {
-    // TODO: implement or remove this function
+    // // TODO: implement or remove this function
+    // py::finalize_interpreter();
+
+    // py::initialize_interpreter();
+
+    // // TODO: it is crucial on Windows to redirect the python
+    // // stdout, because a Windows GUI program gets NoneType for
+    // // sys.stdout, that is used by pybind11::print method
+    // // find a safer way to eliminate the fatal error if not 
+    // // redirected
+    // updateStreamRedirects();
+
+    // py::module::import("a3dc_module_interface");
+    // auto sys = py::module::import("sys");
+
+    // remove all global variables
+    py::exec(R"(
+for name in dir():
+    if not name.startswith('_'):
+        del globals()[name]
+    )");
 }
 
 void PythonEnvironment::exec(std::string code)
@@ -114,30 +134,8 @@ template <typename T>
 void pyDeclareMultiDimImageType(pybind11::module &m, string name)
 {
     // TODO: use type compatible array_t
-    m.def((name + "_from_ndarray").c_str(), [](py::array a) -> MultiDimImage<T>
-    {
-        if (a.ndim() != 3) {
-            throw std::runtime_error("ndarray should have 3 dimensions");
-        }
-
-        auto r = a.unchecked<T, 3>();
-
-        // TODO: try to find a faster copy
-        size_t w = (size_t)(r.shape(0));
-        size_t h = (size_t)(r.shape(1));
-        size_t d = (size_t)(r.shape(2));
-        MultiDimImage<T> im({w, h, d});
-        auto& data = im.unsafeData();
-        for (size_t i = 0; i < w; ++i) {
-            for (size_t j = 0; j < h; ++j) {
-                for (size_t k = 0; k < d; ++k) {
-                    data[k][j * r.shape(1) + i] = r(i, j, k);
-                }
-            }
-        }
-
-        return im;
-    });
+    m.def((name + "_from_ndarray").c_str(), multiDimImageFromNdarray<T>, py::return_value_policy::move);
+    m.def((name + "_to_ndarray").c_str(), multiDimImageToNdarray<T>);
 
     py::class_<MultiDimImage<T>, std::shared_ptr<MultiDimImage<T>>>(m, name.c_str())
     .def(py::init([](std::vector<std::size_t> dims)
@@ -413,6 +411,11 @@ void PythonComputeModule::buildPorts()
 
 void PythonComputeModule::execute()
 {
+    auto& env = PythonEnvironment::instance();
+    env.reset();
+    env.exec(m_code);
+    m_func = env.func;
+
     py::module m = py::module::import("a3dc_module_interface");
     py::object inputs = m.attr("inputs");
     py::object outputs = m.attr("outputs");
