@@ -117,6 +117,7 @@ namespace multidim_image_platform {
         View plane(std::vector<std::size_t> coords);
         View volume(std::vector<std::size_t> coords);
         std::vector<std::vector<T>>& unsafeData();
+        const std::vector<std::vector<T>>& unsafeData() const;
         void reorderDims(std::vector<std::size_t> dims);
         void removeDims(std::vector<std::size_t> dims);
         std::vector<MultiDimImage<T>> splitDim(std::size_t dim);

@@ -322,6 +322,12 @@ std::vector<std::vector<T>>& MultiDimImage<T>::unsafeData()
 }
 
 template <typename T>
+const std::vector<std::vector<T>>& MultiDimImage<T>::unsafeData() const
+{
+    return m_planes;
+}
+
+template <typename T>
 typename MultiDimImage<T>::View MultiDimImage<T>::subDimView(std::vector<std::size_t> coords, std::size_t firstNDims)
 {
     if (m_dims.size() < firstNDims + 1) {
