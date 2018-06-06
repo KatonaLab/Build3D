@@ -35,6 +35,29 @@ Item {
         id: defaultTexture
     }
 
+    function updateTexture(idx) {
+        var x = model.get(idx);
+
+        var item = {"uid": x.uid,
+            "portId": x.portId,
+            "color": x.color,
+            "lutLow": x.lutLow,
+            "lutHigh": x.lutHigh,
+            "visible": x.visible};
+
+        var vol = MainStore.moduleStore.backend.getOutputTexture(x.uid, x.portId);
+        var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
+        var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
+
+        item['texture'] = vol;
+        item['size'] = size;
+
+        // TODO: remove and insert is the workaround to ensure that VolumeTexture object is destroyed
+        // it should be done in a neater way
+        model.remove(idx);
+        model.insert(idx, item)
+    }
+
     function onDispatched(actionType, args) {
         var backend = MainStore.moduleStore.backend;
 
@@ -86,37 +109,8 @@ Item {
 
         handlers[ActionTypes.all_module_output_refresh] = function(args) {
             for(var i = 0; i < model.count; ++i) {
-                var x = model.get(i);
-
-                var vol = backend.getOutputTexture(x.uid, x.portId);
-                var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
-                var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
-
-                model.get(i).texture = vol;
-                model.get(i).size = size;
+                updateTexture(i);
             }
-
-            // TODO: it would be more desirable to create the qml texture object once and
-            // update it afterwards
-            // model.clear();
-            // for(var i = 0; i < preModel.count; ++i) {
-            //     var x = preModel.get(i);
-
-            //     var vol = backend.getOutputTexture(x.uid, x.portId);
-            //     var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
-            //     var size = Qt.vector3d(vol.size.x / m, vol.size.y / m, vol.size.z / m);
-
-            //     var newItem = {
-            //         uid: x.uid,
-            //         portId: x.portId,
-            //         texture: vol,
-            //         size: size,
-            //         color: x.color,
-            //         visible: x.visible,
-            //         lutLow: x.lutLow,
-            //         lutHigh: x.lutHigh};
-            //     model.append(newItem);
-            // }
         };
 
         handlers[ActionTypes.module_removed_notification] = function(args) {
