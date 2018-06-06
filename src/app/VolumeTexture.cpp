@@ -12,8 +12,19 @@ VolumeTexture::VolumeTexture(Qt3DCore::QNode *parent)
     : Qt3DRender::QAbstractTexture(QAbstractTexture::Target3D, parent)
 {}
 
+VolumeTexture::~VolumeTexture()
+{
+    if (m_textureImage) {
+        removeTextureImage(m_textureImage.get());
+    }
+}
+
 void VolumeTexture::init(MultiDimImage<float>& source)
 {
+    if (m_textureImage) {
+        removeTextureImage(m_textureImage.get());
+    }
+
     m_data = unique_ptr<VolumeData>(new VolumeData(source));
     m_textureImage = unique_ptr<VolumeTextureImage>(new VolumeTextureImage(*m_data));
 

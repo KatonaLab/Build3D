@@ -20,15 +20,19 @@ QByteArray VolumeData::toQByteArray() const
 
     size_t zSize = depth();
 
-    char* data = new char[xyzByteSize];
-    if (data == nullptr) {
-        throw std::runtime_error("can not allocate enough memory for the data");
-    }
+    QByteArray data;
+    data.resize(xyzByteSize);
+
+    // char* data = new char[xyzByteSize];
+    // if (data == nullptr) {
+    //     throw std::runtime_error("can not allocate enough memory for the data");
+    // }
 
     auto& planes = m_source.unsafeData();
     for (size_t i = 0; i < zSize; ++i) {
-        memcpy(data + i * xyByteSize, planes[i].data(), xyByteSize);
+        memcpy(data.data() + i * xyByteSize, planes[i].data(), xyByteSize);
     }
 
-    return QByteArray().fromRawData(data, xyzByteSize);
+    // return QByteArray().fromRawData(data, xyzByteSize);
+    return data;
 }
