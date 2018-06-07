@@ -1,17 +1,5 @@
-import a3dc
+import a3dc_module_interface as a3
 import numpy as np
-
-
-def multi_dim_image_to_numpy_array(image):
-    """
-    Returns a numpy array with the copied data of the a3dc.MultiDimImage
-    argument 'image'.
-    """
-    out = np.zeros(image.dims())
-    for i, plane in enumerate(multi_dim_image_plane_iterator(image)):
-        np.copyto(out[:, :, i], plane)
-
-    return out
 
 
 def multi_dim_image_plane_iterator(image):
