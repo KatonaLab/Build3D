@@ -21,12 +21,12 @@ def module_main():
 
 inputs = [a3.Arg('tagged input', a3.types.ImageUInt32),
     a3.Arg('db', a3.types.GeneralPyType),
-    a3.Arg('mean intensity min', a3.types.ImageFloat, 'parameter'),
-    a3.Arg('mean intensity max', a3.types.ImageFloat, 'parameter'),
-    a3.Arg('stdev min', a3.types.ImageFloat, 'parameter'),
-    a3.Arg('stdev max', a3.types.ImageFloat, 'parameter'),
-    a3.Arg('sum intensity min', a3.types.ImageFloat, 'parameter'),
-    a3.Arg('sum intensity max', a3.types.ImageFloat, 'parameter')]
+    a3.Arg('mean intensity min', a3.types.float, 'parameter'),
+    a3.Arg('mean intensity max', a3.types.float, 'parameter'),
+    a3.Arg('stdev min', a3.types.float, 'parameter'),
+    a3.Arg('stdev max', a3.types.float, 'parameter'),
+    a3.Arg('sum intensity min', a3.types.float, 'parameter'),
+    a3.Arg('sum intensity max', a3.types.float, 'parameter')]
 
 outputs = [a3.Arg('tagged output', a3.types.ImageUInt32),
     a3.Arg('db output', a3.types.GeneralPyType)]
