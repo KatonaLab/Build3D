@@ -29,3 +29,60 @@ inputs = [a3.Arg('input1', a3.types.ImageFloat), a3.Arg('input2', a3.types.Image
 outputs = [a3.Arg('output', a3.types.ImageFloat)]
 
 a3.def_process_module(inputs, outputs, module_main)
+
+
+
+def apply_filter(image, filterDict=None, removeFiltered=True, overWrite=!!!False!!!):
+
+=== analyze
+kell:
+'volume'
+'voxelCount'
+'centroid'
+'pixelsOnBorder'
+
+nem kell:
+'ellipsoidDiameter'
+'boundingBox'
+'elongation'
+'equivalentSphericalRadius'
+'flatness'
+'principalAxes'
+'principalMoments'
+'roundness'
+'feretDiameter'
+'perimeter'
+'perimeterOnBorder'
+'perimeterOnBorderRatio'
+'equivalentSphericalPerimeter'
+
+---
+
+=== apply_filter
+kell:
+'meanIntensity'
+'centerOfMass'
+'standardDeviation'
+'cumulativeIntensity'
+
+nem kell:
+'medianIntensity'
+'skewness'
+'kurtosis'
+'variance'
+'maximumPixel'
+'minimumPixel'
+'maximumValue'
+'minimumValue'
+'getWeightedElongation'
+'getWeightedFlatness'
+'getWeightedPrincipalAxes'
+'getWeightedPrincipalMoments'
+
+---
+
+=== colocalization
+kell:
+'colocalizationCount'
+'totalOverlappingRatio'
+'volume'
