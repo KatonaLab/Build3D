@@ -80,6 +80,15 @@ Pane {
                             title: displayName
                             width: 300
                             Component.onCompleted: {
+                                // TODO: find an off-the-shelf solution, this is bad
+                                for (var i = 0; i < files.count; ++i) {
+                                    for(var j = 0; j < i; ++j) {
+                                        if(files.get(i).displayName < files.get(j).displayName) {
+                                            files.move(i, j, 1)
+                                        }
+                                    }
+                                }
+
                                 // TODO: find a nicer QML-way to generate the submenu items
                                 for (var i = 0; i < files.count; ++i) {
                                     insertItem(-1, Qt.createQmlObject('\
