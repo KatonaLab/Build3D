@@ -58,7 +58,7 @@ protected:
 template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
 
 #define PORT_TYPE_TRAITS(Type, x) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = x; };
-#define PORT_TYPE_TRAITS_EX(Type, x...) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = {x}; };
+#define PORT_TYPE_TRAITS_EX(Type, ...) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = {__VA_ARGS__}; };
 
 // TODO: remove the exact type traits, it's a hack that should be fixed with a project-wide static-dynamic typeing system
 PORT_TYPE_TRAITS_EX(uint8_t, "int-like", "uint8_t");

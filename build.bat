@@ -21,6 +21,8 @@ cd %BUILD_DIR%
 qmake.exe "%SRC_DIR%\a3dc.pro" -spec win32-msvc "CONFIG+=%BUILD_MODE%" "CONFIG+=qml_debug"  && jom.exe qmake_all
 jom.exe
 
+pause
+
 cd ..
 
 rem TODO: windeploy should put the files into a subdir and the program should use the dlls from there
@@ -35,6 +37,8 @@ xcopy "%SCRIPT_DIR%" "%BUILD_DIR%\src\app\%BUILD_MODE%\modules" /s /e /y /i
 copy "%SRC_DIR%\app-starter.bat" "%BUILD_DIR%\src\app\%BUILD_MODE%\"
 
 set A3DC_COMPILE_VERSION="%BUILD_MODE%"
+
+pause
 
 iscc win-install.iss
 

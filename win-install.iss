@@ -1,13 +1,13 @@
 [Setup]
 AppName=A3DC
-AppVersion=0.2
+AppVersion=0.21
 DefaultDirName={localappdata}\A3DC
 DefaultGroupName=A3DC
 Compression=lzma2
 ;Compression=none
 SolidCompression=yes
 OutputDir=.
-OutputBaseFilename=a3dc-setup-0.2
+OutputBaseFilename=a3dc-setup-0.21
 Uninstallable=yes
 CreateUninstallRegKey=yes
 

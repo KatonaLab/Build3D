@@ -14,10 +14,6 @@
 #include "VolumeTexture.h"
 #include "UltimateSinkModule.h"
 
-namespace cp = core::compute_platform;
-namespace hp = core::high_platform;
-namespace md = core::multidim_image_platform;
-
 // TODO: separate into files
 
 class BackendModule {
@@ -25,31 +21,31 @@ public:
     BackendModule(int uid);
     int uid() const;
     std::string name() const;
-    virtual cp::ComputeModule& getComputeModule() = 0;
-    virtual const cp::ComputeModule& getComputeModule() const = 0;
+    virtual core::compute_platform::ComputeModule& getComputeModule() = 0;
+    virtual const core::compute_platform::ComputeModule& getComputeModule() const = 0;
     virtual ~BackendModule() = default;
 protected:
     int m_uid;
 };
 
-class DataSourceModule : public cp::ComputeModule, public BackendModule {
+class DataSourceModule : public core::compute_platform::ComputeModule, public BackendModule {
 public:
-    DataSourceModule(cp::ComputePlatform& parent, int uid);
+    DataSourceModule(core::compute_platform::ComputePlatform& parent, int uid);
     void execute() override;
-    void setData(std::shared_ptr<md::MultiDimImage<float>> data);
-    cp::ComputeModule& getComputeModule() override;
-    const cp::ComputeModule& getComputeModule() const override;
+    void setData(std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> data);
+    core::compute_platform::ComputeModule& getComputeModule() override;
+    const core::compute_platform::ComputeModule& getComputeModule() const override;
 protected:
-    std::shared_ptr<md::MultiDimImage<float>> m_data;
-    cp::InputPortCollection m_inputs;
-    cp::TypedOutputPortCollection<md::MultiDimImage<float>> m_outputs;
+    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> m_data;
+    core::compute_platform::InputPortCollection m_inputs;
+    core::compute_platform::TypedOutputPortCollection<core::multidim_image_platform::MultiDimImage<float>> m_outputs;
 };
 
-class GenericModule : public hp::PythonComputeModule, public BackendModule {
+class GenericModule : public core::high_platform::PythonComputeModule, public BackendModule {
 public:
-    GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid);
-    cp::ComputeModule& getComputeModule() override;
-    const cp::ComputeModule& getComputeModule() const override;
+    GenericModule(core::compute_platform::ComputePlatform& parent, const std::string& script, int uid);
+    core::compute_platform::ComputeModule& getComputeModule() override;
+    const core::compute_platform::ComputeModule& getComputeModule() const override;
 };
 
 // --------------------------------------------------------
@@ -87,39 +83,39 @@ void decorateTryCatch(
     }
 }
 
-class ParameterModule: public cp::ComputeModule {
+class ParameterModule: public core::compute_platform::ComputeModule {
 public:
-    ParameterModule(cp::ComputePlatform& parent);
+    ParameterModule(core::compute_platform::ComputePlatform& parent);
     void execute() override;
     void setData(QVariant value);
 protected:
-    std::shared_ptr<md::MultiDimImage<float>> m_data;
-    cp::InputPortCollection m_inputs;
-    cp::TypedOutputPortCollection<md::MultiDimImage<float>> m_outputs;
+    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> m_data;
+    core::compute_platform::InputPortCollection m_inputs;
+    core::compute_platform::TypedOutputPortCollection<core::multidim_image_platform::MultiDimImage<float>> m_outputs;
 };
 
 // --------------------------------------------------------
 
-class ParamHelperModule : public cp::ComputeModule {
+class ParamHelperModule : public core::compute_platform::ComputeModule {
 public:
     // TODO: separate decl from def
-    ParamHelperModule(cp::ComputePlatform& parent,
+    ParamHelperModule(core::compute_platform::ComputePlatform& parent,
         const std::string& name,
-        cp::OutputPortCollectionBase& outputs)
+        core::compute_platform::OutputPortCollectionBase& outputs)
         :
-        cp::ComputeModule(parent, m_inputs, outputs, name),
+        core::compute_platform::ComputeModule(parent, m_inputs, outputs, name),
         m_inputs(*this)
     {}
     virtual bool setData(QVariant value) = 0;
 protected:
-    cp::InputPortCollection m_inputs;
+    core::compute_platform::InputPortCollection m_inputs;
 };
 
 template <typename T>
 class TypedParamHelperModule: public ParamHelperModule {
 public:
     // TODO: separate decl from def
-    TypedParamHelperModule(cp::ComputePlatform& parent, T initialValue)
+    TypedParamHelperModule(core::compute_platform::ComputePlatform& parent, T initialValue)
         :
         ParamHelperModule(parent, "ParamHelper-" + std::string(typeid(T).name()), m_outputs),
         m_outputs(*this),
@@ -140,16 +136,16 @@ public:
         m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
     }
 protected:
-    cp::TypedOutputPortCollection<T> m_outputs;
+    core::compute_platform::TypedOutputPortCollection<T> m_outputs;
     std::shared_ptr<T> m_data;
 };
 
 // --------------------------------------------------------
 
-class ImageOutputHelperModule : public cp::ComputeModule {
+class ImageOutputHelperModule : public core::compute_platform::ComputeModule {
 public:
-    ImageOutputHelperModule(cp::ComputePlatform& parent)
-        : cp::ComputeModule(parent, m_inputs, m_outputs),
+    ImageOutputHelperModule(core::compute_platform::ComputePlatform& parent)
+        : core::compute_platform::ComputeModule(parent, m_inputs, m_outputs),
         m_inputs(*this),
         m_outputs(*this)
     {}
@@ -157,14 +153,14 @@ public:
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }
-    std::shared_ptr<md::MultiDimImage<float>> getImage()
+    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> getImage()
     {
         return m_result;
     }
 protected:
-    std::shared_ptr<md::MultiDimImage<float>> m_result;
-    cp::TypedInputPortCollection<md::MultiDimImage<float>> m_inputs;
-    cp::OutputPortCollection m_outputs;
+    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> m_result;
+    core::compute_platform::TypedInputPortCollection<core::multidim_image_platform::MultiDimImage<float>> m_inputs;
+    core::compute_platform::OutputPortCollection m_outputs;
 };
 
 // --------------------------------------------------------
@@ -189,7 +185,7 @@ public:
     void evaluatePlatform();
     QVariantList getModuleScriptsList();
 private:
-    cp::ComputePlatform m_platform;
+    core::compute_platform::ComputePlatform m_platform;
     std::map<int, std::unique_ptr<BackendModule>> m_modules;
     std::map<QString, QObjectList> m_inputOptions;
     typedef std::pair<int, int> IdPair;
@@ -198,13 +194,13 @@ private:
 private:
     inline int nextUid() const;
     BackendModule& fetchBackendModule(int uid);
-    std::weak_ptr<cp::InputPort> fetchInputPort(int uid, int portId);
-    std::weak_ptr<cp::OutputPort> fetchOutputPort(int uid, int portId);
+    std::weak_ptr<core::compute_platform::InputPort> fetchInputPort(int uid, int portId);
+    std::weak_ptr<core::compute_platform::OutputPort> fetchOutputPort(int uid, int portId);
     QList<int> enumeratePorts(int uid,
-        std::function<std::size_t(cp::ComputeModule&)> numInputsFunc,
-        std::function<bool(cp::ComputeModule&, std::size_t)> predFunc);
-    std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port);
-    std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port);
+        std::function<std::size_t(core::compute_platform::ComputeModule&)> numInputsFunc,
+        std::function<bool(core::compute_platform::ComputeModule&, std::size_t)> predFunc);
+    std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<core::compute_platform::OutputPort> port);
+    std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<core::compute_platform::InputPort> port);
     ParamHelperModule& fetchParamHelperModule(int uid, int portId);
     ImageOutputHelperModule& fetchImageOutputHelperModule(int uid, int portId);
     void buildParamHelperModules(int uid);
