@@ -43,7 +43,8 @@ Item {
             "color": x.color,
             "lutLow": x.lutLow,
             "lutHigh": x.lutHigh,
-            "visible": x.visible};
+            "visible": x.visible,
+            "labeled": x.labeled};
 
         var vol = MainStore.moduleStore.backend.getOutputTexture(x.uid, x.portId);
         var m = Math.max(vol.size.x, vol.size.y, vol.size.z);
@@ -73,7 +74,21 @@ Item {
                         "color": Qt.rgba(1, 0, 0, 1),
                         "lutLow": 0,
                         "lutHigh": 1,
-                        "visible": true,
+                        "visible": false,
+                        "labeled": false,
+                        "texture": defaultTexture,
+                        // TODO: Qt.vector3d(1, 1, 1) is crucial, if it is Qt.vector3d(0, 0, 0) then
+                        // the program crashes on windows, find a way in the backend for protection
+                        "size": Qt.vector3d(1, 1, 1)});
+                } else if (props.type == "int-image") {
+                    model.append({
+                        "uid": args.uid,
+                        "portId": props.portId,
+                        "color": Qt.rgba(1, 1, 1, 1),
+                        "lutLow": 0,
+                        "lutHigh": 1,
+                        "visible": false,
+                        "labeled": true,
                         "texture": defaultTexture,
                         // TODO: Qt.vector3d(1, 1, 1) is crucial, if it is Qt.vector3d(0, 0, 0) then
                         // the program crashes on windows, find a way in the backend for protection
@@ -97,6 +112,7 @@ Item {
                 model.get(idx).lutHigh = args.values.secondValue;
                 model.get(idx).color = args.values.color;
                 model.get(idx).visible = args.values.visible;
+                model.get(idx).labeled = args.values.labeled;
             }
 
             // if (preIdx !== null) {

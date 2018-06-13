@@ -16,6 +16,7 @@ Entity {
     property color volumeColor
     property real accumDivisor
     property bool visible
+    property bool labeled
     property real lutLowCut
     property real lutHighCut
     property real lutDataMax
@@ -44,7 +45,8 @@ Entity {
                 Parameter {name: "volumeColor"; value: volumeColor},
                 Parameter {name: "lutParameters"; value: lutParameters},
                 Parameter {name: "accumDivisor"; value: accumDivisor},
-                Parameter {name: "visible"; value: visible ? 1.0 : 0.0}
+                Parameter {name: "visible"; value: visible ? 1.0 : 0.0},
+                Parameter {name: "labeled"; value: labeled ? 1.0 : 0.0}
             ]
 
             techniques: [

@@ -82,7 +82,8 @@ Repeater {
                         firstValue: rangeSlider.firstValue,
                         secondValue: rangeSlider.secondValue,
                         color: colorSelector.color,
-                        visible: visibilitySwitch.checked
+                        visible: visibilitySwitch.checked,
+                        labeled: false
                     };
                     AppActions.requestModuleOutputChange(uid, details.portId, values);
                 }
@@ -120,9 +121,34 @@ Repeater {
 
         Component {
             id: intImageOutputDelegate
-            Label {
-                text: details.displayName
-                font: root.font
+            ColumnLayout {
+                id: intImageOutput
+                Layout.fillWidth: true
+
+                function update() {
+                    var values = {
+                        firstValue: 0.,
+                        secondValue: 1.,
+                        color: Qt.rgba(1., 1., 1., 1.),
+                        visible: intVisibilitySwitch.checked,
+                        labeled: true
+                    };
+                    AppActions.requestModuleOutputChange(uid, details.portId, values);
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    Switch {
+                        id: intVisibilitySwitch
+                        Layout.fillWidth: true
+                        text: details.displayName
+                        font: root.font
+                        onCheckedChanged: {
+                            intImageOutput.update();
+                        }
+                    }
+                }
             }
         }
 

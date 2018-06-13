@@ -212,6 +212,12 @@ void PrivateModulePlatformBackend::buildimageOutputHelperModules(int uid)
             helperModule = new ImageOutputHelperModule<float>(m_platform);
             connectPorts(m.getComputeModule(), portId, *helperModule, 0);
             m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<float>>(helperModule);
+        } else if (t.hasTrait("int-image")) {
+            // TODO: don't use naked pointers
+            ImageOutputHelperModule<uint32_t>* helperModule = nullptr;
+            helperModule = new ImageOutputHelperModule<uint32_t>(m_platform);
+            connectPorts(m.getComputeModule(), portId, *helperModule, 0);
+            m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<uint32_t>>(helperModule);
         } else {
             // TODO: handle int-image type too
         }

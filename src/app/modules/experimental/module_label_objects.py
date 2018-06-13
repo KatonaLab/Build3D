@@ -10,7 +10,7 @@ def module_main():
         [[0,0,0],[0,1,0],[0,0,0]]])
     labeled_image, _ = label(input_image, structure)
     print(labeled_image)
-    a3.outputs['labeled volume'] = a3.MultiDimImageFloat_from_ndarray(labeled_image)
+    a3.outputs['labeled volume'] = a3.MultiDimImageUInt32_from_ndarray(labeled_image)
     print('object labeling complete 🔖')
 
 
