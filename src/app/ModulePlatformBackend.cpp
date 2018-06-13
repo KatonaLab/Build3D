@@ -33,8 +33,8 @@ std::string BackendModule::name() const
 
 // --------------------------------------------------------
 
-DataSourceModule::DataSourceModule(core::compute_platform::ComputePlatform& parent, int uid)
-    : core::compute_platform::ComputeModule(parent, m_inputs, m_outputs, "DataSource" + to_string(uid)),
+DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
+    : cp::ComputeModule(parent, m_inputs, m_outputs, "DataSource" + to_string(uid)),
     BackendModule(uid),
     m_inputs(*this),
     m_outputs(*this)
@@ -45,34 +45,34 @@ void DataSourceModule::execute()
     m_outputs.output<0>()->forwardFromSharedPtr(m_data);
 }
 
-void DataSourceModule::setData(std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> data)
+void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
 {
     m_data = data;
 }
 
-core::compute_platform::ComputeModule& DataSourceModule::getComputeModule()
+cp::ComputeModule& DataSourceModule::getComputeModule()
 {
-    return const_cast<core::compute_platform::ComputeModule&>(static_cast<const DataSourceModule&>(*this).getComputeModule());
+    return const_cast<cp::ComputeModule&>(static_cast<const DataSourceModule&>(*this).getComputeModule());
 }
 
-const core::compute_platform::ComputeModule& DataSourceModule::getComputeModule() const
+const cp::ComputeModule& DataSourceModule::getComputeModule() const
 {
     return *this;
 }
 
 // --------------------------------------------------------
 
-GenericModule::GenericModule(core::compute_platform::ComputePlatform& parent, const std::string& script, int uid)
-    : core::high_platform::PythonComputeModule(parent, script, "Generic" + to_string(uid)),
+GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
+    : PythonComputeModule(parent, script, "Generic" + to_string(uid)),
     BackendModule(uid)
 {}
 
-core::compute_platform::ComputeModule& GenericModule::getComputeModule()
+cp::ComputeModule& GenericModule::getComputeModule()
 {
-    return const_cast<core::compute_platform::ComputeModule&>(static_cast<const GenericModule&>(*this).getComputeModule());
+    return const_cast<cp::ComputeModule&>(static_cast<const GenericModule&>(*this).getComputeModule());
 }
 
-const core::compute_platform::ComputeModule& GenericModule::getComputeModule() const
+const cp::ComputeModule& GenericModule::getComputeModule() const
 {
     return *this;
 }
@@ -208,10 +208,10 @@ void PrivateModulePlatformBackend::buildimageOutputHelperModules(int uid)
 
         if (t.hasTrait("float-image")) {
             // TODO: don't use naked pointers
-            ImageOutputHelperModule* helperModule = nullptr;
-            helperModule = new ImageOutputHelperModule(m_platform);
+            ImageOutputHelperModule<float>* helperModule = nullptr;
+            helperModule = new ImageOutputHelperModule<float>(m_platform);
             connectPorts(m.getComputeModule(), portId, *helperModule, 0);
-            m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule>(helperModule);
+            m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<float>>(helperModule);
         } else {
             // TODO: handle int-image type too
         }
@@ -291,7 +291,7 @@ QVariantMap PrivateModulePlatformBackend::getModuleProperties(int uid)
     return vmap;
 }
 
-std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCompatibleTo(std::shared_ptr<core::compute_platform::OutputPort> port)
+std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port)
 {
     auto& outTraits = port->traits();
     std::vector<std::pair<int, int>> list;
@@ -312,7 +312,7 @@ std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCo
     return list;
 }
 
-std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsCompatibleTo(std::shared_ptr<core::compute_platform::InputPort> port)
+std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port)
 {
     auto& inTraits = port->traits();
     std::vector<std::pair<int, int>> list;
@@ -400,7 +400,7 @@ QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int p
 
 VolumeTexture* PrivateModulePlatformBackend::getOutputTexture(int uid, int portId)
 {
-    ImageOutputHelperModule& helper = fetchImageOutputHelperModule(uid, portId);
+    ImageOutputHelperModuleBase& helper = fetchImageOutputHelperModule(uid, portId);
 
     // TODO: don't use naked ptrs
     
@@ -483,7 +483,7 @@ ParamHelperModule& PrivateModulePlatformBackend::fetchParamHelperModule(int uid,
     return *ptr;
 }
 
-ImageOutputHelperModule& PrivateModulePlatformBackend::fetchImageOutputHelperModule(int uid, int portId)
+ImageOutputHelperModuleBase& PrivateModulePlatformBackend::fetchImageOutputHelperModule(int uid, int portId)
 {
     auto& ptr = m_imageOutputHelpers[make_pair(uid, portId)];
     if (!ptr) {

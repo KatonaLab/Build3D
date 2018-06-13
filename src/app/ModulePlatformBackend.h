@@ -143,10 +143,50 @@ protected:
 
 // --------------------------------------------------------
 
-class ImageOutputHelperModule : public core::compute_platform::ComputeModule {
+class ImageOutputHelperModuleBase : public core::compute_platform::ComputeModule {
+public:
+    ImageOutputHelperModuleBase(core::compute_platform::ComputePlatform& parent,
+        core::compute_platform::InputPortCollectionBase& inputs,
+        core::compute_platform::OutputPortCollectionBase& outputs,
+        const std::string& name = "")
+        : core::compute_platform::ComputeModule(parent, inputs, outputs)
+    {}
+    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> getImage()
+    {
+        return m_result;
+    }
+    virtual ~ImageOutputHelperModuleBase() = default;
+protected:
+    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> m_result;
+};
+
+template <typename T>
+class ImageOutputHelperModule : public ImageOutputHelperModuleBase {
 public:
     ImageOutputHelperModule(core::compute_platform::ComputePlatform& parent)
-        : core::compute_platform::ComputeModule(parent, m_inputs, m_outputs),
+        : ImageOutputHelperModuleBase(parent, m_inputs, m_outputs),
+        m_inputs(*this),
+        m_outputs(*this)
+    {}
+    void execute() override
+    {
+        if (auto imPtr = m_inputs.template input<0>()->inputPtr().lock()) {
+            m_result = std::make_shared<core::multidim_image_platform::MultiDimImage<float>>();
+            m_result->convertCopyFrom(*imPtr);
+        } else {
+            m_result.reset();
+        }
+    }
+protected:
+    core::compute_platform::TypedInputPortCollection<core::multidim_image_platform::MultiDimImage<T>> m_inputs;
+    core::compute_platform::OutputPortCollection m_outputs;
+};
+
+template <>
+class ImageOutputHelperModule<float> : public ImageOutputHelperModuleBase {
+public:
+    ImageOutputHelperModule(core::compute_platform::ComputePlatform& parent)
+        : ImageOutputHelperModuleBase(parent, m_inputs, m_outputs),
         m_inputs(*this),
         m_outputs(*this)
     {}
@@ -154,12 +194,7 @@ public:
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }
-    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> getImage()
-    {
-        return m_result;
-    }
 protected:
-    std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> m_result;
     core::compute_platform::TypedInputPortCollection<core::multidim_image_platform::MultiDimImage<float>> m_inputs;
     core::compute_platform::OutputPortCollection m_outputs;
 };
@@ -191,7 +226,7 @@ private:
     std::map<QString, QObjectList> m_inputOptions;
     typedef std::pair<int, int> IdPair;
     std::map<IdPair, std::unique_ptr<ParamHelperModule>> m_paramHelpers;
-    std::map<IdPair, std::unique_ptr<ImageOutputHelperModule>> m_imageOutputHelpers;
+    std::map<IdPair, std::unique_ptr<ImageOutputHelperModuleBase>> m_imageOutputHelpers;
 private:
     inline int nextUid() const;
     BackendModule& fetchBackendModule(int uid);
@@ -203,7 +238,7 @@ private:
     std::vector<std::pair<int, int>> fetchInputPortsCompatibleTo(std::shared_ptr<core::compute_platform::OutputPort> port);
     std::vector<std::pair<int, int>> fetchOutputPortsCompatibleTo(std::shared_ptr<core::compute_platform::InputPort> port);
     ParamHelperModule& fetchParamHelperModule(int uid, int portId);
-    ImageOutputHelperModule& fetchImageOutputHelperModule(int uid, int portId);
+    ImageOutputHelperModuleBase& fetchImageOutputHelperModule(int uid, int portId);
     void buildParamHelperModules(int uid);
     void buildimageOutputHelperModules(int uid);
 };
