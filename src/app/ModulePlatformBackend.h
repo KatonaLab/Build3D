@@ -13,6 +13,7 @@
 #include <core/high_platform/PythonComputeModule.h>
 #include "VolumeTexture.h"
 #include "UltimateSinkModule.h"
+#include <util/json.hpp>
 
 // TODO: separate into files
 

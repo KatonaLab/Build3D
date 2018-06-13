@@ -1,7 +1,7 @@
 QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
 CONFIG += c++14
-CONFIG += force_debug_info # for crashpad
-CONFIG += separate_debug_info # for crashpad
+#CONFIG += force_debug_info # for crashpad
+#CONFIG += separate_debug_info # for crashpad
 CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slot *slots; /* terminated by slot==0. */ in Python.h (since slots is a restricted keyword in Qt)
 
 # CONFIG -= app_bundle
