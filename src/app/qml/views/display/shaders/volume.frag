@@ -70,6 +70,23 @@ float lut(in sampler3D tex, in vec3 pos, in vec4 params)
     //return a;
 }
 
+float lut2(in float t, in vec4 params)
+{
+    // normalize to [0, 1] by dividing with max data value
+    float x = t / params.y;
+    float a = params.z;
+    float b = params.w + 0.0001;
+    // float r = max(b - a, 0.0001); // prevent division by zero, TODO: do something with it, it doesnt work
+    float r = b - a;
+    // return 0 if x < a
+    // return x if a < x < b
+    // return 0 if b < x
+    // https://www.wolframalpha.com/input/?i=((min(max(x,+2.5),+4)+-+2.5)%2F(4-2.5)+-+step(x-4)
+    return (clamp(x, a, b) - a) / r - step(b, x);
+    // return (clamp(x, a, b) - a) / r;
+    //return a;
+}
+
 vec3 getLabelColor(in sampler3D tex, in vec3 pos)
 {
     float x = texture(tex, pos).r;
@@ -82,10 +99,14 @@ void main()
     vec3 near = tex3DCoordGeom;
     float alpha = 0.;
     vec3 labelColor = vec3(0.);
-    for (int i = 0; i <= 16; ++i) {
-        vec3 pos = mix(far, near, float(i) * 1./16.);
-        alpha = alpha + lut(volumeTexture, pos, lutParameters) * 1./16.;
-        labelColor = labelColor + getLabelColor(volumeTexture, pos) * 1./16.;
+    for (int i = 0; i <= 48; ++i) {
+        vec3 pos = mix(far, near, float(i) * 1./48.);
+        float x = texture(volumeTexture, pos).r;
+        alpha = alpha + lut2(x, lutParameters) * 1./48.;
+        if (labeled < 0.5) {
+            continue;
+        }
+        labelColor = labelColor + getLabelColor(volumeTexture, pos) * 1./48.;
     }
     vec3 finalColor = mix(alpha * volumeColor.rgb, labelColor, labeled);
     outputColor = vec4(accumDivisor * visible * finalColor, 1.0);
