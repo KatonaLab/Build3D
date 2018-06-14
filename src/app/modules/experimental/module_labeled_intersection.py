@@ -23,7 +23,6 @@ def module_main():
 
     a3.outputs['labeled intersection'] = \
         a3.MultiDimImageUInt32_from_ndarray(intersection_labels.astype(np.uint32))
-    print(intersection_labels.shape)
     a3.outputs['label pair list'] = intersecting_ids
     print('labeled intersections are ready ✨')
 
