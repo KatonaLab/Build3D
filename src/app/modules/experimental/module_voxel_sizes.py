@@ -10,17 +10,15 @@ def module_main():
 
     ids_1 = label_pairs[:, 0]
     cnt_1 = labeled_comprehension(intensity_image, labeled_image, ids_1, len, int, -1)
-    cnt_1 /= np.max(cnt_1)
 
-    a3.outputs['voxel size value'] = a3.MultiDimImageFloat_from_ndarray(cnt_1)
     print(np.c_[ids_1, cnt_1])
-    print('labeled intersections are ready 🍀')
+    print('voxel counting done 🍀')
 
 
 inputs = [a3.Arg('label pair list', a3.types.GeneralPyType),
           a3.Arg('intensity image', a3.types.ImageFloat),
           a3.Arg('labeled', a3.types.ImageUInt32)]
 
-outputs = [a3.Arg('voxel size value', a3.types.ImageFloat)]
+outputs = []
 
 a3.def_process_module(inputs, outputs, module_main)
