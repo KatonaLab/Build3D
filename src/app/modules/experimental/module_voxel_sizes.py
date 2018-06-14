@@ -13,6 +13,7 @@ def module_main():
     cnt_1 /= np.max(cnt_1)
 
     a3.outputs['voxel size value'] = a3.MultiDimImageFloat_from_ndarray(cnt_1)
+    print(np.c_[ids_1, cnt_1])
     print('labeled intersections are ready 🍀')
 
 
