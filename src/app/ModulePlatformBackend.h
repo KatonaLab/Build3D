@@ -1,6 +1,7 @@
 #ifndef _app_NodePlatformBackend_h_
 #define _app_NodePlatformBackend_h_
 
+#include <util/json.hpp>
 #include <memory>
 #include <QtCore>
 #include <QQmlComponent>
@@ -13,7 +14,6 @@
 #include <core/high_platform/PythonComputeModule.h>
 #include "VolumeTexture.h"
 #include "UltimateSinkModule.h"
-#include <util/json.hpp>
 
 // TODO: separate into files
 

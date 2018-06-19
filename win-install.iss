@@ -12,7 +12,7 @@ Uninstallable=yes
 CreateUninstallRegKey=yes
 
 [Files]
-Source: "build\src\app\release\vcredist.msi"; DestDir: "{app}"; AfterInstall: RunVCRedistInstaller
+Source: "build\src\app\release\vc_redist.x64.exe"; DestDir: "{app}"; AfterInstall: RunVCRedistInstaller
 Source: "build\src\app\release\*"; Excludes: "*.obj,*.pdb,*.ilk,*.h,*.cpp,*.c,*.hpp,*.ipp,*.cxx,*.hxx,__pycache__,*.DS_store,Thumbs.db"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
@@ -23,7 +23,7 @@ procedure RunVCRedistInstaller;
 var
   ResultCode: Integer;
 begin
-  if not Exec(ExpandConstant('{app}\vcredist.msi'), '', '', SW_SHOWNORMAL,
+  if not Exec(ExpandConstant('{app}\vc_redist.x64.exe'), '', '', SW_SHOWNORMAL,
     ewWaitUntilTerminated, ResultCode)
   then
     MsgBox('vcredist.msi installer failed to run!' + #13#10 +
