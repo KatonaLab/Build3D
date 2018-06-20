@@ -19,7 +19,7 @@ ApplicationWindow {
 
     width: 480
     height: 480
-    title: "A3DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
+    title: "A3-DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
     Material.theme: Material.Light
     Material.accent: Material.Teal
@@ -35,21 +35,6 @@ ApplicationWindow {
             }
         }
     }
-
-    // header: ToolBar {
-    //     RowLayout {
-    //         anchors.fill: parent
-    //         Button {
-    //             text: "\uE807"
-    //             action: importAction
-    //         }
-    //     }
-    // }
-
-    // footer: Rectangle {
-    //     // TODO
-    //     height: 16
-    // }
 
     Settings {
         property alias x: appWindow.x

@@ -33,6 +33,8 @@ namespace compute_platform {
         std::string name() const;
         // TODO: test this function
         void setName(const std::string& name);
+        // TODO: test this function
+        virtual std::string moduleTypeName() const;
         virtual ~ComputeModule();
     protected:
         ComputeModule(ComputePlatform& parent,

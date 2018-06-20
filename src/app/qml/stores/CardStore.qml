@@ -36,6 +36,7 @@ Item {
         return {
             uid: newUid,
             displayName: module.displayName,
+            moduleTypeName: module.moduleTypeName,
             inputs: inputProps,
             parameters: paramProps,
             outputs: outputProps};
@@ -120,6 +121,13 @@ Item {
                 model.remove(i);
             }
         };
+
+        handlers[ActionTypes.module_properties_changed_notification] = function(args) {
+            var m = findModule(args.uid);
+            if (args.values.displayName) {
+                m.displayName = args.values.displayName;
+            }
+        }
 
         var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);

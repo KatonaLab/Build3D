@@ -83,6 +83,11 @@ void ComputeModule::setName(const std::string& name)
     m_name = name;
 }
 
+std::string ComputeModule::moduleTypeName() const
+{
+    return "Unknown Compute Module";
+}
+
 bool core::compute_platform::connectPorts(ComputeModule& outputModule, std::size_t outputId,
     ComputeModule& inputModule, std::size_t inputId)
 {

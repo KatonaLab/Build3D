@@ -21,7 +21,6 @@ class BackendModule {
 public:
     BackendModule(int uid);
     int uid() const;
-    std::string name() const;
     virtual core::compute_platform::ComputeModule& getComputeModule() = 0;
     virtual const core::compute_platform::ComputeModule& getComputeModule() const = 0;
     virtual ~BackendModule() = default;
@@ -44,9 +43,13 @@ protected:
 
 class GenericModule : public core::high_platform::PythonComputeModule, public BackendModule {
 public:
-    GenericModule(core::compute_platform::ComputePlatform& parent, const std::string& script, int uid);
+    GenericModule(core::compute_platform::ComputePlatform& parent, const std::string& script,
+        const std::string& moduleTypeName, int uid);
     core::compute_platform::ComputeModule& getComputeModule() override;
     const core::compute_platform::ComputeModule& getComputeModule() const override;
+    std::string moduleTypeName() const override;
+protected:
+    std::string m_moduleTypeName = "Unknown Generic Python Module";
 };
 
 // --------------------------------------------------------
@@ -209,6 +212,7 @@ public:
     void destroyModule(int uid);
     bool hasModule(int uid);
     QVariantMap getModuleProperties(int uid);
+    void setModuleProperties(int uid, QVariantMap values);
     QList<int> enumerateInputPorts(int uid);
     QList<int> enumerateParamPorts(int uid);
     QList<int> enumerateOutputPorts(int uid);
@@ -289,6 +293,14 @@ public:
             &PrivateModulePlatformBackend::getModuleProperties,
             m_private, m_errorFunc, QVariantMap(),
             uid
+        );
+    }
+    Q_INVOKABLE void setModuleProperties(int uid, QVariantMap values)
+    {
+        return decorateTryCatch(
+            &PrivateModulePlatformBackend::setModuleProperties,
+            m_private, m_errorFunc,
+            uid, values
         );
     }
     Q_INVOKABLE QList<int> enumerateInputPorts(int uid)

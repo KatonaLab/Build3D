@@ -26,12 +26,13 @@ Pane {
         delegate: Card {
             uid: model.uid
             displayName: model.displayName
+            moduleTypeName: model.moduleTypeName
             inputs: model.inputs
             parameters: model.parameters
             outputs: model.outputs
             width: parent.width
             expanded: true
-            font.pointSize: 12
+            font.pointSize: 11
         }
 
         header: Column {

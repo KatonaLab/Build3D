@@ -25,6 +25,7 @@
     <file>./qml/views/components/PreciseSlider.qml</file>
     <file>./qml/views/components/ColorIndicator.qml</file>
     <file>./qml/views/components/ArrowCheckBox.qml</file>
+    <file>./qml/views/components/ArrowEditCheckBox.qml</file>
     <file>./qml/views/components/DynamicComboBox.qml</file>
     <file>./qml/views/components/HorizontalDivider.qml</file>
     <file>./qml/views/display/SceneRenderSettings.qml</file>

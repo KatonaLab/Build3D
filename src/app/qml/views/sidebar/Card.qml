@@ -12,12 +12,13 @@ Pane {
     id: card
     property int uid
     property string displayName
+    property string moduleTypeName
     property var inputs
     property var parameters
     property var outputs
     property alias expanded: headerArrow.checked
 
-    Material.elevation: 4
+    Material.elevation: 2
 
     contentWidth: layout.implicitWidth
     contentHeight: header.implicitHeight
@@ -50,17 +51,21 @@ Pane {
 
             RowLayout {
                 id: header
-
                 Layout.fillWidth: true
-                ArrowCheckBox {
-                    id: headerArrow    
+                ArrowEditCheckBox {
+                    id: headerArrow
                     text: card.displayName
+                    staticText: card.moduleTypeName
                     Layout.fillWidth: true
                     font: card.font
+                    onTitleTextChanged: function (newText) {
+                        AppActions.requestModulePropertiesChange(uid, {"displayName": newText});
+                    }
                     // TODO: indicate the output image colors even if the card is closed
                 }
 
-                Button {
+                ToolButton {
+                    // TODO: use fontellico icon for this
                     text: "x"
                     onClicked: AppActions.requestRemoveModule(card.uid)
                 }

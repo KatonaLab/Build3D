@@ -51,6 +51,12 @@ Item {
             }
         };
 
+        handlers[ActionTypes.module_properties_change_request] = function(args) {
+            backend.setModuleProperties(args.uid, args.values);
+            var newValues = backend.getModuleProperties(args.uid);
+            AppActions.notifyModulePropertiesChanged(args.uid, newValues);
+        };
+
         handlers[ActionTypes.module_output_change_request] = function(args) {
             AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };

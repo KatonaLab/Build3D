@@ -26,11 +26,6 @@ int BackendModule::uid() const
     return m_uid;
 }
 
-std::string BackendModule::name() const
-{
-    return getComputeModule().name();
-}
-
 // --------------------------------------------------------
 
 DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
@@ -62,10 +57,16 @@ const cp::ComputeModule& DataSourceModule::getComputeModule() const
 
 // --------------------------------------------------------
 
-GenericModule::GenericModule(cp::ComputePlatform& parent, const std::string& script, int uid)
+GenericModule::GenericModule(cp::ComputePlatform& parent,
+    const std::string& script, const std::string& moduleTypeName, int uid)
     : PythonComputeModule(parent, script, "Generic" + to_string(uid)),
-    BackendModule(uid)
+    m_moduleTypeName(moduleTypeName), BackendModule(uid)
 {}
+
+std::string GenericModule::moduleTypeName() const
+{
+    return m_moduleTypeName;
+}
 
 cp::ComputeModule& GenericModule::getComputeModule()
 {
@@ -126,6 +127,8 @@ QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QU
 int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
 {
     string path = scriptPath.toStdString();
+    string moduleTypeName = QFileInfo(scriptPath).baseName().toStdString();
+
 
     ifstream f(path);
     if (!f.is_open()) {
@@ -134,13 +137,16 @@ int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
     stringstream buffer;
     buffer << f.rdbuf();
 
-    // TODO: don't summon objects through naked pointers
-    auto newModule = new GenericModule(m_platform, buffer.str(), nextUid());
+    int newUid = nextUid();
 
-    m_modules.emplace(make_pair(newModule->uid(), newModule));
-    buildParamHelperModules(newModule->uid());
-    buildimageOutputHelperModules(newModule->uid());
-    return newModule->uid();
+    m_modules.emplace(make_pair(
+        newUid,
+        make_unique<GenericModule>(m_platform, buffer.str(), moduleTypeName, newUid)
+    ));
+
+    buildParamHelperModules(newUid);
+    buildimageOutputHelperModules(newUid);
+    return newUid;
 }
 
 void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
@@ -293,8 +299,17 @@ QVariantMap PrivateModulePlatformBackend::getModuleProperties(int uid)
 
     QVariantMap vmap;
     vmap["uid"] = uid;
-    vmap["displayName"] = QString::fromStdString(m.name());
+    vmap["displayName"] = QString::fromStdString(m.getComputeModule().name());
+    vmap["moduleTypeName"] = QString::fromStdString(m.getComputeModule().moduleTypeName());
     return vmap;
+}
+
+void PrivateModulePlatformBackend::setModuleProperties(int uid, QVariantMap values)
+{
+    auto& m = fetchBackendModule(uid);
+    if (values.count("displayName")) {
+        m.getComputeModule().setName(values["displayName"].toString().toStdString());
+    }
 }
 
 std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port)
@@ -364,7 +379,7 @@ QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int po
         listItemMap["targetPortId"] = pr.second;
         auto& targetModule = fetchBackendModule(pr.first);
         auto targetPort = fetchOutputPort(pr.first, pr.second).lock();
-        listItemMap["targetModuleDisplayName"] = QString::fromStdString(targetModule.name());
+        listItemMap["targetModuleDisplayName"] = QString::fromStdString(targetModule.getComputeModule().name());
         listItemMap["targetPortDisplayName"] = QString::fromStdString(targetPort->name());
         vlist.append(listItemMap);
     }
@@ -514,6 +529,7 @@ QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
             && f.suffix().toLower() == "py";
     };
 
+    // TODO: move magic string constants to highlighted section/file
     QDirIterator level1("modules");
     while (level1.hasNext()) {
         level1.next();

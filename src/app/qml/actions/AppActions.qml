@@ -25,6 +25,14 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.module_removed_notification, {uid: uid});
     }
 
+    function requestModulePropertiesChange(uid, values) {
+        AppDispatcher.dispatch(ActionTypes.module_properties_change_request, {uid: uid, values: values});
+    }
+
+    function notifyModulePropertiesChanged(uid, values) {
+        AppDispatcher.dispatch(ActionTypes.module_properties_changed_notification, {uid: uid, values: values});
+    }
+    
     function requestModuleInputChange(uid, portId, values) {
         AppDispatcher.dispatch(ActionTypes.module_input_change_request, {uid: uid, portId: portId, values: values});
     }
