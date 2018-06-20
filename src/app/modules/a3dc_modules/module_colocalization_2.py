@@ -32,7 +32,7 @@ def add_input_triplet(input_list, i):
     input_list.append(a3.Arg(intensity_input_base.format(i), a3.types.ImageFloat))
     return input_list
 
-def module_main():
+def module_main(ctx):
 
     tagged_image_list = []
     source_image_list = []

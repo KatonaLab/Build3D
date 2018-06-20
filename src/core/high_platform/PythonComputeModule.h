@@ -65,8 +65,13 @@ struct Arg {
     std::string tag;
 };
 
+class ModuleContext {
+public:
+    std::string name;
+};
+
 typedef std::vector<Arg> ProcessArg;
-typedef std::function<void()> ProcessFunc;
+typedef std::function<void(ModuleContext&)> ProcessFunc;
 
 // --------------------------------------------------------
 
@@ -352,6 +357,7 @@ private:
     DynamicOutputPortCollection m_outputPorts;
     std::string m_code;
     ProcessFunc m_func;
+    ModuleContext m_moduleContext;
 };
 
 // --------------------------------------------------------

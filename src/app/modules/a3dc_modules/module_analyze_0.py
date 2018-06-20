@@ -3,7 +3,7 @@ from modules.a3dc_modules.a3dc.interface import analyze
 from modules.a3dc_modules.a3dc.imageclass import Image
 import numpy as np
 
-def module_main():
+def module_main(ctx):
     im = a3.MultiDimImageUInt32_to_ndarray(a3.inputs['tagged input'])
     a3dc_image = Image(im, {'Name': 'random_name', 'Type': np.uint32})
 

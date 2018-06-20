@@ -236,6 +236,12 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     .def_readwrite("name", &Arg::name)
     .def_readwrite("type", &Arg::type);
 
+    py::class_<ModuleContext>(m, "ModuleContext")
+    .def("name", [](ModuleContext& obj)
+    {
+        return obj.name;
+    });
+
     py::class_<CustomOutStream>(m, "CustomOutStream")
     .def(py::init<>())
     .def("write", &CustomOutStream::write)
@@ -430,7 +436,8 @@ void PythonComputeModule::execute()
         outputs.attr("__setitem__")(p.first, py::none());
     }
 
-    m_func();
+    m_moduleContext.name = name();
+    m_func(m_moduleContext);
 
     for (auto& p : m_outputPorts) {
         p.second->fromPyObject(outputs.attr("__getitem__")(p.first));

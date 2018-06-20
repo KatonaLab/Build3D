@@ -15,7 +15,7 @@ def intersect_labels(labeled_1, labeled_2):
     return intersecting_ids, intersection_labels
 
 
-def module_main():
+def module_main(ctx):
     input_A = a3.MultiDimImageUInt32_to_ndarray(a3.inputs['labeled A'])
     input_B = a3.MultiDimImageUInt32_to_ndarray(a3.inputs['labeled B'])
 

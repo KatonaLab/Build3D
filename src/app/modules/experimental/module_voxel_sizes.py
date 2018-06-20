@@ -3,7 +3,7 @@ from scipy.ndimage.measurements import labeled_comprehension
 import numpy as np
 
 
-def module_main():
+def module_main(ctx):
     label_pairs = a3.inputs['label pair list']
     intensity_image = a3.MultiDimImageFloat_to_ndarray(a3.inputs['intensity image'])
     labeled_image = a3.MultiDimImageUInt32_to_ndarray(a3.inputs['labeled'])

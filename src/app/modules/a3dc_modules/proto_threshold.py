@@ -6,7 +6,7 @@ import numpy as np
 
 def make_threshold_module(method):
 
-    def proto_threshold_main():
+    def proto_threshold_main(ctx):
         im = a3.MultiDimImageFloat_to_ndarray(a3.inputs['input'])
         a3dc_image = Image(im, {'Name': 'random_name', 'Type': np.float})
 

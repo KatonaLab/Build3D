@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 
 
-def module_main():
+def module_main(ctx):
     level = a3.inputs['level']
     # TODO: this is a naive way, we should not copy the data with
     # MultiDimImageFloat_to_ndarray and MultiDimImageFloat_from_ndarray

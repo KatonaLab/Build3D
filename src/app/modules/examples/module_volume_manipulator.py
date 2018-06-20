@@ -5,7 +5,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 
-def module_main():
+def module_main(ctx):
         r = a3.inputs['smooth radius']
         w = a3.inputs['width']
         h = a3.inputs['height']
