@@ -80,18 +80,20 @@ PythonEnvironment::PythonEnvironment()
     // redirected
     updateStreamRedirects();
 
+    py::module::import("sys");
     py::module::import("a3dc_module_interface");
-    auto sys = py::module::import("sys");
 }
 
 void PythonEnvironment::reset()
 {
     // remove all global variables
-    py::exec(R"(
-for name in dir():
-    if not name.startswith('_'):
-        del globals()[name]
-    )");
+//     py::exec(R"(
+// for name in dir():
+//     if not name.startswith('_'):
+//         del globals()[name]
+//     )");
+//     py::module::import("sys");
+//     py::module::import("a3dc_module_interface");
 }
 
 void PythonEnvironment::exec(std::string code)
@@ -206,6 +208,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     [](ProcessArg config, const ProcessFunc& func)
     {
         auto& env = PythonEnvironment::instance();
+        env.inputs.clear();
+        env.outputs.clear();
         for (ArgBase& arg : config) {
             switch (arg.argType) {
                 case ArgBase::ArgType::Input:
@@ -401,7 +405,7 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
             auto tp = TypedOutputPort<py::object>::create(*this);
             return PyOutputPortWrapperPtr(new GeneralPyTypeOutputPortWrapper(tp));
         }
-        default: throw std::runtime_error("unknown input port type");
+        default: throw std::runtime_error("unknown output port type");
     }
     #undef CASE_POD
     #undef CASE_NON_POD
@@ -441,6 +445,7 @@ void PythonComputeModule::buildPorts()
     m_func = env.func;
 
     for (auto& p : env.inputs) {
+        cout << "input name " << p.get().name << endl;
         auto pw = createInputPortWrapper(p.get().type);
         pw->port()->setName(p.get().name);
         pw->port()->properties() = p.get().properties;
@@ -448,6 +453,7 @@ void PythonComputeModule::buildPorts()
     }
 
     for (auto& p : env.outputs) {
+        cout << "output name " << p.get().name << endl;
         auto pw = createOutputPortWrapper(p.get().type);
         pw->port()->setName(p.get().name);
         pw->port()->properties() = p.get().properties;

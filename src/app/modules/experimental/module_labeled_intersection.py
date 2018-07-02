@@ -27,10 +27,9 @@ def module_main(ctx):
     print('labeled intersections are ready ✨')
 
 
-inputs = [a3.Arg('labeled A', a3.types.ImageUInt32),
-          a3.Arg('labeled B', a3.types.ImageUInt32)]
+config = [a3.Input('labeled A', a3.types.ImageUInt32),
+          a3.Input('labeled B', a3.types.ImageUInt32),
+          a3.Output('labeled intersection', a3.types.ImageUInt32),
+          a3.Output('label pair list', a3.types.GeneralPyType)]
 
-outputs = [a3.Arg('labeled intersection', a3.types.ImageUInt32),
-           a3.Arg('label pair list', a3.types.GeneralPyType)]
-
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)

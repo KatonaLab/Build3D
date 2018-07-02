@@ -20,8 +20,8 @@ def module_main(ctx):
     a3.outputs['db output'] = a3dc_out.database
 
 
-inputs = [a3.Arg('tagged input', a3.types.ImageUInt32)]
-outputs = [a3.Arg('tagged output', a3.types.ImageUInt32),
-    a3.Arg('db output', a3.types.GeneralPyType)]
+config = [a3.Input('tagged input', a3.types.ImageUInt32),
+    a3.Output('tagged output', a3.types.ImageUInt32),
+    a3.Output('db output', a3.types.GeneralPyType)]
 
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)

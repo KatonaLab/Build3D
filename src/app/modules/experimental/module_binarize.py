@@ -12,9 +12,8 @@ def module_main(ctx):
     print('binarization complete 🍰')
 
 
-inputs = [a3.Arg('input', a3.types.ImageFloat),
-    a3.Arg('level', a3.types.float, 'parameter')]
+config = [a3.Input('input', a3.types.ImageFloat),
+    a3.Parameter('level', a3.types.float),
+    a3.Output('binary volume', a3.types.ImageFloat)]
 
-outputs = [a3.Arg('binary volume', a3.types.ImageFloat)]
-
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)

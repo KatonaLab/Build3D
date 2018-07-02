@@ -11,4 +11,4 @@ def module_main(ctx):
     print('Bye Module!')
 
 
-def_process_module([], [], module_main)
+def_process_module([], module_main)

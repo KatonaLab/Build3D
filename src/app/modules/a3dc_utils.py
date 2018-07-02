@@ -2,6 +2,7 @@ import a3dc_module_interface as a3
 import numpy as np
 
 
+# TODO: depricated, to be removed
 def multi_dim_image_plane_iterator(image):
     """
     Returns a generator object can iterate through the planes of the 'image'.
@@ -11,6 +12,7 @@ def multi_dim_image_plane_iterator(image):
         yield non_copied_slice
 
 
+# TODO: depricated, to be removed
 def multi_dim_image_apply(image, plane_func):
     """
     Applies 'plane_func' to all the planes of the 'image', treating one plane

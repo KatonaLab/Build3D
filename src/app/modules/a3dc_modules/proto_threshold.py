@@ -15,7 +15,7 @@ def make_threshold_module(method):
 
         a3.outputs['output'] = a3.MultiDimImageFloat_from_ndarray(a3dc_out.array)
 
-    inputs = [a3.Arg('input', a3.types.ImageFloat)]
-    outputs = [a3.Arg('output', a3.types.ImageFloat)]
+    config = [a3.Input('input', a3.types.ImageFloat),
+        a3.Output('output', a3.types.ImageFloat)]
 
-    a3.def_process_module(inputs, outputs, proto_threshold_main)
+    a3.def_process_module(config, proto_threshold_main)

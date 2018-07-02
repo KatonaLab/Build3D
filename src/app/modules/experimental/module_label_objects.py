@@ -14,8 +14,7 @@ def module_main(ctx):
     print('object labeling complete 🔖')
 
 
-inputs = [a3.Arg('binary volume', a3.types.ImageFloat)]
+config = [a3.Input('binary volume', a3.types.ImageFloat),
+    a3.Output('labeled volume', a3.types.ImageUInt32)]
 
-outputs = [a3.Arg('labeled volume', a3.types.ImageUInt32)]
-
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)

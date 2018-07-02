@@ -19,17 +19,16 @@ def module_main(ctx):
     a3.outputs['db output'] = a3dc_out.database
 
 
-inputs = [a3.Arg('tagged input', a3.types.ImageUInt32),
-    a3.Arg('db', a3.types.GeneralPyType),
-    a3.Arg('mean intensity min', a3.types.float, 'parameter'),
-    a3.Arg('mean intensity max', a3.types.float, 'parameter'),
-    a3.Arg('stdev min', a3.types.float, 'parameter'),
-    a3.Arg('stdev max', a3.types.float, 'parameter'),
-    a3.Arg('sum intensity min', a3.types.float, 'parameter'),
-    a3.Arg('sum intensity max', a3.types.float, 'parameter')]
+config = [a3.Input('tagged input', a3.types.ImageUInt32),
+    a3.Input('db', a3.types.GeneralPyType),
+    a3.Parameter('mean intensity min', a3.types.float),
+    a3.Parameter('mean intensity max', a3.types.float),
+    a3.Parameter('stdev min', a3.types.float),
+    a3.Parameter('stdev max', a3.types.float),
+    a3.Parameter('sum intensity min', a3.types.float),
+    a3.Parameter('sum intensity max', a3.types.float),
+    a3.Output('tagged output', a3.types.ImageUInt32),
+    a3.Output('db output', a3.types.GeneralPyType)]
 
-outputs = [a3.Arg('tagged output', a3.types.ImageUInt32),
-    a3.Arg('db output', a3.types.GeneralPyType)]
-
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)
 

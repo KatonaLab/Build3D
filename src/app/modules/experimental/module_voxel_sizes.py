@@ -15,10 +15,8 @@ def module_main(ctx):
     print('voxel counting done 🍀')
 
 
-inputs = [a3.Arg('label pair list', a3.types.GeneralPyType),
-          a3.Arg('intensity image', a3.types.ImageFloat),
-          a3.Arg('labeled', a3.types.ImageUInt32)]
+config = [a3.Input('label pair list', a3.types.GeneralPyType),
+          a3.Input('intensity image', a3.types.ImageFloat),
+          a3.Input('labeled', a3.types.ImageUInt32)]
 
-outputs = []
-
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)

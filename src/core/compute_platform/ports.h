@@ -13,6 +13,7 @@ namespace compute_platform {
 class InputPort;
 class ComputeModule;
 
+// TODO: write tests
 // TODO: move to a utility file/folder
 class PropertyMap {
 public:

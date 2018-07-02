@@ -27,9 +27,9 @@ def convert_input(i):
 
 
 def add_input_triplet(input_list, i):
-    input_list.append(a3.Arg(tagged_input_base.format(i), a3.types.ImageUInt32))
-    input_list.append(a3.Arg(db_input_base.format(i), a3.types.GeneralPyType))
-    input_list.append(a3.Arg(intensity_input_base.format(i), a3.types.ImageFloat))
+    input_list.append(a3.Input(tagged_input_base.format(i), a3.types.ImageUInt32))
+    input_list.append(a3.Input(db_input_base.format(i), a3.types.GeneralPyType))
+    input_list.append(a3.Input(intensity_input_base.format(i), a3.types.ImageFloat))
     return input_list
 
 def module_main(ctx):
@@ -62,24 +62,22 @@ def module_main(ctx):
         a3.outputs[output_tagged_base.format(i)] = a3.MultiDimImageUInt32_from_ndarray(tagged_image_list[i].array)
         a3.outputs[output_db_base.format(i)] = tagged_image_list[i].db
 
-inputs = [
-    a3.Arg('co-loc count min', a3.types.uint32, 'parameter'),
-    a3.Arg('co-loc count max', a3.types.uint32, 'parameter'),
-    a3.Arg('overlap ration min', a3.types.float, 'parameter'),
-    a3.Arg('overlap ration max', a3.types.float, 'parameter'),
-    a3.Arg('volume min', a3.types.uint32, 'parameter'),
-    a3.Arg('volume max', a3.types.uint32, 'parameter')]
-
-outputs = [
-    a3.Arg('overlapping image', a3.types.ImageUInt32),
-    a3.Arg('overlapping db', a3.types.GeneralPyType)]
+config = [
+    a3.Parameter('co-loc count min', a3.types.uint32),
+    a3.Parameter('co-loc count max', a3.types.uint32),
+    a3.Parameter('overlap ration min', a3.types.float),
+    a3.Parameter('overlap ration max', a3.types.float),
+    a3.Parameter('volume min', a3.types.uint32),
+    a3.Parameter('volume max', a3.types.uint32),
+    a3.Output('overlapping image', a3.types.ImageUInt32),
+    a3.Output('overlapping db', a3.types.GeneralPyType)]
 
 for i in range(1, K):
-    inputs = add_input_triplet(inputs, i)
-    outputs.append(a3.Arg(output_tagged_base.format(i), a3.types.ImageUInt32))
-    outputs.append(a3.Arg(output_db_base.format(i), a3.types.GeneralPyType))
+    config = add_input_triplet(config, i)
+    config.append(a3.Output(output_tagged_base.format(i), a3.types.ImageUInt32))
+    config.append(a3.Output(output_db_base.format(i), a3.types.GeneralPyType))
 
-a3.def_process_module(inputs, outputs, module_main)
+a3.def_process_module(config, module_main)
 
 # def apply_filter(image, filterDict=None, removeFiltered=True, overWrite=!!!False!!!):
 
