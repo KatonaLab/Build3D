@@ -22,21 +22,14 @@ void PortBase::setName(const std::string& name)
     m_name = name;
 }
 
-std::string PortBase::tags() const
+const PropertyMap& PortBase::properties() const
 {
-    return m_tags;
+    return m_propertyMap;
 }
 
-bool PortBase::hasTag(const std::string& tag) const
+PropertyMap& PortBase::properties()
 {
-    // TODO: !!! hasTag("param") will return true when e.g. m_tags == "non-parameter" !!!
-    // FIXME:
-    return m_tags.find(tag) != std::string::npos;
-}
-
-void PortBase::setTags(const std::string& tags)
-{
-    m_tags = tags;
+    return const_cast<PropertyMap&>(static_cast<const PortBase*>(this)->properties());
 }
 
 ComputeModule& PortBase::parent()
@@ -96,7 +89,7 @@ void OutputPort::unbind(std::weak_ptr<InputPort> inputPort)
         }
         
         if ((outputHadInput && !inputHadOutput) || (!outputHadInput && inputHadOutput)) {
-            throw std::runtime_error("assymetric bookkeeping error while unbinding an output");
+            throw std::runtime_error("asymetric bookkeeping error while unbinding an output");
         }
     }
 }

@@ -86,21 +86,6 @@ PythonEnvironment::PythonEnvironment()
 
 void PythonEnvironment::reset()
 {
-    // // TODO: implement or remove this function
-    // py::finalize_interpreter();
-
-    // py::initialize_interpreter();
-
-    // // TODO: it is crucial on Windows to redirect the python
-    // // stdout, because a Windows GUI program gets NoneType for
-    // // sys.stdout, that is used by pybind11::print method
-    // // find a safer way to eliminate the fatal error if not 
-    // // redirected
-    // updateStreamRedirects();
-
-    // py::module::import("a3dc_module_interface");
-    // auto sys = py::module::import("sys");
-
     // remove all global variables
     py::exec(R"(
 for name in dir():
@@ -182,7 +167,6 @@ void pyDeclareMultiDimImageType(pybind11::module &m, string name)
         std::vector<T> tmp(arr.data(), arr.data() + arr.size());
         helper.dataVec().swap(tmp);
     })
-
     .def("dims", &MultiDimImage<T>::dimList)
     .def_readwrite("meta", &MultiDimImage<T>::meta);
 
@@ -219,22 +203,59 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     using namespace pybind11::literals;
 
     m.def("def_process_module",
-        [](ProcessArg inputs, ProcessArg outputs, const ProcessFunc& func)
-        {
-            auto& env = PythonEnvironment::instance();
-            env.inputs = inputs;
-            env.outputs = outputs;
-            env.func = func;
-        },
-        "inputs"_a, "outputs"_a, "function"_a);
-
-    py::class_<Arg>(m, "Arg")
-    .def(py::init([](string name, PyTypes type, string tag = "")
+    [](ProcessArg inputs, ProcessArg outputs, const ProcessFunc& func)
     {
-        return Arg{name, type, tag};
-    }), "name"_a, "type"_a, "tag"_a = "")
-    .def_readwrite("name", &Arg::name)
-    .def_readwrite("type", &Arg::type);
+        auto& env = PythonEnvironment::instance();
+        env.inputs = inputs;
+        env.outputs = outputs;
+        env.func = func;
+    },
+    "inputs"_a, "outputs"_a, "function"_a);
+
+    py::class_<InputArg>(m, "Input")
+    .def(py::init([](string name, PyTypes type)
+    {
+        InputArg arg;
+        arg.name = name;
+        arg.type = type;
+        return arg;
+    }));
+
+    py::class_<OutputArg>(m, "Output")
+    .def(py::init([](string name, PyTypes type)
+    {
+        OutputArg arg;
+        arg.name = name;
+        arg.type = type;
+        return arg;
+    }));
+
+    py::class_<ParameterArg>(m, "Parameter")
+    .def(py::init([](string name, PyTypes type)
+    {
+        ParameterArg arg;
+        arg.name = name;
+        arg.type = type;
+        return arg;
+    }))
+    .def("setIntHint", [](ParameterArg& arg, const std::string& key, int value) -> ParameterArg&
+    {
+        arg.properties.setInt(key, value);
+        return arg;
+    })
+    .def("setBoolHint", [](ParameterArg& arg, const std::string& key, bool value) -> ParameterArg&
+    {
+        arg.properties.setBool(key, value);
+        return arg;
+    })
+    .def("setStringHint", [](ParameterArg& arg, const std::string& key, const std::string& value) -> ParameterArg&
+    {
+        arg.properties.setString(key, value);
+        return arg;
+    })
+    // TODO: implement get functions
+    .def_readwrite("name", &ParameterArg::name)
+    .def_readwrite("type", &ParameterArg::type);
 
     py::class_<ModuleContext>(m, "ModuleContext")
     .def("name", [](ModuleContext& obj)
@@ -401,17 +422,17 @@ void PythonComputeModule::buildPorts()
     m_func = env.func;
 
     for (auto& p : env.inputs) {
-        auto pw = createInputPortWrapper(p.type);
-        pw->port()->setName(p.name);
-        pw->port()->setTags(p.tag);
-        m_inputPorts.push(p.name, pw);
+        auto pw = createInputPortWrapper(p.get().type);
+        pw->port()->setName(p.get().name);
+        pw->port()->properties() = p.get().properties;
+        m_inputPorts.push(p.get().name, pw);
     }
 
     for (auto& p : env.outputs) {
-        auto pw = createOutputPortWrapper(p.type);
-        pw->port()->setName(p.name);
-        pw->port()->setTags(p.tag);
-        m_outputPorts.push(p.name, pw);
+        auto pw = createOutputPortWrapper(p.get().type);
+        pw->port()->setName(p.get().name);
+        pw->port()->properties() = p.get().properties;
+        m_outputPorts.push(p.get().name, pw);
     }
 }
 

@@ -1,6 +1,7 @@
 #ifndef _core_compute_platform_ports_h_
 #define _core_compute_platform_ports_h_
 
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -11,6 +12,57 @@ namespace compute_platform {
 
 class InputPort;
 class ComputeModule;
+
+// TODO: move to a utility file/folder
+class PropertyMap {
+public:
+    void setInt(const std::string& key, int value)
+    {
+        m_map[key].m_intData = value;
+    }
+    void setBool(const std::string& key, bool value)
+    {
+        m_map[key].m_boolData = value;
+    }
+    void setString(const std::string& key, const std::string& value)
+    {
+        m_map[key].m_stringData = value;
+    }
+    bool hasKey(const std::string& key) const
+    {
+        return m_map.count(key);
+    }
+    int asInt(const std::string& key) const
+    {
+        // TODO: handle no such key error
+        return m_map.at(key).m_intData;
+    }
+    bool asBool(const std::string& key) const
+    {
+        // TODO: handle no such key error
+        return m_map.at(key).m_boolData;
+    }
+    std::string asString(const std::string& key) const
+    {
+        // TODO: handle no such key error
+        return m_map.at(key).m_stringData;
+    }
+    void remove(const std::string& key)
+    {
+        auto it = m_map.find(key);
+        if (it != m_map.end()) {
+            m_map.erase(it);
+        }
+    }
+private:
+    struct Data {
+        // TODO: this is a wasteful solution, should be using c++17 std::any or std::variant
+        int m_intData;
+        bool m_boolData;
+        std::string m_stringData;
+    };
+    std::map<std::string, Data> m_map;
+};
 
 class PortTypeTraitsBase {
 public:
@@ -80,17 +132,14 @@ public:
     PortBase(ComputeModule& parent);
     std::string name() const;
     void setName(const std::string& name);
-    
-    std::string tags() const;
-    bool hasTag(const std::string& tag) const;
-    void setTags(const std::string& tags);
-
+    const PropertyMap& properties() const;
+    PropertyMap& properties();
     ComputeModule& parent();
     virtual const PortTypeTraitsBase& traits() const = 0;
     virtual ~PortBase() = default;
 protected:
     std::string m_name;
-    std::string m_tags;
+    PropertyMap m_propertyMap;
     ComputeModule& m_parent;
 };
 

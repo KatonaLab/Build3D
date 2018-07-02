@@ -276,14 +276,14 @@ QList<int> PrivateModulePlatformBackend::enumerateInputPorts(int uid)
 {
     return enumeratePorts(uid,
         [](ComputeModule& m) { return m.numInputs(); },
-        [](ComputeModule& m, size_t i) { return ! m.inputPort(i).lock()->hasTag("parameter"); });
+        [](ComputeModule& m, size_t i) { return ! m.inputPort(i).lock()->properties().hasKey("parameter"); });
 }
 
 QList<int> PrivateModulePlatformBackend::enumerateParamPorts(int uid)
 {
     return enumeratePorts(uid,
         [](ComputeModule& m) { return m.numInputs(); },
-        [](ComputeModule& m, size_t i) { return m.inputPort(i).lock()->hasTag("parameter"); });
+        [](ComputeModule& m, size_t i) { return m.inputPort(i).lock()->properties().hasKey("parameter"); });
 }
 
 QList<int> PrivateModulePlatformBackend::enumerateOutputPorts(int uid)

@@ -59,10 +59,41 @@ enum class PyTypes {
     TYPE_GeneralPyType
 };
 
-struct Arg {
+class ArgBase {
+public:
     std::string name;
+    enum class ArgType {Input, Output, Parameter};
+    ArgType argType;
     PyTypes type;
-    std::string tag;
+    compute_platform::PropertyMap properties;
+    virtual ~ArgBase() = default;
+};
+
+class InputArg : public ArgBase {
+public:
+    InputArg()
+    {
+        argType = ArgType::Input;
+        properties.setBool("input", true);
+    }
+};
+
+class OutputArg : public ArgBase {
+public:
+    OutputArg()
+    {
+        argType = ArgType::Output;
+        properties.setBool("output", true);
+    }
+};
+
+class ParameterArg : public ArgBase {
+public:
+    ParameterArg()
+    {
+        argType = ArgType::Parameter;
+        properties.setBool("parameter", true);
+    }
 };
 
 class ModuleContext {
@@ -70,7 +101,7 @@ public:
     std::string name;
 };
 
-typedef std::vector<Arg> ProcessArg;
+typedef std::vector<std::reference_wrapper<ArgBase>> ProcessArg;
 typedef std::function<void(ModuleContext&)> ProcessFunc;
 
 // --------------------------------------------------------
