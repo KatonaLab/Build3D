@@ -25,7 +25,8 @@ Item {
 
         var paramProps = [];
         params.forEach(function(x) {
-            paramProps.push(backend.getInputPortProperties(newUid, x));
+            var p = backend.getInputPortProperties(newUid, x);
+            paramProps.push(p);
         });
 
         var outputProps = [];

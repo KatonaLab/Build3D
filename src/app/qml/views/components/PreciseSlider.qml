@@ -8,13 +8,14 @@ ColumnLayout {
     property alias from: slider.from
     property alias to: slider.to
     property real value: slider.value
+    property real defaultValue
     property alias editWidth: field.implicitWidth
     property alias stepSize: slider.stepSize
     property alias snapMode: slider.snapMode
     property alias text: label.text
 
     Component.onCompleted: {
-        slider.valueChanged(from);
+        slider.value = defaultValue;
     }
 
     Label {

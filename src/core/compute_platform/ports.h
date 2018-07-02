@@ -16,17 +16,21 @@ class ComputeModule;
 // TODO: move to a utility file/folder
 class PropertyMap {
 public:
+    enum class Type {Int, Bool, String};
     void setInt(const std::string& key, int value)
     {
         m_map[key].m_intData = value;
+        m_map[key].m_type = Type::Int;
     }
     void setBool(const std::string& key, bool value)
     {
         m_map[key].m_boolData = value;
+        m_map[key].m_type = Type::Bool;
     }
     void setString(const std::string& key, const std::string& value)
     {
         m_map[key].m_stringData = value;
+        m_map[key].m_type = Type::String;
     }
     bool hasKey(const std::string& key) const
     {
@@ -47,6 +51,11 @@ public:
         // TODO: handle no such key error
         return m_map.at(key).m_stringData;
     }
+    Type getType(const std::string& key) const
+    {
+        // TODO: handle no such key error
+        return m_map.at(key).m_type;
+    }
     void remove(const std::string& key)
     {
         auto it = m_map.find(key);
@@ -54,9 +63,18 @@ public:
             m_map.erase(it);
         }
     }
+    std::vector<std::string> keys() const
+    {
+        std::vector<std::string> ks;
+        for (const auto& kv: m_map) {
+            ks.push_back(kv.first);
+        }
+        return ks;
+    }
 private:
     struct Data {
         // TODO: this is a wasteful solution, should be using c++17 std::any or std::variant
+        Type m_type;
         int m_intData;
         bool m_boolData;
         std::string m_stringData;

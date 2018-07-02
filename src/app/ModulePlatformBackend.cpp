@@ -60,7 +60,7 @@ const cp::ComputeModule& DataSourceModule::getComputeModule() const
 GenericModule::GenericModule(cp::ComputePlatform& parent,
     const std::string& script, const std::string& moduleTypeName, int uid)
     : PythonComputeModule(parent, script, "Generic" + to_string(uid)),
-    m_moduleTypeName(moduleTypeName), BackendModule(uid)
+    BackendModule(uid), m_moduleTypeName(moduleTypeName)
 {}
 
 std::string GenericModule::moduleTypeName() const
@@ -290,7 +290,7 @@ QList<int> PrivateModulePlatformBackend::enumerateOutputPorts(int uid)
 {
     return enumeratePorts(uid,
         [](ComputeModule& m) { return m.numOutputs(); },
-        [](ComputeModule& m, size_t i) { return true; });
+        [](ComputeModule&, size_t) { return true; });
 }
 
 QVariantMap PrivateModulePlatformBackend::getModuleProperties(int uid)
@@ -353,14 +353,30 @@ std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsC
 
 QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int portId)
 {
-    auto& m = fetchBackendModule(uid);
     auto p = fetchInputPort(uid, portId).lock();
 
     QVariantMap vmap;
     vmap["uid"] = uid;
     vmap["portId"] = portId;
     vmap["displayName"] = QString::fromStdString(p->name());
-    vmap["isParameter"] = p->traits().hasTrait("parameter");
+
+    // TODO: extract this loop into a function
+    auto ks = p->properties().keys();
+    for (const string& key: ks) {
+        QString vmapKey = "_" + QString::fromStdString(key);
+        switch (p->properties().getType(key)) {
+            case PropertyMap::Type::Int:
+                vmap[vmapKey] = QVariant(p->properties().asInt(key));
+                break;
+            case PropertyMap::Type::Bool:
+                vmap[vmapKey] = QVariant(p->properties().asBool(key));
+                break;
+            case PropertyMap::Type::String:
+                vmap[vmapKey] = QVariant(QString::fromStdString(p->properties().asString(key)));
+                break;
+        }
+    }
+
     if (p->traits().hasTrait("int-like")) {
         vmap["type"] = "int";
     }
@@ -389,7 +405,6 @@ QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int po
 
 QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int portId)
 {
-    auto& m = fetchBackendModule(uid);
     auto p = fetchOutputPort(uid, portId).lock();
 
     QVariantMap vmap;
@@ -397,6 +412,23 @@ QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int p
     vmap["portId"] = portId;
     vmap["displayName"] = QString::fromStdString(p->name());
     
+    // TODO: extract this loop into a function
+    auto ks = p->properties().keys();
+    for (const string& key: ks) {
+        QString vmapKey = "_" + QString::fromStdString(key);
+        switch (p->properties().getType(key)) {
+            case PropertyMap::Type::Int:
+                vmap[vmapKey] = QVariant(p->properties().asInt(key));
+                break;
+            case PropertyMap::Type::Bool:
+                vmap[vmapKey] = QVariant(p->properties().asBool(key));
+                break;
+            case PropertyMap::Type::String:
+                vmap[vmapKey] = QVariant(QString::fromStdString(p->properties().asString(key)));
+                break;
+        }
+    }
+
     if (p->traits().hasTrait("int-like")) {
         vmap["type"] = "int";
     }

@@ -129,11 +129,13 @@ public:
     {
         if (var.canConvert<T>()) {
             *m_data = var.value<T>();
+            return true;
         } else {
             throw std::runtime_error("can not convert from "
                 + std::string(var.typeName()) + " to " + typeid(T).name()
                 + " in parameter input " + name());
         }
+        return false;
     }
     void execute() override
     {
@@ -152,7 +154,7 @@ public:
         core::compute_platform::InputPortCollectionBase& inputs,
         core::compute_platform::OutputPortCollectionBase& outputs,
         const std::string& name = "")
-        : core::compute_platform::ComputeModule(parent, inputs, outputs)
+        : core::compute_platform::ComputeModule(parent, inputs, outputs, name)
     {}
     std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> getImage()
     {

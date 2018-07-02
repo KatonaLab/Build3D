@@ -90,10 +90,11 @@ Repeater {
             id: intSliderDelegate
             PreciseSlider {
                 font: root.font
-                stepSize: 1
+                stepSize: details._stepSize || 1
                 snapMode: Slider.SnapAlways
-                from: details.from || 0
-                to: details.to || 1000
+                from: details._min || 0
+                to: details._max || 1000
+                defaultValue: details._default || from
                 text: details.displayName
 
                 onValueChanged: {
@@ -107,8 +108,9 @@ Repeater {
             id: floatSliderDelegate
             PreciseSlider {
                 font: root.font
-                from: details.from || 0
-                to: details.to || 1
+                from: details._min || 0
+                to: details._max || 1
+                defaultValue: details._default || from
                 text: details.displayName
 
                 onValueChanged: {

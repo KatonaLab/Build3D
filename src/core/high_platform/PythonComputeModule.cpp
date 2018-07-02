@@ -203,16 +203,35 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     using namespace pybind11::literals;
 
     m.def("def_process_module",
-    [](ProcessArg inputs, ProcessArg outputs, const ProcessFunc& func)
+    [](ProcessArg config, const ProcessFunc& func)
     {
         auto& env = PythonEnvironment::instance();
-        env.inputs = inputs;
-        env.outputs = outputs;
+        for (ArgBase& arg : config) {
+            switch (arg.argType) {
+                case ArgBase::ArgType::Input:
+                    env.inputs.push_back(arg);
+                    break;
+                case ArgBase::ArgType::Parameter:
+                    env.inputs.push_back(arg);
+                    break;
+                case ArgBase::ArgType::Output:
+                    env.outputs.push_back(arg);
+                    break;
+            }
+        }
         env.func = func;
-    },
-    "inputs"_a, "outputs"_a, "function"_a);
+    }, "config"_a, "function"_a);
 
-    py::class_<InputArg>(m, "Input")
+    py::class_<ArgBase>(m, "ArgBase")
+    .def(py::init([](string name, PyTypes type)
+    {
+        ArgBase arg;
+        arg.name = name;
+        arg.type = type;
+        return arg;
+    }));
+
+    py::class_<InputArg, ArgBase>(m, "Input")
     .def(py::init([](string name, PyTypes type)
     {
         InputArg arg;
@@ -221,7 +240,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         return arg;
     }));
 
-    py::class_<OutputArg>(m, "Output")
+    py::class_<OutputArg, ArgBase>(m, "Output")
     .def(py::init([](string name, PyTypes type)
     {
         OutputArg arg;
@@ -230,7 +249,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         return arg;
     }));
 
-    py::class_<ParameterArg>(m, "Parameter")
+    py::class_<ParameterArg, ArgBase>(m, "Parameter")
     .def(py::init([](string name, PyTypes type)
     {
         ParameterArg arg;
