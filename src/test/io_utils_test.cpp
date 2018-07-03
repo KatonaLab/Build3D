@@ -328,3 +328,9 @@ SCENARIO("ics read assets/A15_1_a_DAPI_TH__vGluT1_20x.ics", "[core/io_utils]")
 
    REQUIRE(ics.valid() == false);
 }
+
+SCENARIO("ics read assets/no_corresponding_ids.ics", "[core/io_utils]")
+{
+   IcsAdapter ics;
+   REQUIRE_THROWS(ics.open("assets/no_corresponding_ids.ics"));
+}
