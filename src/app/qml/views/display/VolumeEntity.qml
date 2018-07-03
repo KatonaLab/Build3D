@@ -21,6 +21,10 @@ Entity {
     property real lutHighCut
     property real lutDataMax
 
+    onVisibleChanged: {
+        console.log("visible changed to ", visible);
+    }
+
     property vector4d lutParameters: Qt.vector4d(0, lutDataMax, lutLowCut, lutHighCut)
 
     property Layer layer

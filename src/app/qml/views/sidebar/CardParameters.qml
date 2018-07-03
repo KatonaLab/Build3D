@@ -14,6 +14,7 @@ Repeater {
     property int uid: -1
     property font font
 
+    // TODO: move to a shared utility js file
     function modelListHasItem(modelList, item) {
         if (!modelList) {
             return false;

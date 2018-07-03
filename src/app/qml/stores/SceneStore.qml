@@ -59,6 +59,19 @@ Item {
         model.insert(idx, item)
     }
 
+    // TODO: move to a shared utility js file
+    function listHasItem(list, item) {
+        if (!list) {
+            return false;
+        }
+        for (var i = 0; i < list.length; ++i) {
+            if (list[i][item] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function onDispatched(actionType, args) {
         var backend = MainStore.moduleStore.backend;
 
@@ -67,7 +80,7 @@ Item {
             var outputs = backend.enumerateOutputPorts(args.uid);
             outputs.forEach(function (x) {
                 var props = backend.getOutputPortProperties(args.uid, x);
-                if (props.type == "float-image") {
+                if (listHasItem(props.typeTraits, "float-image")) {
                     model.append({
                         "uid": args.uid,
                         "portId": props.portId,
@@ -80,7 +93,7 @@ Item {
                         // TODO: Qt.vector3d(1, 1, 1) is crucial, if it is Qt.vector3d(0, 0, 0) then
                         // the program crashes on windows, find a way in the backend for protection
                         "size": Qt.vector3d(1, 1, 1)});
-                } else if (props.type == "int-image") {
+                } else if (listHasItem(props.typeTraits, "int-image")) {
                     model.append({
                         "uid": args.uid,
                         "portId": props.portId,

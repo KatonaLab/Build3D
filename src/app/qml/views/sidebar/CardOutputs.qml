@@ -13,37 +13,45 @@ Repeater {
     property font font
     property int uid: -1
 
+    // TODO: move to a shared utility js file
+    function modelListHasItem(modelList, item) {
+        if (!modelList) {
+            return false;
+        }
+        for (var i = 0; i < modelList.count; ++i) {
+            if (modelList.get(i)[item] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     delegate: Loader {
         property int uid: root.uid
         property var details: model
         Layout.fillWidth: true
 
         sourceComponent: {
-            var typeToDelegate = {
-                "int": {
-                    "default": intOutputDelegate,
-                },
-                "float": {
-                    "default": floatOutputDelegate,
-                },
-                "float-image": {
-                    "default": floatImageOutputDelegate
-                },
-                "int-image": {
-                    "default": intImageOutputDelegate
-                },
-                "py-object": {
-                    "default": pyObjectOutputDelegate
-                }
-            };
-
-            var type = model.type || "unknown";
-            var hint = model.hint || "default";
-            if (typeToDelegate[type]) {
-                if (typeToDelegate[type][hint]) {
-                    return typeToDelegate[type][hint];
-                }
+            if (modelListHasItem(model.typeTraits, "int-like")) {
+                return intOutputDelegate;
             }
+
+            if (modelListHasItem(model.typeTraits, "float-like")) {
+                return floatOutputDelegate;
+            }
+
+            if (modelListHasItem(model.typeTraits, "float-image")) {
+                return floatImageOutputDelegate;
+            }
+
+            if (modelListHasItem(model.typeTraits, "int-image")) {
+                return intImageOutputDelegate;
+            }
+
+            if (modelListHasItem(model.typeTraits, "py-object")) {
+                return pyObjectOutputDelegate;
+            }
+
             return unknownControllerDelegate;
         }
 
