@@ -4,7 +4,9 @@ QMAKE_CXXFLAGS += -fdiagnostics-absolute-paths
 
 TARGET = test
 SOURCES += \
-    benchmark.cpp
+    benchmark.cpp \
+    ../core/multidim_image_platform/MultiDimImage.hpp \
+    ../core/multidim_image_platform/MultiDimImage.cpp \
 
 CONFIG -= app_bundle
 CONFIG += debug
