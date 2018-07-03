@@ -17,7 +17,7 @@ class ComputeModule;
 // TODO: move to a utility file/folder
 class PropertyMap {
 public:
-    enum class Type {Int, Bool, String};
+    enum class Type {Int, Bool, String, Float};
     void setInt(const std::string& key, int value)
     {
         m_map[key].m_intData = value;
@@ -32,6 +32,11 @@ public:
     {
         m_map[key].m_stringData = value;
         m_map[key].m_type = Type::String;
+    }
+    void setFloat(const std::string& key, float value)
+    {
+        m_map[key].m_floatData = value;
+        m_map[key].m_type = Type::Float;
     }
     bool hasKey(const std::string& key) const
     {
@@ -51,6 +56,11 @@ public:
     {
         // TODO: handle no such key error
         return m_map.at(key).m_stringData;
+    }
+    float asFloat(const std::string& key) const
+    {
+        // TODO: handle no such key error
+        return m_map.at(key).m_floatData;
     }
     Type getType(const std::string& key) const
     {
@@ -79,6 +89,7 @@ private:
         int m_intData;
         bool m_boolData;
         std::string m_stringData;
+        float m_floatData;
     };
     std::map<std::string, Data> m_map;
 };
@@ -92,6 +103,7 @@ public:
         return hash() == ptt.hash();
     }
     virtual bool hasTrait(const std::string& trait) const = 0;
+    virtual const std::set<std::string>& getAll() const = 0;
     virtual std::string typeName() const = 0;
 protected:
     virtual std::size_t hash() const = 0;
@@ -108,6 +120,10 @@ public:
     bool hasTrait(const std::string& trait) const override
     {
         return m_traits.set.find(trait) != m_traits.set.end();
+    }
+    const std::set<std::string>& getAll() const override
+    {
+        return m_traits.set;
     }
     static const PortTypeTraits& instance()
     {
@@ -143,6 +159,7 @@ PORT_TYPE_TRAITS_EX(int64_t, "int-like", "int64_t");
 PORT_TYPE_TRAITS_EX(float, "float-like", "float");
 PORT_TYPE_TRAITS_EX(double, "float-like", "double");
 PORT_TYPE_TRAITS_EX(bool, "bool-like", "bool");
+PORT_TYPE_TRAITS_EX(std::string, "string");
 
 // --------------------------
 

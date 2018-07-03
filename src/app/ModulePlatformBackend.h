@@ -13,7 +13,6 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <core/high_platform/PythonComputeModule.h>
 #include "VolumeTexture.h"
-#include "UltimateSinkModule.h"
 
 // TODO: separate into files
 
@@ -144,6 +143,37 @@ public:
 protected:
     core::compute_platform::TypedOutputPortCollection<T> m_outputs;
     std::shared_ptr<T> m_data;
+};
+
+// template spetialization for QString <-> std::string interchange
+template <>
+class TypedParamHelperModule<QString>: public ParamHelperModule {
+public:
+    // TODO: separate decl from def
+    TypedParamHelperModule(core::compute_platform::ComputePlatform& parent, QString initialValue)
+        :
+        ParamHelperModule(parent, "ParamHelper-QString", m_outputs),
+        m_outputs(*this),
+        m_data(std::make_shared<std::string>(initialValue.toStdString()))
+    {}
+    bool setData(QVariant var) override
+    {
+        if (var.canConvert<QString>()) {
+            *m_data = var.value<QString>().toStdString();
+            return true;
+        } else {
+            throw std::runtime_error("can not convert from "
+                + std::string(var.typeName()) + " to QString in parameter input " + name());
+        }
+        return false;
+    }
+    void execute() override
+    {
+        m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
+    }
+protected:
+    core::compute_platform::TypedOutputPortCollection<std::string> m_outputs;
+    std::shared_ptr<std::string> m_data;
 };
 
 // --------------------------------------------------------

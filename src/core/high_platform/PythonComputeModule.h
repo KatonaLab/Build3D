@@ -46,6 +46,7 @@ enum class PyTypes {
     TYPE_uint64_t,
     TYPE_float,
     TYPE_double,
+    TYPE_bool,
     TYPE_MultiDimImageInt8,
     TYPE_MultiDimImageInt16,
     TYPE_MultiDimImageInt32,
@@ -56,7 +57,8 @@ enum class PyTypes {
     TYPE_MultiDimImageUInt64,
     TYPE_MultiDimImageFloat,
     TYPE_MultiDimImageDouble,
-    TYPE_GeneralPyType
+    TYPE_GeneralPyType,
+    TYPE_String
 };
 
 class ArgBase {

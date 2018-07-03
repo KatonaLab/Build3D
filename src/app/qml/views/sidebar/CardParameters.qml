@@ -4,6 +4,7 @@ import QtQml.Models 2.3
 import QtQuick.Controls 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
+import QtQuick.Dialogs 1.2
 
 import "../../actions"
 import "../components"
@@ -13,33 +14,45 @@ Repeater {
     property int uid: -1
     property font font
 
+    function modelListHasItem(modelList, item) {
+        if (!modelList) {
+            return false;
+        }
+        for (var i = 0; i < modelList.count; ++i) {
+            if (modelList.get(i)[item] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     delegate: Loader {
         property int uid: root.uid
         property var details: model
         Layout.fillWidth: true
 
         sourceComponent: {
-            var typeToDelegate = {
-                "int": {
-                    "default": intSliderDelegate,
-                    "slider": intSliderDelegate
-                },
-                "float": {
-                    "default": floatSliderDelegate,
-                    "slider": floatSliderDelegate
-                },
-                "bool": {
-                    "default": switchDelegate
-                }
-            };
 
-            var type = model.type || "unknown";
-            var hint = model.hint || "default";
-            if (typeToDelegate[type]) {
-                if (typeToDelegate[type][hint]) {
-                    return typeToDelegate[type][hint];
+            if (modelListHasItem(model.typeTraits, "int-like")) {
+                return intSliderDelegate;
+            }
+
+            if (modelListHasItem(details.typeTraits, "float-like")) {
+                return floatSliderDelegate;
+            }
+
+            if (modelListHasItem(details.typeTraits, "bool")) {
+                return switchDelegate;
+            }
+
+            if (modelListHasItem(details.typeTraits, "string")) {
+                if (details.hints.file === true) {
+                    return filenameDelegate;
+                } else {
+                    return stringDelegate;
                 }
             }
+
             return unknownControllerDelegate;
         }
 
@@ -90,11 +103,11 @@ Repeater {
             id: intSliderDelegate
             PreciseSlider {
                 font: root.font
-                stepSize: details._stepSize || 1
+                stepSize: details.hints.stepSize || 1
                 snapMode: Slider.SnapAlways
-                from: details._min || 0
-                to: details._max || 1000
-                defaultValue: details._default || from
+                from: details.hints.min || 0
+                to: details.hints.max || 1000
+                defaultValue: details.hints.default || from
                 text: details.displayName
 
                 onValueChanged: {
@@ -108,9 +121,9 @@ Repeater {
             id: floatSliderDelegate
             PreciseSlider {
                 font: root.font
-                from: details._min || 0
-                to: details._max || 1
-                defaultValue: details._default || from
+                from: details.hints.min || 0.0
+                to: details.hints.max || 1.0
+                defaultValue: details.hints.default || from
                 text: details.displayName
 
                 onValueChanged: {
@@ -142,6 +155,60 @@ Repeater {
                 onCheckedChanged: {
                     var values = {value: checked};
                     AppActions.requestModuleParamChange(uid, details.portId, values);
+                }
+            }
+        }
+
+        Component {
+            id: stringDelegate
+            ColumnLayout {
+                Label {
+                    text: details.displayName
+                    font: root.font
+                }
+                TextField {
+                    font: root.font
+                    Layout.fillWidth: true
+                    onEditingFinished: {
+                        var values = {value: text};
+                        AppActions.requestModuleParamChange(uid, details.portId, values);
+                    }
+                }
+            }
+        }
+
+        Component {
+            id: filenameDelegate
+            ColumnLayout {
+                Label {
+                    Layout.fillWidth: true
+                    text: details.displayName
+                    font: root.font
+                }
+                Text {
+                    id: filenameText
+                    Layout.fillWidth: true
+                    wrapMode: Text.WrapAnywhere
+                    font: root.font
+                }
+                Button {
+                    Layout.fillWidth: true
+                    text: "select file"
+                    onClicked: {
+                        dialog.open();
+                    }
+
+                    FileDialog {
+                        id: dialog
+                        title: "Select File"
+                        selectMultiple: details.hints.multipleFiles || false
+                        onAccepted: {
+                            console.debug("select file", dialog.fileUrl);
+                            filenameText.text = dialog.fileUrl;
+                            var values = {value: dialog.fileUrl};
+                            AppActions.requestModuleParamChange(uid, details.portId, values);
+                        }
+                    }
                 }
             }
         }

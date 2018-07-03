@@ -37,7 +37,6 @@ HEADERS += \
     VolumeData.h \
     VolumeTexture.h \
     ModulePlatformBackend.h \
-    UltimateSinkModule.h \
     LogCollector.h \
     TurnTableCameraController.h \
     ../util/version.h \
@@ -51,7 +50,6 @@ SOURCES += \
     VolumeData.cpp \
     VolumeTexture.cpp \
     ModulePlatformBackend.cpp \
-    UltimateSinkModule.cpp \
     LogCollector.cpp \
     TurnTableCameraController.cpp \
     main.cpp \

@@ -190,6 +190,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     .value("uint64", PyTypes::TYPE_uint64_t)
     .value("float", PyTypes::TYPE_float)
     .value("double", PyTypes::TYPE_double)
+    .value("bool", PyTypes::TYPE_bool)
     .value("ImageInt8", PyTypes::TYPE_MultiDimImageInt8)
     .value("ImageInt16", PyTypes::TYPE_MultiDimImageInt16)
     .value("ImageInt32", PyTypes::TYPE_MultiDimImageInt32)
@@ -200,7 +201,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     .value("ImageUInt64", PyTypes::TYPE_MultiDimImageUInt64)
     .value("ImageFloat", PyTypes::TYPE_MultiDimImageFloat)
     .value("ImageDouble", PyTypes::TYPE_MultiDimImageDouble)
-    .value("GeneralPyType", PyTypes::TYPE_GeneralPyType);
+    .value("GeneralPyType", PyTypes::TYPE_GeneralPyType)
+    .value("string", PyTypes::TYPE_String);
 
     using namespace pybind11::literals;
 
@@ -276,6 +278,11 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         arg.properties.setString(key, value);
         return arg;
     })
+    .def("setFloatHint", [](ParameterArg& arg, const std::string& key, float value) -> ParameterArg&
+    {
+        arg.properties.setFloat(key, value);
+        return arg;
+    })
     // TODO: implement get functions
     .def_readwrite("name", &ParameterArg::name)
     .def_readwrite("type", &ParameterArg::type);
@@ -348,6 +355,8 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
         CASE_POD(TYPE_uint64_t, uint64_t)
         CASE_POD(TYPE_float, float)
         CASE_POD(TYPE_double, double)
+        CASE_POD(TYPE_bool, bool)
+        CASE_POD(TYPE_String, std::string)
         CASE_NON_POD(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
@@ -391,6 +400,8 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
         CASE_POD(TYPE_uint64_t, uint64_t)
         CASE_POD(TYPE_float, float)
         CASE_POD(TYPE_double, double)
+        CASE_POD(TYPE_bool, bool)
+        CASE_POD(TYPE_String, std::string)
         CASE_NON_POD(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)

@@ -162,36 +162,30 @@ void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
         ParamHelperModule* helperModule = nullptr;
 
         // TODO: fix this mess, find a project-wide solution for static-dynamic type conversion
-        if (t.hasTrait("int-like")) {
-            if (t.hasTrait("uint8_t")) {
-                helperModule = new TypedParamHelperModule<uint8_t>(m_platform, 0);
-            } else if (t.hasTrait("uint16_t")) {
-                helperModule = new TypedParamHelperModule<uint16_t>(m_platform, 0);
-            } else if (t.hasTrait("uint32_t")) {
-                helperModule = new TypedParamHelperModule<uint32_t>(m_platform, 0);
-            } else if (t.hasTrait("uint64_t")) {
-                helperModule = new TypedParamHelperModule<uint64_t>(m_platform, 0);
-            } else if (t.hasTrait("int8_t")) {
-                helperModule = new TypedParamHelperModule<int8_t>(m_platform, 0);
-            } else if (t.hasTrait("int16_t")) {
-                helperModule = new TypedParamHelperModule<int16_t>(m_platform, 0);
-            } else if (t.hasTrait("int32_t")) {
-                helperModule = new TypedParamHelperModule<int32_t>(m_platform, 0);
-            } else if (t.hasTrait("int64_t")) {
-                helperModule = new TypedParamHelperModule<int64_t>(m_platform, 0);
-            } else {
-                throw std::runtime_error("unknown input parameter int-like type, can not create input module for that");
-            }
-        } else if (t.hasTrait("float-like")) {
-            if (t.hasTrait("float")) {
-                helperModule = new TypedParamHelperModule<float>(m_platform, 0);
-            } else if (t.hasTrait("double")) {
-                helperModule = new TypedParamHelperModule<double>(m_platform, 0);
-            } else {
-                throw std::runtime_error("unknown input parameter float-like type, can not create input module for that");
-            }
-        } else if (t.hasTrait("bool-like")) {
+        if (t.hasTrait("uint8_t")) {
+            helperModule = new TypedParamHelperModule<uint8_t>(m_platform, 0);
+        } else if (t.hasTrait("uint16_t")) {
+            helperModule = new TypedParamHelperModule<uint16_t>(m_platform, 0);
+        } else if (t.hasTrait("uint32_t")) {
+            helperModule = new TypedParamHelperModule<uint32_t>(m_platform, 0);
+        } else if (t.hasTrait("uint64_t")) {
+            helperModule = new TypedParamHelperModule<uint64_t>(m_platform, 0);
+        } else if (t.hasTrait("int8_t")) {
+            helperModule = new TypedParamHelperModule<int8_t>(m_platform, 0);
+        } else if (t.hasTrait("int16_t")) {
+            helperModule = new TypedParamHelperModule<int16_t>(m_platform, 0);
+        } else if (t.hasTrait("int32_t")) {
+            helperModule = new TypedParamHelperModule<int32_t>(m_platform, 0);
+        } else if (t.hasTrait("int64_t")) {
+            helperModule = new TypedParamHelperModule<int64_t>(m_platform, 0);
+        } else if (t.hasTrait("float")) {
+            helperModule = new TypedParamHelperModule<float>(m_platform, 0);
+        } else if (t.hasTrait("double")) {
+            helperModule = new TypedParamHelperModule<double>(m_platform, 0);
+        } else if (t.hasTrait("bool")) {
             helperModule = new TypedParamHelperModule<bool>(m_platform, 0);
+        } else if (t.hasTrait("string")) {
+            helperModule = new TypedParamHelperModule<QString>(m_platform, 0);
         } else {
             throw std::runtime_error("unknown input parameter type, can not create input module for that");
         }
@@ -199,6 +193,7 @@ void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
         if (!connectPorts(*helperModule, 0, m.getComputeModule(), portId)) {
             throw std::runtime_error("internal error, can not connect param helper modules");
         }
+
         m_paramHelpers[make_pair(uid, portId)] = unique_ptr<ParamHelperModule>(helperModule);
     }
 }
@@ -350,6 +345,47 @@ std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsC
     }
     return list;
 }
+// TODO: proper header to .h file
+QVariantMap portPropertiesToQVariantMap(const PropertyMap& properties)
+{
+    QVariantMap vmap;
+    auto ks = properties.keys();
+    for (const string& key: ks) {
+        QString vmapKey = QString::fromStdString(key);
+        switch (properties.getType(key)) {
+            case PropertyMap::Type::Int:
+                vmap[vmapKey] = QVariant(properties.asInt(key));
+                break;
+            case PropertyMap::Type::Bool:
+                vmap[vmapKey] = QVariant(properties.asBool(key));
+                break;
+            case PropertyMap::Type::String:
+                vmap[vmapKey] = QVariant(QString::fromStdString(properties.asString(key)));
+                break;
+            case PropertyMap::Type::Float:
+                vmap[vmapKey] = QVariant(properties.asFloat(key));
+                break;
+        }
+    }
+    return vmap;
+}
+
+// TODO: proper header to .h file
+QVariantList portTypeTraitsToQVariantList(const std::set<std::string>& traits)
+{
+    QVariantList vlist;
+    for (const auto& t : traits) {
+        QVariantMap vmap;
+        // TODO: a simple list could not be sent to the js model side:
+        // reading the model after dispatching ActionTypes.module_added_notification in CardStore.qml
+        // after model.append(newItem), the model does not contain the type traits list
+        // I think this is something to do with the dynamic role = false property in the QMLListModel
+        // A proper solution is needed, see issue #50
+        vmap[QString::fromStdString(t)] = true;
+        vlist.append(vmap);
+    }
+    return vlist;
+}
 
 QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int portId)
 {
@@ -359,33 +395,8 @@ QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int po
     vmap["uid"] = uid;
     vmap["portId"] = portId;
     vmap["displayName"] = QString::fromStdString(p->name());
-
-    // TODO: extract this loop into a function
-    auto ks = p->properties().keys();
-    for (const string& key: ks) {
-        QString vmapKey = "_" + QString::fromStdString(key);
-        switch (p->properties().getType(key)) {
-            case PropertyMap::Type::Int:
-                vmap[vmapKey] = QVariant(p->properties().asInt(key));
-                break;
-            case PropertyMap::Type::Bool:
-                vmap[vmapKey] = QVariant(p->properties().asBool(key));
-                break;
-            case PropertyMap::Type::String:
-                vmap[vmapKey] = QVariant(QString::fromStdString(p->properties().asString(key)));
-                break;
-        }
-    }
-
-    if (p->traits().hasTrait("int-like")) {
-        vmap["type"] = "int";
-    }
-    if (p->traits().hasTrait("float-like")) {
-        vmap["type"] = "float";
-    }
-    if (p->traits().hasTrait("bool-like")) {
-        vmap["type"] = "bool";
-    }
+    vmap["hints"] = portPropertiesToQVariantMap(p->properties());
+    vmap["typeTraits"] = portTypeTraitsToQVariantList(p->traits().getAll());
 
     auto portList = fetchOutputPortsCompatibleTo(p);
     QVariantList vlist;
@@ -400,6 +411,7 @@ QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int po
         vlist.append(listItemMap);
     }
     vmap["options"] = vlist;
+
     return vmap;
 }
 
@@ -411,42 +423,8 @@ QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int p
     vmap["uid"] = uid;
     vmap["portId"] = portId;
     vmap["displayName"] = QString::fromStdString(p->name());
-    
-    // TODO: extract this loop into a function
-    auto ks = p->properties().keys();
-    for (const string& key: ks) {
-        QString vmapKey = "_" + QString::fromStdString(key);
-        switch (p->properties().getType(key)) {
-            case PropertyMap::Type::Int:
-                vmap[vmapKey] = QVariant(p->properties().asInt(key));
-                break;
-            case PropertyMap::Type::Bool:
-                vmap[vmapKey] = QVariant(p->properties().asBool(key));
-                break;
-            case PropertyMap::Type::String:
-                vmap[vmapKey] = QVariant(QString::fromStdString(p->properties().asString(key)));
-                break;
-        }
-    }
-
-    if (p->traits().hasTrait("int-like")) {
-        vmap["type"] = "int";
-    }
-    if (p->traits().hasTrait("float-like")) {
-        vmap["type"] = "float";
-    }
-    if (p->traits().hasTrait("bool-like")) {
-        vmap["type"] = "bool";
-    }
-    if (p->traits().hasTrait("float-image")) {
-        vmap["type"] = "float-image";
-    }
-    if (p->traits().hasTrait("int-image")) {
-        vmap["type"] = "int-image";
-    }
-    if (p->traits().hasTrait("py-object")) {
-        vmap["type"] = "py-object";
-    }
+    vmap["hints"] = portPropertiesToQVariantMap(p->properties());
+    vmap["typeTraits"] = portTypeTraitsToQVariantList(p->traits().getAll());
 
     return vmap;
 }
