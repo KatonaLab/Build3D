@@ -38,6 +38,10 @@ protected:
 template <typename T>
 md::MultiDimImage<T> IcsAdapter::read(bool xyztcReorder)
 {
+    if (!valid()) {
+        throw std::runtime_error("can not read '" + m_filename + "', check the .ics file and also the corresponding .ids file");
+    }
+
     if (std::type_index(typeid(T)) != dataType()) {
         throw std::runtime_error("image object and ics file data type mismatch in '" + m_filename + "'");
     }
@@ -70,6 +74,10 @@ md::MultiDimImage<T> IcsAdapter::read(bool xyztcReorder)
 template <typename T>
 md::MultiDimImage<T> IcsAdapter::readScaledConvert(bool xyztcReorder)
 {
+    if (!valid()) {
+        throw std::runtime_error("can not read '" + m_filename + "', check the .ics file and also the corresponding .ids file");
+    }
+    
     if (std::type_index(typeid(T)) != dataType()) {
         md::MultiDimImage<T> im;
         switch (m_dt) {

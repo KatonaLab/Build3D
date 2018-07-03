@@ -65,6 +65,16 @@ bool IcsAdapter::open(const std::string& filename)
 
     // check valid type
     dataType();
+
+    // test for valid .ids
+
+    uint32_t dummy;
+    if (IcsGetDataBlock(m_ip, &dummy, sizeof(uint32_t)) != IcsErr_Ok) {
+        close();
+        throw std::runtime_error("ics/ids data read error '" + filename + "', check the .ics file and also the corresponding .ids file");
+    }
+    std::rewind(((Ics_BlockRead*)m_ip->blockRead)->dataFilePtr);
+
     return true;
 }
     
