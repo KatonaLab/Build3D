@@ -101,7 +101,7 @@ public:
     std::string name;
 };
 
-typedef std::vector<std::reference_wrapper<ArgBase>> ProcessArg;
+typedef std::vector<std::shared_ptr<ArgBase>> ProcessArg;
 typedef std::function<void(ModuleContext&)> ProcessFunc;
 
 // --------------------------------------------------------

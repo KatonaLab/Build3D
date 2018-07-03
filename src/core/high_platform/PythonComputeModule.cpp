@@ -210,8 +210,8 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         auto& env = PythonEnvironment::instance();
         env.inputs.clear();
         env.outputs.clear();
-        for (ArgBase& arg : config) {
-            switch (arg.argType) {
+        for (shared_ptr<ArgBase> arg : config) {
+            switch (arg->argType) {
                 case ArgBase::ArgType::Input:
                     env.inputs.push_back(arg);
                     break;
@@ -226,7 +226,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         env.func = func;
     }, "config"_a, "function"_a);
 
-    py::class_<ArgBase>(m, "ArgBase")
+    py::class_<ArgBase, std::shared_ptr<ArgBase>>(m, "ArgBase")
     .def(py::init([](string name, PyTypes type)
     {
         ArgBase arg;
@@ -235,7 +235,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         return arg;
     }));
 
-    py::class_<InputArg, ArgBase>(m, "Input")
+    py::class_<InputArg, ArgBase, std::shared_ptr<InputArg>>(m, "Input")
     .def(py::init([](string name, PyTypes type)
     {
         InputArg arg;
@@ -244,7 +244,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         return arg;
     }));
 
-    py::class_<OutputArg, ArgBase>(m, "Output")
+    py::class_<OutputArg, ArgBase, std::shared_ptr<OutputArg>>(m, "Output")
     .def(py::init([](string name, PyTypes type)
     {
         OutputArg arg;
@@ -253,7 +253,7 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
         return arg;
     }));
 
-    py::class_<ParameterArg, ArgBase>(m, "Parameter")
+    py::class_<ParameterArg, ArgBase, std::shared_ptr<ParameterArg>>(m, "Parameter")
     .def(py::init([](string name, PyTypes type)
     {
         ParameterArg arg;
@@ -444,20 +444,18 @@ void PythonComputeModule::buildPorts()
     env.exec(m_code);
     m_func = env.func;
 
-    for (auto& p : env.inputs) {
-        cout << "input name " << p.get().name << endl;
-        auto pw = createInputPortWrapper(p.get().type);
-        pw->port()->setName(p.get().name);
-        pw->port()->properties() = p.get().properties;
-        m_inputPorts.push(p.get().name, pw);
+    for (auto p : env.inputs) {
+        auto pw = createInputPortWrapper(p->type);
+        pw->port()->setName(p->name);
+        pw->port()->properties() = p->properties;
+        m_inputPorts.push(p->name, pw);
     }
 
     for (auto& p : env.outputs) {
-        cout << "output name " << p.get().name << endl;
-        auto pw = createOutputPortWrapper(p.get().type);
-        pw->port()->setName(p.get().name);
-        pw->port()->properties() = p.get().properties;
-        m_outputPorts.push(p.get().name, pw);
+        auto pw = createOutputPortWrapper(p->type);
+        pw->port()->setName(p->name);
+        pw->port()->properties() = p->properties;
+        m_outputPorts.push(p->name, pw);
     }
 }
 

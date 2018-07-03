@@ -207,12 +207,12 @@ SCENARIO("high_platform source py module test", "[core/high_platform]")
     R"(
 import a3dc_module_interface
 
-def module_main():
+def module_main(ctx):
     im = a3dc_module_interface.MultiDimImageFloat([16, 24])
     im[7, 23] = 42
     a3dc_module_interface.outputs['out_image'] = im
 
-a3dc_module_interface.def_process_module([], [a3dc_module_interface.Arg('out_image', a3dc_module_interface.types.ImageFloat)], module_main)
+a3dc_module_interface.def_process_module([a3dc_module_interface.Output('out_image', a3dc_module_interface.types.ImageFloat)], module_main)
     )";
 
     GIVEN("a simple net") {
@@ -237,14 +237,14 @@ SCENARIO("high_platform sink py module test", "[core/high_platform]")
     string codeSource =
     R"(
 import a3dc_module_interface
-from a3dc_module_interface import Arg
+from a3dc_module_interface import Input
 
-def module_main():
+def module_main(ctx):
     im = a3dc_module_interface.inputs['in_image']
     if im[7, 23] != 42:
         raise Exception('im[7, 23] != 42')
 
-a3dc_module_interface.def_process_module([Arg('in_image', a3dc_module_interface.types.ImageFloat)], [], module_main)
+a3dc_module_interface.def_process_module([Input('in_image', a3dc_module_interface.types.ImageFloat)], module_main)
     )";
 
     GIVEN("a simple net") {
@@ -271,9 +271,9 @@ SCENARIO("high_platform common py module test", "[core/high_platform]")
     string codeSource =
     R"(
 import a3dc_module_interface
-from a3dc_module_interface import Arg
+from a3dc_module_interface import Input, Output
 
-def module_main():
+def module_main(ctx):
     im = a3dc_module_interface.inputs['in_image']
     im[7, 23] += 42
     im[7, 24] = a3dc_module_interface.inputs['in_int_param']
@@ -283,15 +283,14 @@ def module_main():
     a3dc_module_interface.outputs['out_uint_param'] = 42000000
     a3dc_module_interface.outputs['out_float_param'] = 2024.2024
 
-inputs = [
-    Arg('in_image', a3dc_module_interface.types.ImageFloat),
-    Arg('in_int_param', a3dc_module_interface.types.int64),
-    Arg('in_double_param', a3dc_module_interface.types.double)]
-outputs = [
-    Arg('out_image', a3dc_module_interface.types.ImageFloat),
-    Arg('out_uint_param', a3dc_module_interface.types.uint64),
-    Arg('out_float_param', a3dc_module_interface.types.float)]
-a3dc_module_interface.def_process_module(inputs, outputs, module_main)
+config = [
+    Input('in_image', a3dc_module_interface.types.ImageFloat),
+    Input('in_int_param', a3dc_module_interface.types.int64),
+    Input('in_double_param', a3dc_module_interface.types.double),
+    Output('out_image', a3dc_module_interface.types.ImageFloat),
+    Output('out_uint_param', a3dc_module_interface.types.uint64),
+    Output('out_float_param', a3dc_module_interface.types.float)]
+a3dc_module_interface.def_process_module(config, module_main)
     )";
 
     GIVEN("a simple net") {
@@ -340,16 +339,15 @@ SCENARIO("high_platform complex py module test", "[core/high_platform]")
 import a3dc_module_interface
 import numpy as np
 
-def module_main():
+def module_main(ctx):
     im = a3dc_module_interface.MultiDimImageUInt8([1024, 1024, 32])
     for i in range(32):
         p = np.array(im.plane([i]), copy=False)
         p[:, :] = 42
     a3dc_module_interface.outputs['out_image'] = im
 
-inputs = []
-outputs = [a3dc_module_interface.Arg('out_image', a3dc_module_interface.types.ImageUInt8)]
-a3dc_module_interface.def_process_module(inputs, outputs, module_main)
+config = [a3dc_module_interface.Output('out_image', a3dc_module_interface.types.ImageUInt8)]
+a3dc_module_interface.def_process_module(config, module_main)
     )";
 
     string incrementCode =
@@ -357,25 +355,25 @@ a3dc_module_interface.def_process_module(inputs, outputs, module_main)
 import a3dc_module_interface
 import numpy as np
 
-def module_main():
+def module_main(ctx):
     im = a3dc_module_interface.inputs['in_image']
     for i in range(im.dims()[2]):
         p = np.array(im.plane([i]), copy=False)
         p += 1
     a3dc_module_interface.outputs['out_image'] = im
 
-inputs = [a3dc_module_interface.Arg('in_image', a3dc_module_interface.types.ImageUInt8)]
-outputs = [a3dc_module_interface.Arg('out_image', a3dc_module_interface.types.ImageUInt8)]
-a3dc_module_interface.def_process_module(inputs, outputs, module_main)
+config = [a3dc_module_interface.Input('in_image', a3dc_module_interface.types.ImageUInt8),
+    a3dc_module_interface.Output('out_image', a3dc_module_interface.types.ImageUInt8)]
+a3dc_module_interface.def_process_module(config, module_main)
     )";
 
     string addCode =
     R"(
 import a3dc_module_interface
-from a3dc_module_interface import Arg
+from a3dc_module_interface import Input, Output
 import numpy as np
 
-def module_main():
+def module_main(ctx):
     im1 = a3dc_module_interface.inputs['in_image1']
     im2 = a3dc_module_interface.inputs['in_image2']
     out = a3dc_module_interface.MultiDimImageUInt8(im1.dims())
@@ -385,11 +383,11 @@ def module_main():
         
     a3dc_module_interface.outputs['out_image'] = out
 
-inputs = [
-    Arg('in_image1', a3dc_module_interface.types.ImageUInt8),
-    Arg('in_image2', a3dc_module_interface.types.ImageUInt8)]
-outputs = [Arg('out_image', a3dc_module_interface.types.ImageUInt8)]
-a3dc_module_interface.def_process_module(inputs, outputs, module_main)
+config = [
+    Input('in_image1', a3dc_module_interface.types.ImageUInt8),
+    Input('in_image2', a3dc_module_interface.types.ImageUInt8),
+    Output('out_image', a3dc_module_interface.types.ImageUInt8)]
+a3dc_module_interface.def_process_module(config, module_main)
     )";
 
     string sinkCode =
@@ -397,17 +395,16 @@ a3dc_module_interface.def_process_module(inputs, outputs, module_main)
 import a3dc_module_interface
 import numpy as np
 
-def module_main():
+def module_main(ctx):
     im = a3dc_module_interface.inputs['in_image']
     for i in range(im.dims()[2]):
         p = np.array(im.plane([i]), copy=False)
         if not np.all(p == a3dc_module_interface.inputs['require']):
             raise Exception('image value is not the required one')
 
-inputs = [a3dc_module_interface.Arg('in_image', a3dc_module_interface.types.ImageUInt8),
-    a3dc_module_interface.Arg('require', a3dc_module_interface.types.uint8)]
-outputs = []
-a3dc_module_interface.def_process_module(inputs, outputs, module_main)
+config = [a3dc_module_interface.Input('in_image', a3dc_module_interface.types.ImageUInt8),
+    a3dc_module_interface.Input('require', a3dc_module_interface.types.uint8)]
+a3dc_module_interface.def_process_module(config, module_main)
     )";
 
     GIVEN("a simple net") {
