@@ -1,0 +1,7 @@
+name;num_it;runtime;dimension;timestamp;platform;git_branch
+0;create MultiDimImage 100x100x16x3;500;2648992; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+1;create MultiDimImage 2048x2048x16x3;1;1269661853; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+2;reordering MultiDimImage 100x100x16x3;1;7303104311; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+3;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;25794304; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+4;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;27730607; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+5;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;43335163; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master

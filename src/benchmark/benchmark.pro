@@ -2,7 +2,7 @@ CONFIG += c++14
 
 QMAKE_CXXFLAGS += -fdiagnostics-absolute-paths
 
-TARGET = test
+TARGET = benchmark
 SOURCES += \
     benchmark.cpp \
     ../core/multidim_image_platform/MultiDimImage.hpp \
