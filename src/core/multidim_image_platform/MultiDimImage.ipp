@@ -1,124 +1,7 @@
 
 template <typename T>
-MultiDimImage<T>::View::View(MultiDimImage<T>* parent,
-    std::vector<std::size_t> offsets,
-    std::vector<std::size_t> dims)
-    : m_offsets(offsets), m_dims(dims), m_parent(parent)
-{
-    if (parent == nullptr) {
-        throw std::invalid_argument("parent of the view can not be null");
-    }
-
-    if (offsets.size() != dims.size()) {
-        throw std::invalid_argument("number of offsets differes form the number of dims");
-    }
-
-    std::copy_if(m_dims.begin(), m_dims.end(), 
-        std::back_inserter(m_trueDims),
-        [](std::size_t x) { return x > 1; });
-
-    // TODO: check that the region is valid
-
-    m_parent->m_viewRegistry.add(this);
-}
-
-template <typename T>
-MultiDimImage<T>::View::View(const MultiDimImage<T>::View& other) : m_parent(nullptr)
-{
-    *this = other;
-}
-
-template <typename T>
-typename MultiDimImage<T>::View& MultiDimImage<T>::View::operator=(const MultiDimImage<T>::View& other)
-{
-    m_offsets = other.m_offsets;
-    m_dims = other.m_dims;
-    m_trueDims = other.m_trueDims;
-    if (m_parent) {
-        m_parent->m_viewRegistry.remove(this);
-        m_parent = other.m_parent;
-        m_parent->m_viewRegistry.add(this);
-    }
-    return *this;
-}
-
-template <typename T>
-bool MultiDimImage<T>::View::empty() const
-{
-    return m_dims.empty() || std::any_of(m_dims.begin(), m_dims.end(),
-        [](std::size_t x) { return x == 0; });
-}
-
-template <typename T>
-std::size_t MultiDimImage<T>::View::size() const
-{
-    if (m_dims.empty()) {
-        return 0;
-    } else {
-        return std::accumulate(m_dims.begin(), m_dims.end(), 1, std::multiplies<std::size_t>());
-    }
-}
-
-template <typename T>
-std::size_t MultiDimImage<T>::View::dims() const
-{
-    return m_trueDims.size();
-}
-
-template <typename T>
-std::size_t MultiDimImage<T>::View::dim(std::size_t d) const
-{
-    if (d >= m_trueDims.size()) {
-        throw std::range_error("no such dimension");
-    }
-    
-    return m_trueDims[d];
-}
-
-template <typename T>
-std::size_t MultiDimImage<T>::View::byteSize() const
-{
-    return size() * sizeof(T);
-}
-
-template <typename T>
-bool MultiDimImage<T>::View::valid() const
-{
-    return m_parent != nullptr;
-}
-
-template <typename T>
-T& MultiDimImage<T>::View::at(std::vector<std::size_t> coords)
-{
-    if (coords.size() != m_trueDims.size()) {
-        throw std::length_error("number of coordinates not equals with the number of true dimensions");
-    }
-    std::vector<std::size_t> newCoords(m_offsets);
-    for (size_t i = 0, j = 0; i < newCoords.size(); ++i) {
-        if (m_dims[i] > 1) {
-            newCoords[i] += coords[j++];
-        }
-    }
-    return m_parent->at(newCoords);
-}
-
-template <typename T>
-MultiDimImage<T>* MultiDimImage<T>::View::parent()
-{
-    return m_parent;
-}
-
-template <typename T>
-MultiDimImage<T>::View::~View()
-{
-    if (m_parent) {
-        m_parent->m_viewRegistry.remove(this);
-    }
-}
-
-template <typename T>
 MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
-    : m_dims(dims), m_viewRegistry(this)
+    : m_dims(dims)
 {
     initUtilsFromDim();
 
@@ -261,7 +144,6 @@ Type MultiDimImage<T>::type() const
 template <typename T>
 void MultiDimImage<T>::clear()
 {
-    m_viewRegistry.clear();
     MultiDimImage<T> empty;
     std::swap(empty, *this);
 }
@@ -304,18 +186,6 @@ T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
 }
 
 template <typename T>
-typename MultiDimImage<T>::View MultiDimImage<T>::plane(std::vector<std::size_t> coords)
-{
-    return subDimView(coords, 2);
-}
-
-template <typename T>
-typename MultiDimImage<T>::View MultiDimImage<T>::volume(std::vector<std::size_t> coords)
-{
-    return subDimView(coords, 3);
-}
-
-template <typename T>
 std::vector<std::vector<T>>& MultiDimImage<T>::unsafeData()
 {
     return m_planes;
@@ -325,30 +195,6 @@ template <typename T>
 const std::vector<std::vector<T>>& MultiDimImage<T>::unsafeData() const
 {
     return m_planes;
-}
-
-template <typename T>
-typename MultiDimImage<T>::View MultiDimImage<T>::subDimView(std::vector<std::size_t> coords, std::size_t firstNDims)
-{
-    if (m_dims.size() < firstNDims + 1) {
-        throw std::invalid_argument("can not slice with the same dimensions as the original");
-    }
-
-    if (coords.size() != m_dims.size() - firstNDims) {
-        throw std::invalid_argument("invalid number of coordinates");
-    }
-
-    std::vector<std::size_t> dims(m_dims);
-    std::vector<std::size_t> offsets(m_dims.size());
-    for (size_t i = 0; i < dims.size(); ++i) {
-        if (i < firstNDims) {
-            offsets[i] = 0;
-        } else {
-            dims[i] = 1;
-            offsets[i] = coords[i - firstNDims];
-        }
-    }
-    return View(this, offsets, dims);
 }
 
 template <typename T>
@@ -394,7 +240,6 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
         detail::stepCoords(coords, m_dims);
     }
 
-    m_viewRegistry.clear();
     std::swap(newImage, *this);
 }
 
@@ -431,7 +276,6 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
         detail::stepCoords(newCoords, newImage.m_dims);
     }
 
-    m_viewRegistry.clear();
     std::swap(newImage, *this);
 }
 

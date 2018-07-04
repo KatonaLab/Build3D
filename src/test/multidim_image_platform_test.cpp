@@ -108,44 +108,6 @@ SCENARIO("multidim image basic usage", "[core/multidim_image_platform]")
     }
 }
 
-template <typename T>
-using ImageViewPair = 
-    std::pair<
-        std::vector<typename MultiDimImage<T>::View>,
-        std::vector<typename MultiDimImage<T>::View>
-    >;
-
-template <typename T>
-ImageViewPair<T> weakPointerToImageData(MultiDimImage<T>& image)
-{
-    std::vector<typename MultiDimImage<T>::View> planePtrs;
-    std::vector<typename MultiDimImage<T>::View> volumePtrs;
-
-    REQUIRE(image.dims() == 4);
-
-    for (size_t c = 0; c < image.dim(3); ++c) {
-        auto volume = image.volume({c});
-        volumePtrs.push_back(volume);
-        for (size_t d = 0; d < image.dim(2); ++d) {
-            auto plane = image.plane({d, c});
-            planePtrs.push_back(plane);
-        }
-    }
-
-    return std::make_pair(planePtrs, volumePtrs);
-}
-
-template <typename T>
-void checkWeakPtrNull(ImageViewPair<T>& wpp)
-{
-    for (auto wPtr : wpp.first) {
-        REQUIRE(wPtr.valid() == false);
-    }
-    for (auto wPtr : wpp.second) {
-        REQUIRE(wPtr.valid() == false);
-    }
-}
-
 SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
 {
     auto __start = std::chrono::high_resolution_clock::now();
@@ -164,8 +126,6 @@ SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
         MultiDimImage<float> huge({n, n, 64, 4});
         TAC("allocate 2048x2048x64x4 float data");
 
-        ImageViewPair<float> wpp = weakPointerToImageData(huge);
-
         REQUIRE(huge.size() == n * n * 64 * 4);
         REQUIRE(huge.byteSize() == n * n * 64 * 4 * sizeof(float));
         REQUIRE(huge.dims() == 4);
@@ -178,14 +138,10 @@ SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
 
         std::shared_ptr<MultiDimImage<float>> hugeCopy = std::make_shared<MultiDimImage<float>>();
 
-        ImageViewPair<float> wppCpy;
-
         // copy
         TIC;
         *hugeCopy = huge;
         TAC("copy 2048x2048x64x4 float data")
-
-        wppCpy = weakPointerToImageData(*hugeCopy);
 
         REQUIRE(hugeCopy->size() == n * n * 64 * 4);
         REQUIRE(hugeCopy->byteSize() == n * n * 64 * 4 * sizeof(float));
@@ -202,14 +158,10 @@ SCENARIO("huge multidim image usage", "[core/multidim_image_platform]")
         hugeCopy.reset();
         TAC("free 2048x2048x64x4 float data")
 
-        checkWeakPtrNull<float>(wppCpy);
-
         // clear
         TIC;
         huge.clear();
         TAC("clear 2048x2048x64x4 float data")
-
-        checkWeakPtrNull<float>(wpp);
     }
 
     std::cout << "testing huge data create/copy/destroy finished" << std::endl;
@@ -239,100 +191,6 @@ SCENARIO("multidim metadata usage", "[core/multidim_image_platform]")
                 THEN("it is no longer reachable") {
                     REQUIRE(im.meta.has("to be removed") == false);
                     REQUIRE_THROWS(im.meta.get("to be removed"));
-                }
-            }
-        }
-    }
-}
-
-SCENARIO("multidim subdata from multidim", "[core/multidim_image_platform]")
-{
-    GIVEN("an image") {
-        MultiDimImage<uint8_t> image({16, 16, 4, 2});
-        image.at({0, 8, 0, 0}) = 42;
-        image.at({1, 9, 1, 0}) = 43;
-        image.at({2, 10, 2, 0}) = 44;
-        image.at({3, 11, 3, 0}) = 45;
-        image.at({4, 12, 0, 1}) = 82;
-        image.at({5, 13, 1, 1}) = 83;
-        image.at({6, 14, 2, 1}) = 84;
-        image.at({7, 15, 3, 1}) = 85;
-        WHEN("a plane is viewed through a MultiDimImageView") {
-            auto view1 = image.plane({0, 0});
-            auto view2 = image.plane({1, 0});
-            auto view3 = image.plane({2, 0});
-            auto view4 = image.plane({3, 0});
-            auto view5 = image.plane({0, 1});
-            auto view6 = image.plane({1, 1});
-            auto view7 = image.plane({2, 1});
-            auto view8 = image.plane({3, 1});
-
-            REQUIRE(view1.dims() == 2);
-            REQUIRE(view1.dim(0) == 16);
-            REQUIRE(view1.dim(1) == 16);
-            REQUIRE(view1.size() == 16 * 16);
-            REQUIRE(view1.empty() == false);
-            REQUIRE(view1.valid() == true);
-            REQUIRE(view1.parent() == &image);
-
-            REQUIRE(view7.dims() == 2);
-            REQUIRE(view7.dim(0) == 16);
-            REQUIRE(view7.dim(1) == 16);
-            REQUIRE(view7.size() == 16 * 16);
-            REQUIRE(view7.empty() == false);
-            REQUIRE(view7.valid() == true);
-            REQUIRE(view7.parent() == &image);
-
-            THEN("it points to the right data") {
-                REQUIRE(view1.at({0, 8}) == 42);
-                REQUIRE(view2.at({1, 9}) == 43);
-                REQUIRE(view3.at({2, 10}) == 44);
-                REQUIRE(view4.at({3, 11}) == 45);
-                REQUIRE(view5.at({4, 12}) == 82);
-                REQUIRE(view6.at({5, 13}) == 83);
-                REQUIRE(view7.at({6, 14}) == 84);
-                REQUIRE(view8.at({7, 15}) == 85);
-            }
-
-            AND_WHEN("a view id modified") {
-                view1.at({0, 0}) = 224;
-                view7.at({0, 0}) = 225;
-                THEN("then the original MultiDimImage is modified too") {
-                    REQUIRE(image.at({0, 0, 0, 0}) == 224);
-                    REQUIRE(image.at({0, 0, 2, 1}) == 225);
-                }
-            }
-        }
-
-        WHEN("a volume is viewed through a MultiDimImageView") {
-            MultiDimImage<uint8_t>::View vol1 = image.volume({0});
-            MultiDimImage<uint8_t>::View vol2 = image.volume({1});
-            THEN("the dimensions match") {
-                REQUIRE(vol1.dims() == 3);
-                REQUIRE(vol1.dim(0) == 16);
-                REQUIRE(vol1.dim(1) == 16);
-                REQUIRE(vol1.dim(2) == 4);
-                REQUIRE(vol1.empty() == false);
-                REQUIRE(vol1.size() == 16 * 16 * 4);
-                REQUIRE(vol1.valid() == true);
-                REQUIRE(vol1.parent() == &image);
-
-                REQUIRE(vol2.dims() == 3);
-                REQUIRE(vol2.dim(0) == 16);
-                REQUIRE(vol2.dim(1) == 16);
-                REQUIRE(vol2.dim(2) == 4);
-                REQUIRE(vol2.empty() == false);
-                REQUIRE(vol2.size() == 16 * 16 * 4);
-                REQUIRE(vol2.valid() == true);
-                REQUIRE(vol2.parent() == &image);
-            }
-
-            AND_WHEN("view is modified") {
-                vol1.at({15, 15, 0}) = 127;
-                vol2.at({15, 15, 0}) = 78;
-                THEN("the original is modified too") {
-                    REQUIRE(image.at({15, 15, 0, 0}) == 127);
-                    REQUIRE(image.at({15, 15, 0, 1}) == 78);
                 }
             }
         }
@@ -454,23 +312,6 @@ SCENARIO("multidim with 1d arrays", "[core/multidim_image_platform]")
                     REQUIRE(imageCopy.dim(0) == 128);
                     REQUIRE(imageCopy.at({17}) == 42);
                 }
-            }
-        }
-
-        WHEN("trying to view through a plane view") {
-            THEN("it is prohibited") {
-                REQUIRE_THROWS(image.plane({}));
-                REQUIRE_THROWS(image.plane({0}));
-                REQUIRE_THROWS(image.plane({0, 0}));
-            }
-        }
-
-        WHEN("trying to view through a volume view") {
-            THEN("it is prohibited") {
-                REQUIRE_THROWS(image.volume({}));
-                REQUIRE_THROWS(image.volume({0}));
-                REQUIRE_THROWS(image.volume({0, 0}));
-                REQUIRE_THROWS(image.volume({0, 0, 0}));
             }
         }
     }
