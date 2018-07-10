@@ -20,7 +20,8 @@ class Image(object):
     __protected=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
     __dim_translate={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
    
-   
+    #Translate ome type to numpy
+    __bit_depth_lookup={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}
     
     def __init__(self, image, metadata):
         
@@ -204,8 +205,7 @@ class Image(object):
             raise TypeError('image must be a a NumPy array!')
         
         #Check if metadata 'Type' field matches the type of the image
-        
-        if metadata['Type']!=image.dtype:
+        if self.__bit_depth_lookup[metadata['Type']]!=image.dtype:
              raise TypeError('image data type does not mach the one specified in the metadata!')
              
         #Check if number of channels and length of the name list is the same
@@ -231,7 +231,7 @@ class Image(object):
         available_keys=[self.__dim_translate[dim] for dim in reversed(metadata['DimensionOrder']) if self.__dim_translate[dim] in metadata.keys()]
  
         shape_metadata=[metadata[key] for key in available_keys if metadata[key]!=1]
-      
+        print(shape_metadata)
         if shape_image!=shape_metadata:
             raise PythImageError('shape information in metadata is not compattible to the image shape!','')
     
@@ -391,7 +391,7 @@ class Image(object):
         order=list(order)
         dim_order_list=list(self.__metadata['DimensionOrder'])
         order_final=order.copy()
-        
+        print(self.__metadata)
         #Remove singleton dimensions
         dim_translate={'T':self.__metadata['SizeT'], 'C':self.__metadata['SizeC'], 'Z':self.__metadata['SizeZ'], 'X':self.__metadata['SizeX'], 'Y': self.__metadata['SizeY']}
         singleton_dim=[key for key in dim_translate if int(dim_translate[key])<=1]
