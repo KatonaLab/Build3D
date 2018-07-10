@@ -3,7 +3,7 @@ import sys
 import cv2
 import numpy as np
 from math import pow
-from skimage import img_as_ubyte
+from skimage import img_as_ubyte, img_as_uint
 from skimage.external.tifffile import imread, imsave, TiffWriter
 from skimage.filters import threshold_local
 import pandas as pd
@@ -20,6 +20,7 @@ import traceback
 #import xml.etree.cElementTree as ET
 #from pympler import summary, muppy
 #import gc
+import fnmatch
 
 class Main(object):
 
@@ -30,13 +31,110 @@ class Main(object):
 
         ###################################################################################################################################
         #############################################Load Images###########################################################################
+        '''
         #sourceImageList = []
         #sourceDictList = []
+        # path of image library
+        #pathImageLib = os.path.dirname(sys.argv[0])
+        #pathImageLib = "D:\\Playground\\Vivi\\1"
+        pathImageLib = "D:\\Playground\\Ana2\\Processing\\Cropped\\1"
+        print(pathImageLib)
+        outputPath=os.path.join(pathImageLib, 'Thresholded')
+        print(outputPath)
+        if not os.path.exists(outputPath):
+            os.makedirs(outputPath)
 
-        path = "D:/OneDrive - MTA KOKI/Workspace/Playground/Cube/Cube/1024"
-        fileNameList1 =['ch1_Z64_2048.tif']#, 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']#['test7_1.tif']#['ch1_Z64_2048.tif', 'ch1_Z128_2048.tif','ch1_Z256_2048.tif', 'ch1_Z512_2048.tif', 'ch1_Z1024_2048.tif']
-        fileNameList2 =['ch3_Z64_2048.tif']#, 'ch3_Z128_2048.tif', 'ch3_Z256_2048.tif', 'ch3_Z512_2048.tif', 'ch3_Z1024_2048.tif']#['test7_2.tif']#['ch2_Z64_2048.tif', 'ch2_Z128_2048.tif', 'ch2_Z256_2048.tif', 'ch2_Z512_2048.tif', 'ch2_Z1024_2048.tif']
+        thresholdMethod=['Huang']#['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
+                             #'RenyiEntropy', 'Shanbhag']#'Adaptive Mean', 'Adaptive Gaussian']
+        fileList = []
+        for df in os.listdir(pathImageLib):
+            for thMethod in thresholdMethod:
+                if fnmatch.fnmatch(df, '*.tiff') or fnmatch.fnmatch(df, '*.tif'):
+                    try:
+                        fileList.append(df)
+                        image = Processor.load_image(os.path.join(pathImageLib, df))
+                        #print(image.dtype)
+                        name, _ = os.path.splitext(os.path.basename(df))
+                        dict = {'name': name}
+                        thresholdedImage, logText = Main.threshold(image, dict, method=thMethod, mode="Slice")
 
+                        save(inputDictionaryList, path, fileName='output', toText=True)
+
+                        #imsave(os.path.join(outputPath,  name+"_"+thMethod+".tiff"), thresholdedImage)
+                    except:
+                        pass
+
+                    print(logText)
+                    log = logText
+
+        '''
+
+        #path = "F:\Playground"
+        #fileNameList1 = ['one_1.tif']
+        #fileNameList2 = ['one_2.tif']
+
+        path = "D:\Playground\Ana2\Processing\Cropped\Colocalization"
+        fileNameList1 = ['180130_Ctrl_SC_P2X7_APC_60X-1_crop1_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-1_crop2_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-2_crop1_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-2_crop2_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-3_crop1_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-3_crop2_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-1_crop1_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-1_crop2_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-2_crop1_cmle_channel_1_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-2_crop2_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-1_crop1_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-1_crop2_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-2_crop1_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-2_crop2_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-3_crop1_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-3_crop2_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-1_crop1_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-1_crop2_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-2_crop1_cmle_channel_1_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-2_crop2_cmle_channel_1_crop.tif']
+
+        fileNameList2 = ['180130_Ctrl_SC_P2X7_APC_60X-1_crop1_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-1_crop2_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-2_crop1_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-2_crop2_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-3_crop1_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_SC_P2X7_APC_60X-3_crop2_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-1_crop1_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-1_crop2_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-2_crop1_cmle_channel_2_crop.tif',
+                         '180130_Ctrl_V_P2X7_APC_60X-2_crop2_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-1_crop1_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-1_crop2_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-2_crop1_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-2_crop2_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-3_crop1_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_R_P2X7_APC_60X-3_crop2_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-1_crop1_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-1_crop2_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-2_crop1_cmle_channel_2_crop.tif',
+                         '180130_Cup6w_WTf_SC_P2X7_APC_60X-2_crop2_cmle_channel_2_crop.tif']
+
+
+
+        thresholdMeth1=['Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual']
+        thresholdVal1=[1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5,1316.5, ]
+
+        thresholdMeth2=['Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual','Manual']
+        thresholdVal2=[805, 805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805,805]
+
+        #measurementList = #['volume', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox', 'pixelsOnBorder',
+                           #'getElongation', 'getEquivalentSphericalRadius', 'getFlatness', 'getPrincipalAxes',
+                           #'getPrincipalMoments', 'getRoundness', 'getFeretDiameter', 'getPerimeter',
+                           #'getPerimeterOnBorder', 'getPerimeterOnBorderRatio', 'getEquivalentSphericalPerimeter',
+                           #'meanIntensity', 'medianIntensity', 'skewness', 'kurtosis', 'variance', 'maximumPixel',
+                           #'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass', 'standardDeviation',
+                           #'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
+                           #'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
+
+        measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder',
+                           'getElongation', 'getFlatness', 'meanIntensity', 'variance']
 
 
         for i in range(len(fileNameList1)):
@@ -44,86 +142,126 @@ class Main(object):
             print(str(i)+'. '+fileNameList1[i]+'+'+fileNameList2[i])
             print('####################################################################################')
 
-            ch1Img = Processor.load_image(os.path.join(path, fileNameList1[i]))
-            ch1Dict = {'name': fileNameList1[i]}#,
-                   #'width': ch1Img.shape[2], 'height': ch1Img.shape[1], 'depth': ch1Img.shape[0],
-                   #'pixelSizeX': 0.5, 'pixelSizeY': 0.5, 'pixelSizeZ': 0.5, 'pixelSizeUnit': 'um'}
+            try:
+                tstart = time.clock()
 
-            ch2Img = Processor.load_image(os.path.join(path, fileNameList2[i]))
-            ch2Dict = {'name': fileNameList2[i]}#,
-                   #'width': ch2Img.shape[2], 'height': ch2Img.shape[1], 'depth': ch2Img.shape[0],
-                   #'pixelSizeX': 0.5, 'pixelSizeY': 0.5, 'pixelSizeZ': 0.5, 'pixelSizeUnit': 'um'}
+                ch1Img = Processor.load_image(os.path.join(path, fileNameList1[i]))
+                ch1Name, _ = os.path.splitext(os.path.basename(fileNameList1[i]))
+                ch1Dict = {'name': ch1Name}#,
+                    #'width': ch1Img.shape[2], 'height': ch1Img.shape[1], 'depth': ch1Img.shape[0],
+                    #'pixelSizeX': 0.5, 'pixelSizeY': 0.5, 'pixelSizeZ': 0.5, 'pixelSizeUnit': 'um'}
 
-            Main.pairwiseColocalization(ch1Img, ch2Img, ch1Dict, ch2Dict, path,
-                                    'output_' + fileNameList1[i] + '_' + fileNameList2[i])
+                ch2Img = Processor.load_image(os.path.join(path, fileNameList2[i]))
+                ch2Name, _ = os.path.splitext(os.path.basename(fileNameList2[i]))
+                ch2Dict = {'name': ch2Name}#,
+                    #'width': ch2Img.shape[2], 'height': ch2Img.shape[1], 'depth': ch2Img.shape[0],
+                    #'pixelSizeX': 0.5, 'pixelSizeY': 0.5, 'pixelSizeZ': 0.5, 'pixelSizeUnit': 'um'}
 
+                outputName='output_' + fileNameList1[i] + '_' + fileNameList2[i]
+                print(outputName)
+                Main.pairwiseColocalization(ch1Img, ch2Img, ch1Dict, ch2Dict,thresholdMeth1[i], thresholdVal1[i], thresholdMeth2[i], thresholdVal2[i], path, outputName, measurementList)
 
+            except:
+                print('\n\tException encountered!!!!')
+                #print('\n\t\t' + str(e.__class__.__name__) + ': ' + str(e))
+                print('\n\t\t' + str(traceback.format_exc()).replace('\n', '\n\t\t'))
+                pass
+
+            tstop = time.clock()
+            print('\n\nTotal processing time was ' + str((tstop - tstart)) + ' seconds! ')
     ####################################################Interface to call from C++####################################################
 
-    def pairwiseColocalization(ch1Img, ch2Img, ch1Dict, ch2Dict ,path, fileName):
-        ###########################################Segmentation and Analysis#########################################################
-        #print('###########################################Segmentation and Analysis#########################################################')
-       #print(ch1Dict)
+    def pairwiseColocalization(ch1Img, ch2Img, ch1Dict, ch2Dict , threshMethod1, thresholdVal1, threshMethod2, thresholdVal2, path, fileName, measurementList):
+        #############################################################################################################################
+        ######################################################Initialization#########################################################
+        #############################################################################################################################
 
-        measurementList = ['volume', 'voxelCount', 'centroid', 'ellipsoidDiameter', 'boundingBox', 'pixelsOnBorder',
-                            'getElongation', 'getEquivalentSphericalRadius', 'getFlatness', 'getPrincipalAxes',
-                            'getPrincipalMoments', 'getRoundness', 'getFeretDiameter', 'getPerimeter',
-                            'getPerimeterOnBorder', 'getPerimeterOnBorderRatio', 'getEquivalentSphericalPerimeter',
-                            'meanIntensity', 'medianIntensity', 'skewness', 'kurtosis', 'variance', 'maximumPixel',
-                            'maximumValue', 'minimumValue', 'minimumPixel', 'centerOfMass', 'standardDeviation',
-                            'cumulativeIntensity', 'getWeightedElongation', 'getWeightedFlatness',
-                            'getWeightedPrincipalAxes', 'getWeightedPrincipalMoments']
-        # Channel 1
-        thresholdedImage1, logText = Main.threshold(ch1Img, ch1Dict, method="MaxEntropy", mode="Slice")
+        #Creata Output directory
+        outputPath=os.path.join(path, 'Output')
+        if not os.path.exists(outputPath):
+            os.makedirs(outputPath)
+
+        #############################################################################################################################
+        ###########################################Segmentation and Analysis#########################################################
+        #############################################################################################################################
+
+        #######################################################Channel 1#############################################################
+        #Channel 1:Thresholding
+        thresholdedImage1, logText = Main.threshold(ch1Img, ch1Dict, method=threshMethod1, mode="Slice", lowerThreshold=0, upperThreshold=thresholdVal1)
         print(logText)
         log=logText
 
-        taggedImage1, logText = Main.tagImage(ch1Img, ch1Dict)
+        #Channel 1:Tagging Image
+        taggedImage1, logText = Main.tagImage(thresholdedImage1, ch1Dict)
         print(logText)
         log+='\n'+logText
 
+        # Channel 1:Analysis and Filtering of objects
         taggedImageDictionary1 = copy.copy(ch1Dict)
         taggedImageDictionary1['name'] = str(ch1Dict['name']) + '_tagged'
         taggedImageDictionary1, logText = Main.analyze(taggedImage1, taggedImageDictionary1, imageList=[ch1Img],dictionaryList=[ch1Dict],measurementInput=measurementList)
-        taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,{}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
-
+        taggedImage1, taggedImageDictionary1,_=Main.filter(taggedImage1, taggedImageDictionary1,filterDict={'voxelCount':{'min': 15, 'max': 400000000}}, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
         print(logText)
         log += '\n' + logText
 
-        # Channel 2
-        thresholdedImage2, logText = Main.threshold(ch2Img, ch2Dict, method="MaxEntropy", mode="Slice")
+        # Channel 1:Saving Intermediate Images
+        name=ch1Dict['name']+ "_" + threshMethod1 + ".tiff"
+        imsave(os.path.join(outputPath, name ), thresholdedImage1)
+        name = taggedImageDictionary1['name'] + ".tiff"
+        imsave(os.path.join(outputPath, name), taggedImage1)
+
+        #######################################################Channel 2#############################################################
+        #Channel 2:Thresholding
+        thresholdedImage2, logText = Main.threshold(ch2Img, ch2Dict, method=threshMethod2, mode="Slice", lowerThreshold=0, upperThreshold=thresholdVal2)
+        print('\n'+logText)
+        log += '\n' + logText
+
+        # Channel 2:Tagging Image
+        taggedImage2, logText = Main.tagImage(thresholdedImage2, ch2Dict)
         print(logText)
         log += '\n' + logText
 
-        taggedImage2, logText = Main.tagImage(ch2Img, ch2Dict)
-        print(logText)
-        log += '\n' + logText
-
+        # Channel 2:Tagging Image
         taggedImageDictionary2 = copy.copy(ch2Dict)
         taggedImageDictionary2['name'] = str(ch2Dict['name']) + '_tagged'
+
+        # Channel 2:Analysis and Filtering of objects
         taggedImageDictionary2, logText = Main.analyze(taggedImage2, taggedImageDictionary2, imageList=[ch2Img],dictionaryList=[ch2Dict], measurementInput=measurementList)
-
-
-        taggedImage2, taggedImageDictionary2, _ = Main.filter(taggedImage2, taggedImageDictionary2, removeFiltered=False)  # {'tag':{'min': 2, 'max': 40}}
-
+        taggedImage2, taggedImageDictionary2, _ = Main.filter(taggedImage2, taggedImageDictionary2, filterDict={'voxelCount':{'min': 100, 'max': 400000000}}, removeFiltered=False)  # {'tag':{'min': 2, 'max': 40}}
         print(logText)
         log += '\n' + logText
 
-        ###########################################Colocalization#########################################################
-        # Colocalization analysis
+        # Channel 2:Saving Intermediate Images
+        name=ch2Dict['name']+ "_" + threshMethod2 + ".tiff"
+        imsave(os.path.join(outputPath, name ), thresholdedImage2)
+        name = taggedImageDictionary2['name'] + ".tiff"
+        imsave(os.path.join(outputPath, name), taggedImage2)
+
+        #############################################################################################################################
+        ###################################################Colocalization############################################################
+        #############################################################################################################################
+
+        #Colocalization:
         overlappingImage, overlappingDictionary, taggedDataBaseList, logText = Main.colocalization( [taggedImage1, taggedImage2], [taggedImageDictionary1, taggedImageDictionary2])
-
-        #Main.colocalization(taggedImageList, taggedDictList, sourceImageList=None, sourceDictionayList=None,
-                           #overlappingFilter=None,
-                           #removeFiltered=False, overWrite=True):
         print(logText)
         log += '\n' + logText
 
-        ###########################################Save#########################################################
+
+        # Channel 2:Saving Intermediate Images
+        name=ch2Dict['name']+ "_overlapping.tiff"
+        imsave(os.path.join(outputPath, name ), overlappingImage)
+
+
+        #############################################################################################################################
+        ####################################################Finalization############################################################
+        #############################################################################################################################
+
+        #Save data
         logText = Main.save([taggedImageDictionary1, taggedImageDictionary2, overlappingDictionary], path,
                             fileName=fileName, toText=False)
         log += '\n' + logText
 
+        #Save Log
         with open(os.path.join(path,'log_'+fileName+'.txt'), "w") as textFile:
             textFile.write(log)
 
@@ -174,26 +312,42 @@ class Main(object):
         # Start timing
         tstart = time.clock()
 
-        # Available Autothreshold methods
+        # Threshold methods
         autothresholdList = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                              'RenyiEntropy', 'Shanbhag']
         adaptiveThresholdList = ['Adaptive Mean', 'Adaptive Gaussian']
 
+
         # Creatre LogText and start logging
-        logText = '\nThresholding: ' + str(imageDictionary['name']) + '\n\tMethod: ' + method
+        logText = 'Thresholding: '+imageDictionary['name']
+        logText += '\n\tMethod: ' + imageDictionary['name']
+
+        # Parse kwargs
         if kwargs != {}:
-            logText += '(' + str(kwargs)[1: -1] + ')'
+            if method in autothresholdList:
+                keyList=['mode']
+            elif method in adaptiveThresholdList:
+                keyList = ['blockSize', 'offSet']
+            elif method == 'Manual':
+                keyList =['lowerThreshold', 'upperThreshold']
+
+
+            kwargs = {your_key: kwargs[your_key] for your_key in keyList}
 
         # Run thresholding functions
         try:
             if method in autothresholdList:
                 outputImage, thresholdValue = Segmentation.threshold_auto(image, method, **kwargs)
+
                 logText += '\n\tThreshold values: ' + str(thresholdValue)
+                logText +=" "+str(thresholdValue)
 
             elif method in adaptiveThresholdList:
+                logText += '\n\tSettings: ' + str(kwargs)
                 outputImage = Segmentation.threshold_adaptive(image, method, **kwargs)
 
             elif method == 'Manual':
+                logText += '\n\tSettings: ' + str(kwargs)
                 outputImage = Segmentation.threshold_manual(image, **kwargs)
 
             else:
@@ -740,6 +894,12 @@ class Measurement(object):
         keyOrderList=[]
         columnWidthsList=[]
         nameList = [x['name'] for x in dictionaryList]
+        #Crop so it fits as worksheet name
+        for i in range(0, len(nameList)):
+            if len(nameList[i]) > 30:
+                nameList[i] = nameList[i][:27] + '_'+str(i)
+            else:
+                nameList[i] =nameList[i] + '_' + str(i)
 
 
         for dict in  dictionaryList:
@@ -758,8 +918,8 @@ class Measurement(object):
                 list(dict['dataBase'].keys())
                 for key in list(dict['dataBase'].keys()):
 
-                    if str(dataFrame[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64'
-                        ,'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
+                    if str(dataFrame[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
+                        'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
                         numericalKeys.append(key)
 
                     else:
@@ -868,6 +1028,11 @@ class Segmentation(object):
     @staticmethod
     def threshold_auto(image, method, mode='Slice'):
 
+        # Cast to 16-bit
+        image = img_as_uint(image)
+
+        # Cast to 16-bit
+        #image = img_as_ubyte(image)
 
         itkThresholdDict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                                 'Huang': sitk.HuangThresholdImageFilter(),
@@ -907,6 +1072,8 @@ class Segmentation(object):
                 thresholdValue.append(thresholdFilter.GetThreshold())
                 #Append slice to outputImage
                 outputImage.append(segmentedImage)
+            outputImage=np.asarray(outputImage)
+
         else:
             raise LookupError("'"+str(mode)+"' is Not a valid mode!")
 
@@ -951,7 +1118,7 @@ class Segmentation(object):
         return sitk.GetArrayFromImage(tagged_image)
 
     @staticmethod
-    def threshold_manual(img, lowerThreshold, upperThreshold):
+    def threshold_manual(img, lowerThreshold=0, upperThreshold=1):
 
         # Convert nd Image to ITK image
         itkImage = sitk.GetImageFromArray(img)
@@ -1074,9 +1241,9 @@ class Processor(object):
         return imread(str(filePath))
 
     @staticmethod
-    def save_image(nparray, path):
+    def save_image(ndarray, path):
         #Save image using tifffile save
-        imsave(path, nparray)
+        imsave(path, ndarray)
 
     @staticmethod
     def threshold_manual(image,  lower, upper=pow(2, 32)):
