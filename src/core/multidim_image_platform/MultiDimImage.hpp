@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <iomanip>
@@ -115,6 +116,16 @@ namespace multidim_image_platform {
     };
 
     namespace detail {
+
+        // class BoundedCoordinates {
+        // public:
+        //     BoundedCoordinates(std::vector<size_t> bounds);
+        //     size_t unravel(const std::vector<size_t> coordinates&);
+        //     std::vector<size_t> ravel(size_t index);
+        // protected:
+
+        // };
+
         std::size_t flatCoordinate(const std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& dims);
 

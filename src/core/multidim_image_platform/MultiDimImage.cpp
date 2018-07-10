@@ -58,7 +58,7 @@ bool detail::stepCoords(std::vector<std::size_t>& coords,
     // it might be better to increment in a reverse order, e.g.:
     // coords={2, 77}, limits={5, 80} --> coords={3, 77}, limits={5, 80}
     // instead of
-    // coords={2, 77}, limits={5, 80} -->> out: coords={2, 78}, return false
+    // coords={2, 77}, limits={5, 80} --> out: coords={2, 78}, return false
 
     // increments the coordinates with one step in 'coords'
     // respecting the given 'limits'

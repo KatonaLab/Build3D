@@ -6,7 +6,7 @@ MultiDimImage<T>::MultiDimImage(std::vector<std::size_t> dims)
     initUtilsFromDim();
 
     std::vector<std::vector<T>> data(m_restSize, std::vector<T>(m_planeSize, T()));
-    m_planes.swap(data);
+    m_planes = std::move(data);
     m_type = GetType<T>();
 }
 
@@ -57,8 +57,7 @@ void MultiDimImage<T>::transformCopy(const MultiDimImage<U>& other,
         std::transform(it->begin(), it->end(),
             std::back_inserter(plane), unary);
     }
-    std::swap(*this, newImage);
-    
+    *this = std::move(newImage);
 }
 
 template <typename T>
@@ -145,7 +144,7 @@ template <typename T>
 void MultiDimImage<T>::clear()
 {
     MultiDimImage<T> empty;
-    std::swap(empty, *this);
+    *this = std::move(empty);
 }
 
 template <typename T>
@@ -165,6 +164,10 @@ T& MultiDimImage<T>::at(std::vector<std::size_t> coords)
 
     return unsafeAt(coords);
 }
+
+// [x0 x1 x2]   [m11 m12 m13]   [t1]   [a 0 0]
+// [y0 y1 y2] x [m21 m22 m23] + [t2] = [0 b 0]
+// [z0 z1 z2]   [m31 m32 m33]   [t3]   [0 0 0]
 
 template <typename T>
 T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
@@ -227,6 +230,18 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
     }
 
     MultiDimImage<T> newImage(newDims);
+    // size_t planeId = 0;
+    // size_t pixelId = 0;
+    // for (auto& newPlane: newImage.m_planes) {
+        
+    //     pixelId = 0;
+    //     for (auto& newPixel: newPlane) {
+            
+    //         ++pixelId;
+    //     }
+    //     ++planeId;
+    // }
+
     std::size_t n = size();
     std::vector<std::size_t> coords(m_dims.size(), 0);
     for (std::size_t i = 0; i < n; ++i) {
@@ -240,7 +255,7 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
         detail::stepCoords(coords, m_dims);
     }
 
-    std::swap(newImage, *this);
+    *this = std::move(newImage);
 }
 
 template <typename T>
@@ -276,7 +291,7 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
         detail::stepCoords(newCoords, newImage.m_dims);
     }
 
-    std::swap(newImage, *this);
+    *this = std::move(newImage);
 }
 
 template <typename T>

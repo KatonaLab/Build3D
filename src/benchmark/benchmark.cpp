@@ -11,10 +11,26 @@ BENCHMARK("create MultiDimImage 100x100x16x3", [](benchpress::context* ctx)
 	}
 })
 
+BENCHMARK("create MultiDimImage 3x16x100x100", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::multidim_image_platform::MultiDimImage<uint8_t> image({3, 16, 100, 100});
+        benchpress::escape(&image);
+	}
+})
+
 BENCHMARK("create MultiDimImage 2048x2048x16x3", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::multidim_image_platform::MultiDimImage<uint8_t> image({2048, 2048, 16, 3});
+        benchpress::escape(&image);
+	}
+})
+
+BENCHMARK("create MultiDimImage 16x3x2048x2048", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::multidim_image_platform::MultiDimImage<uint8_t> image({16, 3, 2048, 2048});
         benchpress::escape(&image);
 	}
 })
