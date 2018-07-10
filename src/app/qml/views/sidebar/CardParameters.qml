@@ -204,9 +204,16 @@ Repeater {
                         title: "Select File"
                         selectMultiple: details.hints.multipleFiles || false
                         onAccepted: {
-                            console.debug("select file", dialog.fileUrl);
-                            filenameText.text = dialog.fileUrl;
-                            var values = {value: dialog.fileUrl};
+                            // https://stackoverflow.com/questions/24927850/get-the-path-from-a-qml-url
+                            var path = dialog.fileUrl.toString();
+                            // remove prefixed "file:///"
+                            path = path.replace(/^(file:\/{2})/,"");
+                            // unescape html codes like '%23' for '#'
+                            var cleanPath = decodeURIComponent(path);
+
+                            console.debug("select file", cleanPath);
+                            filenameText.text = cleanPath;
+                            var values = {value: cleanPath};
                             AppActions.requestModuleParamChange(uid, details.portId, values);
                         }
                     }
