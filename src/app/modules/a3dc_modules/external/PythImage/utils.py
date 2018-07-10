@@ -1,5 +1,8 @@
 import collections
 from xml.etree import cElementTree as etree 
+import numpy as np
+
+
 
 def concatenate(a,b):
     '''
@@ -19,6 +22,7 @@ def length(a):
     '''
     Append elements of two lists using slice notation. Elements of list b are added to the end of a.
     '''
+
     if not isinstance(a, collections.Iterable) or isinstance(a, str):
         length=1
     else:
@@ -53,7 +57,6 @@ def xml2dict( xml, sanitize=True, prefix=None):
     #fields into the file that occasionally contain erronious chars
     xml=xml.decode('utf-8', errors='ignore')
     
-
     
     return etree2dict(etree.fromstring(xml), sanitize, prefix) 
 
