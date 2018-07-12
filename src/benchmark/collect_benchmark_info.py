@@ -22,6 +22,7 @@ if not os.path.isfile(BENCHMARK_EXECUTABLE):
                   sys.argv[0]))
     sys.exit(1)
 
+
 def produce_new_benchmark():
 
     process = Popen([BENCHMARK_EXECUTABLE], stdout=PIPE, shell=True)

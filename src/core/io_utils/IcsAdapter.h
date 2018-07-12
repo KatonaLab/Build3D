@@ -27,6 +27,8 @@ public:
     virtual ~IcsAdapter();
 protected:
     void errorCheck(Ics_Error error, const std::string message);
+    template <typename T> md::MultiDimImage<T> readOriginalChannelOrder();
+    template <typename T> md::MultiDimImage<T> readModifiedChannelOrder();
 protected:
     std::string m_filename;
     ICS *m_ip = nullptr;
@@ -36,16 +38,8 @@ protected:
 };
 
 template <typename T>
-md::MultiDimImage<T> IcsAdapter::read(bool xyztcReorder)
+md::MultiDimImage<T> IcsAdapter::readOriginalChannelOrder()
 {
-    if (!valid()) {
-        throw std::runtime_error("can not read '" + m_filename + "', check the .ics file and also the corresponding .ids file");
-    }
-
-    if (std::type_index(typeid(T)) != dataType()) {
-        throw std::runtime_error("image object and ics file data type mismatch in '" + m_filename + "'");
-    }
-
     md::MultiDimImage<T> im(m_dims);
     std::size_t size = 0;
     if (m_dims.empty()) {
@@ -64,11 +58,33 @@ md::MultiDimImage<T> IcsAdapter::read(bool xyztcReorder)
     // no support for that in libics and I don't want IcsClose/IcsOpen all the time
     std::rewind(((Ics_BlockRead*)m_ip->blockRead)->dataFilePtr);
 
-    if (xyztcReorder) {
-        im.reorderDims(m_reorder);
+    return im;
+}
+
+template <typename T>
+md::MultiDimImage<T> IcsAdapter::readModifiedChannelOrder()
+{
+    auto im = readOriginalChannelOrder<T>();
+    im.reorderDims(m_reorder);
+    return im;
+}
+
+template <typename T>
+md::MultiDimImage<T> IcsAdapter::read(bool xyztcReorder)
+{
+    if (!valid()) {
+        throw std::runtime_error("can not read '" + m_filename + "', check the .ics file and also the corresponding .ids file");
     }
 
-    return im;
+    if (std::type_index(typeid(T)) != dataType()) {
+        throw std::runtime_error("image object and ics file data type mismatch in '" + m_filename + "'");
+    }
+
+    if (xyztcReorder) {
+        return readModifiedChannelOrder<T>();
+    } else {
+        return readOriginalChannelOrder<T>();
+    }
 }
 
 template <typename T>

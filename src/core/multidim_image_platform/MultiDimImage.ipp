@@ -165,10 +165,6 @@ T& MultiDimImage<T>::at(std::vector<std::size_t> coords)
     return unsafeAt(coords);
 }
 
-// [x0 x1 x2]   [m11 m12 m13]   [t1]   [a 0 0]
-// [y0 y1 y2] x [m21 m22 m23] + [t2] = [0 b 0]
-// [z0 z1 z2]   [m31 m32 m33]   [t3]   [0 0 0]
-
 template <typename T>
 T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
 {

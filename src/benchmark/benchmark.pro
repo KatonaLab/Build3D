@@ -7,6 +7,7 @@ SOURCES += \
     benchmark.cpp \
     ../core/multidim_image_platform/MultiDimImage.hpp \
     ../core/multidim_image_platform/MultiDimImage.cpp \
+    ../core/io_utils/IcsAdapter.cpp
 
 CONFIG -= app_bundle
 CONFIG += debug
@@ -34,3 +35,23 @@ macx {
     QMAKE_CXXFLAGS += $$system(python3-config --includes)
     LIBS += $$system(python3-config --ldflags)
 }
+
+HEADERS += \
+    ../../lib/libics/libics_ll.h \
+    ../../lib/libics/libics_intern.h \
+    ../../lib/libics/libics.h \
+    ../../lib/libics/libics_sensor.h
+
+SOURCES +=  \
+    ../../lib/libics/libics_preview.c \
+    ../../lib/libics/libics_read.c \
+    ../../lib/libics/libics_top.c \
+    ../../lib/libics/libics_sensor.c \
+    ../../lib/libics/libics_history.c \
+    ../../lib/libics/libics_util.c \
+    ../../lib/libics/libics_data.c \
+    ../../lib/libics/libics_binary.c \
+    ../../lib/libics/libics_test.c \
+    ../../lib/libics/libics_write.c \
+    ../../lib/libics/libics_gzip.c \
+    ../../lib/libics/libics_compress.c

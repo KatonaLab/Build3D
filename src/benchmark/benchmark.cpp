@@ -2,6 +2,7 @@
 #include <benchpress.hpp>
 
 #include <core/multidim_image_platform/MultiDimImage.hpp>
+#include <core/io_utils/IcsAdapter.h>
 
 BENCHMARK("create MultiDimImage 100x100x16x3", [](benchpress::context* ctx)
 {
@@ -75,5 +76,95 @@ BENCHMARK("copy convert MultiDimImage 100x100x16x3, float->uint8_t", [](benchpre
     ctx->reset_timer();
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		imTo.convertCopyFrom(imFrom);
+	}
+})
+
+BENCHMARK("read<native type> small .ics file", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/128x128x32_c1_t1_float32.ics");
+        auto im = a.read<float>(false);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("read<native type> small .ics file, reorder", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/128x128x32_c1_t1_float32.ics");
+        auto im = a.read<float>(true);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<native type> small .ics file", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/128x128x32_c1_t1_float32.ics");
+        auto im = a.readScaledConvert<float>(false);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<native type> small .ics file, reorder", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/128x128x32_c1_t1_float32.ics");
+        auto im = a.readScaledConvert<float>(true);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<int32_t> small .ics file, reorder", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/128x128x32_c1_t1_float32.ics");
+        auto im = a.readScaledConvert<int32_t>(true);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/A15_1_a_DAPI_TH__vGluT1_20x.ics");
+        auto im = a.readScaledConvert<float>(false);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/B23_4_b_DAPI_TH_vGluT1_bassoon_60x_cmle.ics");
+        auto im = a.readScaledConvert<float>(false);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/A15_1_a_DAPI_TH__vGluT1_20x.ics");
+        auto im = a.readScaledConvert<float>(true);
+        benchpress::escape(&im);
+	}
+})
+
+BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		core::io_utils::IcsAdapter a;
+        a.open("assets/B23_4_b_DAPI_TH_vGluT1_bassoon_60x_cmle.ics");
+        auto im = a.readScaledConvert<float>(true);
+        benchpress::escape(&im);
 	}
 })

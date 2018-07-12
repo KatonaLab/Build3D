@@ -67,7 +67,6 @@ bool IcsAdapter::open(const std::string& filename)
     dataType();
 
     // test for valid .ids
-
     uint32_t dummy;
     if (IcsGetDataBlock(m_ip, &dummy, sizeof(uint32_t)) != IcsErr_Ok) {
         close();
