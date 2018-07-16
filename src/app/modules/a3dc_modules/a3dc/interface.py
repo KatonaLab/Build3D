@@ -15,6 +15,85 @@ from .error import A3dcError as A3dcError
 from .imageclass import Image
 
 ####################################################Interface to call from C++####################################################
+def colocalize(ch1Array, ch1ThrArray, ch1Metadata, ch1Settings,  ch2Array, ch2ThrArray, ch2Metadata, ch2Settings, ovlSettings):
+   
+        #Parameters to measure
+        measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder', 'meanIntensity', 'variance']
+        
+        
+        ch1Img=Image(ch1Array, ch1Metadata)
+        ch2Img=Image(ch2Array, ch2Metadata)
+        thresholdedImage1=Image(ch1ThrArray, ch1Metadata)
+        thresholdedImage2=Image(ch2ThrArray, ch2Metadata)
+    
+        outputPath=ch1Metadata['Path']
+        #############################################################################################################################
+        ###########################################Segmentation and Analysis#########################################################
+        #############################################################################################################################
+
+        #######################################################Channel 1#############################################################
+
+
+        #Channel 1:Tagging Image
+        taggedImage1, logText = tagImage(thresholdedImage1)
+        print(logText)
+
+        # Channel 1:Analysis and Filtering of objects
+        taggedImage1, logText = analyze(taggedImage1, imageList=[ch1Img], measurementInput=measurementList)
+        print(logText)
+        
+        taggedImage1, logText = apply_filter(taggedImage1, filterDict=ch1Settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
+        print(logText)
+        
+
+
+        #######################################################Channel 2#############################################################
+       
+
+
+        #Channel 1:Tagging Image
+        taggedImage2, logText = tagImage(thresholdedImage2)
+        print(logText)
+
+        # Channel 1:Analysis and Filtering of objects
+        taggedImage2, logText = analyze(taggedImage2, imageList=[ch2Img], measurementInput=measurementList)
+        print(logText)
+
+        
+        taggedImage2, logText = apply_filter(taggedImage2, filterDict=ch2Settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
+        print(logText)
+        
+
+        
+
+        #############################################################################################################################
+        ###################################################Colocalization############################################################
+        #############################################################################################################################
+        
+
+        #Colocalization:
+        overlappingImage, taggedImageList, logText = colocalization( [taggedImage1, taggedImage2], overlappingFilter=ovlSettings, removeFiltered=False)
+        print(logText)
+
+        suffix = ch1Img.metadata['Name']+ "_" +ch2Img.metadata['Name']+ "_overlap"
+        save_image(overlappingImage, outputPath, suffix)
+        
+        logText='\nSaving object dataBases to xlsx and text!'
+        print(logText)
+
+        
+        name1=ch1Img.metadata['Name']+'_tagged'
+        name2=ch2Img.metadata['Name']+'_tagged'
+        name=ch1Img.metadata['Name']+'_'+ch2Img.metadata['Name']
+        
+        save_data([taggedImage1,taggedImage2, overlappingImage], path=outputPath, file_name=name+'.xlsx', to_text=False)
+        save_data([taggedImage1], path=outputPath, file_name=name1+'.txt', to_text=True)
+        save_data([taggedImage1], path=outputPath, file_name=name2+'.txt', to_text=True)
+
+####################################################Interface to call from Python scripts####################################################
+        
+        
+        
 def tagImage(image):
 
     '''
@@ -78,18 +157,16 @@ def threshold(image, method="Otsu", **kwargs):
         elif method in adaptiveThresholdList:
             keyList = ['blockSize', 'offSet']
         elif method == 'Manual':
-            keyList =['lowerThreshold', 'upperThreshold']
+            keyList =['lower', 'upper']
         else:
             raise KeyError('Thresholding method '+str(method)+' not available or valid!')
 
-
         kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
-
+        
     # Run thresholding functions
     try:
         if method in autothresholdList:
             outputArray, thresholdValue = segmentation.threshold_auto(image.array, method, **kwargs)
-
             logText += '\n\tThreshold values: ' + str(thresholdValue)
 
         elif method in adaptiveThresholdList:
@@ -113,12 +190,12 @@ def threshold(image, method="Otsu", **kwargs):
     return Image(outputArray, image.metadata), logText
 
 
-def analyze(taggedImage, imageList=None, measurementInput=['voxelCount', 'meanIntensity']):
+def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanIntensity']):
     '''
-    Analyzes tagedImage and appends 'dataBase' to its dictionary that contain measured values.
-    :param taggedImage: tagged image
+    Analyzes tagedImage and appends 'database' to its dictionary that contain measured values.
+    :param tagged_img: tagged image
     :param taggedDictionary: dictionary with descriptors of tagged image
-    :param imageList: image list where intensity is measured within objects of taggedImage
+    :param imageList: image list where intensity is measured within objects of tagged_img
     :param dictionaryList: list of dictionaries that apartain to each element in imageList
     :param outputImage: output image
     :param outputDictionary: dictionary with descriptors of outputImage
@@ -129,7 +206,7 @@ def analyze(taggedImage, imageList=None, measurementInput=['voxelCount', 'meanIn
     tstart = time.clock()
 
     # Creatre LogText and start logging
-    logText = '\nAnalyzing: ' + str(taggedImage.metadata['Name'])
+    logText = '\nAnalyzing: ' + str(tagged_img.metadata['Name'])
 
     try:
         #Print list of images in Imagelist to log text
@@ -139,10 +216,10 @@ def analyze(taggedImage, imageList=None, measurementInput=['voxelCount', 'meanIn
                 logText += img.metadata['Name']
 
         #Analyze image
-        taggedImage=core.analyze(taggedImage, imageList, measurementInput)
+        tagged_img=core.analyze(tagged_img, imageList, measurementInput)
 
         #Add number of objects to logText
-        logText += '\n\tNumber of objects: '+str(len(taggedImage.database['tag']))
+        logText += '\n\tNumber of objects: '+str(len(tagged_img.database['tag']))
         
         
 
@@ -153,12 +230,12 @@ def analyze(taggedImage, imageList=None, measurementInput=['voxelCount', 'meanIn
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
     
-    return taggedImage, logText
+    return tagged_img, logText
 
 
-def apply_filter(image, filterDict=None, removeFiltered=True, overWrite=True):
+def apply_filter(image, filterDict=None, removeFiltered=False, overWrite=True):
     '''
-    Filters dictionary stored in the 'dataBase' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['Database']
+    Filters dictionary stored in the 'database' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['database']
     and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
 
     :param inputDictionary: Dictionary containing informason related to inputImage
@@ -186,32 +263,33 @@ def apply_filter(image, filterDict=None, removeFiltered=True, overWrite=True):
             filterDict={}
 
         # Filter dictionary
-        output_database=core.filter_dataBase(image.database, filterDict, overWrite)
+        output_database=core.filter_database(image.database, filterDict, overWrite, removeFiltered)
 
-        # Filter image
+        # Create/Filter image
         if removeFiltered == True:
-            output_image = core.filter_image(image.array)
+            output_image = core.filter_image(image)
         else:
-            output_image=image.array
+            output_image=Image(image.array, image.metadata)
 
-
-
+        #Add database to image
+        output_image.database=output_database
+    
     except Exception as e:
         raise A3dcError("Error occured while filtering database!",  e)
 
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+    
+    
+    return output_image , logText
 
 
-    return Image(output_image, image.metadata, database=output_database), logText
-
-
-def colocalization(taggedImageList, sourceImageList=None, overlappingFilter=None,
+def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None,
                    removeFiltered=False, overWrite=True):
     '''
 
-    :param taggedImageList:
+    :param tagged_img_list:
     :param taggedDictList:
     :param sourceImageList:
     :param overlappingFilterList:
@@ -225,7 +303,7 @@ def colocalization(taggedImageList, sourceImageList=None, overlappingFilter=None
 
         # Creatre LogText
         logText = '\nColocalization analysis started using: '
-        for img in taggedImageList:
+        for img in tagged_img_list:
             logText += '\t ' + str(img.metadata['Name'])
 
         # Add Filter settings
@@ -235,14 +313,14 @@ def colocalization(taggedImageList, sourceImageList=None, overlappingFilter=None
 
 
         # Determine connectivity data
-        overlappingImage = core.colocalization_connectivity(taggedImageList, sourceImageList)
+        overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
      
-        # Filter dataBase and image
+        # Filter database and image
         overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
         
 
         # Analyze colocalization
-        overlappingImage, _ = core.colocalization_analysis(taggedImageList, overlappingImage)
+        overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
 
 
         #Print number of objects to logText
@@ -255,10 +333,10 @@ def colocalization(taggedImageList, sourceImageList=None, overlappingFilter=None
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return overlappingImage, taggedImageList, logText
+    return overlappingImage, tagged_img_list, logText
 
 
-def save_data(inputImageList, path, fileName='output', toText=True):
+def save_data(image_list, path, file_name='output', to_text=True):
     '''
     :param dictionaryList: Save dictionaries in inputDictionaryList
     :param path: path where file is saved
@@ -267,8 +345,8 @@ def save_data(inputImageList, path, fileName='output', toText=True):
     :return:
     '''
     
-    if not isinstance(inputImageList, collections.Iterable):
-            inputImageList=[inputImageList]
+    if not isinstance(image_list, collections.Iterable):
+            image_list=[image_list]
     
     # Start timing
     tstart = time.clock()
@@ -276,19 +354,19 @@ def save_data(inputImageList, path, fileName='output', toText=True):
     # Creatre LogText and start logging
     logText = '\nSaving database: '
     # Add names of dictionary sources to logText
-    for img in inputImageList:
+    for img in image_list:
         logText += '\t' + str(img.metadata['Name'])
     #Add settings to logText
     # Add filter settings to logText
     logText += '\n\tPath: '+str(path)
-    logText += '\n\tFilename: '+str(fileName)
-    if toText==True: logText += '.txt'
-    elif toText==False:logText += '.xlsx'
+    logText += '\n\tFilename: '+str(file_name)
+    if to_text==True: logText += '.txt'
+    elif to_text==False:logText += '.xlsx'
     
 
     try:
 
-        Image.save_data(inputImageList, path, fileName, toText)
+        Image.save_data(image_list, path, file_name, to_text)
 
     except Exception as e:
         raise A3dcError("Error occured while filtering database!",e)
@@ -302,10 +380,8 @@ def save_data(inputImageList, path, fileName='output', toText=True):
     return logText
 
 
-def save_image(inputImageList, dir_path, suffix):
+def save_image(img, path, file_name):
     
-    if not isinstance(inputImageList, collections.Iterable) or isinstance(inputImageList, np.ndarray):
-        inputImageList=[inputImageList]
     
     # Start timing
     tstart = time.clock()
@@ -313,15 +389,15 @@ def save_image(inputImageList, dir_path, suffix):
     # Creatre LogText and start logging
     logText = '\nSaving image: '
     # Add names of dictionary sources to logText
-    for img in inputImageList:
-        logText += '\t' + str(img.metadata['Name'])
+
+    logText += '\t' + str(img.metadata['Name'])
     #Add settings to logText
     # Add filter settings to logText
-    logText += '\n\tPath: '+str(dir_path)
+    logText += '\n\tPath: '+str(path)
 
     try:
         #Save image using tifffile save
-        Image.save_image(inputImageList, dir_path, suffix ) 
+        Image.save_image(img, path, file_name) 
         
     except Exception as e:
         raise A3dcError("Error occured while filtering database!",e)

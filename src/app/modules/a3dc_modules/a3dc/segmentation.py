@@ -15,7 +15,7 @@ def tag_image(ndarray):
     #itk_image=sitk.Cast(itk_image, sitk.sitkUInt8)
 
     # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
-    ndarray = sitk.ConnectedComponent(itk_image, True)
+    ndarray = sitk.ConnectedComponent(itk_image, fullyConnected=True)
 
     return sitk.GetArrayFromImage(ndarray)
  
@@ -23,12 +23,12 @@ def tag_image(ndarray):
 def threshold_auto(ndarray, method, mode='Slice'):
 
     # Cast to 16-bit
-    #image = img_as_uint(image)
+    ndarray = img_as_uint(ndarray)
 
-    # Cast to 16-bit
-    ndarray = img_as_ubyte(ndarray)
+    # Cast to 8-bit
+    #ndarray = img_as_ubyte(ndarray)
 
-    itkThresholdDict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
+    threshold_dict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                             'Huang': sitk.HuangThresholdImageFilter(),
                             'MaxEntropy': sitk.MaximumEntropyThresholdImageFilter(),
                             'Li': sitk.LiThresholdImageFilter(),
@@ -39,102 +39,102 @@ def threshold_auto(ndarray, method, mode='Slice'):
                             'Triangle': sitk.TriangleThresholdImageFilter()}
 
     #Check if method is valid
-    if method not in itkThresholdDict.keys():
+    if method not in threshold_dict.keys():
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
     #Create ITK FIlter object
-    thresholdFilter=itkThresholdDict[method]
+    threshold_filter=threshold_dict[method]
 
     if mode=="Stack" or len(ndarray.shape)<3 :
         # Create ITK image
-        itkImage = sitk.GetImageFromArray(ndarray)
+        itk_image = sitk.GetImageFromArray(ndarray)
         # Apply threshold, invert and convert to nd array
-        outputImage=sitk.GetArrayFromImage(sitk.InvertIntensity(thresholdFilter.Execute(itkImage), 1))
+        output=sitk.GetArrayFromImage(sitk.InvertIntensity(threshold_filter.Execute(itk_image), 1))
         #Get threshold value
-        thresholdValue = thresholdFilter.GetThreshold()
+        threshold_val = threshold_filter.GetThreshold()
 
     elif mode=="Slice":
 
-        thresholdValue=[]
-        outputImage=[]
+        threshold_val=[]
+        output=[]
         for i in range(len(ndarray)):
             # Create ITK image
-            itkImage = sitk.GetImageFromArray(ndarray[i])
+            itk_image = sitk.GetImageFromArray(ndarray[i])
             # Apply threshold, invert and convert to nd array
-            segmentedImage = sitk.GetArrayFromImage(sitk.InvertIntensity(thresholdFilter.Execute(itkImage), 1))
+            segmented_img = sitk.GetArrayFromImage(sitk.InvertIntensity(threshold_filter.Execute(itk_image), 1))
             #Append threshold value to threshodValue
-            thresholdValue.append(thresholdFilter.GetThreshold())
+            threshold_val.append(threshold_filter.GetThreshold())
             #Append slice to outputImage
-            outputImage.append(segmentedImage)
-        outputImage=np.asarray(outputImage)
+            output.append(segmented_img)
+        output=np.asarray(output)
 
     else:
         raise LookupError("'"+str(mode)+"' is Not a valid mode!")
 
 
-    return outputImage, thresholdValue
+    return output, threshold_val
 
 
 def create_surfaceImage(ndarray):
 
     # Convert nd array to itk image
-    itkImage = sitk.GetImageFromArray(ndarray)
-    pixelType = itkImage.GetPixelID()
+    itk_image = sitk.GetImageFromArray(ndarray)
+    pixel_type = itk_image.GetPixelID()
     # Run binary threshold
-    thresholdedItkImage = sitk.BinaryThreshold(itkImage, 0, 0, 0, 1)
+    thresholded_itk_img = sitk.BinaryThreshold(itk_image, 0, 0, 0, 1)
 
     # Create an parametrize instance ofBinaryContourImageFilter()
-    itkFilter = sitk.BinaryContourImageFilter()
-    itkFilter.SetFullyConnected(False)
+    itk_filter = sitk.BinaryContourImageFilter()
+    itk_filter.SetFullyConnected(False)
     #Execute to get a surface mask
-    output = itkFilter.Execute(thresholdedItkImage)
+    output = itk_filter.Execute(thresholded_itk_img)
 
-    # Change pixeltype of the object map to be the same as the input image
+    # Change pixel_type of the object map to be the same as the input image
     caster = sitk.CastImageFilter()
-    caster.SetOutputPixelType(pixelType)
-    output=caster.Execute(output)*itkImage
+    caster.SetOutputpixel_type(pixel_type)
+    output=caster.Execute(output)*itk_image
 
     return sitk.GetArrayFromImage(output)
 
 
 
-def threshold_manual(ndarray, lowerThreshold=0, upperThreshold=1):
+def threshold_manual(ndarray, lower=0, upper=1):
 
     # Convert nd Image to ITK image
-    itkImage = sitk.GetImageFromArray(ndarray)
+    itk_image = sitk.GetImageFromArray(ndarray)
 
     #threshold=sitk.ThresholdImageFilter()
     threshold=sitk.BinaryThresholdImageFilter()
-    threshold.SetUpperThreshold(float(upperThreshold))
-    threshold.SetLowerThreshold(float(lowerThreshold))
-    segmentedImage=threshold.Execute(itkImage)
+    threshold.SetUpperThreshold(float(upper))
+    threshold.SetLowerThreshold(float(lower))
+    segmented_img=threshold.Execute(itk_image)
 
     # Threshold and Invert
-    return sitk.GetArrayFromImage(sitk.InvertIntensity(segmentedImage, 1))
+    return sitk.GetArrayFromImage(sitk.InvertIntensity(segmented_img, 1))
 
 
 
-def threshold_adaptive(ndarray, method, blockSize=5, offSet=0):
+def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     
     #Round to add as blocksize has to be odd
     def round_up_to_odd(f):
         return int(np.ceil(f) // 2 * 2 + 1)
     
-    blockSize=round_up_to_odd(blockSize)
+    blocksize=round_up_to_odd(blocksize)
     
     #Cast to 8-bit
-    convertedImage = img_as_ubyte(ndarray)
+    converted_image = img_as_ubyte(ndarray)
 
     #Cycle through image
     outputImage = []
-    for i in range(len(convertedImage)):
+    for i in range(len(converted_image)):
         if method == 'Adaptive Mean':
-            outputImage.append(threshold_local(convertedImage[i], blockSize, offSet))
+            outputImage.append(threshold_local(converted_image[i], blocksize, offset))
 
         elif method == 'Adaptive Gaussian':
 
-            outputImage.append(cv2.adaptiveThreshold(convertedImage[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                                cv2.THRESH_BINARY, blockSize, offSet))
+            outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                                cv2.THRESH_BINARY, blocksize, offset))
         else:
             raise LookupError('Not a valid method!')
 
