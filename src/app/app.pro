@@ -30,14 +30,6 @@ macx {
     # QMAKE_CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
 }
 
-macx {
-    system(cp $${PWD}/lib/libics/libics_conf.h.in $${PWD}/lib/libics/libics_conf.h)
-}
-
-win32 {
-    # TODO: copy libics_conf.in to libics_conf.h
-}
-
 HEADERS += \
     VolumeData.h \
     VolumeTexture.h \
