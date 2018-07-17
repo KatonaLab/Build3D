@@ -8,4 +8,5 @@ qmake.exe "%WORK_DIR%\a3dc.pro" -spec win32-msvc "CONFIG+=%BUILD_MODE%" "CONFIG+
 	"DEFINED_AT_COMPILATION_A3DC_BUILD_MODE=%DEFINED_AT_COMPILATION_A3DC_BUILD_MODE%"^
 	"DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=%DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM%"^
 	&& jom.exe qmake_all
-jom.exe && (echo "sucessfull build") || (echo "build failed" & exit /b 1)
+jom.exe && (echo "sucessfull build") || (echo "build failed" & pause & exit /b 1)
+pause
