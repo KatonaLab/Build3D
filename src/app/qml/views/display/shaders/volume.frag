@@ -102,7 +102,8 @@ void main()
     for (int i = 0; i <= 48; ++i) {
         vec3 pos = mix(far, near, float(i) * 1./48.);
         float x = texture(volumeTexture, pos).r;
-        alpha = alpha + lut2(x, lutParameters) * 1./48.;
+        // alpha = alpha + lut2(x, lutParameters) * 1./48.;
+        alpha = max(alpha, lut2(x, lutParameters));
         if (labeled < 0.5) {
             continue;
         }

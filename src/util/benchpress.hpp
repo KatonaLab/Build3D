@@ -255,13 +255,13 @@ public:
 
     std::string to_string() const {
         std::stringstream tmp;
-        tmp << std::setw(12) << std::right << d_num_iterations;
+        tmp << std::setw(16) << std::right << (std::to_string(d_num_iterations) + ";");
         size_t npo = get_ns_per_op();
-        tmp << std::setw(12) << std::right << npo << std::setw(0) << " ns/op";
-        double mbs = get_mb_per_s();
-        if (mbs > 0.0) {
-            tmp << std::setw(12) << std::right << mbs << std::setw(0) << " MB/s";
-        }
+        tmp << std::setw(16) << std::right << (std::to_string(npo) + ";") << std::setw(0) << " ns/op";
+        // double mbs = get_mb_per_s();
+        // if (mbs > 0.0) {
+        //     tmp << std::setw(16) << std::right << (std::to_string(mbs) + ";") << std::setw(0) << " MB/s";
+        // }
         return std::string(tmp.str());
     }
 };
@@ -412,11 +412,12 @@ private:
 void run_benchmarks(const options& opts) {
     std::regex match_r(opts.get_bench());
     auto benchmarks = registration::get_ptr()->get_benchmarks();
+    std::cout << "name;num_it;runtime;dimension" << std::endl;
     for (auto& info : benchmarks) {
         if (std::regex_match(info.get_name(), match_r)) {
             context c(info, opts);
             auto r = c.run();
-            std::cout << std::setw(35) << std::left << info.get_name() << r.to_string() << std::endl;
+            std::cout << std::setw(100) << std::left << (info.get_name() + ";") << r.to_string() << std::endl;
         }
     }
 }
@@ -475,7 +476,7 @@ int main(int argc, char** argv) {
     float duration = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - bp_start
     ).count() / 1000.f;
-    std::cout << argv[0] << " " << duration << "s" << std::endl;
+    // std::cout << argv[0] << " " << duration << "s" << std::endl;
     return 0;
 }
 #endif

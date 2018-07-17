@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <iomanip>
@@ -63,32 +64,6 @@ namespace multidim_image_platform {
     class MultiDimImage {
         template <typename U> friend class MultiDimImage;
     public:
-        // TODO: consider making inheritance between MultiDimImage and View
-        class View {
-            friend class MultiDimImage<T>;
-        public:
-            View(MultiDimImage<T>* parent,
-                std::vector<std::size_t> offset,
-                std::vector<std::size_t> dims);
-            View(const View& other);
-            View& operator=(const View& other);
-            bool empty() const;
-            std::size_t size() const;
-            std::size_t dims() const;
-            std::size_t dim(std::size_t d) const;
-            std::size_t byteSize() const;
-            bool valid() const;
-            T& at(std::vector<std::size_t> coords);
-            // TODO: do not expose a raw pointer
-            MultiDimImage<T>* parent();
-            ~View();
-        protected:
-            std::vector<std::size_t> m_offsets;
-            std::vector<std::size_t> m_dims;
-            std::vector<std::size_t> m_trueDims;
-            MultiDimImage<T>* m_parent;
-        };
-    public:
         MultiDimImage(std::vector<std::size_t> dims = {});
 
         MultiDimImage(const MultiDimImage&) = default;
@@ -114,8 +89,6 @@ namespace multidim_image_platform {
         Type type() const;
         void clear();
         T& at(std::vector<std::size_t> coords);
-        View plane(std::vector<std::size_t> coords);
-        View volume(std::vector<std::size_t> coords);
         std::vector<std::vector<T>>& unsafeData();
         const std::vector<std::vector<T>>& unsafeData() const;
         void reorderDims(std::vector<std::size_t> dims);
@@ -136,45 +109,23 @@ namespace multidim_image_platform {
 
         void initUtilsFromDim();
         T& unsafeAt(std::vector<std::size_t> coords);
-        View subDimView(std::vector<std::size_t> coords, std::size_t firstNDims);
 
         template <typename U>
         void transformCopy(const MultiDimImage<U>& other,
             std::function<T(const U&)> unary);
-
-        struct ViewRegistry {
-            ViewRegistry(MultiDimImage<T>* owner): m_owner(owner) {}
-            void add(View* view)
-            {
-                m_views.push_back(view);
-                view->m_parent = m_owner;
-            }
-            void remove(View* view)
-            {
-                auto it = std::find(m_views.begin(), m_views.end(), view);
-                if (it != m_views.end()) {
-                    (*it)->m_parent = nullptr;
-                    m_views.erase(it);
-                }
-            }
-            void clear()
-            {
-                for (auto x : m_views) {
-                    x->m_parent = nullptr;
-                }
-                m_views.clear();
-            }
-            ~ViewRegistry()
-            {
-                clear();
-            }
-            std::list<View*> m_views;
-            MultiDimImage<T>* m_owner;
-        };
-        ViewRegistry m_viewRegistry;
     };
 
     namespace detail {
+
+        // class BoundedCoordinates {
+        // public:
+        //     BoundedCoordinates(std::vector<size_t> bounds);
+        //     size_t unravel(const std::vector<size_t> coordinates&);
+        //     std::vector<size_t> ravel(size_t index);
+        // protected:
+
+        // };
+
         std::size_t flatCoordinate(const std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& dims);
 

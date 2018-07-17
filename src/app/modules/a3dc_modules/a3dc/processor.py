@@ -13,13 +13,13 @@ import SimpleITK as sitk
 import numpy as np
 
 
-def multiply(taggedImgList, sourceImageList=None):
+def multiply(img_list, sourceImageList=None):
 
 
     # Create Overlapping Image
-    output_array = taggedImgList[0].array
-    for i in range(1, len(taggedImgList)):
-        output_array = np.multiply(output_array, taggedImgList[i].array)
+    output_array = img_list[0].array
+    for i in range(1, len(img_list)):
+        output_array = np.multiply(output_array, img_list[i].array)
 
     return output_array
 
@@ -28,51 +28,51 @@ def multiply(taggedImgList, sourceImageList=None):
 
 def smoothingGaussianFilter(image, sigma):
 
-    itkImage = sitk.GetImageFromArray(image)
-    pixelType = itkImage.GetPixelID()
+    itk_img = sitk.GetImageFromArray(image)
+    pixel_type = itk_img.GetPixelID()
 
     sGaussian = sitk.SmoothingRecursiveGaussianImageFilter()
     sGaussian.SetSigma(float(sigma))
-    itkImage = sGaussian.Execute(itkImage)
+    itk_img = sGaussian.Execute(itk_img)
 
     caster = sitk.CastImageFilter()
-    caster.SetOutputPixelType(pixelType)
+    caster.SetOutputpixel_type(pixel_type)
 
-    return sitk.GetArrayFromImage(caster.Execute(itkImage))
+    return sitk.GetArrayFromImage(caster.Execute(itk_img))
 
 
 def discreteGaussianFilter(image, sigma):
-    itkImage = sitk.GetImageFromArray(image)
-    pixelType = itkImage.GetPixelID()
+    itk_img = sitk.GetImageFromArray(image)
+    pixel_type = itk_img.GetPixelID()
 
     dGaussian = sitk.DiscreteGaussianImageFilter ()
     dGaussian.SetVariance(int(sigma))
     dGaussian.SetUseImageSpacing(False)
-    itkImage = dGaussian.Execute(itkImage)
+    itk_img = dGaussian.Execute(itk_img)
 
-    caster = sitk.CastImageFilter(itkImage)
-    caster.SetOutputPixelType(pixelType)
+    caster = sitk.CastImageFilter(itk_img)
+    caster.SetOutputpixel_type(pixel_type)
 
-    return sitk.GetArrayFromImage(caster.Execute(itkImage))
+    return sitk.GetArrayFromImage(caster.Execute(itk_img))
 
 
 def medianFilter(image, radius):
-    itkImage = sitk.GetImageFromArray(image)
-    pixelType = itkImage.GetPixelID()
+    itk_img = sitk.GetImageFromArray(image)
+    pixel_type = itk_img.GetPixelID()
 
     median = sitk.MedianImageFilter()
     median.SetRadius(int(radius))
-    itkImage = median.Execute(itkImage)
+    itk_img = median.Execute(itk_img)
 
-    caster = sitk.CastImageFilter(itkImage)
-    caster.SetOutputPixelType(pixelType)
+    caster = sitk.CastImageFilter(itk_img)
+    caster.SetOutputpixel_type(pixel_type)
 
-    return sitk.GetArrayFromImage(caster.Execute(itkImage))
+    return sitk.GetArrayFromImage(caster.Execute(itk_img))
 
 
 def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, multiplier=2.5, NbrOfIterations=5,
                               replaceValue=255):
-    itkImage = sitk.GetImageFromArray(image)
+    itk_img = sitk.GetImageFromArray(image)
 
 
     filter = sitk.ConfidenceConnectedImageFilter()
@@ -81,10 +81,10 @@ def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, mult
     filter.SetNumberOfIterations(NbrOfIterations)
     filter.SetReplaceValue(replaceValue)
     filter.SetInitialNeighborhoodRadius(initialNeighborhoodRadius)
-    itkImage = filter.Execute(itkImage)
+    itk_img = filter.Execute(itk_img)
 
 
-    return sitk.GetArrayFromImage(itkImage)
+    return sitk.GetArrayFromImage(itk_img)
 
  
 

@@ -1,0 +1,46 @@
+name;num_it;runtime;dimension;timestamp;platform;git_branch
+0;create MultiDimImage 100x100x16x3;500;2648992; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+1;create MultiDimImage 2048x2048x16x3;1;1269661853; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+2;reordering MultiDimImage 100x100x16x3;1;7303104311; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+3;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;25794304; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+4;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;27730607; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+5;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;43335163; ns/op;1530706429.602887;Darwin-17.5.0-x86_64-i386-64bit;master
+6;create MultiDimImage 100x100x16x3;500;2421485; ns/op;1530713398.332145;Darwin-17.5.0-x86_64-i386-64bit;master
+7;create MultiDimImage 2048x2048x16x3;1;1150370608; ns/op;1530713398.332145;Darwin-17.5.0-x86_64-i386-64bit;master
+8;reordering MultiDimImage 100x100x16x3;1;6273848017; ns/op;1530713398.332145;Darwin-17.5.0-x86_64-i386-64bit;master
+9;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;22064007; ns/op;1530713398.332145;Darwin-17.5.0-x86_64-i386-64bit;master
+10;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;22185654; ns/op;1530713398.332145;Darwin-17.5.0-x86_64-i386-64bit;master
+11;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;22620079; ns/op;1530713398.332145;Darwin-17.5.0-x86_64-i386-64bit;master
+12;create MultiDimImage 100x100x16x3;500;2362785; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+13;create MultiDimImage 3x16x100x100;500;4689322; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+14;create MultiDimImage 2048x2048x16x3;1;1149189011; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+15;create MultiDimImage 16x3x2048x2048;1;2425516281; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+16;reordering MultiDimImage 100x100x16x3;1;6122046033; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+17;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;21765216; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+18;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;21717126; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+19;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;22123560; ns/op;1530734109.2182212;Darwin-17.5.0-x86_64-i386-64bit;master
+20;create MultiDimImage 100x100x16x3;500;2805386; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+21;create MultiDimImage 3x16x100x100;500;4650765; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+22;create MultiDimImage 2048x2048x16x3;1;1153408381; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+23;create MultiDimImage 16x3x2048x2048;1;2237353500; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+24;reordering MultiDimImage 100x100x16x3;1;6222041319; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+25;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;22240582; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+26;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;21997954; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+27;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;22287620; ns/op;1530804803.044038;Darwin-17.5.0-x86_64-i386-64bit;master
+28;create MultiDimImage 100x100x16x3;500;2469433; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+29;create MultiDimImage 3x16x100x100;500;4820243; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+30;create MultiDimImage 2048x2048x16x3;1;1193715084; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+31;create MultiDimImage 16x3x2048x2048;1;2405135452; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+32;reordering MultiDimImage 100x100x16x3;1;6472368608; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+33;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;22543649; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+34;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;22556107; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+35;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;23007393; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+36;read<native type> small .ics file;100;14756646; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+37;read<native type> small .ics file, reorder;100;14955716; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+38;readScaledConvert<native type> small .ics file;100;14839171; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+39;readScaledConvert<native type> small .ics file, reorder;50;33054574; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+40;readScaledConvert<int32_t> small .ics file, reorder;50;43775632; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+41;readScaledConvert<float> large, 2x1024x1024x20 .ics file;1;3026790617; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+42;readScaledConvert<float> large, 2048x2048x15x4 .ics file;1;2607141937; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+43;readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder;1;161328428888; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+44;readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder;1;2570457017; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
