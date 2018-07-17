@@ -1,7 +1,8 @@
 #ifndef _version_h_
 #define _version_h_
 
-// extern const char * _A3DC_BUILD_DATE;
+extern const char * _A3DC_BUILD_DATE;
+extern const char * _A3DC_BUILD_MODE;
 extern const char * _A3DC_BUILD_GIT_SHA;
 extern const char * _A3DC_BUILD_PLATFORM;
 

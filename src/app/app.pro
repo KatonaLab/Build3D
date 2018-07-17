@@ -6,19 +6,24 @@ CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slo
 
 # CONFIG -= app_bundle
 
-# used in version.h/cpp
-DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --abbrev=8 --dirty --always --tags)
-
 CONFIG(release, debug|release) {
     config += optimize_full
 }
 
 win32 {
-    DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=win32
     QMAKE_CXXFLAGS += -bigobj
 }
 
+message(%%DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA)
+
+DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_DATE=%%DEFINED_AT_COMPILATION_A3DC_BUILD_DATE
+DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=%%DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA
+DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_MODE=%%DEFINED_AT_COMPILATION_A3DC_BUILD_MODE
+DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=%%DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM
+
 macx {
+    # used in version.h/cpp
+    DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --dirty --always --tags)
     DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=macx
     QMAKE_CXXFLAGS += -fdiagnostics-absolute-paths
     QMAKE_CXXFLAGS += -Wshadow
