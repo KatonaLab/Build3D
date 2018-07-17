@@ -53,5 +53,4 @@ SOURCES +=  \
     ../../lib/libics/libics_binary.c \
     ../../lib/libics/libics_test.c \
     ../../lib/libics/libics_write.c \
-    ../../lib/libics/libics_gzip.c \
     ../../lib/libics/libics_compress.c
