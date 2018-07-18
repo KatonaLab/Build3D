@@ -7,4 +7,6 @@ cd "%BUILD_DIR%\src\test\%BUILD_MODE%\"
 set PATH=python-3.6.5.amd64;%PATH%
 set PYTHONHOME=python-3.6.5.amd64
 
-call "test.exe" && (echo "sucessfull test") || (echo "test failed" & exit /b 2)
+call "test.exe" && (echo "sucessfull test") || (echo "test failed" & pause & exit /b 2)
+
+pause
