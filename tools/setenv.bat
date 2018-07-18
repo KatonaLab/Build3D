@@ -9,6 +9,8 @@ set QT_CREATOR_DIR=C:\Qt\Tools\QtCreator
 set PYTHON_DIR_NAME=python-3.6.5.amd64
 set PYTHON_DIR_FULL_PATH=C:\WinPython36\%PYTHON_DIR_NAME%
 
+set CRASHPAD_DIR=C:\Users\balint\projects\tools\crashpad\crashpad
+
 set VCREDIST_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.13.26020\vcredist_x64.exe
 
 set PATH=%QT_DIR%\bin;%QT_CREATOR_DIR%\bin;%PATH%

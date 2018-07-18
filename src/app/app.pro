@@ -128,7 +128,9 @@ macx {
 }
 
 win32 {
-    CRASHPAD_DIR = $$_PRO_FILE_PWD_/../../../tools/crashpad/crashpad
+    isEmpty(CRASHPAD_DIR) {
+        CRASHPAD_DIR = $$_PRO_FILE_PWD_/../../../tools/crashpad/crashpad
+    }
     INCLUDEPATH += $$CRASHPAD_DIR
     INCLUDEPATH += $$CRASHPAD_DIR/third_party/mini_chromium/mini_chromium/
     INCLUDEPATH += $$CRASHPAD_DIR/third_party/zlib/zlib/
