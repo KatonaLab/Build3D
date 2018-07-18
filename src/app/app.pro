@@ -166,7 +166,7 @@ win32 {
     CONFIG(release, debug|release) {
         CRASHPAD_DST = $$shell_path($$clean_path($$OUT_PWD/release))
     }
-    CopyCrashpad.commands = xcopy /Y /S /I $$quote($${CRASHPAD_SRC}) $$quote($${CRASHPAD_DST})
+    CopyCrashpad.commands = $$QMAKE_COPY $$shell_quote($${CRASHPAD_SRC}) $$shell_quote($${CRASHPAD_DST})
 
     QMAKE_EXTRA_TARGETS += CopyCrashpad
     POST_TARGETDEPS += CopyCrashpad
