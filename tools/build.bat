@@ -1,6 +1,8 @@
 call setenv.bat
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
+if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
+
 cd %BUILD_DIR%
 qmake.exe "%WORK_DIR%\a3dc.pro" -spec win32-msvc "CONFIG+=%BUILD_MODE%" "CONFIG+=qml_debug" ^
 	"DEFINED_AT_COMPILATION_A3DC_BUILD_DATE=%DEFINED_AT_COMPILATION_A3DC_BUILD_DATE%"^
