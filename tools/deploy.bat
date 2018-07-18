@@ -27,4 +27,6 @@ iscc ^
 	/DAPP_VERSION="%DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA%-%DEFINED_AT_COMPILATION_A3DC_BUILD_DATE%" ^
 	/DBUILD_ID="%BUILD_ID%" ^
 	/DBUILD_MODE="%BUILD_MODE%" ^
-	win-install.iss && (echo "sucessfull deployment") || (echo "deployment failed" & pause s& exit /b 4)
+	win-install.iss && (echo "sucessfull deployment") || (echo "deployment failed" & pause & exit /b 4)
+
+pause

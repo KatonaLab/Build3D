@@ -41,3 +41,17 @@ begin
     MsgBox('vcredist.msi installer failed to run!' + #13#10 +
       SysErrorMessage(ResultCode), mbError, MB_OK);
 end;
+
+procedure InitializeWizard();
+var
+  VersionLabel: TNewStaticText;
+begin
+  VersionLabel := TNewStaticText.Create(WizardForm);
+  VersionLabel.Caption := Format('Version: %s', ['{#SetupSetting("AppVersion")}']);
+  VersionLabel.Parent := WizardForm;
+  VersionLabel.Left := ScaleX(16);
+  VersionLabel.Top :=
+    WizardForm.BackButton.Top +
+    (WizardForm.BackButton.Height div 2) -
+    (VersionLabel.Height div 2)
+end;
