@@ -206,10 +206,13 @@ Repeater {
                         onAccepted: {
                             // https://stackoverflow.com/questions/24927850/get-the-path-from-a-qml-url
                             var path = dialog.fileUrl.toString();
+                            console.log(path);
                             // remove prefixed "file:///"
-                            path = path.replace(/^(file:\/{2})/,"");
+                            path = path.replace(/^(file:\/{3})/,"");
+                            console.log(path);
                             // unescape html codes like '%23' for '#'
                             var cleanPath = decodeURIComponent(path);
+                            console.log(cleanPath);
 
                             console.debug("select file", cleanPath);
                             filenameText.text = cleanPath;

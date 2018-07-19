@@ -35,10 +35,10 @@ procedure RunVCRedistInstaller;
 var
   ResultCode: Integer;
 begin
-  if not Exec(ExpandConstant('{app}\vc_redist.x64.exe'), '', '', SW_SHOWNORMAL,
+  if not Exec(ExpandConstant('{app}\vcredist_x64.exe'), '', '', SW_SHOWNORMAL,
     ewWaitUntilTerminated, ResultCode)
   then
-    MsgBox('vcredist.msi installer failed to run!' + #13#10 +
+    MsgBox('vcredist_x64.exe installer failed to run!' + #13#10 +
       SysErrorMessage(ResultCode), mbError, MB_OK);
 end;
 
