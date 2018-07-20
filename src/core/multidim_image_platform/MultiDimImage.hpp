@@ -105,6 +105,8 @@ namespace multidim_image_platform {
         std::vector<std::size_t> m_restDims;
         std::size_t m_planeSize;
         std::size_t m_restSize;
+        std::vector<std::size_t> m_planeDimsProducts;
+        std::vector<std::size_t> m_restDimsProducts;
         Type m_type;
 
         void initUtilsFromDim();
@@ -113,24 +115,25 @@ namespace multidim_image_platform {
         template <typename U>
         void transformCopy(const MultiDimImage<U>& other,
             std::function<T(const U&)> unary);
+
+        std::pair<std::size_t, std::size_t> planeCoordinatePair(const std::vector<std::size_t>& coords);
     };
 
     namespace detail {
 
-        // class BoundedCoordinates {
-        // public:
-        //     BoundedCoordinates(std::vector<size_t> bounds);
-        //     size_t unravel(const std::vector<size_t> coordinates&);
-        //     std::vector<size_t> ravel(size_t index);
-        // protected:
-
-        // };
-
+        // TODO: depricated, remove
         std::size_t flatCoordinate(const std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& dims);
 
+        template <typename It1, typename It2>
+        void stepCoords(It1 begin, It1 end, It2 limitsBegin);
+
+        // TODO: depricated, remove
         bool stepCoords(std::vector<std::size_t>& coords,
             const std::vector<std::size_t>& limits);
+
+        std::vector<std::size_t> reorderCoords(std::vector<std::size_t>& coords,
+            const std::vector<std::size_t>& order);
 
         template <typename T, typename U,
             bool T_is_integral = std::is_integral<T>::value,

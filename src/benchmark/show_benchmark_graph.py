@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import platform
 from bokeh.plotting import figure, output_file, show, gridplot
-from bokeh.palettes import Dark2_5
+from bokeh.palettes import d3
 import itertools
 import os.path
 
@@ -40,11 +40,14 @@ p = figure(title='benchmark on branch \'{}\' and platform \'{}\''
            x_axis_label='timestamp',
            y_axis_label='ns/op')
 
-colors = itertools.cycle(Dark2_5)
+colors = itertools.cycle(d3['Category20'][20])
+
+t_index = {ts: i
+           for i, ts in enumerate(sorted(current_dt['timestamp'].unique()))}
 
 for bm, c in zip(current_dt['name'].unique(), colors):
     bm_dt = current_dt[current_dt['name'] == bm]
-    x = bm_dt['timestamp'].values
+    x = [t_index[ts] for ts in bm_dt['timestamp'].values]
     y = bm_dt['runtime'].values
     p.line(x, y, legend=bm, color=c)
     p.circle(x, y, legend=bm, color=c, size=6)

@@ -44,3 +44,20 @@ name;num_it;runtime;dimension;timestamp;platform;git_branch
 42;readScaledConvert<float> large, 2048x2048x15x4 .ics file;1;2607141937; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
 43;readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder;1;161328428888; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
 44;readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder;1;2570457017; ns/op;1531390809.634775;Darwin-17.5.0-x86_64-i386-64bit;master
+45;create MultiDimImage 100x100x16x3;500;2355009; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+46;create MultiDimImage 3x16x100x100;500;4594170; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+47;create MultiDimImage 2048x2048x16x3;1;1134973298; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+48;create MultiDimImage 16x3x2048x2048;1;2244313654; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+49;reordering MultiDimImage 100x100x16x3;5;794370673; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+50;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t;50;21535988; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+51;copy convert MultiDimImage 100x100x16x3, uint8_t->double;50;21657922; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+52;copy convert MultiDimImage 100x100x16x3, float->uint8_t;50;22362127; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+53;read<native type> small .ics file;100;14914532; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+54;read<native type> small .ics file, reorder;100;14175713; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+55;readScaledConvert<native type> small .ics file;100;14156381; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+56;readScaledConvert<native type> small .ics file, reorder;100;14061334; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+57;readScaledConvert<int32_t> small .ics file, reorder;50;42059643; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+58;readScaledConvert<float> large, 2x1024x1024x20 .ics file;1;2637978852; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+59;readScaledConvert<float> large, 2048x2048x15x4 .ics file;1;2164147397; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+60;readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder;1;20266292251; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master
+61;readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder;1;2152434521; ns/op;1532086492.08335;Darwin-17.5.0-x86_64-i386-64bit;master

@@ -14,28 +14,29 @@ template <typename T>
 void MultiDimImage<T>::initUtilsFromDim()
 {
     int i = 0;
+    std::size_t prodPlane = 1, prodRest = 1;
     for (std::size_t x : m_dims) {
         if (i < 2) {
             m_planeDims.push_back(x);
+            m_planeDimsProducts.push_back(prodPlane);
+            prodPlane *= x;
         } else {
             m_restDims.push_back(x);
+            m_restDimsProducts.push_back(prodRest);
+            prodRest *= x;
         }
         i++;
     }
     if (m_planeDims.empty()) {
         m_planeSize = 0;
     } else {
-        m_planeSize = std::accumulate(
-            m_planeDims.begin(), m_planeDims.end(),
-            1, std::multiplies<std::size_t>());
+        m_planeSize = prodPlane;
     }
 
     if (m_restDims.empty() && m_planeDims.empty()) {
         m_restSize = 0;
     } else {
-        m_restSize = std::accumulate(
-            m_restDims.begin(), m_restDims.end(),
-            1, std::multiplies<std::size_t>());
+        m_restSize = prodRest;
     }
 }
 
@@ -103,7 +104,7 @@ std::size_t MultiDimImage<T>::size() const
     if (m_dims.empty()) {
         return 0;
     } else {
-        return std::accumulate(m_dims.begin(), m_dims.end(), 1, std::multiplies<std::size_t>());
+        return m_planeSize * m_restSize;
     }
 }
 
@@ -166,22 +167,30 @@ T& MultiDimImage<T>::at(std::vector<std::size_t> coords)
 }
 
 template <typename T>
-T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
+std::pair<std::size_t, std::size_t> MultiDimImage<T>::planeCoordinatePair(const std::vector<std::size_t>& coords)
 {
-    std::vector<std::size_t> planeDimCoords;
-    std::vector<std::size_t> restDimCoords;
-    int i = 0;
-    for (std::size_t x : coords) {
-        if (i < 2) {
-            planeDimCoords.push_back(x);
-        } else {
-            restDimCoords.push_back(x);
-        }
-        i++;
+    std::size_t second = 0;
+    if (coords.size() > 2) {
+        second = std::inner_product(
+            coords.begin() + 2,
+            coords.end(),
+            m_restDimsProducts.begin(), 0);
     }
 
-    return m_planes[detail::flatCoordinate(restDimCoords, m_restDims)]
-        [detail::flatCoordinate(planeDimCoords, m_planeDims)];
+    return std::make_pair(
+        std::inner_product(
+            coords.begin(),
+            coords.begin() + std::min((std::size_t)2, coords.size()),
+            m_planeDimsProducts.begin(), 0),
+            second
+    );
+}
+
+template <typename T>
+T& MultiDimImage<T>::unsafeAt(std::vector<std::size_t> coords)
+{
+    auto c = planeCoordinatePair(coords);
+    return m_planes[c.second][c.first];
 }
 
 template <typename T>
@@ -225,30 +234,19 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
         newDims[j] = m_dims[dimOrder[j]];
     }
 
+    std::size_t d = std::min((std::size_t)2, m_planeDims.size());
+
+    std::vector<std::size_t> coord(newDims.size(), 0);
     MultiDimImage<T> newImage(newDims);
-    // size_t planeId = 0;
-    // size_t pixelId = 0;
-    // for (auto& newPlane: newImage.m_planes) {
-        
-    //     pixelId = 0;
-    //     for (auto& newPixel: newPlane) {
-            
-    //         ++pixelId;
-    //     }
-    //     ++planeId;
-    // }
-
-    std::size_t n = size();
-    std::vector<std::size_t> coords(m_dims.size(), 0);
-    for (std::size_t i = 0; i < n; ++i) {
-        std::vector<std::size_t> newCoords(m_dims.size(), 0);
-
-        for (std::size_t j = 0; j < m_dims.size(); ++j) {
-            newCoords[j] = coords[dimOrder[j]];
+    for (auto& oldPlane : m_planes) {
+        for (auto& oldValue : oldPlane) {
+            auto coordPair = newImage.planeCoordinatePair(detail::reorderCoords(coord, dimOrder));
+            newImage.m_planes[coordPair.second][coordPair.first] = oldValue;
+            detail::stepCoords(coord.begin(), coord.begin() + d, m_planeDims.begin());
         }
-
-        newImage.unsafeAt(newCoords) = unsafeAt(coords);
-        detail::stepCoords(coords, m_dims);
+        if (m_restSize) {
+            detail::stepCoords(coord.begin() + 2, coord.end(), m_restDims.begin());
+        }
     }
 
     *this = std::move(newImage);
@@ -325,6 +323,23 @@ MultiDimImage<T>::~MultiDimImage()
 {}
 
 namespace detail {
+
+    template <typename It1, typename It2>
+    void stepCoords(It1 begin, It1 end, It2 limitsBegin)
+    {
+        bool c = true;
+        auto it = begin;
+        auto limitsIt = limitsBegin;
+        while (c && it != end) {
+            if (++(*it) >= *limitsIt) {
+                *it = 0;
+            } else {
+                c = false;
+            }
+            ++it;
+            ++limitsIt;
+        }
+    }
 
     template <typename X, typename Y>
     struct TypeScaleHelper<X, Y, true, false> {

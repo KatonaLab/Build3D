@@ -51,30 +51,19 @@ std::size_t detail::flatCoordinate(
     return x;
 }
 
+std::vector<std::size_t> detail::reorderCoords(std::vector<std::size_t>& coords,
+    const std::vector<std::size_t>& order)
+{
+    std::vector<std::size_t> newCoords(order.size(), 0);
+    for (std::size_t i = 0; i < order.size(); ++i) {
+        newCoords[i] = coords[order[i]];
+    }
+    return newCoords;
+}
+
 bool detail::stepCoords(std::vector<std::size_t>& coords,
     const std::vector<std::size_t>& limits)
 {
-    // TODO: revisit the usage of this function,
-    // it might be better to increment in a reverse order, e.g.:
-    // coords={2, 77}, limits={5, 80} --> coords={3, 77}, limits={5, 80}
-    // instead of
-    // coords={2, 77}, limits={5, 80} --> out: coords={2, 78}, return false
-
-    // increments the coordinates with one step in 'coords'
-    // respecting the given 'limits'
-    // e.g.:
-    //       in:  coords={2, 77}, limits={5, 80}
-    //       out: coords={2, 78}, return false
-    //
-    //       in:  coords={2, 79}, limits={5, 80}
-    //       out: coords={3, 0}, return false
-    //
-    //       in:  coords={2, 79, 49}, limits={5, 80, 50}
-    //       out: coords={3, 0, 0}, return false
-    //
-    //       in:  coords={4, 79, 49}, limits={5, 80, 50}
-    //       out: coords={5, 0, 0}, return true
-
     std::size_t carry = 1;
     for (int i = (int)coords.size() - 1; i >= 0; --i) {
         coords[i] += carry;
@@ -85,6 +74,7 @@ bool detail::stepCoords(std::vector<std::size_t>& coords,
             coords[i] = 0;
             carry = 1;
         }
+
     }
     return carry;
 }
