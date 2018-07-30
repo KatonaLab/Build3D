@@ -168,3 +168,43 @@ BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder #mu
         benchpress::escape(&im);
 	}
 })
+
+BENCHMARK("splitDim dim 0 MultiDimImage 400x400x16x3 #multidimimage #splitdim", [](benchpress::context* ctx)
+{
+    core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+    ctx->reset_timer();
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		auto vec = image.splitDim(0);
+        benchpress::escape(&vec);
+	}
+})
+
+BENCHMARK("splitDim dim 1 MultiDimImage 400x400x16x3 #multidimimage #splitdim", [](benchpress::context* ctx)
+{
+    core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+    ctx->reset_timer();
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		auto vec = image.splitDim(1);
+        benchpress::escape(&vec);
+	}
+})
+
+BENCHMARK("splitDim dim 2 MultiDimImage 400x400x16x3 #multidimimage #splitdim", [](benchpress::context* ctx)
+{
+    core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+    ctx->reset_timer();
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		auto vec = image.splitDim(2);
+        benchpress::escape(&vec);
+	}
+})
+
+BENCHMARK("splitDim dim 3 MultiDimImage 400x400x16x3 #multidimimage #splitdim", [](benchpress::context* ctx)
+{
+    core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+    ctx->reset_timer();
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+		auto vec = image.splitDim(3);
+        benchpress::escape(&vec);
+	}
+})

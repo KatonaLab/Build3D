@@ -66,7 +66,7 @@ if len(keywords) > 0:
 unq_names = [remove_hash_tags(name) for name in unq_names]
 
 # canonic names
-current_dt['name'].apply(remove_hash_tags)
+current_dt['name'] = current_dt['name'].apply(remove_hash_tags)
 
 for bm, c in zip(unq_names, colors):
     bm_dt = current_dt[current_dt['name'] == bm]

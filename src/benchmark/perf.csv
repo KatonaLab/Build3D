@@ -95,3 +95,45 @@ name;num_it;runtime;dimension;timestamp;platform;git_branch
 93;readScaledConvert<float> large, 2048x2048x15x4 .ics file #multidimimage #ics #read #scaledconvert;1;3811399028; ns/op;1532957654.128886;Darwin-17.5.0-x86_64-i386-64bit;master
 94;readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;1;20573519752; ns/op;1532957654.128886;Darwin-17.5.0-x86_64-i386-64bit;master
 95;readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;1;2269132069; ns/op;1532957654.128886;Darwin-17.5.0-x86_64-i386-64bit;master
+96;create MultiDimImage 100x100x16x3 #multidimimage #create;500;2436389; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+97;create MultiDimImage 3x16x100x100 #multidimimage #create;500;4758141; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+98;create MultiDimImage 2048x2048x16x3 #multidimimage #create;1;1173197576; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+99;create MultiDimImage 16x3x2048x2048 #multidimimage #create;1;2247688921; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+100;reordering MultiDimImage 100x100x16x3 #multidimimage #reorder;5;808466368; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+101;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t #multidimimage #reorder #copyconvert;50;21734008; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+102;copy convert MultiDimImage 100x100x16x3, uint8_t->double #multidimimage #reorder #copyconvert;50;22803465; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+103;copy convert MultiDimImage 100x100x16x3, float->uint8_t #multidimimage #reorder #copyconvert;50;22194893; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+104;read<native type> small .ics file #multidimimage #read #ics;100;14693667; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+105;read<native type> small .ics file, reorder #multidimimage #reorder #read #ics;100;14297224; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+106;readScaledConvert<native type> small .ics file #multidimimage #ics #read #scaledconvert;100;14310790; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+107;readScaledConvert<native type> small .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;100;14570268; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+108;readScaledConvert<int32_t> small .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;50;42794218; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+109;readScaledConvert<float> large, 2x1024x1024x20 .ics file #multidimimage #ics #read #scaledconvert;1;2849964886; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+110;readScaledConvert<float> large, 2048x2048x15x4 .ics file #multidimimage #ics #read #scaledconvert;1;3699117514; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+111;readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;1;21850758676; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+112;readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;1;2451207591; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+113;splitDim dim 0 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;10629964580; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+114;splitDim dim 1 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;10746083327; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+115;splitDim dim 2 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;11632099290; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+116;splitDim dim 3 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;10450394696; ns/op;1532962336.037828;Darwin-17.5.0-x86_64-i386-64bit;master
+117;create MultiDimImage 100x100x16x3 #multidimimage #create;500;2414762; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+118;create MultiDimImage 3x16x100x100 #multidimimage #create;500;4697750; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+119;create MultiDimImage 2048x2048x16x3 #multidimimage #create;1;1153380811; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+120;create MultiDimImage 16x3x2048x2048 #multidimimage #create;1;2270885173; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+121;reordering MultiDimImage 100x100x16x3 #multidimimage #reorder;5;826379507; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+122;copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t #multidimimage #reorder #copyconvert;50;21760821; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+123;copy convert MultiDimImage 100x100x16x3, uint8_t->double #multidimimage #reorder #copyconvert;50;21953168; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+124;copy convert MultiDimImage 100x100x16x3, float->uint8_t #multidimimage #reorder #copyconvert;50;22246193; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+125;read<native type> small .ics file #multidimimage #read #ics;100;15418998; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+126;read<native type> small .ics file, reorder #multidimimage #reorder #read #ics;100;14244017; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+127;readScaledConvert<native type> small .ics file #multidimimage #ics #read #scaledconvert;100;14306718; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+128;readScaledConvert<native type> small .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;100;14893934; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+129;readScaledConvert<int32_t> small .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;50;42254975; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+130;readScaledConvert<float> large, 2x1024x1024x20 .ics file #multidimimage #ics #read #scaledconvert;1;2686177341; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+131;readScaledConvert<float> large, 2048x2048x15x4 .ics file #multidimimage #ics #read #scaledconvert;1;2545674221; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+132;readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;1;21177298559; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+133;readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder;1;2270708062; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+134;splitDim dim 0 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;9936900108; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+135;splitDim dim 1 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;9480649439; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+136;splitDim dim 2 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;9804820524; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
+137;splitDim dim 3 MultiDimImage 400x400x16x3 #multidimimage #splitdim;1;9820791105; ns/op;1532962531.79828;Darwin-17.5.0-x86_64-i386-64bit;master
