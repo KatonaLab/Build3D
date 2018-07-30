@@ -208,8 +208,6 @@ const std::vector<std::vector<T>>& MultiDimImage<T>::unsafeData() const
 template <typename T>
 void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
 {
-    // TODO: find a faster solution
-
     if (dimOrder.size() != m_dims.size()) {
         throw std::invalid_argument("number of dimensions in the argument does not match with the number of data dimensions");
     }
@@ -291,27 +289,25 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
 template <typename T>
 std::vector<MultiDimImage<T>> MultiDimImage<T>::splitDim(std::size_t dim)
 {
-    // TODO: find a faster solution
     using namespace std;
 
     if (dim >= m_dims.size()) {
         throw std::range_error("no such dimension: " + std::to_string(dim));
     }
 
-    vector<MultiDimImage<T>> result;
     vector<size_t> newDims(m_dims);
     newDims.erase(newDims.begin() + dim);
+    vector<MultiDimImage<T>> result(m_dims[dim], MultiDimImage<T>(newDims));
 
-    for (size_t k = 0; k < this->dim(dim); ++k) {
-        result.emplace_back(newDims);
-        vector<size_t> newCoords(newDims.size(), 0);
-        size_t n = result.back().size();
-        for (size_t i = 0; i < n; ++i) {
-            vector<size_t> oldCoords(newCoords);
-            oldCoords.insert(oldCoords.begin() + dim, k);
-            
-            result.back().unsafeAt(newCoords) = unsafeAt(oldCoords);
-            detail::stepCoords(newCoords, result.back().m_dims);
+    vector<size_t> oldCoord(m_dims.size(), 0);
+    vector<vector<size_t>> newCoordsList(m_dims[dim], vector<size_t>(newDims.size(), 0));
+    for (auto& oldPlane : m_planes) {
+        for (auto& oldValue : oldPlane) {
+            size_t x = oldCoord[dim];
+            auto coordPair = result[x].planeCoordinatePair(newCoordsList[x]);
+            result[x].m_planes[coordPair.second][coordPair.first] = oldValue;
+            detail::stepCoords(oldCoord.begin(), oldCoord.end(), m_dims.begin());
+            detail::stepCoords(newCoordsList[x].begin(), newCoordsList[x].end(), newDims.begin());
         }
     }
 
