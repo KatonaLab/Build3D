@@ -996,3 +996,5 @@ virtualenv
 
 # Allow
 !src/app/scripts
+
+src/benchmark/benchmark
