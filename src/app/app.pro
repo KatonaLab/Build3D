@@ -7,7 +7,7 @@ CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slo
 # CONFIG -= app_bundle
 
 CONFIG(release, debug|release) {
-    config += optimize_full
+    CONFIG += optimize_full
 }
 
 win32 {
@@ -25,6 +25,18 @@ macx {
     # used in version.h/cpp
     DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA=$$system(git describe --dirty --always --tags)
     DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=macx
+
+    CONFIG(release, debug|release) {
+        DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_MODE=$$shell_quote(release)
+    }
+
+    CONFIG(debug, debug|release) {
+        DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_MODE=$$shell_quote(debug)
+    }
+
+    BUILD_DATE = $$system(date "+%Y.%m.%d-%H.%M")
+    DEFINES += DEFINED_AT_COMPILATION_A3DC_BUILD_DATE=$$shell_quote($$BUILD_DATE)
+
     QMAKE_CXXFLAGS += -fdiagnostics-absolute-paths
     QMAKE_CXXFLAGS += -Wshadow
     # QMAKE_CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
