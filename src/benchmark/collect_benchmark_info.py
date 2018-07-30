@@ -37,8 +37,6 @@ def produce_new_benchmark():
         print(line.decode('ascii').rstrip())
     exit_code = 0
 
-    # (output, err) = process.communicate()
-    # exit_code = process.wait()
     print('benchmarking is complete')
 
     if exit_code != 0:
