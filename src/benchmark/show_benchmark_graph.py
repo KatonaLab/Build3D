@@ -20,6 +20,18 @@ def git_branch():
     return br.decode('ascii').rstrip()
 
 
+def contains_any_keyword(text, keywords_list):
+    return any([k in text for k in keywords_list])
+
+
+def remove_hash_tags(text):
+    return ' '.join(filter(lambda x: x[0] != '#', text.split()))
+
+
+# get filtering keywords
+keywords = sys.argv[1:]
+print('keywords: {}'.format(' '.join(keywords)))
+
 if not os.path.isfile(PERF_CSV_FILENAME):
     print(('\'{}\' does not exist, can not create graph,\n'
            'run collect_benchmark_info.py to generate \'{}\'')
@@ -45,7 +57,18 @@ colors = itertools.cycle(d3['Category20'][20])
 t_index = {ts: i
            for i, ts in enumerate(sorted(current_dt['timestamp'].unique()))}
 
-for bm, c in zip(current_dt['name'].unique(), colors):
+unq_names = current_dt['name'].unique()
+
+if len(keywords) > 0:
+    unq_names = [name for name in unq_names
+                 if contains_any_keyword(name, keywords)]
+
+unq_names = [remove_hash_tags(name) for name in unq_names]
+
+# canonic names
+current_dt['name'].apply(remove_hash_tags)
+
+for bm, c in zip(unq_names, colors):
     bm_dt = current_dt[current_dt['name'] == bm]
     x = [t_index[ts] for ts in bm_dt['timestamp'].values]
     y = bm_dt['runtime'].values

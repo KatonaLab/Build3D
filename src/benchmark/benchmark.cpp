@@ -4,7 +4,7 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <core/io_utils/IcsAdapter.h>
 
-BENCHMARK("create MultiDimImage 100x100x16x3", [](benchpress::context* ctx)
+BENCHMARK("create MultiDimImage 100x100x16x3 #multidimimage #create", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::multidim_image_platform::MultiDimImage<uint8_t> image({100, 100, 16, 3});
@@ -12,7 +12,7 @@ BENCHMARK("create MultiDimImage 100x100x16x3", [](benchpress::context* ctx)
 	}
 })
 
-BENCHMARK("create MultiDimImage 3x16x100x100", [](benchpress::context* ctx)
+BENCHMARK("create MultiDimImage 3x16x100x100 #multidimimage #create", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::multidim_image_platform::MultiDimImage<uint8_t> image({3, 16, 100, 100});
@@ -20,7 +20,7 @@ BENCHMARK("create MultiDimImage 3x16x100x100", [](benchpress::context* ctx)
 	}
 })
 
-BENCHMARK("create MultiDimImage 2048x2048x16x3", [](benchpress::context* ctx)
+BENCHMARK("create MultiDimImage 2048x2048x16x3 #multidimimage #create", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::multidim_image_platform::MultiDimImage<uint8_t> image({2048, 2048, 16, 3});
@@ -28,7 +28,7 @@ BENCHMARK("create MultiDimImage 2048x2048x16x3", [](benchpress::context* ctx)
 	}
 })
 
-BENCHMARK("create MultiDimImage 16x3x2048x2048", [](benchpress::context* ctx)
+BENCHMARK("create MultiDimImage 16x3x2048x2048 #multidimimage #create", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::multidim_image_platform::MultiDimImage<uint8_t> image({16, 3, 2048, 2048});
@@ -36,7 +36,7 @@ BENCHMARK("create MultiDimImage 16x3x2048x2048", [](benchpress::context* ctx)
 	}
 })
 
-BENCHMARK("reordering MultiDimImage 100x100x16x3", [](benchpress::context* ctx)
+BENCHMARK("reordering MultiDimImage 100x100x16x3 #multidimimage #reorder", [](benchpress::context* ctx)
 {
     core::multidim_image_platform::MultiDimImage<uint8_t> image({100, 100, 16, 3});
     ctx->reset_timer();
@@ -49,7 +49,7 @@ BENCHMARK("reordering MultiDimImage 100x100x16x3", [](benchpress::context* ctx)
 	}
 })
 
-BENCHMARK("copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t", [](benchpress::context* ctx)
+BENCHMARK("copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t #multidimimage #reorder #copyconvert", [](benchpress::context* ctx)
 {
     core::multidim_image_platform::MultiDimImage<uint8_t> imFrom({100, 100, 16, 3});
     core::multidim_image_platform::MultiDimImage<uint64_t> imTo;
@@ -59,7 +59,7 @@ BENCHMARK("copy convert MultiDimImage 100x100x16x3, uint8_t->uint64_t", [](bench
 	}
 })
 
-BENCHMARK("copy convert MultiDimImage 100x100x16x3, uint8_t->double", [](benchpress::context* ctx)
+BENCHMARK("copy convert MultiDimImage 100x100x16x3, uint8_t->double #multidimimage #reorder #copyconvert", [](benchpress::context* ctx)
 {
     core::multidim_image_platform::MultiDimImage<uint8_t> imFrom({100, 100, 16, 3});
     core::multidim_image_platform::MultiDimImage<double> imTo;
@@ -69,7 +69,7 @@ BENCHMARK("copy convert MultiDimImage 100x100x16x3, uint8_t->double", [](benchpr
 	}
 })
 
-BENCHMARK("copy convert MultiDimImage 100x100x16x3, float->uint8_t", [](benchpress::context* ctx)
+BENCHMARK("copy convert MultiDimImage 100x100x16x3, float->uint8_t #multidimimage #reorder #copyconvert", [](benchpress::context* ctx)
 {
     core::multidim_image_platform::MultiDimImage<float> imFrom({100, 100, 16, 3});
     core::multidim_image_platform::MultiDimImage<uint8_t> imTo;
@@ -79,7 +79,7 @@ BENCHMARK("copy convert MultiDimImage 100x100x16x3, float->uint8_t", [](benchpre
 	}
 })
 
-BENCHMARK("read<native type> small .ics file", [](benchpress::context* ctx)
+BENCHMARK("read<native type> small .ics file #multidimimage #read #ics", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -89,7 +89,7 @@ BENCHMARK("read<native type> small .ics file", [](benchpress::context* ctx)
 	}
 })
 
-BENCHMARK("read<native type> small .ics file, reorder", [](benchpress::context* ctx)
+BENCHMARK("read<native type> small .ics file, reorder #multidimimage #reorder #read #ics", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -99,7 +99,7 @@ BENCHMARK("read<native type> small .ics file, reorder", [](benchpress::context* 
 	}
 })
 
-BENCHMARK("readScaledConvert<native type> small .ics file", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<native type> small .ics file #multidimimage #ics #read #scaledconvert", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -109,7 +109,7 @@ BENCHMARK("readScaledConvert<native type> small .ics file", [](benchpress::conte
 	}
 })
 
-BENCHMARK("readScaledConvert<native type> small .ics file, reorder", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<native type> small .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -119,7 +119,7 @@ BENCHMARK("readScaledConvert<native type> small .ics file, reorder", [](benchpre
 	}
 })
 
-BENCHMARK("readScaledConvert<int32_t> small .ics file, reorder", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<int32_t> small .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -129,7 +129,7 @@ BENCHMARK("readScaledConvert<int32_t> small .ics file, reorder", [](benchpress::
 	}
 })
 
-BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file #multidimimage #ics #read #scaledconvert", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -139,7 +139,7 @@ BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file", [](benchpr
 	}
 })
 
-BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file #multidimimage #ics #read #scaledconvert", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -149,7 +149,7 @@ BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file", [](benchpr
 	}
 })
 
-BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
@@ -159,7 +159,7 @@ BENCHMARK("readScaledConvert<float> large, 2x1024x1024x20 .ics file, reorder", [
 	}
 })
 
-BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder", [](benchpress::context* ctx)
+BENCHMARK("readScaledConvert<float> large, 2048x2048x15x4 .ics file, reorder #multidimimage #ics #read #scaledconvert #reorder", [](benchpress::context* ctx)
 {
     for (size_t i = 0; i < ctx->num_iterations(); ++i) {
 		core::io_utils::IcsAdapter a;
