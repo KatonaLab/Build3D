@@ -208,3 +208,53 @@ BENCHMARK("splitDim dim 3 MultiDimImage 400x400x16x3 #multidimimage #splitdim", 
         benchpress::escape(&vec);
 	}
 })
+
+BENCHMARK("removeDims dim 0 MultiDimImage 400x400x16x3 #multidimimage #removedims", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+        ctx->stop_timer();
+        core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+        ctx->start_timer();
+		image.removeDims({0});
+	}
+})
+
+BENCHMARK("removeDims dim 1 MultiDimImage 400x400x16x3 #multidimimage #removedims", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+        ctx->stop_timer();
+        core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+        ctx->start_timer();
+		image.removeDims({1});
+	}
+})
+
+BENCHMARK("removeDims dim 2 MultiDimImage 400x400x16x3 #multidimimage #removedims", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+        ctx->stop_timer();
+        core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+        ctx->start_timer();
+		image.removeDims({2});
+	}
+})
+
+BENCHMARK("removeDims dim 3 MultiDimImage 400x400x16x3 #multidimimage #removedims", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+        ctx->stop_timer();
+        core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+        ctx->start_timer();
+		image.removeDims({3});
+	}
+})
+
+BENCHMARK("removeDims dim 0,2 MultiDimImage 400x400x16x3 #multidimimage #removedims", [](benchpress::context* ctx)
+{
+    for (size_t i = 0; i < ctx->num_iterations(); ++i) {
+        ctx->stop_timer();
+        core::multidim_image_platform::MultiDimImage<uint8_t> image({400, 400, 16, 3});
+        ctx->start_timer();
+		image.removeDims({0, 2});
+	}
+})

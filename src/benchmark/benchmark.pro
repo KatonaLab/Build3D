@@ -10,7 +10,7 @@ SOURCES += \
     ../core/io_utils/IcsAdapter.cpp
 
 CONFIG -= app_bundle
-CONFIG += debug
+CONFIG *= debug
 INCLUDEPATH += \
     ../util \
     ../ \

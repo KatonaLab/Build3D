@@ -44,7 +44,9 @@ SOURCES +=  \
     ../../lib/libics/libics_compress.c
 
 CONFIG -= app_bundle
-#CONFIG += debug
+
+CONFIG *= debug
+
 INCLUDEPATH += \
     ../util \
     ../ \
