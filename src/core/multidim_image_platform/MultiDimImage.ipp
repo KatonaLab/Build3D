@@ -253,7 +253,6 @@ void MultiDimImage<T>::reorderDims(std::vector<std::size_t> dimOrder)
 template <typename T>
 void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
 {
-    // TODO: find a faster solution
     using namespace std;
 
     sort(dims.begin(), dims.end());
@@ -268,19 +267,29 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
     }
 
     MultiDimImage<T> newImage(newDims);
+    std::vector<std::size_t> newCoord(newDims.size(), 0);
+    std::vector<std::size_t> oldCoord(m_dims.size(), 0);
 
-    std::size_t n = newImage.size();
-    std::vector<std::size_t> newCoords(newImage.m_dims.size(), 0);
-    
-    for (std::size_t i = 0; i < n; ++i) {
-        std::vector<std::size_t> oldCoords(newCoords);
+    if (newImage.empty()) {
+        *this = std::move(newImage);
+        return;
+    }
 
-        for (size_t d : dims) {
-            oldCoords.insert(oldCoords.begin() + d, 0);
+    auto skipDim = [&oldCoord, &dims]() {
+        return any_of(dims.begin(), dims.end(), [&oldCoord](size_t x) {
+            return (bool)oldCoord[x];
+        });
+    };
+
+    for (auto& oldPlane : m_planes) {
+        for (auto& oldValue : oldPlane) {
+            if (!skipDim()) {
+                auto coordPair = newImage.planeCoordinatePair(newCoord);
+                newImage.m_planes[coordPair.second][coordPair.first] = oldValue;
+                detail::stepCoords(newCoord.begin(), newCoord.end(), newDims.begin());
+            }
+            detail::stepCoords(oldCoord.begin(), oldCoord.end(), m_dims.begin());
         }
-
-        newImage.unsafeAt(newCoords) = unsafeAt(oldCoords);
-        detail::stepCoords(newCoords, newImage.m_dims);
     }
 
     *this = std::move(newImage);
