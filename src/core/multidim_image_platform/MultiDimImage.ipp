@@ -266,29 +266,23 @@ void MultiDimImage<T>::removeDims(std::vector<std::size_t> dims)
         newDims.erase(newDims.begin() + (d - k++));
     }
 
+    vector<size_t> invDims(m_dims.size());
+    iota(invDims.begin(), invDims.end(), 0);
+    invDims.erase(remove_if(invDims.begin(), invDims.end(), [&dims](size_t x) {
+        return find(dims.begin(), dims.end(), x) != dims.end();
+    }), invDims.end());
+
+    vector<size_t> newCoord(newDims.size(), 0);
+    vector<size_t> oldCoord(m_dims.size(), 0);
     MultiDimImage<T> newImage(newDims);
-    std::vector<std::size_t> newCoord(newDims.size(), 0);
-    std::vector<std::size_t> oldCoord(m_dims.size(), 0);
-
-    if (newImage.empty()) {
-        *this = std::move(newImage);
-        return;
-    }
-
-    auto skipDim = [&oldCoord, &dims]() {
-        return any_of(dims.begin(), dims.end(), [&oldCoord](size_t x) {
-            return (bool)oldCoord[x];
-        });
-    };
-
-    for (auto& oldPlane : m_planes) {
-        for (auto& oldValue : oldPlane) {
-            if (!skipDim()) {
-                auto coordPair = newImage.planeCoordinatePair(newCoord);
-                newImage.m_planes[coordPair.second][coordPair.first] = oldValue;
-                detail::stepCoords(newCoord.begin(), newCoord.end(), newDims.begin());
+    for (auto& newPlane : newImage.m_planes) {
+        for (auto& newValue : newPlane) {
+            for (size_t i = 0; i < invDims.size(); ++i) {
+                oldCoord[invDims[i]] = newCoord[i];
             }
-            detail::stepCoords(oldCoord.begin(), oldCoord.end(), m_dims.begin());
+            auto coordPair = planeCoordinatePair(oldCoord);
+            newValue = m_planes[coordPair.second][coordPair.first];
+            detail::stepCoords(newCoord.begin(), newCoord.end(), newDims.begin());
         }
     }
 
