@@ -577,7 +577,6 @@ QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
 ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
     : QObject(parent)
 {
-    // TODO: move to cpp
     OutStreamRouters routers;
     routers.stdOut.setCallback([](const std::string& str)
     {
@@ -591,4 +590,8 @@ ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
 
     PythonEnvironment::outStreamRouters = routers;
     PythonEnvironment::instance();
+
+    m_commandHistory["date"] = QString("unknown date");
+    m_commandHistory["version"] = QString("unknown version");
+    m_commandHistory["commands"] = QVariantList();
 }

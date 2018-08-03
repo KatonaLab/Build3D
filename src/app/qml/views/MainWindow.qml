@@ -33,6 +33,14 @@ ApplicationWindow {
                 text: importAction.text
                 onTriggered: importAction.onTriggered();
             }
+            MenuItem {
+                text: readJsonAction.text
+                onTriggered: readJsonAction.onTriggered();
+            }
+            MenuItem {
+                text: writeJsonAction.text
+                onTriggered: writeJsonAction.onTriggered();
+            }
         }
     }
 
@@ -48,6 +56,22 @@ ApplicationWindow {
         text: "Import"
         onTriggered: {
             AppActions.importIcsFile({});
+        }
+    }
+
+    Action {
+        id: readJsonAction
+        text: "Open Workflow"
+        onTriggered: {
+            AppActions.readJson({});
+        }
+    }
+
+    Action {
+        id: writeJsonAction
+        text: "Save Workflow"
+        onTriggered: {
+            AppActions.writeJson({});
         }
     }
 

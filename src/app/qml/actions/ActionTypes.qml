@@ -19,4 +19,6 @@ QtObject {
     readonly property string platform_evaluation: "PLATFORM_EVALUATION"
     readonly property string all_module_output_refresh: "ALL_MODULE_OUTPUT_REFRESH"
     readonly property string module_list_refresh: "MODULE_LIST_REFRESH"
+    readonly property string json_file_read: "JSON_FILE_READ"
+    readonly property string json_file_write: "JSON_FILE_WRITE"
 }

@@ -19,6 +19,14 @@ Item {
             });
         };
 
+        handlers[ActionTypes.json_file_read] = function(args) {
+            backend.readJSON("workflow.json");
+        }
+
+        handlers[ActionTypes.json_file_write] = function(args) {
+            backend.writeJSON("workflow.json");
+        }
+
         handlers[ActionTypes.module_add_request] = function(args) {
             var uid = backend.createGenericModule(args.scriptPath);
             if (uid >= 0) {

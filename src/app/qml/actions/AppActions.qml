@@ -9,6 +9,14 @@ QtObject {
         AppDispatcher.dispatch(ActionTypes.ics_file_import, {url: url});
     }
 
+    function readJson(url) {
+        AppDispatcher.dispatch(ActionTypes.json_file_read, {url: url});
+    }
+
+    function writeJson(url) {
+        AppDispatcher.dispatch(ActionTypes.json_file_write, {url: url});
+    }
+
     function requestAddModule(scriptPath) {
         AppDispatcher.dispatch(ActionTypes.module_add_request, {scriptPath: scriptPath});
     }

@@ -1,7 +1,6 @@
 #ifndef _app_NodePlatformBackend_h_
 #define _app_NodePlatformBackend_h_
 
-#include <util/json.hpp>
 #include <memory>
 #include <QtCore>
 #include <QQmlComponent>
@@ -287,8 +286,61 @@ public:
     explicit ModulePlatformBackend(QObject* parent = Q_NULLPTR);
     virtual ~ModulePlatformBackend() = default;
 
+    Q_INVOKABLE void writeJSON(const QUrl& filename)
+    {
+        m_commandHistory["date"] = QString("dummy_date");
+        m_commandHistory["version"] = QString("dummy_version");
+
+        QFile file(filename.fileName());
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(QJsonDocument::fromVariant(m_commandHistory).toJson());
+        } else {
+            // TODO: handle error
+        }
+    }
+
+    Q_INVOKABLE void readJSON(const QUrl& filename)
+    {
+        QFile file(filename.fileName());
+        if (file.open(QIODevice::ReadOnly)) {
+            m_commandHistory = QJsonDocument::fromJson(file.readAll()).toVariant().toMap();
+        } else {
+            // TODO: handle error
+        }
+
+        auto& h = m_commandHistory;
+
+        qInfo() << "read" << filename;
+        qInfo() << "date" << h["data"];
+        qInfo() << "version" << h["version"];
+
+        for (auto& listItem : h["commands"].toList()) {
+            QVariantMap item = listItem.toMap();
+            if (item["name"].toString() == "createSourceModulesFromIcsFile") {
+                createSourceModulesFromIcsFile(QUrl(item["filename"].toString()));
+            } else if (item["name"].toString() == "createGenericModule") {
+                createGenericModule(item["scriptPath"].toString());
+            } else if (item["name"].toString() == "destroyModule") {
+                destroyModule(item["uid"].toInt());
+            } else if (item["name"].toString() == "setModuleProperties") {
+                setModuleProperties(item["uid"].toInt(), item["values"].toMap());
+            } else if (item["name"].toString() == "connectInputOutput") {
+                connectInputOutput(item["outputModuleUid"].toInt(), item["outputPortId"].toInt(), item["inputModuleUid"].toInt(), item["inputPortId"].toInt());
+            } else if (item["name"].toString() == "setParamPortProperty") {
+                setParamPortProperty(item["uid"].toInt(), item["portId"].toInt(), item["value"]);
+            } else {
+                qWarning() << "unknown command" << item["name"];
+            }
+        }
+    }
+
     Q_INVOKABLE QList<int> createSourceModulesFromIcsFile(const QUrl& filename)
     {
+        QVariantMap item;
+        item["name"] = QString("createSourceModulesFromIcsFile");
+        item["filename"] = filename.toString();
+        m_commandHistory["commands"].toList().append(item);
+
         return decorateTryCatch(
             &PrivateModulePlatformBackend::createSourceModulesFromIcsFile,
             m_private, m_errorFunc, QList<int>(),
@@ -297,6 +349,16 @@ public:
     }
     Q_INVOKABLE int createGenericModule(const QString& scriptPath)
     {
+        QVariantMap item;
+        item["name"] = QString("createGenericModule");
+        item["scriptPath"] = scriptPath;
+        QVariantList list = m_commandHistory["commands"].toList();
+        list.append(item);
+        m_commandHistory["commands"] = list;
+        qDebug() << item;
+        qDebug() << m_commandHistory["commands"];
+        qDebug() << m_commandHistory;
+        
         return decorateTryCatch(
             &PrivateModulePlatformBackend::createGenericModule,
             m_private, m_errorFunc, -1,
@@ -305,6 +367,11 @@ public:
     }
     Q_INVOKABLE void destroyModule(int uid)
     {
+        // QJsonObject item;
+        // item["name"] = QString("destroyModule");
+        // item["uid"] = uid;
+        // m_json["commands"].toArray().push_back(item);
+
         return decorateTryCatch(
             &PrivateModulePlatformBackend::destroyModule,
             m_private, m_errorFunc,
@@ -329,6 +396,14 @@ public:
     }
     Q_INVOKABLE void setModuleProperties(int uid, QVariantMap values)
     {
+        // QJsonObject item;
+        // item["name"] = QString("setModuleProperties");
+        // item["uid"] = uid;
+        // QJsonObject p;
+        // p.fromVariantMap(values);
+        // item["setModuleProperties"] = p;
+        // m_json["commands"].toArray().append(item);
+
         return decorateTryCatch(
             &PrivateModulePlatformBackend::setModuleProperties,
             m_private, m_errorFunc,
@@ -385,6 +460,14 @@ public:
     }
     Q_INVOKABLE bool connectInputOutput(int outputModuleUid, int outputPortId, int inputModuleUid, int inputPortId)
     {
+        // QJsonObject item;
+        // item["name"] = QString("connectInputOutput");
+        // item["outputModuleUid"] = outputModuleUid;
+        // item["outputPortId"] = outputPortId;
+        // item["inputModuleUid"] = inputModuleUid;
+        // item["inputPortId"] = inputPortId;
+        // m_json["commands"].toArray().append(item);
+
         return decorateTryCatch(
             &PrivateModulePlatformBackend::connectInputOutput,
             m_private, m_errorFunc, false,
@@ -393,6 +476,12 @@ public:
     }
     Q_INVOKABLE void disconnectInput(int inputModuleUid, int inputPortId)
     {
+        // QJsonObject item;
+        // item["name"] = QString("disconnectInput");
+        // item["inputModuleUid"] = inputModuleUid;
+        // item["inputPortId"] = inputPortId;
+        // m_json["commands"].toArray().append(item);
+
         return decorateTryCatch(
             &PrivateModulePlatformBackend::disconnectInput,
             m_private, m_errorFunc,
@@ -401,6 +490,13 @@ public:
     }
     Q_INVOKABLE bool setParamPortProperty(int uid, int portId, QVariant value)
     {
+        // QJsonObject item;
+        // item["name"] = QString("setParamPortProperty");
+        // item["uid"] = uid;
+        // item["portId"] = portId;
+        // item["value"] = value.toJsonObject();
+        // m_json["commands"].toArray().append(item);
+
         return decorateTryCatch(
             &PrivateModulePlatformBackend::setParamPortProperty,
             m_private, m_errorFunc, false,
@@ -429,6 +525,7 @@ protected:
     };
 private:
     PrivateModulePlatformBackend m_private;
+    QVariantMap m_commandHistory;
 };
 
 // TODO: move it to a namespace
