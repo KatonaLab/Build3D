@@ -6,59 +6,63 @@
 
 using namespace std;
 
-ModuleStoreItem::ModuleStoreItem(QObject* parent)
-    : QObject(parent)
-{}
-
-ModuleStoreItem::ModuleStoreItem(const ModuleStoreItem &other)
-{
-    // TODO:
-    m_uid = other.m_uid;
-}
-
-// ----
-
 ModuleStore::ModuleStore(QObject* parent)
     : QAbstractListModel(parent)
 {}
 
 int ModuleStore::rowCount(const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
     return m_items.size();
 }
 
 QVariant ModuleStore::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || role != Qt::DisplayRole || index.row() >= m_items.size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= (int)m_items.size()) {
         return QVariant();
     }
 
-    return m_items.at(index.row());
+    auto& item = m_items[index.row()];
+
+    switch (role) {
+        case UidRole: return item->uid();
+        case NameRole: return QVariant("Mario");
+        case TypeRole: return QVariant("plumber");
+        case StatusRole: return QVariant("on quest");
+        case IntputsRole: return QVariant();
+        case ParametersRole: return QVariant();
+        case OutputsRole: return QVariant();
+        default: return QVariant();
+    }
+}
+
+QHash<int, QByteArray> ModuleStore::roleNames() const
+{
+    static QHash<int, QByteArray> roles = {
+        {UidRole, "uid"},
+        {NameRole, "name"},
+        {TypeRole, "type"},
+        {StatusRole, "status"},
+        {IntputsRole, "inputs"},
+        {ParametersRole, "parameters"},
+        {OutputsRole, "outputs"}};
+    return roles;
 }
 
 int ModuleStore::addModule(const QString& typeName)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    
     // TODO: call factory
-    ModuleStoreItem* newItem = new ModuleStoreItem(this);
-    newItem->m_incr = m_items.size() + 1;
-    newItem->m_str = typeName;
-    QVariant var;
-    var.setValue(newItem);
-    m_items.push_back(var);
-    cout << "added " << m_items.size() << endl;
-    
+    m_items.emplace_back(new ModuleStoreItem);
     endInsertRows();
-    
-    return newItem->uid();
+    return m_items.back()->uid();
 }
 
 void ModuleStore::removeModule(int uid)
 {
     auto it = find_if(m_items.begin(), m_items.end(),
-        [uid](const QVariant& var) {
-            return qvariant_cast<ModuleStoreItem*>(var)->uid() == uid;
+        [uid](const unique_ptr<ModuleStoreItem>& item) {
+            return item->uid() == uid;
         });
 
     if (it != m_items.end()) {
@@ -67,4 +71,11 @@ void ModuleStore::removeModule(int uid)
         m_items.erase(it);
         endRemoveRows();
     }
+}
+
+ModuleStore::~ModuleStore()
+{
+    beginResetModel();
+    m_items.clear();
+    endResetModel();
 }

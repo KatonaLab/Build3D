@@ -25,33 +25,25 @@ ApplicationWindow {
     width: 480
     height: 480
 
-    Text {
-        text: "hey"
-    }
-
     ListView {
         anchors.fill: parent
         model: bke
         delegate: Text {
-            text: model.display.hello
-            Component.onCompleted: {
-                console.log("notif");
-            }
+            text: uid
         }
     }
 
-    Button {
-        text: "add";
-        onClicked: {
-            bke.addModule("again");
-        }
-    }
+    // Button {
+    //     text: "add";
+    //     onClicked: {
+    //         bke.addModule("again");
+    //     }
+    // }
 
     Component.onCompleted: {
         bke.addModule("hello");
         bke.addModule("bello");
         bke.addModule("yello");
-        console.log("added all");
         visible = true;
 
         // AppDispatcher.addStoreListener(MainStore.moduleStore);

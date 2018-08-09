@@ -432,7 +432,7 @@ pybind11::array_t<T> multiDimImageToNdarray(const multidim_image_platform::Multi
     pybind11::array_t<T> result(a.dimList());
     auto r = result.template mutable_unchecked<3>();
 
-    // // TODO: try to find a faster copy
+    // TODO: try to find a faster copy
     size_t w = a.dim(0);
     size_t h = a.dim(1);
     size_t d = a.dim(2);    
