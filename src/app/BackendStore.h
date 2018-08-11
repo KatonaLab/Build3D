@@ -5,70 +5,77 @@
 #include <core/compute_platform/ComputeModule.h>
 #include <memory>
 
-class PortStore: public QAbstractListModel {
-    Q_OBJECT
-public:
-    enum PortRoles {
-        IdRole = Qt::UserRole,
-        NameRole,
-        TypeRole,
-        ValueRole
-    };
-};
+// class BackendModule : public BackendStoreItem {
+// public:
+//     static BackendModule* createPythonModule(const QString& scriptPath);
+// }
 
-class ModuleStoreItem {
-public:
-    int uid() const;
-    QString name() const;
-    void setName(const QString& name);
-    QString type() const;
-    int status() const;
+// class PortProxyStore: public QAbstractProxy
 
-    QAbstractItemModel* inputsModel();
-    QAbstractItemModel* parametersModel();
-    QAbstractItemModel* outputsModel();
-
-    core::compute_platform::ComputeModule& computeModule();
-    const core::compute_platform::ComputeModule& computeModule() const;
-protected:
-    int m_uid = -1;
-};
-
-// Q_DECLARE_METATYPE(ModuleStoreItem)
-
-// class ModuleStoreItemFactory: public QObject {
+// class PortStore: public QAbstractListModel {
 //     Q_OBJECT
 // public:
-//     static ModuleStoreItem* createPythonModule(const QString& scriptPath);
-//     static ModuleStoreItem* createIcsInputModule(const QString& icsFilePath);
-
-//     explicit ModuleStoreItemFactory(QObject* parent = Q_NULLPTR);
+//     enum PortRoles {
+//         IdRole = Qt::UserRole,
+//         NameRole,
+//         TypeRole,
+//         ValueRole
+//     };
 // };
 
-class ModuleStore: public QAbstractListModel {
-    Q_OBJECT
-public:
-    enum ModuleRoles {
-        UidRole = Qt::UserRole,
-        NameRole,
-        TypeRole,
-        StatusRole,
-        IntputsRole,
-        ParametersRole,
-        OutputsRole
-    };
+// class ModuleStoreItem {
+// public:
+//     int uid() const;
+//     QString name() const;
+//     void setName(const QString& name);
+//     QString type() const;
+//     int status() const;
 
-    explicit ModuleStore(QObject* parent = Q_NULLPTR);
-    ~ModuleStore() override;
+//     QAbstractItemModel* inputsModel();
+//     QAbstractItemModel* parametersModel();
+//     QAbstractItemModel* outputsModel();
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    QHash<int, QByteArray> roleNames() const override;
+//     core::compute_platform::ComputeModule& computeModule();
+//     const core::compute_platform::ComputeModule& computeModule() const;
+// protected:
+//     int m_uid = -1;
+// };
 
-    Q_INVOKABLE int addModule(const QString& typeName);
-    Q_INVOKABLE void removeModule(int uid);
-protected:
-    std::vector<std::unique_ptr<ModuleStoreItem>> m_items;
-};
+// // Q_DECLARE_METATYPE(ModuleStoreItem)
+
+// // class ModuleStoreItemFactory: public QObject {
+// //     Q_OBJECT
+// // public:
+// //     static ModuleStoreItem* createPythonModule(const QString& scriptPath);
+// //     static ModuleStoreItem* createIcsInputModule(const QString& icsFilePath);
+
+// //     explicit ModuleStoreItemFactory(QObject* parent = Q_NULLPTR);
+// // };
+
+// class ModuleStore: public QAbstractListModel {
+//     Q_OBJECT
+// public:
+//     enum ModuleRoles {
+//         UidRole = Qt::UserRole,
+//         NameRole,
+//         TypeRole,
+//         StatusRole,
+//         IntputsRole,
+//         ParametersRole,
+//         OutputsRole
+//     };
+
+//     explicit ModuleStore(QObject* parent = Q_NULLPTR);
+//     ~ModuleStore() override;
+
+//     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+//     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+//     QHash<int, QByteArray> roleNames() const override;
+
+//     Q_INVOKABLE int addModule(const QString& typeName);
+//     Q_INVOKABLE void removeModule(int uid);
+// protected:
+//     std::vector<std::unique_ptr<ModuleStoreItem>> m_items;
+// };
 
 #endif

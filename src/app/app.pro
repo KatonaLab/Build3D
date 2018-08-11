@@ -49,6 +49,12 @@ HEADERS += \
     LogCollector.h \
     TurnTableCameraController.h \
     BackendStore.h \
+    BackendStoreItem.h \
+    BackendInput.h \
+    BackendParameter.h \
+    BackendOutput.h \
+    ParameterInterfaceModules.hpp \
+    OutputInterfaceModules.hpp \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -63,6 +69,12 @@ SOURCES += \
     LogCollector.cpp \
     TurnTableCameraController.cpp \
     BackendStore.cpp \
+    BackendStoreItem.cpp \
+    BackendInput.cpp \
+    BackendParameter.cpp \
+    BackendOutput.cpp \
+    ParameterInterfaceModules.cpp \
+    OutputInterfaceModules.cpp \
     main.cpp \
 
 SOURCES +=  \

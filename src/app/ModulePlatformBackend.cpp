@@ -1,597 +1,597 @@
-#include "ModulePlatformBackend.h"
+// #include "ModulePlatformBackend.h"
 
-#include <core/io_utils/IcsAdapter.h>
-#include <fstream>
-#include <sstream>
-#include "VolumeTexture.h"
-#include "VolumeData.h"
-#include <core/high_platform/PythonComputeModule.h>
-#include <QDirIterator>
-#include <QFileInfo>
+// #include <core/io_utils/IcsAdapter.h>
+// #include <fstream>
+// #include <sstream>
+// #include "VolumeTexture.h"
+// #include "VolumeData.h"
+// #include <core/high_platform/PythonComputeModule.h>
+// #include <QDirIterator>
+// #include <QFileInfo>
 
-#include <iostream>
+// #include <iostream>
 
-using namespace std;
-using namespace core::io_utils;
-using namespace core::compute_platform;
-using namespace core::multidim_image_platform;
-using namespace core::high_platform;
+// using namespace std;
+// using namespace core::io_utils;
+// using namespace core::compute_platform;
+// using namespace core::multidim_image_platform;
+// using namespace core::high_platform;
 
-BackendModule::BackendModule(int uid)
-    : m_uid(uid)
-{}
+// BackendModule::BackendModule(int uid)
+//     : m_uid(uid)
+// {}
 
-int BackendModule::uid() const
-{
-    return m_uid;
-}
+// int BackendModule::uid() const
+// {
+//     return m_uid;
+// }
 
-// --------------------------------------------------------
+// // --------------------------------------------------------
 
-DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
-    : cp::ComputeModule(parent, m_inputs, m_outputs, "DataSource" + to_string(uid)),
-    BackendModule(uid),
-    m_inputs(*this),
-    m_outputs(*this)
-{}
+// DataSourceModule::DataSourceModule(cp::ComputePlatform& parent, int uid)
+//     : cp::ComputeModule(parent, m_inputs, m_outputs, "DataSource" + to_string(uid)),
+//     BackendModule(uid),
+//     m_inputs(*this),
+//     m_outputs(*this)
+// {}
 
-void DataSourceModule::execute()
-{
-    m_outputs.output<0>()->forwardFromSharedPtr(m_data);
-}
+// void DataSourceModule::execute()
+// {
+//     m_outputs.output<0>()->forwardFromSharedPtr(m_data);
+// }
 
-void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
-{
-    m_data = data;
-}
+// void DataSourceModule::setData(std::shared_ptr<md::MultiDimImage<float>> data)
+// {
+//     m_data = data;
+// }
 
-cp::ComputeModule& DataSourceModule::getComputeModule()
-{
-    return const_cast<cp::ComputeModule&>(static_cast<const DataSourceModule&>(*this).getComputeModule());
-}
+// cp::ComputeModule& DataSourceModule::getComputeModule()
+// {
+//     return const_cast<cp::ComputeModule&>(static_cast<const DataSourceModule&>(*this).getComputeModule());
+// }
 
-const cp::ComputeModule& DataSourceModule::getComputeModule() const
-{
-    return *this;
-}
+// const cp::ComputeModule& DataSourceModule::getComputeModule() const
+// {
+//     return *this;
+// }
 
-// --------------------------------------------------------
+// // --------------------------------------------------------
 
-GenericModule::GenericModule(cp::ComputePlatform& parent,
-    const std::string& script, const std::string& moduleTypeName, int uid)
-    : PythonComputeModule(parent, script, "Generic" + to_string(uid)),
-    BackendModule(uid), m_moduleTypeName(moduleTypeName)
-{}
+// GenericModule::GenericModule(cp::ComputePlatform& parent,
+//     const std::string& script, const std::string& moduleTypeName, int uid)
+//     : PythonComputeModule(parent, script, "Generic" + to_string(uid)),
+//     BackendModule(uid), m_moduleTypeName(moduleTypeName)
+// {}
 
-std::string GenericModule::moduleTypeName() const
-{
-    return m_moduleTypeName;
-}
+// std::string GenericModule::moduleTypeName() const
+// {
+//     return m_moduleTypeName;
+// }
 
-cp::ComputeModule& GenericModule::getComputeModule()
-{
-    return const_cast<cp::ComputeModule&>(static_cast<const GenericModule&>(*this).getComputeModule());
-}
+// cp::ComputeModule& GenericModule::getComputeModule()
+// {
+//     return const_cast<cp::ComputeModule&>(static_cast<const GenericModule&>(*this).getComputeModule());
+// }
 
-const cp::ComputeModule& GenericModule::getComputeModule() const
-{
-    return *this;
-}
+// const cp::ComputeModule& GenericModule::getComputeModule() const
+// {
+//     return *this;
+// }
 
-// --------------------------------------------------------
+// // --------------------------------------------------------
 
-QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& filename)
-{
-    IcsAdapter ics;
-    ics.open(filename.toLocalFile().toStdString());
-    auto image = ics.readScaledConvert<float>(true);
+// QList<int> PrivateModulePlatformBackend::createSourceModulesFromIcsFile(const QUrl& filename)
+// {
+//     IcsAdapter ics;
+//     ics.open(filename.toLocalFile().toStdString());
+//     auto image = ics.readScaledConvert<float>(true);
 
-    vector<MultiDimImage<float>> volumes;
+//     vector<MultiDimImage<float>> volumes;
 
-    switch (image.dims()) {
-        case 3: // xyz
-            volumes.push_back(image);
-            break;
-        case 5: // xyztc
-            // removing dimension 't'
-            image.removeDims({3});
-            // no break - let it flow
-        case 4: // xyzc or xyzt
-            volumes = image.splitDim(3);
-            break;
-        // TODO: support XY images too
-        default:
-            // TODO: proper error message to GUI
-            throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
-    };
+//     switch (image.dims()) {
+//         case 3: // xyz
+//             volumes.push_back(image);
+//             break;
+//         case 5: // xyztc
+//             // removing dimension 't'
+//             image.removeDims({3});
+//             // no break - let it flow
+//         case 4: // xyzc or xyzt
+//             volumes = image.splitDim(3);
+//             break;
+//         // TODO: support XY images too
+//         default:
+//             // TODO: proper error message to GUI
+//             throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
+//     };
 
-    QList<int> uids;
-    for (auto& vol : volumes) {
-        uids.push_back(nextUid());
-        auto newModule = new DataSourceModule(m_platform, uids.back());
-        // TODO: try to use move semantics to make a shared_ptr out of vol
-        auto p = make_shared<MultiDimImage<float>>();
-        swap(*p, vol);
-        newModule->setData(p);
+//     QList<int> uids;
+//     for (auto& vol : volumes) {
+//         uids.push_back(nextUid());
+//         auto newModule = new DataSourceModule(m_platform, uids.back());
+//         // TODO: try to use move semantics to make a shared_ptr out of vol
+//         auto p = make_shared<MultiDimImage<float>>();
+//         swap(*p, vol);
+//         newModule->setData(p);
 
-        m_modules.emplace(make_pair(newModule->uid(), newModule));
-        // TODO: buildimageOutputHelperModules requires that m_modules has the module with the uid,
-        // make it explicit or modify the function, because swapping the line above and below will
-        // fail to do their job
-        buildimageOutputHelperModules(newModule->uid());
-    }
+//         m_modules.emplace(make_pair(newModule->uid(), newModule));
+//         // TODO: buildimageOutputHelperModules requires that m_modules has the module with the uid,
+//         // make it explicit or modify the function, because swapping the line above and below will
+//         // fail to do their job
+//         buildimageOutputHelperModules(newModule->uid());
+//     }
 
-    return uids;
-}
+//     return uids;
+// }
 
-int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
-{
-    string path = scriptPath.toStdString();
-    string moduleTypeName = QFileInfo(scriptPath).baseName().toStdString();
+// int PrivateModulePlatformBackend::createGenericModule(const QString& scriptPath)
+// {
+//     string path = scriptPath.toStdString();
+//     string moduleTypeName = QFileInfo(scriptPath).baseName().toStdString();
 
 
-    ifstream f(path);
-    if (!f.is_open()) {
-        throw std::runtime_error("missing module script: " + path);
-    }
-    stringstream buffer;
-    buffer << f.rdbuf();
+//     ifstream f(path);
+//     if (!f.is_open()) {
+//         throw std::runtime_error("missing module script: " + path);
+//     }
+//     stringstream buffer;
+//     buffer << f.rdbuf();
 
-    int newUid = nextUid();
+//     int newUid = nextUid();
 
-    m_modules.emplace(make_pair(
-        newUid,
-        make_unique<GenericModule>(m_platform, buffer.str(), moduleTypeName, newUid)
-    ));
+//     m_modules.emplace(make_pair(
+//         newUid,
+//         make_unique<GenericModule>(m_platform, buffer.str(), moduleTypeName, newUid)
+//     ));
 
-    buildParamHelperModules(newUid);
-    buildimageOutputHelperModules(newUid);
-    return newUid;
-}
+//     buildParamHelperModules(newUid);
+//     buildimageOutputHelperModules(newUid);
+//     return newUid;
+// }
 
-void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
-{
-    QList<int> paramList = enumerateParamPorts(uid);
-    auto& m = fetchBackendModule(uid);
+// void PrivateModulePlatformBackend::buildParamHelperModules(int uid)
+// {
+//     QList<int> paramList = enumerateParamPorts(uid);
+//     auto& m = fetchBackendModule(uid);
 
-    for (int portId : paramList) {
-        auto port = fetchInputPort(uid, portId).lock();
-        const auto& t = port->traits();
+//     for (int portId : paramList) {
+//         auto port = fetchInputPort(uid, portId).lock();
+//         const auto& t = port->traits();
 
-        // TODO: don't use naked pointers
-        ParamHelperModule* helperModule = nullptr;
+//         // TODO: don't use naked pointers
+//         ParamHelperModule* helperModule = nullptr;
 
-        // TODO: fix this mess, find a project-wide solution for static-dynamic type conversion
-        if (t.hasTrait("uint8_t")) {
-            helperModule = new TypedParamHelperModule<uint8_t>(m_platform, 0);
-        } else if (t.hasTrait("uint16_t")) {
-            helperModule = new TypedParamHelperModule<uint16_t>(m_platform, 0);
-        } else if (t.hasTrait("uint32_t")) {
-            helperModule = new TypedParamHelperModule<uint32_t>(m_platform, 0);
-        } else if (t.hasTrait("uint64_t")) {
-            helperModule = new TypedParamHelperModule<uint64_t>(m_platform, 0);
-        } else if (t.hasTrait("int8_t")) {
-            helperModule = new TypedParamHelperModule<int8_t>(m_platform, 0);
-        } else if (t.hasTrait("int16_t")) {
-            helperModule = new TypedParamHelperModule<int16_t>(m_platform, 0);
-        } else if (t.hasTrait("int32_t")) {
-            helperModule = new TypedParamHelperModule<int32_t>(m_platform, 0);
-        } else if (t.hasTrait("int64_t")) {
-            helperModule = new TypedParamHelperModule<int64_t>(m_platform, 0);
-        } else if (t.hasTrait("float")) {
-            helperModule = new TypedParamHelperModule<float>(m_platform, 0);
-        } else if (t.hasTrait("double")) {
-            helperModule = new TypedParamHelperModule<double>(m_platform, 0);
-        } else if (t.hasTrait("bool")) {
-            helperModule = new TypedParamHelperModule<bool>(m_platform, 0);
-        } else if (t.hasTrait("string")) {
-            helperModule = new TypedParamHelperModule<QString>(m_platform, 0);
-        } else {
-            throw std::runtime_error("unknown input parameter type, can not create input module for that");
-        }
+//         // TODO: fix this mess, find a project-wide solution for static-dynamic type conversion
+//         if (t.hasTrait("uint8_t")) {
+//             helperModule = new TypedParamHelperModule<uint8_t>(m_platform, 0);
+//         } else if (t.hasTrait("uint16_t")) {
+//             helperModule = new TypedParamHelperModule<uint16_t>(m_platform, 0);
+//         } else if (t.hasTrait("uint32_t")) {
+//             helperModule = new TypedParamHelperModule<uint32_t>(m_platform, 0);
+//         } else if (t.hasTrait("uint64_t")) {
+//             helperModule = new TypedParamHelperModule<uint64_t>(m_platform, 0);
+//         } else if (t.hasTrait("int8_t")) {
+//             helperModule = new TypedParamHelperModule<int8_t>(m_platform, 0);
+//         } else if (t.hasTrait("int16_t")) {
+//             helperModule = new TypedParamHelperModule<int16_t>(m_platform, 0);
+//         } else if (t.hasTrait("int32_t")) {
+//             helperModule = new TypedParamHelperModule<int32_t>(m_platform, 0);
+//         } else if (t.hasTrait("int64_t")) {
+//             helperModule = new TypedParamHelperModule<int64_t>(m_platform, 0);
+//         } else if (t.hasTrait("float")) {
+//             helperModule = new TypedParamHelperModule<float>(m_platform, 0);
+//         } else if (t.hasTrait("double")) {
+//             helperModule = new TypedParamHelperModule<double>(m_platform, 0);
+//         } else if (t.hasTrait("bool")) {
+//             helperModule = new TypedParamHelperModule<bool>(m_platform, 0);
+//         } else if (t.hasTrait("string")) {
+//             helperModule = new TypedParamHelperModule<QString>(m_platform, 0);
+//         } else {
+//             throw std::runtime_error("unknown input parameter type, can not create input module for that");
+//         }
 
-        if (!connectPorts(*helperModule, 0, m.getComputeModule(), portId)) {
-            throw std::runtime_error("internal error, can not connect param helper modules");
-        }
+//         if (!connectPorts(*helperModule, 0, m.getComputeModule(), portId)) {
+//             throw std::runtime_error("internal error, can not connect param helper modules");
+//         }
 
-        m_paramHelpers[make_pair(uid, portId)] = unique_ptr<ParamHelperModule>(helperModule);
-    }
-}
+//         m_paramHelpers[make_pair(uid, portId)] = unique_ptr<ParamHelperModule>(helperModule);
+//     }
+// }
 
-void PrivateModulePlatformBackend::buildimageOutputHelperModules(int uid)
-{
-    QList<int> outList = enumerateOutputPorts(uid);
-    auto& m = fetchBackendModule(uid);
+// void PrivateModulePlatformBackend::buildimageOutputHelperModules(int uid)
+// {
+//     QList<int> outList = enumerateOutputPorts(uid);
+//     auto& m = fetchBackendModule(uid);
 
-    for (int portId : outList) {
-        auto port = fetchOutputPort(uid, portId).lock();
-        const auto& t = port->traits();
+//     for (int portId : outList) {
+//         auto port = fetchOutputPort(uid, portId).lock();
+//         const auto& t = port->traits();
 
-        if (t.hasTrait("float-image")) {
-            // TODO: don't use naked pointers
-            ImageOutputHelperModule<float>* helperModule = nullptr;
-            helperModule = new ImageOutputHelperModule<float>(m_platform);
-            connectPorts(m.getComputeModule(), portId, *helperModule, 0);
-            m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<float>>(helperModule);
-        } else if (t.hasTrait("int-image")) {
-            // TODO: don't use naked pointers
-            ImageOutputHelperModule<uint32_t>* helperModule = nullptr;
-            helperModule = new ImageOutputHelperModule<uint32_t>(m_platform);
-            connectPorts(m.getComputeModule(), portId, *helperModule, 0);
-            m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<uint32_t>>(helperModule);
-        } else {
-            // TODO: handle int-image type too
-        }
-    }
-}
+//         if (t.hasTrait("float-image")) {
+//             // TODO: don't use naked pointers
+//             ImageOutputHelperModule<float>* helperModule = nullptr;
+//             helperModule = new ImageOutputHelperModule<float>(m_platform);
+//             connectPorts(m.getComputeModule(), portId, *helperModule, 0);
+//             m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<float>>(helperModule);
+//         } else if (t.hasTrait("int-image")) {
+//             // TODO: don't use naked pointers
+//             ImageOutputHelperModule<uint32_t>* helperModule = nullptr;
+//             helperModule = new ImageOutputHelperModule<uint32_t>(m_platform);
+//             connectPorts(m.getComputeModule(), portId, *helperModule, 0);
+//             m_imageOutputHelpers[make_pair(uid, portId)] = unique_ptr<ImageOutputHelperModule<uint32_t>>(helperModule);
+//         } else {
+//             // TODO: handle int-image type too
+//         }
+//     }
+// }
 
-bool PrivateModulePlatformBackend::hasModule(int uid)
-{
-    return m_modules.end() != m_modules.find(uid);
-}
+// bool PrivateModulePlatformBackend::hasModule(int uid)
+// {
+//     return m_modules.end() != m_modules.find(uid);
+// }
 
-void PrivateModulePlatformBackend::destroyModule(int uid)
-{
-    erase_if(m_paramHelpers,
-        [uid](const decltype(m_paramHelpers)::value_type& item)
-        {
-            return uid == item.first.first;
-        });
+// void PrivateModulePlatformBackend::destroyModule(int uid)
+// {
+//     erase_if(m_paramHelpers,
+//         [uid](const decltype(m_paramHelpers)::value_type& item)
+//         {
+//             return uid == item.first.first;
+//         });
 
-    erase_if(m_imageOutputHelpers,
-        [uid](const decltype(m_imageOutputHelpers)::value_type& item)
-        {
-            return uid == item.first.first;
-        });
+//     erase_if(m_imageOutputHelpers,
+//         [uid](const decltype(m_imageOutputHelpers)::value_type& item)
+//         {
+//             return uid == item.first.first;
+//         });
 
-    erase_if(m_modules,
-        [uid](const decltype(m_modules)::value_type& item)
-        {
-            return uid == item.first;
-        });
-}
+//     erase_if(m_modules,
+//         [uid](const decltype(m_modules)::value_type& item)
+//         {
+//             return uid == item.first;
+//         });
+// }
 
-QList<int> PrivateModulePlatformBackend::enumeratePorts(
-    int uid,
-    std::function<std::size_t(ComputeModule&)> numInputsFunc,
-    std::function<bool(ComputeModule&, std::size_t)> predFunc)
-{
-    ComputeModule& m = fetchBackendModule(uid).getComputeModule();
-    QList<int> list;
-    size_t k = numInputsFunc(m);
-    for (size_t i = 0; i < k; ++i) {
-        if (predFunc(m, i)) {
-            list.append(i);
-        }
-    }
-    return list;
-}
+// QList<int> PrivateModulePlatformBackend::enumeratePorts(
+//     int uid,
+//     std::function<std::size_t(ComputeModule&)> numInputsFunc,
+//     std::function<bool(ComputeModule&, std::size_t)> predFunc)
+// {
+//     ComputeModule& m = fetchBackendModule(uid).getComputeModule();
+//     QList<int> list;
+//     size_t k = numInputsFunc(m);
+//     for (size_t i = 0; i < k; ++i) {
+//         if (predFunc(m, i)) {
+//             list.append(i);
+//         }
+//     }
+//     return list;
+// }
 
-QList<int> PrivateModulePlatformBackend::enumerateInputPorts(int uid)
-{
-    return enumeratePorts(uid,
-        [](ComputeModule& m) { return m.numInputs(); },
-        [](ComputeModule& m, size_t i) { return ! m.inputPort(i).lock()->properties().hasKey("parameter"); });
-}
+// QList<int> PrivateModulePlatformBackend::enumerateInputPorts(int uid)
+// {
+//     return enumeratePorts(uid,
+//         [](ComputeModule& m) { return m.numInputs(); },
+//         [](ComputeModule& m, size_t i) { return ! m.inputPort(i).lock()->properties().hasKey("parameter"); });
+// }
 
-QList<int> PrivateModulePlatformBackend::enumerateParamPorts(int uid)
-{
-    return enumeratePorts(uid,
-        [](ComputeModule& m) { return m.numInputs(); },
-        [](ComputeModule& m, size_t i) { return m.inputPort(i).lock()->properties().hasKey("parameter"); });
-}
+// QList<int> PrivateModulePlatformBackend::enumerateParamPorts(int uid)
+// {
+//     return enumeratePorts(uid,
+//         [](ComputeModule& m) { return m.numInputs(); },
+//         [](ComputeModule& m, size_t i) { return m.inputPort(i).lock()->properties().hasKey("parameter"); });
+// }
 
-QList<int> PrivateModulePlatformBackend::enumerateOutputPorts(int uid)
-{
-    return enumeratePorts(uid,
-        [](ComputeModule& m) { return m.numOutputs(); },
-        [](ComputeModule&, size_t) { return true; });
-}
+// QList<int> PrivateModulePlatformBackend::enumerateOutputPorts(int uid)
+// {
+//     return enumeratePorts(uid,
+//         [](ComputeModule& m) { return m.numOutputs(); },
+//         [](ComputeModule&, size_t) { return true; });
+// }
 
-QVariantMap PrivateModulePlatformBackend::getModuleProperties(int uid)
-{
-    auto& m = fetchBackendModule(uid);
+// QVariantMap PrivateModulePlatformBackend::getModuleProperties(int uid)
+// {
+//     auto& m = fetchBackendModule(uid);
 
-    QVariantMap vmap;
-    vmap["uid"] = uid;
-    vmap["displayName"] = QString::fromStdString(m.getComputeModule().name());
-    vmap["moduleTypeName"] = QString::fromStdString(m.getComputeModule().moduleTypeName());
-    return vmap;
-}
+//     QVariantMap vmap;
+//     vmap["uid"] = uid;
+//     vmap["displayName"] = QString::fromStdString(m.getComputeModule().name());
+//     vmap["moduleTypeName"] = QString::fromStdString(m.getComputeModule().moduleTypeName());
+//     return vmap;
+// }
 
-void PrivateModulePlatformBackend::setModuleProperties(int uid, QVariantMap values)
-{
-    auto& m = fetchBackendModule(uid);
-    if (values.count("displayName")) {
-        m.getComputeModule().setName(values["displayName"].toString().toStdString());
-    }
-}
+// void PrivateModulePlatformBackend::setModuleProperties(int uid, QVariantMap values)
+// {
+//     auto& m = fetchBackendModule(uid);
+//     if (values.count("displayName")) {
+//         m.getComputeModule().setName(values["displayName"].toString().toStdString());
+//     }
+// }
 
-std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port)
-{
-    auto& outTraits = port->traits();
-    std::vector<std::pair<int, int>> list;
+// std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchInputPortsCompatibleTo(std::shared_ptr<cp::OutputPort> port)
+// {
+//     auto& outTraits = port->traits();
+//     std::vector<std::pair<int, int>> list;
 
-    for (auto& pr : m_modules) {
-        QList<int> result = enumeratePorts(
-            pr.first,
-            [](ComputeModule& m) { return m.numInputs(); },
-            [&outTraits](ComputeModule& m, size_t i)
-            {
-                return m.inputPort(i).lock()->traits().equals(outTraits); 
-            }
-        );
-        for (int x : result) {
-            list.push_back(make_pair(pr.first, x));
-        }
-    }
-    return list;
-}
+//     for (auto& pr : m_modules) {
+//         QList<int> result = enumeratePorts(
+//             pr.first,
+//             [](ComputeModule& m) { return m.numInputs(); },
+//             [&outTraits](ComputeModule& m, size_t i)
+//             {
+//                 return m.inputPort(i).lock()->traits().equals(outTraits); 
+//             }
+//         );
+//         for (int x : result) {
+//             list.push_back(make_pair(pr.first, x));
+//         }
+//     }
+//     return list;
+// }
 
-std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port)
-{
-    auto& inTraits = port->traits();
-    std::vector<std::pair<int, int>> list;
+// std::vector<std::pair<int, int>> PrivateModulePlatformBackend::fetchOutputPortsCompatibleTo(std::shared_ptr<cp::InputPort> port)
+// {
+//     auto& inTraits = port->traits();
+//     std::vector<std::pair<int, int>> list;
     
-    for (auto& pr : m_modules) {
-        QList<int> result = enumeratePorts(
-            pr.first,
-            [](ComputeModule& m) { return m.numOutputs(); },
-            [&inTraits](ComputeModule& m, size_t i) { return m.outputPort(i).lock()->traits().equals(inTraits); }
-        );
-        for (int x : result) {
-            list.push_back(make_pair(pr.first, x));
-        }
-    }
-    return list;
-}
-// TODO: proper header to .h file
-QVariantMap portPropertiesToQVariantMap(const PropertyMap& properties)
-{
-    QVariantMap vmap;
-    auto ks = properties.keys();
-    for (const string& key: ks) {
-        QString vmapKey = QString::fromStdString(key);
-        switch (properties.getType(key)) {
-            case PropertyMap::Type::Int:
-                vmap[vmapKey] = QVariant(properties.asInt(key));
-                break;
-            case PropertyMap::Type::Bool:
-                vmap[vmapKey] = QVariant(properties.asBool(key));
-                break;
-            case PropertyMap::Type::String:
-                vmap[vmapKey] = QVariant(QString::fromStdString(properties.asString(key)));
-                break;
-            case PropertyMap::Type::Float:
-                vmap[vmapKey] = QVariant(properties.asFloat(key));
-                break;
-        }
-    }
-    return vmap;
-}
+//     for (auto& pr : m_modules) {
+//         QList<int> result = enumeratePorts(
+//             pr.first,
+//             [](ComputeModule& m) { return m.numOutputs(); },
+//             [&inTraits](ComputeModule& m, size_t i) { return m.outputPort(i).lock()->traits().equals(inTraits); }
+//         );
+//         for (int x : result) {
+//             list.push_back(make_pair(pr.first, x));
+//         }
+//     }
+//     return list;
+// }
+// // TODO: proper header to .h file
+// QVariantMap portPropertiesToQVariantMap(const PropertyMap& properties)
+// {
+//     QVariantMap vmap;
+//     auto ks = properties.keys();
+//     for (const string& key: ks) {
+//         QString vmapKey = QString::fromStdString(key);
+//         switch (properties.getType(key)) {
+//             case PropertyMap::Type::Int:
+//                 vmap[vmapKey] = QVariant(properties.asInt(key));
+//                 break;
+//             case PropertyMap::Type::Bool:
+//                 vmap[vmapKey] = QVariant(properties.asBool(key));
+//                 break;
+//             case PropertyMap::Type::String:
+//                 vmap[vmapKey] = QVariant(QString::fromStdString(properties.asString(key)));
+//                 break;
+//             case PropertyMap::Type::Float:
+//                 vmap[vmapKey] = QVariant(properties.asFloat(key));
+//                 break;
+//         }
+//     }
+//     return vmap;
+// }
 
-// TODO: proper header to .h file
-QVariantList portTypeTraitsToQVariantList(const std::set<std::string>& traits)
-{
-    QVariantList vlist;
-    for (const auto& t : traits) {
-        QVariantMap vmap;
-        // TODO: a simple list could not be sent to the js model side:
-        // reading the model after dispatching ActionTypes.module_added_notification in CardStore.qml
-        // after model.append(newItem), the model does not contain the type traits list
-        // I think this is something to do with the dynamic role = false property in the QMLListModel
-        // A proper solution is needed, see issue #50
-        vmap[QString::fromStdString(t)] = true;
-        vlist.append(vmap);
-    }
-    return vlist;
-}
+// // TODO: proper header to .h file
+// QVariantList portTypeTraitsToQVariantList(const std::set<std::string>& traits)
+// {
+//     QVariantList vlist;
+//     for (const auto& t : traits) {
+//         QVariantMap vmap;
+//         // TODO: a simple list could not be sent to the js model side:
+//         // reading the model after dispatching ActionTypes.module_added_notification in CardStore.qml
+//         // after model.append(newItem), the model does not contain the type traits list
+//         // I think this is something to do with the dynamic role = false property in the QMLListModel
+//         // A proper solution is needed, see issue #50
+//         vmap[QString::fromStdString(t)] = true;
+//         vlist.append(vmap);
+//     }
+//     return vlist;
+// }
 
-QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int portId)
-{
-    auto p = fetchInputPort(uid, portId).lock();
+// QVariantMap PrivateModulePlatformBackend::getInputPortProperties(int uid, int portId)
+// {
+//     auto p = fetchInputPort(uid, portId).lock();
 
-    QVariantMap vmap;
-    vmap["uid"] = uid;
-    vmap["portId"] = portId;
-    vmap["displayName"] = QString::fromStdString(p->name());
-    vmap["hints"] = portPropertiesToQVariantMap(p->properties());
-    vmap["typeTraits"] = portTypeTraitsToQVariantList(p->traits().getAll());
+//     QVariantMap vmap;
+//     vmap["uid"] = uid;
+//     vmap["portId"] = portId;
+//     vmap["displayName"] = QString::fromStdString(p->name());
+//     vmap["hints"] = portPropertiesToQVariantMap(p->properties());
+//     vmap["typeTraits"] = portTypeTraitsToQVariantList(p->traits().getAll());
 
-    auto portList = fetchOutputPortsCompatibleTo(p);
-    QVariantList vlist;
-    for (auto pr : portList) {
-        QVariantMap listItemMap;
-        listItemMap["targetUid"] = pr.first;
-        listItemMap["targetPortId"] = pr.second;
-        auto& targetModule = fetchBackendModule(pr.first);
-        auto targetPort = fetchOutputPort(pr.first, pr.second).lock();
-        listItemMap["targetModuleDisplayName"] = QString::fromStdString(targetModule.getComputeModule().name());
-        listItemMap["targetPortDisplayName"] = QString::fromStdString(targetPort->name());
-        vlist.append(listItemMap);
-    }
-    vmap["options"] = vlist;
+//     auto portList = fetchOutputPortsCompatibleTo(p);
+//     QVariantList vlist;
+//     for (auto pr : portList) {
+//         QVariantMap listItemMap;
+//         listItemMap["targetUid"] = pr.first;
+//         listItemMap["targetPortId"] = pr.second;
+//         auto& targetModule = fetchBackendModule(pr.first);
+//         auto targetPort = fetchOutputPort(pr.first, pr.second).lock();
+//         listItemMap["targetModuleDisplayName"] = QString::fromStdString(targetModule.getComputeModule().name());
+//         listItemMap["targetPortDisplayName"] = QString::fromStdString(targetPort->name());
+//         vlist.append(listItemMap);
+//     }
+//     vmap["options"] = vlist;
 
-    return vmap;
-}
+//     return vmap;
+// }
 
-QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int portId)
-{
-    auto p = fetchOutputPort(uid, portId).lock();
+// QVariantMap PrivateModulePlatformBackend::getOutputPortProperties(int uid, int portId)
+// {
+//     auto p = fetchOutputPort(uid, portId).lock();
 
-    QVariantMap vmap;
-    vmap["uid"] = uid;
-    vmap["portId"] = portId;
-    vmap["displayName"] = QString::fromStdString(p->name());
-    vmap["hints"] = portPropertiesToQVariantMap(p->properties());
-    vmap["typeTraits"] = portTypeTraitsToQVariantList(p->traits().getAll());
+//     QVariantMap vmap;
+//     vmap["uid"] = uid;
+//     vmap["portId"] = portId;
+//     vmap["displayName"] = QString::fromStdString(p->name());
+//     vmap["hints"] = portPropertiesToQVariantMap(p->properties());
+//     vmap["typeTraits"] = portTypeTraitsToQVariantList(p->traits().getAll());
 
-    return vmap;
-}
+//     return vmap;
+// }
 
-VolumeTexture* PrivateModulePlatformBackend::getOutputTexture(int uid, int portId)
-{
-    ImageOutputHelperModuleBase& helper = fetchImageOutputHelperModule(uid, portId);
+// VolumeTexture* PrivateModulePlatformBackend::getOutputTexture(int uid, int portId)
+// {
+//     ImageOutputHelperModuleBase& helper = fetchImageOutputHelperModule(uid, portId);
 
-    // TODO: don't use naked ptrs
+//     // TODO: don't use naked ptrs
     
-    auto imPtr = helper.getImage();
-    if (imPtr) {
-        VolumeTexture* tex = new VolumeTexture;
-        tex->init(*imPtr);
-        return tex;
-    }
-    return nullptr;
-}
+//     auto imPtr = helper.getImage();
+//     if (imPtr) {
+//         VolumeTexture* tex = new VolumeTexture;
+//         tex->init(*imPtr);
+//         return tex;
+//     }
+//     return nullptr;
+// }
 
-bool PrivateModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,
-    int inputModuleUid, int inputPortId)
-{
-    auto input = fetchInputPort(inputModuleUid, inputPortId);
-    auto output = fetchOutputPort(outputModuleUid, outputPortId).lock();
-    if (output) {
-        return output->bind(input);
-    } else {
-        qDebug() << "no output port with id " << outputPortId << " for module with uid " << outputModuleUid << ", can not connect";
-        return false;
-    }
-}
+// bool PrivateModulePlatformBackend::connectInputOutput(int outputModuleUid, int outputPortId,
+//     int inputModuleUid, int inputPortId)
+// {
+//     auto input = fetchInputPort(inputModuleUid, inputPortId);
+//     auto output = fetchOutputPort(outputModuleUid, outputPortId).lock();
+//     if (output) {
+//         return output->bind(input);
+//     } else {
+//         qDebug() << "no output port with id " << outputPortId << " for module with uid " << outputModuleUid << ", can not connect";
+//         return false;
+//     }
+// }
 
-void PrivateModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
-{
-    auto input = fetchInputPort(inputModuleUid, inputPortId);
-    if (auto inPtr = input.lock()) {
-        if (auto srcPtr = inPtr->getSource().lock()) {
-            srcPtr->unbind(input);
-        }
-    }
-}
+// void PrivateModulePlatformBackend::disconnectInput(int inputModuleUid, int inputPortId)
+// {
+//     auto input = fetchInputPort(inputModuleUid, inputPortId);
+//     if (auto inPtr = input.lock()) {
+//         if (auto srcPtr = inPtr->getSource().lock()) {
+//             srcPtr->unbind(input);
+//         }
+//     }
+// }
 
-bool PrivateModulePlatformBackend::setParamPortProperty(int uid, int portId, QVariant value)
-{
-    return fetchParamHelperModule(uid, portId).setData(value);
-}
+// bool PrivateModulePlatformBackend::setParamPortProperty(int uid, int portId, QVariant value)
+// {
+//     return fetchParamHelperModule(uid, portId).setData(value);
+// }
 
-int PrivateModulePlatformBackend::nextUid() const
-{
-    static int counter = 1;
-    return counter++;
-}
+// int PrivateModulePlatformBackend::nextUid() const
+// {
+//     static int counter = 1;
+//     return counter++;
+// }
 
-BackendModule& PrivateModulePlatformBackend::fetchBackendModule(int uid)
-{
-    if(!hasModule(uid)) {
-        throw std::runtime_error("backend: no module with uid " + to_string(uid));
-    }
+// BackendModule& PrivateModulePlatformBackend::fetchBackendModule(int uid)
+// {
+//     if(!hasModule(uid)) {
+//         throw std::runtime_error("backend: no module with uid " + to_string(uid));
+//     }
 
-    return *m_modules[uid];
-}
+//     return *m_modules[uid];
+// }
 
-std::weak_ptr<InputPort> PrivateModulePlatformBackend::fetchInputPort(int uid, int portId)
-{
-    auto& m = fetchBackendModule(uid);
-    if (m.getComputeModule().numInputs() <= (size_t)portId) {
-        throw std::runtime_error("backend: no input port with id " + to_string(portId) + " at module uid " + to_string(uid));
-    }
-    return m.getComputeModule().inputPort(portId);
-}
+// std::weak_ptr<InputPort> PrivateModulePlatformBackend::fetchInputPort(int uid, int portId)
+// {
+//     auto& m = fetchBackendModule(uid);
+//     if (m.getComputeModule().numInputs() <= (size_t)portId) {
+//         throw std::runtime_error("backend: no input port with id " + to_string(portId) + " at module uid " + to_string(uid));
+//     }
+//     return m.getComputeModule().inputPort(portId);
+// }
 
-std::weak_ptr<OutputPort> PrivateModulePlatformBackend::fetchOutputPort(int uid, int portId)
-{
-    auto& m = fetchBackendModule(uid);
-    if (m.getComputeModule().numOutputs() <= (size_t)portId) {
-        throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
-    }
-    return m.getComputeModule().outputPort(portId);
-}
+// std::weak_ptr<OutputPort> PrivateModulePlatformBackend::fetchOutputPort(int uid, int portId)
+// {
+//     auto& m = fetchBackendModule(uid);
+//     if (m.getComputeModule().numOutputs() <= (size_t)portId) {
+//         throw std::runtime_error("backend: no output port with id " + to_string(portId) + " at module uid " + to_string(uid));
+//     }
+//     return m.getComputeModule().outputPort(portId);
+// }
 
-ParamHelperModule& PrivateModulePlatformBackend::fetchParamHelperModule(int uid, int portId)
-{
-    auto& ptr = m_paramHelpers[make_pair(uid, portId)];
-    if (!ptr) {
-        throw std::runtime_error("no helper param module for uid " + to_string(uid) + " portId " + to_string(portId));
-    }
-    return *ptr;
-}
+// ParamHelperModule& PrivateModulePlatformBackend::fetchParamHelperModule(int uid, int portId)
+// {
+//     auto& ptr = m_paramHelpers[make_pair(uid, portId)];
+//     if (!ptr) {
+//         throw std::runtime_error("no helper param module for uid " + to_string(uid) + " portId " + to_string(portId));
+//     }
+//     return *ptr;
+// }
 
-ImageOutputHelperModuleBase& PrivateModulePlatformBackend::fetchImageOutputHelperModule(int uid, int portId)
-{
-    auto& ptr = m_imageOutputHelpers[make_pair(uid, portId)];
-    if (!ptr) {
-        throw std::runtime_error("no helper image output module for uid " + to_string(uid) + " portId " + to_string(portId));
-    }
-    return *ptr;
-}
+// ImageOutputHelperModuleBase& PrivateModulePlatformBackend::fetchImageOutputHelperModule(int uid, int portId)
+// {
+//     auto& ptr = m_imageOutputHelpers[make_pair(uid, portId)];
+//     if (!ptr) {
+//         throw std::runtime_error("no helper image output module for uid " + to_string(uid) + " portId " + to_string(portId));
+//     }
+//     return *ptr;
+// }
 
-void PrivateModulePlatformBackend::evaluatePlatform()
-{
-    m_platform.printModuleConnections();
-    m_platform.run();
-}
+// void PrivateModulePlatformBackend::evaluatePlatform()
+// {
+//     m_platform.printModuleConnections();
+//     m_platform.run();
+// }
 
-QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
-{
-    QVariantList vlist;
-    auto isModuleFile = [](const QFileInfo& f)
-    {
-        return f.isFile()
-            && f.fileName().toLower().startsWith("module")
-            && f.suffix().toLower() == "py";
-    };
+// QVariantList PrivateModulePlatformBackend::getModuleScriptsList()
+// {
+//     QVariantList vlist;
+//     auto isModuleFile = [](const QFileInfo& f)
+//     {
+//         return f.isFile()
+//             && f.fileName().toLower().startsWith("module")
+//             && f.suffix().toLower() == "py";
+//     };
 
-    // TODO: move magic string constants to highlighted section/file
-    QDirIterator level1("modules");
-    while (level1.hasNext()) {
-        level1.next();
-        if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()
-			&& level1.fileName() != "." && level1.fileName() != "..") {
+//     // TODO: move magic string constants to highlighted section/file
+//     QDirIterator level1("modules");
+//     while (level1.hasNext()) {
+//         level1.next();
+//         if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()
+// 			&& level1.fileName() != "." && level1.fileName() != "..") {
 
-            QVariantMap vmap;
-            vmap["displayName"] = level1.fileName();
-            QVariantList fileList;
-            QDirIterator level2(level1.filePath(), QDirIterator::Subdirectories);
-            while (level2.hasNext()) {
-                level2.next();
-                if (isModuleFile(level2.fileInfo() )) {
-                    QVariantMap fileVMap;
-                    fileVMap["path"] = level2.filePath();
-                    QString name = level2.fileName()
-                        .mid(QString("module").size())
-                        .replace('_', ' ')
-                        .simplified();
-                    name.chop(3);
-                    fileVMap["displayName"] = name;
-                    fileList.append(fileVMap);
-                }
-            }
-            if (!fileList.empty()) {
-                vmap["files"] = fileList;
-                vlist.append(vmap);
-            }
-        }
-    }
+//             QVariantMap vmap;
+//             vmap["displayName"] = level1.fileName();
+//             QVariantList fileList;
+//             QDirIterator level2(level1.filePath(), QDirIterator::Subdirectories);
+//             while (level2.hasNext()) {
+//                 level2.next();
+//                 if (isModuleFile(level2.fileInfo() )) {
+//                     QVariantMap fileVMap;
+//                     fileVMap["path"] = level2.filePath();
+//                     QString name = level2.fileName()
+//                         .mid(QString("module").size())
+//                         .replace('_', ' ')
+//                         .simplified();
+//                     name.chop(3);
+//                     fileVMap["displayName"] = name;
+//                     fileList.append(fileVMap);
+//                 }
+//             }
+//             if (!fileList.empty()) {
+//                 vmap["files"] = fileList;
+//                 vlist.append(vmap);
+//             }
+//         }
+//     }
 
-    return vlist;
-}
+//     return vlist;
+// }
 
-ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
-    : QObject(parent)
-{
-    OutStreamRouters routers;
-    routers.stdOut.setCallback([](const std::string& str)
-    {
-        qInfo("%s", str.c_str());
-    });
+// ModulePlatformBackend::ModulePlatformBackend(QObject* parent)
+//     : QObject(parent)
+// {
+//     OutStreamRouters routers;
+//     routers.stdOut.setCallback([](const std::string& str)
+//     {
+//         qInfo("%s", str.c_str());
+//     });
 
-    routers.stdErr.setCallback([](const std::string& str)
-    {
-        qCritical("%s", str.c_str());
-    });
+//     routers.stdErr.setCallback([](const std::string& str)
+//     {
+//         qCritical("%s", str.c_str());
+//     });
 
-    PythonEnvironment::outStreamRouters = routers;
-    PythonEnvironment::instance();
+//     PythonEnvironment::outStreamRouters = routers;
+//     PythonEnvironment::instance();
 
-    m_commandHistory["date"] = QString("unknown date");
-    m_commandHistory["version"] = QString("unknown version");
-    m_commandHistory["commands"] = QVariantList();
-}
+//     m_commandHistory["date"] = QString("unknown date");
+//     m_commandHistory["version"] = QString("unknown version");
+//     m_commandHistory["commands"] = QVariantList();
+// }

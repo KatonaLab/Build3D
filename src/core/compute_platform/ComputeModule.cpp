@@ -61,6 +61,11 @@ ComputeModule::~ComputeModule()
     m_parent.removeModule(*this);
 }
 
+ComputePlatform& ComputeModule::platform()
+{
+    return m_parent;
+}
+
 NodePtr ComputeModule::node()
 {
     return m_node;

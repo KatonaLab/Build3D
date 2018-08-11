@@ -36,6 +36,8 @@ namespace compute_platform {
         // TODO: test this function
         virtual std::string moduleTypeName() const;
         virtual ~ComputeModule();
+        // TODO: test this function
+        ComputePlatform& platform();
     protected:
         ComputeModule(ComputePlatform& parent,
             InputPortCollectionBase& inputs,

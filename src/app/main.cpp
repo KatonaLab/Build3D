@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
     setSurfaceFormat();
 
-    qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "ModulePlatformBackend");
+    // qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "ModulePlatformBackend");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterType<TurnTableCameraController>("koki.katonalab.a3dc", 1, 0, "TurnTableCameraController");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     // see LogCollector.cpp for details
     qmlRegisterSingletonType<LogCollector>("koki.katonalab.a3dc", 1, 0, "LogCollector", singletonLogCollectorProvider);
 
-    qmlRegisterType<ModuleStore>("koki.katonalab.a3dc", 1, 0, "ModuleStoreBackend");
+    // qmlRegisterType<ModuleStore>("koki.katonalab.a3dc", 1, 0, "ModuleStoreBackend");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";
