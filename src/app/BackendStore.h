@@ -1,81 +1,75 @@
 #ifndef _app_BackendStore_h_
 #define _app_BackendStore_h_
 
-#include <QAbstractListModel>
+#include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
+#include <QDebug>
 #include <core/compute_platform/ComputeModule.h>
 #include <memory>
 
-// class BackendModule : public BackendStoreItem {
-// public:
-//     static BackendModule* createPythonModule(const QString& scriptPath);
-// }
+#include "BackendStoreItem.h"
 
-// class PortProxyStore: public QAbstractProxy
+class BackendStoreRootItem : public BackendStoreItem {
+public:
+    int uid() const override { return -1; }
+    QString category() const override { return QString("root"); }
+    QString name() const override { return QString("root"); }
+    QString type() const override { return QString("root"); }
+    int status() const override { return 0; }
+    QVariant value() const override { return QVariant(); }
+};
 
-// class PortStore: public QAbstractListModel {
-//     Q_OBJECT
-// public:
-//     enum PortRoles {
-//         IdRole = Qt::UserRole,
-//         NameRole,
-//         TypeRole,
-//         ValueRole
-//     };
-// };
+class BackendStoreDummyItem : public BackendStoreItem {
+public:
+    BackendStoreDummyItem(int id, QString name, QString type)
+        : m_id(id), m_name(name), m_type(type)
+    {}
+    int uid() const override { return m_id; }
+    QString category() const override { return QString("dummy"); }
+    QString name() const override { return m_name; }
+    QString type() const override { return m_type; }
+    int status() const override { return 0; }
+    QVariant value() const override { return QVariant(); }
+protected:
+    int m_id;
+    QString m_name;
+    QString m_type;
+};
 
-// class ModuleStoreItem {
-// public:
-//     int uid() const;
-//     QString name() const;
-//     void setName(const QString& name);
-//     QString type() const;
-//     int status() const;
+class BackendStore: public QAbstractItemModel {
+    Q_OBJECT
+public:
+    enum ModuleRoles {
+        UidRole = Qt::UserRole,
+        CategoryRole,
+        NameRole,
+        TypeRole,
+        StatusRole,
+        ValueRole
+    };
+    explicit BackendStore(QObject* parent = Q_NULLPTR);
+    virtual ~BackendStore();
 
-//     QAbstractItemModel* inputsModel();
-//     QAbstractItemModel* parametersModel();
-//     QAbstractItemModel* outputsModel();
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QModelIndex index(int row, int column,
+        const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    Q_INVOKABLE void addModule(QString name, QString type);
+protected:
+    // TODO: use shared/unique_ptr
+    BackendStoreItem* m_root;
+};
 
-//     core::compute_platform::ComputeModule& computeModule();
-//     const core::compute_platform::ComputeModule& computeModule() const;
-// protected:
-//     int m_uid = -1;
-// };
-
-// // Q_DECLARE_METATYPE(ModuleStoreItem)
-
-// // class ModuleStoreItemFactory: public QObject {
-// //     Q_OBJECT
-// // public:
-// //     static ModuleStoreItem* createPythonModule(const QString& scriptPath);
-// //     static ModuleStoreItem* createIcsInputModule(const QString& icsFilePath);
-
-// //     explicit ModuleStoreItemFactory(QObject* parent = Q_NULLPTR);
-// // };
-
-// class ModuleStore: public QAbstractListModel {
-//     Q_OBJECT
-// public:
-//     enum ModuleRoles {
-//         UidRole = Qt::UserRole,
-//         NameRole,
-//         TypeRole,
-//         StatusRole,
-//         IntputsRole,
-//         ParametersRole,
-//         OutputsRole
-//     };
-
-//     explicit ModuleStore(QObject* parent = Q_NULLPTR);
-//     ~ModuleStore() override;
-
-//     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-//     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-//     QHash<int, QByteArray> roleNames() const override;
-
-//     Q_INVOKABLE int addModule(const QString& typeName);
-//     Q_INVOKABLE void removeModule(int uid);
-// protected:
-//     std::vector<std::unique_ptr<ModuleStoreItem>> m_items;
-// };
+class BackendStoreProxy: public QSortFilterProxyModel {
+    Q_OBJECT
+public:
+    explicit BackendStoreProxy(QObject* parent = Q_NULLPTR);
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+};
 
 #endif

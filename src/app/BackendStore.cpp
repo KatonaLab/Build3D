@@ -1,81 +1,139 @@
 #include "BackendStore.h"
 
-#include <iostream>
-#include <iterator>
-#include <algorithm>
+BackendStore::BackendStore(QObject* parent)
+    : QAbstractItemModel(parent)
+{
+    m_root = new BackendStoreRootItem;
+    addModule("a", "typeA");
+    addModule("b", "typeB");
+    addModule("c", "typeC");
+}
 
-using namespace std;
+void BackendStore::addModule(QString name, QString type)
+{
+    BackendStoreDummyItem* newItem = new BackendStoreDummyItem(42, name, type);
+    BackendStoreDummyItem* subItem = new BackendStoreDummyItem(42, "sub", "sub " + type);
 
-// ModuleStore::ModuleStore(QObject* parent)
-//     : QAbstractListModel(parent)
-// {}
+    // beginInsertRows(QModelIndex(), m_root->numChildren(), m_root->numChildren());
+    m_root->add(newItem);
+    newItem->add(subItem);
+    // endInsertRows();
+}
 
-// int ModuleStore::rowCount(const QModelIndex& parent) const
-// {
-//     Q_UNUSED(parent);
-//     return m_items.size();
-// }
+BackendStore::~BackendStore()
+{
+    delete m_root;
+}
 
-// QVariant ModuleStore::data(const QModelIndex& index, int role) const
-// {
-//     if (!index.isValid() || index.row() < 0 || index.row() >= (int)m_items.size()) {
-//         return QVariant();
-//     }
+QHash<int, QByteArray> BackendStore::roleNames() const
+{
+    static QHash<int, QByteArray> roles = {
+        {UidRole, "uid"},
+        {CategoryRole, "category"},
+        {NameRole, "name"},
+        {TypeRole, "type"},
+        {StatusRole, "status"},
+        {ValueRole, "value"}
+    };
+    return roles;
+}
 
-//     auto& item = m_items[index.row()];
+Qt::ItemFlags BackendStore::flags(const QModelIndex& index) const
+{
+    if (!index.isValid())
+        return 0;
 
-//     switch (role) {
-//         case UidRole: return item->uid();
-//         case NameRole: return QVariant("Mario");
-//         case TypeRole: return QVariant("plumber");
-//         case StatusRole: return QVariant("on quest");
-//         case IntputsRole: return QVariant();
-//         case ParametersRole: return QVariant();
-//         case OutputsRole: return QVariant();
-//         default: return QVariant();
-//     }
-// }
+    return QAbstractItemModel::flags(index);
+}
 
-// QHash<int, QByteArray> ModuleStore::roleNames() const
-// {
-//     static QHash<int, QByteArray> roles = {
-//         {UidRole, "uid"},
-//         {NameRole, "name"},
-//         {TypeRole, "type"},
-//         {StatusRole, "status"},
-//         {IntputsRole, "inputs"},
-//         {ParametersRole, "parameters"},
-//         {OutputsRole, "outputs"}};
-//     return roles;
-// }
+QVariant BackendStore::data(const QModelIndex& index, int role) const
+{
+    if (!index.isValid()) {
+        return QVariant();
+    }
 
-// int ModuleStore::addModule(const QString& typeName)
-// {
-//     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-//     // TODO: call factory
-//     m_items.emplace_back(new ModuleStoreItem);
-//     endInsertRows();
-//     return m_items.back()->uid();
-// }
+    BackendStoreItem* item = static_cast<BackendStoreItem*>(index.internalPointer());
 
-// void ModuleStore::removeModule(int uid)
-// {
-//     auto it = find_if(m_items.begin(), m_items.end(),
-//         [uid](const unique_ptr<ModuleStoreItem>& item) {
-//             return item->uid() == uid;
-//         });
+    if (!item) {
+        return QVariant();
+    }
 
-//     if (it != m_items.end()) {
-//         int pos = distance(m_items.begin(), it);
-//         beginRemoveRows(QModelIndex(), pos, pos);
-//         m_items.erase(it);
-//         endRemoveRows();
-//     }
-// }
+    switch (role) {
+        case UidRole: return item->uid();
+        case CategoryRole: return item->category();
+        case NameRole: return item->name();
+        case TypeRole: return item->type();
+        case StatusRole: return item->status();
+        case ValueRole: return item->value();
+        default: return QVariant();
+    }
+}
 
-// ModuleStore::~ModuleStore()
-// {
-//     beginResetModel();
-//     m_items.clear();
-//     endResetModel();
-// }
+QModelIndex BackendStore::index(int row, int column, const QModelIndex& parent) const
+{
+    if (!hasIndex(row, column, parent)) {
+        return QModelIndex();
+    }
+
+    BackendStoreItem* r;
+    if (parent.isValid()) {
+        r = static_cast<BackendStoreItem*>(parent.internalPointer());
+    } else {
+        r = m_root;
+    }
+
+    BackendStoreItem* c = r->child(row);
+    if (c) {
+        return createIndex(row, column, c);
+    } else {
+        return QModelIndex();
+    }
+}
+
+QModelIndex BackendStore::parent(const QModelIndex& index) const
+{
+    if (!index.isValid()) {
+        return QModelIndex();
+    }
+
+    BackendStoreItem* c = static_cast<BackendStoreItem*>(index.internalPointer());
+    BackendStoreItem* r = c->parent();
+
+    if (r == m_root) {
+        return QModelIndex();
+    }
+
+    return createIndex(r->row(), 0, r);
+}
+
+int BackendStore::rowCount(const QModelIndex& parent) const
+{
+    if (parent.column() > 0) {
+        return 0;
+    }
+
+    if (parent.isValid()) {
+        return static_cast<BackendStoreItem*>(parent.internalPointer())->numChildren();
+    } else {
+        return m_root->numChildren();
+    }
+}
+
+int BackendStore::columnCount(const QModelIndex& parent) const
+{
+    if (parent.isValid()) {
+        return static_cast<BackendStoreItem*>(parent.internalPointer())->columnCount();
+    } else {
+        m_root->columnCount();
+    }
+}
+
+BackendStoreProxy::BackendStoreProxy(QObject* parent)
+    :  QSortFilterProxyModel(parent)
+{}
+
+bool BackendStoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    return sourceModel()->data(index, BackendStore::TypeRole).toString() == QString("sub");
+}

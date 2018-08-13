@@ -3,6 +3,8 @@
 
 #include <QList>
 
+// TODO: change * to shared/weak_ptr
+
 class BackendStoreItem {
 public:
     virtual int uid() const = 0;
@@ -15,11 +17,13 @@ public:
     void add(BackendStoreItem* child);
     BackendStoreItem* parent();
     BackendStoreItem* child(int row);
+    int numChildren() const;
     int row();
+    int columnCount() const;
     virtual ~BackendStoreItem();
 protected:
     QList<BackendStoreItem*> m_children;
-    BackendStoreItem* m_parent;
+    BackendStoreItem* m_parent = nullptr;
 };
 
 #endif

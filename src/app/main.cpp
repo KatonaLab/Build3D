@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     // see LogCollector.cpp for details
     qmlRegisterSingletonType<LogCollector>("koki.katonalab.a3dc", 1, 0, "LogCollector", singletonLogCollectorProvider);
 
-    // qmlRegisterType<ModuleStore>("koki.katonalab.a3dc", 1, 0, "ModuleStoreBackend");
+    qmlRegisterType<BackendStore>("koki.katonalab.a3dc", 1, 0, "BackendStore");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";
