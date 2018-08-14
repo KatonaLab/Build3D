@@ -80,9 +80,9 @@ ApplicationWindow {
         spacing: 0
 
         CardPanel {
-            Layout.preferredWidth: 300
+            Layout.preferredWidth: 400
             Layout.fillHeight: true
-            model: MainStore.moduleStore.model
+            baseModel: MainStore.moduleStore.model
             supportedModules: MainStore.moduleStore.supportedModules
             configurationUpToDate: MainStore.moduleStore.modelUpToDate
         }

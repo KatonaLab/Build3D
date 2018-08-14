@@ -58,7 +58,7 @@ Repeater {
         Component {
             id: pyObjectOutputDelegate
             Label {
-                text: details.displayName + "(py object)"
+                text: details.name + "(py object)"
                 font: root.font
             }
         }
@@ -66,7 +66,7 @@ Repeater {
         Component {
             id: intOutputDelegate
             Label {
-                text: details.displayName + "(int)"
+                text: details.name + "(int)"
                 font: root.font
             }
         }
@@ -74,7 +74,7 @@ Repeater {
         Component {
             id: floatOutputDelegate
             Label {
-                text: details.displayName + "(float)"
+                text: details.name + "(float)"
                 font: root.font
             }
         }
@@ -93,7 +93,7 @@ Repeater {
                         visible: visibilitySwitch.checked,
                         labeled: false
                     };
-                    AppActions.requestModuleOutputChange(uid, details.portId, values);
+                    AppActions.requestModuleOutputChange(uid, details.uid, values);
                 }
 
                 RowLayout {
@@ -102,7 +102,7 @@ Repeater {
                     Switch {
                         id: visibilitySwitch
                         Layout.fillWidth: true
-                        text: details.displayName
+                        text: details.name
                         font: root.font
                         onCheckedChanged: {
                             floatImageOutput.update();
@@ -111,7 +111,8 @@ Repeater {
 
                     ColorIndicator {
                         id: colorSelector
-                        color: details.color
+                        // TODO:
+                        // color: details.color
                         Layout.alignment: Qt.AlignRight
                         onColorChanged: floatImageOutput.update()
                     }
@@ -141,7 +142,7 @@ Repeater {
                         visible: intVisibilitySwitch.checked,
                         labeled: true
                     };
-                    AppActions.requestModuleOutputChange(uid, details.portId, values);
+                    AppActions.requestModuleOutputChange(uid, details.uid, values);
                 }
 
                 RowLayout {
@@ -150,7 +151,7 @@ Repeater {
                     Switch {
                         id: intVisibilitySwitch
                         Layout.fillWidth: true
-                        text: details.displayName
+                        text: details.name
                         font: root.font
                         onCheckedChanged: {
                             intImageOutput.update();
@@ -163,7 +164,7 @@ Repeater {
         Component {
             id: unknownControllerDelegate
             Label {
-                text: "invalid type for output '" + details.displayName + "'"
+                text: "invalid type for output '" + details.name + "'"
                 font: root.font
                 color: Material.color(Material.Red)
             }

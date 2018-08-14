@@ -3,16 +3,23 @@ import QtQuick.Controls 2.2
 import QtQml 2.2
 import QtQml.Models 2.2
 import QtQuick.Controls.Material 2.2
+import koki.katonalab.a3dc 1.0
 
 import "../../actions"
 
 Pane {
     id: root
     property var supportedModules
-    property alias model: listView.model
+    property var baseModel
     property bool configurationUpToDate: true
 
     padding: 12
+
+    BackendStoreFilter {
+        id: moduleList
+        source: baseModel
+        includeCategory: ["module"]
+    }
 
     ListView {
         id: listView
@@ -23,13 +30,36 @@ Pane {
         // TODO: fix scrollbar hickups: https://forum.qt.io/topic/52484/problem-scrolling-listview-with-many-entries-of-different-height/2
         // ScrollBar.vertical: scrollbar
 
+        model: moduleList
         delegate: Card {
             uid: model.uid
-            displayName: model.displayName
-            moduleTypeName: model.moduleTypeName
-            inputs: model.inputs
-            parameters: model.parameters
-            outputs: model.outputs
+            displayName: model.name
+            moduleTypeName: model.type
+
+            BackendStoreFilter {
+                id: inputsModel
+                source: baseModel
+                includeCategory: ["input"]
+                includeParentUid: [model.uid]
+            }
+
+            BackendStoreFilter {
+                id: parametersModel
+                source: baseModel
+                includeCategory: ["parameter"]
+                includeParentUid: [model.uid]
+            }
+
+            BackendStoreFilter {
+                id: outputsModel
+                source: baseModel
+                includeCategory: ["output"]
+                includeParentUid: [model.uid]
+            }
+
+            inputs: inputsModel
+            parameters: parametersModel
+            outputs: outputsModel
             width: parent.width
             expanded: true
             font.pointSize: 11

@@ -60,7 +60,7 @@ Repeater {
         Component {
             id: buttonDelegate
             Button {
-                text: details.displayName
+                text: details.name
                 font: root.font
                 // TODO: action
             }
@@ -69,7 +69,7 @@ Repeater {
         Component {
             id: unknownControllerDelegate
             Label {
-                text: "invalid type for property '" + details.displayName + "'"
+                text: "invalid type for property '" + details.name + "'"
                 font: root.font
                 color: Material.color(Material.Red)
                 // TODO: action
@@ -80,7 +80,7 @@ Repeater {
             id: editDelegate
             ColumnLayout {
                 Label {
-                    text: details.displayName
+                    text: details.name
                     font: root.font
                 }
                 TextField {
@@ -109,11 +109,11 @@ Repeater {
                 from: details.hints.min || 0
                 to: details.hints.max || 1000
                 defaultValue: details.hints.default || from
-                text: details.displayName
+                text: details.name
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModuleParamChange(uid, details.portId, values);
+                    AppActions.requestModuleParamChange(uid, details.uid, values);
                 }
             }
         }
@@ -125,11 +125,11 @@ Repeater {
                 from: details.hints.min || 0.0
                 to: details.hints.max || 1.0
                 defaultValue: details.hints.default || from
-                text: details.displayName
+                text: details.name
 
                 onValueChanged: {
                     var values = {value: value};
-                    AppActions.requestModuleParamChange(uid, details.portId, values);
+                    AppActions.requestModuleParamChange(uid, details.uid, values);
                 }
             }
         }
@@ -151,11 +151,11 @@ Repeater {
         Component {
             id: switchDelegate
             Switch {
-                text: details.displayName
+                text: details.name
                 font: root.font
                 onCheckedChanged: {
                     var values = {value: checked};
-                    AppActions.requestModuleParamChange(uid, details.portId, values);
+                    AppActions.requestModuleParamChange(uid, details.uid, values);
                 }
             }
         }
@@ -164,7 +164,7 @@ Repeater {
             id: stringDelegate
             ColumnLayout {
                 Label {
-                    text: details.displayName
+                    text: details.name
                     font: root.font
                 }
                 TextField {
@@ -172,7 +172,7 @@ Repeater {
                     Layout.fillWidth: true
                     onEditingFinished: {
                         var values = {value: text};
-                        AppActions.requestModuleParamChange(uid, details.portId, values);
+                        AppActions.requestModuleParamChange(uid, details.uid, values);
                     }
                 }
             }
@@ -183,7 +183,7 @@ Repeater {
             ColumnLayout {
                 Label {
                     Layout.fillWidth: true
-                    text: details.displayName
+                    text: details.name
                     font: root.font
                 }
                 Text {
@@ -217,7 +217,7 @@ Repeater {
                             console.debug("select file", cleanPath);
                             filenameText.text = cleanPath;
                             var values = {value: cleanPath};
-                            AppActions.requestModuleParamChange(uid, details.portId, values);
+                            AppActions.requestModuleParamChange(uid, details.uid, values);
                         }
                     }
                 }

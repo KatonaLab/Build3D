@@ -23,7 +23,7 @@ Repeater {
 
             Label {
                 font: root.font
-                text: model.displayName
+                text: model.name
                 Layout.fillWidth: true
             }
 

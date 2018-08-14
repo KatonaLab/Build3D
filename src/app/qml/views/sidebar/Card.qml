@@ -43,8 +43,8 @@ Pane {
 
     Container {
         anchors.fill: parent
-        leftPadding: 4
-        rightPadding: 4
+        leftPadding: 1
+        rightPadding: 1
         clip: true
         contentItem: ColumnLayout {
             id: layout
