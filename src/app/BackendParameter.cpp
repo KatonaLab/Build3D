@@ -5,7 +5,7 @@
 using namespace std;
 using namespace core::compute_platform;
 
-BackendParameter::BackendParameter(ComputeModule& sourceModule, int portId)
+BackendParameter::BackendParameter(ComputeModule& sourceModule, int portId, int parentUid)
     : m_portId(portId)
 {
     auto& platform = sourceModule.platform();
@@ -18,6 +18,11 @@ BackendParameter::BackendParameter(ComputeModule& sourceModule, int portId)
 int BackendParameter::uid() const
 {
     return m_portId;
+}
+
+int BackendParameter::parentUid() const
+{
+    return m_parentUid;
 }
 
 QString BackendParameter::category() const

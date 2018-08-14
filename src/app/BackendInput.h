@@ -7,8 +7,9 @@
 class BackendInput : public BackendStoreItem {
     typedef core::compute_platform::InputPort InputPort;
 public:
-    BackendInput(std::weak_ptr<InputPort> source, int portId);
+    BackendInput(std::weak_ptr<InputPort> source, int portId, int parentUid);
     int uid() const override;
+    int parentUid() const override;
     QString category() const override;
     QString name() const override;
     QString type() const override;
@@ -17,6 +18,7 @@ public:
 protected:
     std::weak_ptr<InputPort> m_source;
     int m_portId = -1;
+    int m_parentUid = -1;
 };
 
 #endif

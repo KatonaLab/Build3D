@@ -2,8 +2,8 @@
 
 using namespace core::compute_platform;
 
-BackendOutput::BackendOutput(ComputeModule& sourceModule, int portId)
-    : m_portId(portId)
+BackendOutput::BackendOutput(ComputeModule& sourceModule, int portId, int parentUid)
+    : m_portId(portId), m_parentUid(parentUid)
 {
     auto& platform = sourceModule.platform();
     m_source = sourceModule.outputPort((size_t)portId);
@@ -16,23 +16,33 @@ int BackendOutput::uid() const
 {
     return m_portId;
 }
+
+int BackendOutput::parentUid() const
+{
+    return m_parentUid;
+}
+
 QString BackendOutput::category() const
 {
     return QString("output");
 }
+
 QString BackendOutput::name() const
 {
     return QString::fromStdString(m_source.lock()->name());
 }
+
 QString BackendOutput::type() const
 {
     // TODO:
     return QString();
 }
+
 int BackendOutput::status() const
 {
     return 0;
 }
+
 QVariant BackendOutput::value() const
 {
     // TODO:

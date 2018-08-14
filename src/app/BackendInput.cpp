@@ -2,13 +2,18 @@
 
 using namespace core::compute_platform;
 
-BackendInput::BackendInput(std::weak_ptr<InputPort> source, int portId)
-    : m_source(source), m_portId(portId)
+BackendInput::BackendInput(std::weak_ptr<InputPort> source, int portId, int parentUid)
+    : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {}
 
 int BackendInput::uid() const
 {
     return m_portId;
+}
+
+int BackendInput::parentUid() const
+{
+    return m_parentUid;
 }
 
 QString BackendInput::category() const

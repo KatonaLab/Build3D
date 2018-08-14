@@ -1,34 +1,27 @@
 #include "BackendStore.h"
 
+#include <tuple>
+#include <vector>
+
+using namespace std;
+
 BackendStore::BackendStore(QObject* parent)
-    : QAbstractItemModel(parent)
-{
-    m_root = new BackendStoreRootItem;
-    addModule("a", "typeA");
-    addModule("b", "typeB");
-    addModule("c", "typeC");
-}
+    : QAbstractListModel(parent)
+{}
 
-void BackendStore::addModule(QString name, QString type)
+void BackendStore::addModule(int uid, int parentUid, QString category,
+    QString name, QString type, int status)
 {
-    BackendStoreDummyItem* newItem = new BackendStoreDummyItem(42, name, type);
-    BackendStoreDummyItem* subItem = new BackendStoreDummyItem(42, "sub " + name, "sub");
-
-    beginInsertRows(QModelIndex(), m_root->numChildren(), m_root->numChildren());
-    m_root->add(newItem);
-    newItem->add(subItem);
+    beginInsertRows(QModelIndex(), m_items.size(), m_items.size());
+    m_items.push_back(make_unique<BackendStoreDummyItem>(uid, parentUid, category, name, type, status));
     endInsertRows();
-}
-
-BackendStore::~BackendStore()
-{
-    delete m_root;
 }
 
 QHash<int, QByteArray> BackendStore::roleNames() const
 {
     static QHash<int, QByteArray> roles = {
         {UidRole, "uid"},
+        {ParentUidRole, "parentUid"},
         {CategoryRole, "category"},
         {NameRole, "name"},
         {TypeRole, "type"},
@@ -38,29 +31,17 @@ QHash<int, QByteArray> BackendStore::roleNames() const
     return roles;
 }
 
-Qt::ItemFlags BackendStore::flags(const QModelIndex& index) const
-{
-    if (!index.isValid())
-        return 0;
-
-    return QAbstractItemModel::flags(index);
-}
-
 QVariant BackendStore::data(const QModelIndex& index, int role) const
 {
-    qDebug() << "data" << role << index.row() << index.column();
     if (!index.isValid()) {
         return QVariant();
     }
 
-    BackendStoreItem* item = static_cast<BackendStoreItem*>(index.internalPointer());
-
-    if (!item) {
-        return QVariant();
-    }
+    auto& item = m_items[index.row()];
 
     switch (role) {
         case UidRole: return item->uid();
+        case ParentUidRole: return item->parentUid();
         case CategoryRole: return item->category();
         case NameRole: return item->name();
         case TypeRole: return item->type();
@@ -70,112 +51,145 @@ QVariant BackendStore::data(const QModelIndex& index, int role) const
     }
 }
 
-QModelIndex BackendStore::index(int row, int column, const QModelIndex& parent) const
-{
-    qDebug() << "index" << row << column;
-    if (!hasIndex(row, column, parent)) {
-        return QModelIndex();
-    }
-
-    BackendStoreItem* r;
-    if (parent.isValid()) {
-        r = static_cast<BackendStoreItem*>(parent.internalPointer());
-    } else {
-        r = m_root;
-    }
-
-    BackendStoreItem* c = r->child(row);
-    if (c) {
-        return createIndex(row, column, c);
-    } else {
-        return QModelIndex();
-    }
-}
-
-QModelIndex BackendStore::parent(const QModelIndex& index) const
-{
-    if (!index.isValid()) {
-        return QModelIndex();
-    }
-
-    BackendStoreItem* c = static_cast<BackendStoreItem*>(index.internalPointer());
-    BackendStoreItem* r = c->parent();
-
-    if (r == m_root) {
-        return QModelIndex();
-    }
-
-    return createIndex(r->row(), 0, r);
-}
-
 int BackendStore::rowCount(const QModelIndex& parent) const
 {
-    if (parent.column() > 0) {
-        return 0;
-    }
-
-    if (parent.isValid()) {
-        return static_cast<BackendStoreItem*>(parent.internalPointer())->numChildren();
-    } else {
-        return m_root->numChildren();
-    }
+    return m_items.size();
 }
 
-int BackendStore::columnCount(const QModelIndex& parent) const
+BackendStoreFilter::BackendStoreFilter(QObject* parent)
+    :  QSortFilterProxyModel(parent)
 {
-    if (parent.isValid()) {
-        return static_cast<BackendStoreItem*>(parent.internalPointer())->columnCount();
-    } else {
-        m_root->columnCount();
-    }
+    setDynamicSortFilter(true);
 }
 
-BackendStoreProxy::BackendStoreProxy(QObject* parent)
-    :  QAbstractProxyModel(parent)
+bool BackendStoreFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
-    // setRecursiveFilteringEnabled(false);
-    // setDynamicSortFilter(true);
-    // setFilterRole(BackendStore::TypeRole);
-    // setFilterRegExp(QRegExp("sub"));
-    // invalidate();
+    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    if (!index.isValid()) {
+        return false;
+    }
+
+    vector<tuple<const QList<int>*, BackendStore::ModuleRoles, bool>> intTri = {
+        make_tuple(&m_includeUid, BackendStore::UidRole, true),
+        make_tuple(&m_excludeUid, BackendStore::UidRole, false),
+        make_tuple(&m_includeParentUid, BackendStore::ParentUidRole, true),
+        make_tuple(&m_excludeParentUid, BackendStore::ParentUidRole, false)
+    };
+
+    for (auto& tri: intTri) {
+        if (get<0>(tri)->empty()) {
+            continue;
+        }
+        int value = sourceModel()->data(index, get<1>(tri)).toInt();
+        // "contains?" XOR "should be contained?"
+        if ((bool)get<0>(tri)->contains(value) != (bool)get<2>(tri)) {
+            return false;
+        }
+    }
+
+    vector<tuple<const QList<QString>*, BackendStore::ModuleRoles, bool>> stringTri = {
+        make_tuple(&m_includeCategory, BackendStore::CategoryRole, true),
+        make_tuple(&m_excludeCategory, BackendStore::CategoryRole, false),
+        make_tuple(&m_includeType, BackendStore::TypeRole, true),
+        make_tuple(&m_excludeType, BackendStore::TypeRole, false)
+    };
+
+    for (auto& tri: stringTri) {
+        if (get<0>(tri)->empty()) {
+            continue;
+        }
+        QString value = sourceModel()->data(index, get<1>(tri)).toString();
+        // "contains?" XOR "should be contained?"
+        if ((bool)get<0>(tri)->contains(value) != (bool)get<2>(tri)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
-// bool BackendStoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
-// {
-//     // QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-//     // if (index.isValid()) {
-//     //     QVariant v = sourceModel()->data(index, BackendStore::TypeRole);
-//     //     bool eq = (v.toString() == QString("typeA"));
-//     //     return eq;
-//     // }
-//     // // qDebug() << v.toString() << eq;
-//     // // return eq;
-//     // return false;
-//     return true;
-// }
+QList<int> BackendStoreFilter::includeUid() const
+{
+    return m_includeUid;
+}
 
-// QModelIndex BackendStoreProxy::mapToSource(const QModelIndex& proxyIndex) const
-// {
-//     QModelIndex i = QSortFilterProxyModel::mapToSource(proxyIndex);
-//     qDebug() << "mapToSource" << proxyIndex << i;
-//     return i;
-// }
+QList<int> BackendStoreFilter::excludeUid() const
+{
+    return m_excludeUid;
+}
 
-// QModelIndex BackendStoreProxy::mapFromSource(const QModelIndex& sourceIndex) const
-// {
-//     QModelIndex i = QSortFilterProxyModel::mapFromSource(sourceIndex);
-//     qDebug() << "mapFromSource" << sourceIndex << i;
-//     return i;
-// }
+QList<int> BackendStoreFilter::includeParentUid() const
+{
+    return m_includeParentUid;
+}
 
-// QModelIndex BackendStoreProxy::index(int row, int column, const QModelIndex& parent) const
-// {
-//     //return createIndex(row, column);
-//     qDebug() << "index proxy" << row << column << parent;
-//     return QSortFilterProxyModel::index(row, column, parent);
-// }
+QList<int> BackendStoreFilter::excludeParentUid() const
+{
+    return m_excludeParentUid;
+}
 
-// QModelIndex BackendStoreProxy::parent(const QModelIndex& child) const
-// {
-//     return QSortFilterProxyModel::parent(child);
-// }
+QList<QString> BackendStoreFilter::includeCategory() const
+{
+    return m_includeCategory;
+}
+
+QList<QString> BackendStoreFilter::excludeCategory() const
+{
+    return m_excludeCategory;
+}
+
+QList<QString> BackendStoreFilter::includeType() const
+{
+    return m_includeType;
+}
+
+QList<QString> BackendStoreFilter::excludeType() const
+{
+    return m_excludeType;
+}
+
+void BackendStoreFilter::setIncludeUid(QList<int> list)
+{
+    m_includeUid = list;
+}
+
+void BackendStoreFilter::setExcludeUid(QList<int> list)
+{
+    m_excludeUid = list;
+}
+
+void BackendStoreFilter::setIncludeParentUid(QList<int> list)
+{
+    m_includeParentUid = list;
+}
+
+void BackendStoreFilter::setExcludeParentUid(QList<int> list)
+{
+    m_excludeParentUid = list;
+}
+
+void BackendStoreFilter::setIncludeCategory(QList<QString> list)
+{
+    m_includeCategory = list;
+}
+
+void BackendStoreFilter::setExcludeCategory(QList<QString> list)
+{
+    m_excludeCategory = list;
+}
+
+void BackendStoreFilter::setIncludeType(QList<QString> list)
+{
+    m_includeType = list;
+}
+
+void BackendStoreFilter::setExcludeType(QList<QString> list)
+{
+    m_excludeType = list;
+}
+
+BackendStoreMatch::BackendStoreMatch(QObject* parent)
+    :  QSortFilterProxyModel(parent)
+{
+    setDynamicSortFilter(true);
+}

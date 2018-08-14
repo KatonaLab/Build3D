@@ -30,42 +30,58 @@ ApplicationWindow {
     width: 480
     height: 480
 
-    ListView {
-        anchors.fill: parent
-        model: BackendStoreProxy {
-            source: bs
-        }
-        // model: bs
-        delegate: Text {
-            // text: name + " " + type
-            text: name
-        }
-    }
-
-    // TreeView {
+    // ListView {
     //     anchors.fill: parent
-    //     model: BackendStoreProxy{
-    //         source: bs
-    //     }
-    //     TableViewColumn {
-    //         role: "uid"
-    //         width: 100
-    //     }
-    //     TableViewColumn {
-    //         role: "name"
-    //         width: 100
-    //     }
-    //     TableViewColumn {
-    //         role: "type"
-    //         width: 100
+    //     // model: BackendStoreProxy {
+    //         // source: bs
+    //     // }
+    //     model: bs
+    //     delegate: Text {
+    //         // text: name + " " + type
+    //         text: name
     //     }
     // }
 
+    TableView {
+        anchors.fill: parent
+        model: BackendStoreFilter{
+            source: bs
+            includeType: ["int"]
+            excludeParentUid: [0] 
+        }
+        TableViewColumn {
+            role: "uid"
+            width: 100
+        }
+        TableViewColumn {
+            role: "parentUid"
+            width: 100
+        }
+        TableViewColumn {
+            role: "category"
+            width: 100
+        }
+        TableViewColumn {
+            role: "name"
+            width: 100
+        }
+        TableViewColumn {
+            role: "type"
+            width: 100
+        }
+    }
+
     Component.onCompleted: {
-        bs.addModule("hello", "type1");
-        bs.addModule("bello", "type1");
-        bs.addModule("yello", "type2");
-        bs.addModule("yellobellow", "type2");
+        bs.addModule(0, -1, "module", "x", "dummyType", 0);
+        bs.addModule(0, 0, "input", "x.i0", "int", 0);
+        bs.addModule(1, 0, "input", "x.i1", "image", 0);
+        bs.addModule(0, 0, "output", "x.o1", "image", 0);
+
+        bs.addModule(1, -1, "module", "y", "dummyType", 0);
+        bs.addModule(0, 1, "output", "y.o0", "int", 0);
+        bs.addModule(1, 1, "output", "y.o1", "image", 0);
+        bs.addModule(0, 1, "output", "y.i0", "image", 0);
+        
         visible = true;
 
         // AppDispatcher.addStoreListener(MainStore.moduleStore);
