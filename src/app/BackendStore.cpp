@@ -12,12 +12,12 @@ BackendStore::BackendStore(QObject* parent)
 void BackendStore::addModule(QString name, QString type)
 {
     BackendStoreDummyItem* newItem = new BackendStoreDummyItem(42, name, type);
-    BackendStoreDummyItem* subItem = new BackendStoreDummyItem(42, "sub", "sub " + type);
+    BackendStoreDummyItem* subItem = new BackendStoreDummyItem(42, "sub " + name, "sub");
 
-    // beginInsertRows(QModelIndex(), m_root->numChildren(), m_root->numChildren());
+    beginInsertRows(QModelIndex(), m_root->numChildren(), m_root->numChildren());
     m_root->add(newItem);
     newItem->add(subItem);
-    // endInsertRows();
+    endInsertRows();
 }
 
 BackendStore::~BackendStore()
@@ -48,6 +48,7 @@ Qt::ItemFlags BackendStore::flags(const QModelIndex& index) const
 
 QVariant BackendStore::data(const QModelIndex& index, int role) const
 {
+    qDebug() << "data" << role << index.row() << index.column();
     if (!index.isValid()) {
         return QVariant();
     }
@@ -71,6 +72,7 @@ QVariant BackendStore::data(const QModelIndex& index, int role) const
 
 QModelIndex BackendStore::index(int row, int column, const QModelIndex& parent) const
 {
+    qDebug() << "index" << row << column;
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
@@ -129,11 +131,51 @@ int BackendStore::columnCount(const QModelIndex& parent) const
 }
 
 BackendStoreProxy::BackendStoreProxy(QObject* parent)
-    :  QSortFilterProxyModel(parent)
-{}
-
-bool BackendStoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+    :  QAbstractProxyModel(parent)
 {
-    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    return sourceModel()->data(index, BackendStore::TypeRole).toString() == QString("sub");
+    // setRecursiveFilteringEnabled(false);
+    // setDynamicSortFilter(true);
+    // setFilterRole(BackendStore::TypeRole);
+    // setFilterRegExp(QRegExp("sub"));
+    // invalidate();
 }
+
+// bool BackendStoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+// {
+//     // QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+//     // if (index.isValid()) {
+//     //     QVariant v = sourceModel()->data(index, BackendStore::TypeRole);
+//     //     bool eq = (v.toString() == QString("typeA"));
+//     //     return eq;
+//     // }
+//     // // qDebug() << v.toString() << eq;
+//     // // return eq;
+//     // return false;
+//     return true;
+// }
+
+// QModelIndex BackendStoreProxy::mapToSource(const QModelIndex& proxyIndex) const
+// {
+//     QModelIndex i = QSortFilterProxyModel::mapToSource(proxyIndex);
+//     qDebug() << "mapToSource" << proxyIndex << i;
+//     return i;
+// }
+
+// QModelIndex BackendStoreProxy::mapFromSource(const QModelIndex& sourceIndex) const
+// {
+//     QModelIndex i = QSortFilterProxyModel::mapFromSource(sourceIndex);
+//     qDebug() << "mapFromSource" << sourceIndex << i;
+//     return i;
+// }
+
+// QModelIndex BackendStoreProxy::index(int row, int column, const QModelIndex& parent) const
+// {
+//     //return createIndex(row, column);
+//     qDebug() << "index proxy" << row << column << parent;
+//     return QSortFilterProxyModel::index(row, column, parent);
+// }
+
+// QModelIndex BackendStoreProxy::parent(const QModelIndex& child) const
+// {
+//     return QSortFilterProxyModel::parent(child);
+// }

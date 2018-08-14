@@ -30,44 +30,42 @@ ApplicationWindow {
     width: 480
     height: 480
 
-    // ListView {
-    //     anchors.fill: parent
-    //     model: bs
-    //     delegate: Text {
-    //         text: name + " " + type
-    //     }
-    // }
-
-    TreeView {
+    ListView {
         anchors.fill: parent
-        model: bs
-        TableViewColumn {
-            role: "uid"
-            width: 100
+        model: BackendStoreProxy {
+            source: bs
         }
-        TableViewColumn {
-            role: "name"
-            width: 100
-        }
-
-        TableViewColumn {
-            role: "type"
-            width: 100
+        // model: bs
+        delegate: Text {
+            // text: name + " " + type
+            text: name
         }
     }
 
-    // Button {
-    //     text: "add";
-    //     onClicked: {
-    //         bke.addModule("again");
+    // TreeView {
+    //     anchors.fill: parent
+    //     model: BackendStoreProxy{
+    //         source: bs
+    //     }
+    //     TableViewColumn {
+    //         role: "uid"
+    //         width: 100
+    //     }
+    //     TableViewColumn {
+    //         role: "name"
+    //         width: 100
+    //     }
+    //     TableViewColumn {
+    //         role: "type"
+    //         width: 100
     //     }
     // }
 
     Component.onCompleted: {
-        // bs.addModule("hello", "type1");
-        // bs.addModule("bello", "type1");
-        // bs.addModule("yello", "type2");
-        // bs.addModule("yellobellow", "type2");
+        bs.addModule("hello", "type1");
+        bs.addModule("bello", "type1");
+        bs.addModule("yello", "type2");
+        bs.addModule("yellobellow", "type2");
         visible = true;
 
         // AppDispatcher.addStoreListener(MainStore.moduleStore);

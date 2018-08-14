@@ -2,7 +2,7 @@
 #define _app_BackendStore_h_
 
 #include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
+#include <QAbstractProxyModel>
 #include <QDebug>
 #include <core/compute_platform/ComputeModule.h>
 #include <memory>
@@ -64,12 +64,21 @@ protected:
     BackendStoreItem* m_root;
 };
 
-class BackendStoreProxy: public QSortFilterProxyModel {
+class BackendStoreProxy: public QAbstractProxyModel {
     Q_OBJECT
+    // Q_PROPERTY(QAbstractItemModel* source READ sourceModel WRITE setSourceModel)
 public:
     explicit BackendStoreProxy(QObject* parent = Q_NULLPTR);
 protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    void rebuildMapping();
+    QHash<QModelIndex, QModelIndex> m_sourceToProxy;
+    QHash<QModelIndex, QModelIndex> m_proxyToSource;
+
+    // QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
+    // QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
+    // QModelIndex index(int row, int column, const QModelIndex& parent) const override;
+    // QModelIndex parent(const QModelIndex& child) const override;
+    // bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
 
 #endif
