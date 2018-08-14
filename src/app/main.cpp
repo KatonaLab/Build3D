@@ -114,10 +114,11 @@ int main(int argc, char* argv[])
     // NOTE: it will initialize LogCollector and routes the all qDebug/qInfo... log through this instance
     // see LogCollector.cpp for details
     qmlRegisterSingletonType<LogCollector>("koki.katonalab.a3dc", 1, 0, "LogCollector", singletonLogCollectorProvider);
-
+    
+    qmlRegisterInterface<BackendStoreItem>("BackendStoreItem");
     qmlRegisterType<BackendStore>("koki.katonalab.a3dc", 1, 0, "BackendStore");
     qmlRegisterType<BackendStoreFilter>("koki.katonalab.a3dc", 1, 0, "BackendStoreFilter");
-    qmlRegisterType<BackendStoreMatch>("koki.katonalab.a3dc", 1, 0, "BackendStoreMatch");
+    // qmlRegisterType<BackendStoreMatch>("koki.katonalab.a3dc", 1, 0, "BackendStoreMatch");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";

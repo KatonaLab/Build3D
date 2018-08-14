@@ -62,13 +62,15 @@ public:
 
     Q_INVOKABLE void addModule(int uid, int parentUid, QString category,
         QString name, QString type, int status);
+    Q_INVOKABLE QVariant get(int row);
+    Q_INVOKABLE int count() const;
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {
     Q_OBJECT
-    Q_PROPERTY(QAbstractItemModel* source READ sourceModel WRITE setSourceModel)
+    Q_PROPERTY(BackendStore* source READ sourceStore WRITE setSourceStore)
     Q_PROPERTY(QList<int> includeUid READ includeUid WRITE setIncludeUid)
     Q_PROPERTY(QList<int> excludeUid READ excludeUid WRITE setExcludeUid)
     Q_PROPERTY(QList<int> includeParentUid READ includeParentUid WRITE setIncludeParentUid)
@@ -78,9 +80,15 @@ class BackendStoreFilter: public QSortFilterProxyModel {
     Q_PROPERTY(QList<QString> includeType READ includeType WRITE setIncludeType)
     Q_PROPERTY(QList<QString> excludeType READ excludeType WRITE setExcludeType)
     // TODO: add more filters when needed
+    Q_PROPERTY(QVariant first READ first NOTIFY firstChanged)
 public:
     explicit BackendStoreFilter(QObject* parent = Q_NULLPTR);
-    
+
+    BackendStore* sourceStore() const;
+    void setSourceStore(BackendStore* store);
+
+    QVariant first() const;
+
     QList<int> includeUid() const;
     QList<int> excludeUid() const;
     QList<int> includeParentUid() const;
@@ -98,8 +106,15 @@ public:
     void setExcludeCategory(QList<QString> list);
     void setIncludeType(QList<QString> list);
     void setExcludeType(QList<QString> list);
+
+    Q_INVOKABLE QVariant get(int row) const;
+    Q_INVOKABLE int count() const;
+
+Q_SIGNALS:
+    void firstChanged();
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
+    BackendStore* m_store = nullptr;
     QList<int> m_includeUid;
     QList<int> m_excludeUid;
     QList<int> m_includeParentUid;
@@ -108,25 +123,6 @@ protected:
     QList<QString> m_excludeCategory;
     QList<QString> m_includeType;
     QList<QString> m_excludeType;
-};
-
-class BackendStoreMatch: public QSortFilterProxyModel {
-    Q_OBJECT
-    // Q_PROPERTY(QAbstractItemModel* source READ sourceModel WRITE setSourceModel)
-    // Q_PROPERTY(bool hasMatch READ hasMatch NOTIFY hasMatchChanged)
-    // Q_PROPERTY(QString matchBy READ matchBy WRITE setMatchBy NOTIFY matchByChanged)
-    // Q_PROPERTY(QVariant matchValue READ matchValue WRITE setMatchValue NOTIFY matchValueChanged)
-    // Q_PROPERTY(int uid READ uid NOTIFY uidChanged)
-    // Q_PROPERTY(int parentUid READ parentUid NOTIFY parentUidChanged)
-    // Q_PROPERTY(QString category READ category NOTIFY categoryChanged)
-    // Q_PROPERTY(QString name READ name NOTIFY nameChanged)
-    // Q_PROPERTY(QString type READ type NOTIFY typeChanged)
-    // Q_PROPERTY(int status READ status NOTIFY statusChanged)
-    // Q_PROPERTY(QVariant value READ value NOTIFY valueChanged)
-public:
-    explicit BackendStoreMatch(QObject* parent = Q_NULLPTR);
-protected:
-    // bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
 };
 
 #endif

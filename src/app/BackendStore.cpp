@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include <vector>
+#include <QDebug>
 
 using namespace std;
 
@@ -56,6 +57,20 @@ int BackendStore::rowCount(const QModelIndex& parent) const
     return m_items.size();
 }
 
+QVariant BackendStore::get(int row)
+{
+    if (row >= 0 && row < (int)m_items.size()) {
+        return QVariant::fromValue(m_items[row].get());
+    } else {
+        return QVariant();
+    }
+}
+
+int BackendStore::count() const
+{
+    return rowCount(QModelIndex());
+}
+
 BackendStoreFilter::BackendStoreFilter(QObject* parent)
     :  QSortFilterProxyModel(parent)
 {
@@ -77,12 +92,12 @@ bool BackendStoreFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sour
     };
 
     for (auto& tri: intTri) {
-        if (get<0>(tri)->empty()) {
+        if (std::get<0>(tri)->empty()) {
             continue;
         }
-        int value = sourceModel()->data(index, get<1>(tri)).toInt();
+        int value = sourceModel()->data(index, std::get<1>(tri)).toInt();
         // "contains?" XOR "should be contained?"
-        if ((bool)get<0>(tri)->contains(value) != (bool)get<2>(tri)) {
+        if ((bool)std::get<0>(tri)->contains(value) != (bool)std::get<2>(tri)) {
             return false;
         }
     }
@@ -95,17 +110,70 @@ bool BackendStoreFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sour
     };
 
     for (auto& tri: stringTri) {
-        if (get<0>(tri)->empty()) {
+        if (std::get<0>(tri)->empty()) {
             continue;
         }
-        QString value = sourceModel()->data(index, get<1>(tri)).toString();
+        QString value = sourceModel()->data(index, std::get<1>(tri)).toString();
         // "contains?" XOR "should be contained?"
-        if ((bool)get<0>(tri)->contains(value) != (bool)get<2>(tri)) {
+        if ((bool)std::get<0>(tri)->contains(value) != (bool)std::get<2>(tri)) {
             return false;
         }
     }
 
     return true;
+}
+
+BackendStore* BackendStoreFilter::sourceStore() const
+{
+    return m_store;
+}
+
+void BackendStoreFilter::setSourceStore(BackendStore* store)
+{
+    if (m_store) {
+        m_store->disconnect(this);
+    }
+
+    if (m_store != store) {
+        m_store = store;
+        setSourceModel(m_store);
+
+        // TODO: optimize signal emission and invalidate filter calls
+
+        QObject::connect(m_store, &BackendStore::dataChanged, [=](const QModelIndex& topLeft,
+            const QModelIndex& bottomRight, const QVector<int>& roles)
+        {
+            this->invalidateFilter();
+            Q_EMIT firstChanged();
+        });
+
+        QObject::connect(m_store, &BackendStore::modelReset, [=]()
+        {
+            this->invalidateFilter();
+            Q_EMIT firstChanged();
+        });
+
+        QObject::connect(m_store, &BackendStore::rowsInserted, [=](const QModelIndex& parent,
+            int first, int last)
+        {
+            this->invalidateFilter();
+            Q_EMIT firstChanged();
+        });
+
+        QObject::connect(m_store, &BackendStore::rowsMoved, [=](const QModelIndex& parent, int start,
+            int end, const QModelIndex& destination, int row)
+        {
+            this->invalidateFilter();
+            Q_EMIT firstChanged();
+        });
+
+        QObject::connect(m_store, &BackendStore::rowsRemoved, [=](const QModelIndex& parent,
+            int first, int last)
+        {
+            this->invalidateFilter();
+            Q_EMIT firstChanged();
+        });
+    }
 }
 
 QList<int> BackendStoreFilter::includeUid() const
@@ -188,8 +256,27 @@ void BackendStoreFilter::setExcludeType(QList<QString> list)
     m_excludeType = list;
 }
 
-BackendStoreMatch::BackendStoreMatch(QObject* parent)
-    :  QSortFilterProxyModel(parent)
+QVariant BackendStoreFilter::get(int row) const
 {
-    setDynamicSortFilter(true);
+    if (m_store == nullptr) {
+        return QVariant();
+    }
+
+    QModelIndex proxyIndex = index(row, 0, QModelIndex());
+    if (!proxyIndex.isValid()) {
+        return QVariant();
+    }
+
+    QModelIndex sourceIndex = mapToSource(proxyIndex);
+    return m_store->get(sourceIndex.row());
+}
+
+int BackendStoreFilter::count() const
+{
+    return rowCount(QModelIndex());
+}
+
+QVariant BackendStoreFilter::first() const
+{
+    return get(0);
 }

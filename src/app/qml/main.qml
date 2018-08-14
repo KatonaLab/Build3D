@@ -27,6 +27,11 @@ ApplicationWindow {
         id: bs
     }
 
+    BackendStoreFilter {
+        id: filt
+        source: bs
+    }
+
     width: 480
     height: 480
 
@@ -42,34 +47,38 @@ ApplicationWindow {
     //     }
     // }
 
-    TableView {
-        anchors.fill: parent
-        model: BackendStoreFilter{
-            source: bs
-            includeType: ["int"]
-            excludeParentUid: [0] 
-        }
-        TableViewColumn {
-            role: "uid"
-            width: 100
-        }
-        TableViewColumn {
-            role: "parentUid"
-            width: 100
-        }
-        TableViewColumn {
-            role: "category"
-            width: 100
-        }
-        TableViewColumn {
-            role: "name"
-            width: 100
-        }
-        TableViewColumn {
-            role: "type"
-            width: 100
-        }
+    Text {
+        text: filt.first.name
     }
+
+    // TableView {
+    //     anchors.fill: parent
+    //     model: BackendStoreFilter {
+    //         source: bs
+    //         includeType: ["int"]
+    //         excludeParentUid: [0]
+    //     }
+    //     TableViewColumn {
+    //         role: "uid"
+    //         width: 100
+    //     }
+    //     TableViewColumn {
+    //         role: "parentUid"
+    //         width: 100
+    //     }
+    //     TableViewColumn {
+    //         role: "category"
+    //         width: 100
+    //     }
+    //     TableViewColumn {
+    //         role: "name"
+    //         width: 100
+    //     }
+    //     TableViewColumn {
+    //         role: "type"
+    //         width: 100
+    //     }
+    // }
 
     Component.onCompleted: {
         bs.addModule(0, -1, "module", "x", "dummyType", 0);
@@ -81,7 +90,7 @@ ApplicationWindow {
         bs.addModule(0, 1, "output", "y.o0", "int", 0);
         bs.addModule(1, 1, "output", "y.o1", "image", 0);
         bs.addModule(0, 1, "output", "y.i0", "image", 0);
-        
+
         visible = true;
 
         // AppDispatcher.addStoreListener(MainStore.moduleStore);
