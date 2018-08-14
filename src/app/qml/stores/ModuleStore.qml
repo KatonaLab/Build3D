@@ -100,14 +100,15 @@ Item {
         
         Component.onCompleted: {
             // demo data
-            addModule(0, -1, "module", "x", "dummyType", 0);
-            addModule(0, 0, "input", "x.i0", "int", 0);
-            addModule(1, 0, "input", "x.i1", "image", 0);
-            addModule(0, 0, "output", "x.o1", "image", 0);
-            addModule(1, -1, "module", "y", "dummyType", 0);
-            addModule(0, 1, "output", "y.o0", "int", 0);
-            addModule(1, 1, "output", "y.o1", "image", 0);
-            addModule(0, 1, "output", "y.i0", "image", 0);
+            addModule("hey");
+            // addModule(0, -1, "module", "x", "dummyType", 0);
+            // addModule(0, 0, "input", "x.i0", "int", 0);
+            // addModule(1, 0, "input", "x.i1", "image", 0);
+            // addModule(0, 0, "output", "x.o1", "image", 0);
+            // addModule(1, -1, "module", "y", "dummyType", 0);
+            // addModule(0, 1, "output", "y.o0", "int", 0);
+            // addModule(1, 1, "output", "y.o1", "image", 0);
+            // addModule(0, 1, "output", "y.i0", "image", 0);
         }
         
     }

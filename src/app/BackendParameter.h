@@ -9,7 +9,7 @@ class BackendParameter : public BackendStoreItem {
     typedef core::compute_platform::ComputeModule ComputeModule;
     typedef core::compute_platform::InputPort InputPort;
 public:
-    BackendParameter(ComputeModule& sourceModule, int portId, int parentUid);
+    BackendParameter(std::weak_ptr<InputPort> source, int portId, int parentUid);
     int uid() const override;
     int parentUid() const override;
     QString category() const override;

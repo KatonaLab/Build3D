@@ -53,6 +53,7 @@ HEADERS += \
     BackendInput.h \
     BackendParameter.h \
     BackendOutput.h \
+    BackendModule.h \
     ParameterInterfaceModules.hpp \
     OutputInterfaceModules.hpp \
     ../util/version.h \
@@ -73,6 +74,7 @@ SOURCES += \
     BackendInput.cpp \
     BackendParameter.cpp \
     BackendOutput.cpp \
+    BackendModule.cpp \
     ParameterInterfaceModules.cpp \
     OutputInterfaceModules.cpp \
     main.cpp \

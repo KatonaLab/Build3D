@@ -374,6 +374,10 @@ public:
     PythonComputeModule(cp::ComputePlatform& platform,
         std::string code,
         const std::string& name = "");
+    std::string moduleTypeName() const override
+    {
+        return "Unknown Python Module";
+    }
 protected:
     void buildPorts();
     void execute() override;
@@ -381,10 +385,6 @@ protected:
     PyOutputPortWrapperPtr createOutputPortWrapper(PyTypes t);
     PyTypes inputPortPyType(std::string name);
     PyTypes outputPortPyType(std::string name);
-    std::string moduleTypeName() const override
-    {
-        return "Unknown Python Module";
-    }
 private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;

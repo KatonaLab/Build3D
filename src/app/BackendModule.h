@@ -1,0 +1,24 @@
+#ifndef _app_BackendModule_h_
+#define _app_BackendModule_h_
+
+#include "BackendStoreItem.h"
+#include <core/high_platform/PythonComputeModule.h>
+
+class BackendModule : public BackendStoreItem {
+    typedef core::high_platform::PythonComputeModule PythonComputeModule;
+public:
+    BackendModule(std::shared_ptr<PythonComputeModule> sourceModule, int uid);
+    int uid() const override;
+    int parentUid() const override;
+    QString category() const override;
+    QString name() const override;
+    QString type() const override;
+    int status() const override;
+    QVariant value() const override;
+protected:
+    std::shared_ptr<PythonComputeModule> m_source;
+    int m_uid = -1;
+    int m_status = 0;
+};
+
+#endif

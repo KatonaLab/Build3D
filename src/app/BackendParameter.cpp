@@ -5,14 +5,14 @@
 using namespace std;
 using namespace core::compute_platform;
 
-BackendParameter::BackendParameter(ComputeModule& sourceModule, int portId, int parentUid)
-    : m_portId(portId)
+BackendParameter::BackendParameter(std::weak_ptr<InputPort> source, int portId, int parentUid)
+    : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
-    auto& platform = sourceModule.platform();
-    m_source = sourceModule.inputPort((size_t)portId);
-    // TODO:
-    // m_interfaceModule = make_shared<ParameterInterfaceModule>(platform, m_source);
-    m_interfaceModule->outputPort(0).lock()->bind(m_source);
+    // auto& platform = sourceModule.platform();
+    // m_source = sourceModule.inputPort((size_t)portId);
+    // // TODO:
+    // // m_interfaceModule = make_shared<ParameterInterfaceModule>(platform, m_source);
+    // m_interfaceModule->outputPort(0).lock()->bind(m_source);
 }
 
 int BackendParameter::uid() const
@@ -37,8 +37,7 @@ QString BackendParameter::name() const
 
 QString BackendParameter::type() const
 {
-    // TODO:
-    return QString();
+    return QString("int");
 }
 
 int BackendParameter::status() const

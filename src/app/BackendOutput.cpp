@@ -2,14 +2,14 @@
 
 using namespace core::compute_platform;
 
-BackendOutput::BackendOutput(ComputeModule& sourceModule, int portId, int parentUid)
-    : m_portId(portId), m_parentUid(parentUid)
+BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source, int portId, int parentUid)
+    : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
-    auto& platform = sourceModule.platform();
-    m_source = sourceModule.outputPort((size_t)portId);
-    // TODO:
-    // m_interfaceModule = make_shared<OutputInterfaceModule>(platform, m_source);
-    m_source.lock()->bind(m_interfaceModule->inputPort(0));
+    // auto& platform = sourceModule.platform();
+    // m_source = sourceModule.outputPort((size_t)portId);
+    // // TODO:
+    // // m_interfaceModule = make_shared<OutputInterfaceModule>(platform, m_source);
+    // m_source.lock()->bind(m_interfaceModule->inputPort(0));
 }
 
 int BackendOutput::uid() const

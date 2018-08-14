@@ -4,7 +4,9 @@
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
 #include <core/compute_platform/ComputeModule.h>
+#include <core/high_platform/PythonComputeModule.h>
 #include <memory>
+#include <QString>
 
 #include "BackendStoreItem.h"
 
@@ -43,6 +45,7 @@ protected:
 
 class BackendStore: public QAbstractListModel {
     Q_OBJECT
+    typedef core::compute_platform::ComputePlatform ComputePlatform;
 public:
     enum ModuleRoles {
         UidRole = Qt::UserRole,
@@ -60,12 +63,13 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void addModule(int uid, int parentUid, QString category,
-        QString name, QString type, int status);
+    Q_INVOKABLE void addModule(const QString& scriptPath);
     Q_INVOKABLE QVariant get(int row);
     Q_INVOKABLE int count() const;
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
+    ComputePlatform m_platform;
+    int m_uidCounter = 0;
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {

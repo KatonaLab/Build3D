@@ -52,34 +52,34 @@ Entity {
     // 
     // so we need a per object volume rendering and then merging the results
 
-    NodeInstantiator {
-        model: MainStore.sceneStore.model
-        delegate: VolumeEntity {
-            uid: model.uid
+    // NodeInstantiator {
+    //     model: MainStore.sceneStore.model
+    //     delegate: VolumeEntity {
+    //         uid: model.uid
 
-            width: model.size.x
-            height: model.size.y
-            depth: model.size.z
-            volumeTexture: model.texture
+    //         width: model.size.x
+    //         height: model.size.y
+    //         depth: model.size.z
+    //         volumeTexture: model.texture
 
-            backFaceMap: renderSettings.backFaceMap
-            // TODO: count only the visible channels
-            // accumDivisor: 1.0 / MainStore.moduleStore.model.count
-            accumDivisor: 1.0
-            layer: sceneLayer
+    //         backFaceMap: renderSettings.backFaceMap
+    //         // TODO: count only the visible channels
+    //         // accumDivisor: 1.0 / MainStore.moduleStore.model.count
+    //         accumDivisor: 1.0
+    //         layer: sceneLayer
 
-            // note: JSValue to QColor conversion
-            volumeColor: Qt.rgba(model.color.r, model.color.g, model.color.b, model.color.a);
-            visible: model.visible
-            labeled: model.labeled
+    //         // note: JSValue to QColor conversion
+    //         volumeColor: Qt.rgba(model.color.r, model.color.g, model.color.b, model.color.a);
+    //         visible: model.visible
+    //         labeled: model.labeled
 
-            lutLowCut: model.lutLow
-            lutHighCut: model.lutHigh
-            Component.onCompleted: {
-                lutDataMax = 1.;
-            }
-        }
-    }
+    //         lutLowCut: model.lutLow
+    //         lutHighCut: model.lutHigh
+    //         Component.onCompleted: {
+    //             lutDataMax = 1.;
+    //         }
+    //     }
+    // }
 
     Layer {
         id: screenQuadLayer

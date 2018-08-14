@@ -14,19 +14,6 @@ Repeater {
     property int uid: -1
     property font font
 
-    // TODO: move to a shared utility js file
-    function modelListHasItem(modelList, item) {
-        if (!modelList) {
-            return false;
-        }
-        for (var i = 0; i < modelList.count; ++i) {
-            if (modelList.get(i)[item] === true) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     delegate: Loader {
         property int uid: root.uid
         property var details: model
@@ -34,27 +21,23 @@ Repeater {
 
         sourceComponent: {
 
-            if (modelListHasItem(model.typeTraits, "int-like")) {
-                return intSliderDelegate;
+            switch (model.type) {
+                case "int": return intSliderDelegate;
+                case "float": return floatSliderDelegate;
+                case "bool": return switchDelegate;
+                // case "string": 
+                defualt: return unknownControllerDelegate;
             }
 
-            if (modelListHasItem(details.typeTraits, "float-like")) {
-                return floatSliderDelegate;
-            }
+            // if (modelListHasItem(details.typeTraits, "string")) {
+                // if (details.hints.file === true) {
+                    // return filenameDelegate;
+                // } else {
+                    // return stringDelegate;
+                // }
+            // }
 
-            if (modelListHasItem(details.typeTraits, "bool")) {
-                return switchDelegate;
-            }
-
-            if (modelListHasItem(details.typeTraits, "string")) {
-                if (details.hints.file === true) {
-                    return filenameDelegate;
-                } else {
-                    return stringDelegate;
-                }
-            }
-
-            return unknownControllerDelegate;
+            // return unknownControllerDelegate;
         }
 
         Component {
@@ -109,6 +92,7 @@ Repeater {
                 from: details.hints.min || 0
                 to: details.hints.max || 1000
                 defaultValue: details.hints.default || from
+                
                 text: details.name
 
                 onValueChanged: {

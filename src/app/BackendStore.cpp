@@ -3,18 +3,66 @@
 #include <tuple>
 #include <vector>
 #include <QDebug>
+#include <core/high_platform/PythonComputeModule.h>
+#include "BackendModule.h"
+#include "BackendInput.h"
+#include "BackendParameter.h"
+#include "BackendOutput.h"
+#include <fstream>
 
 using namespace std;
+using namespace core::high_platform;
 
 BackendStore::BackendStore(QObject* parent)
     : QAbstractListModel(parent)
-{}
-
-void BackendStore::addModule(int uid, int parentUid, QString category,
-    QString name, QString type, int status)
 {
-    beginInsertRows(QModelIndex(), m_items.size(), m_items.size());
-    m_items.push_back(make_unique<BackendStoreDummyItem>(uid, parentUid, category, name, type, status));
+    OutStreamRouters routers;
+    routers.stdOut.setCallback([](const std::string& str)
+    {
+        qInfo("%s", str.c_str());
+    });
+
+    routers.stdErr.setCallback([](const std::string& str)
+    {
+        qCritical("%s", str.c_str());
+    });
+
+    PythonEnvironment::outStreamRouters = routers;
+    PythonEnvironment::instance();
+}
+
+void BackendStore::addModule(const QString& scriptPath)
+{
+    std::string script = "modules/examples/module_hello_parameters_module.py";
+    
+    ifstream f(script);
+    if (!f.is_open()) {
+        throw std::runtime_error("missing module script: " + script);
+    }
+    stringstream buffer;
+    buffer << f.rdbuf();
+
+    auto pyModule = make_shared<PythonComputeModule>(m_platform, buffer.str(), "Generic");
+    int numRows = 1 + (int)pyModule->numInputs() + (int)pyModule->numOutputs();
+    int uid = m_uidCounter++;
+
+    beginInsertRows(QModelIndex(), m_items.size(), m_items.size() + numRows);
+    m_items.push_back(make_unique<BackendModule>(pyModule, uid));
+
+    for (size_t i = 0; i < pyModule->numInputs(); ++i) {
+        auto port = pyModule->inputPort(i);
+        if (port.lock()->properties().hasKey("parameter")) {
+            m_items.push_back(make_unique<BackendParameter>(port, i, uid));
+        } else {
+            m_items.push_back(make_unique<BackendInput>(port, i, uid));
+        }
+    }
+
+    for (size_t i = 0; i < pyModule->numOutputs(); ++i) {
+        auto port = pyModule->outputPort(i);
+        m_items.push_back(make_unique<BackendOutput>(port, i, uid));
+    }
+
     endInsertRows();
 }
 
@@ -74,7 +122,7 @@ int BackendStore::count() const
 BackendStoreFilter::BackendStoreFilter(QObject* parent)
     :  QSortFilterProxyModel(parent)
 {
-    setDynamicSortFilter(true);
+    // setDynamicSortFilter(true);
 }
 
 bool BackendStoreFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const

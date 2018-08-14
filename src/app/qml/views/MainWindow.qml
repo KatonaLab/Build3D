@@ -113,31 +113,31 @@ ApplicationWindow {
                 height: 240
                 color: "#1f000000"
 
-                ScrollView {
-                    id: textAreaScroll
+                Flickable {
                     anchors.fill: parent
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
                     clip: true
-                    Flickable {
-                        flickableDirection: Flickable.VerticalFlick
-                        contentHeight: textArea.height
-                        contentY: contentHeight - height
-                        
-                        TextArea.flickable: TextArea {
-                            id : textArea
-                            font.pointSize: 11
-                            font.family: "Courier"
-                            text: LogCollector.unfilteredLog
-                            color: Material.accent
-                            textFormat: TextEdit.RichText
-                            readOnly: true
-                            selectByMouse: true
-                            selectByKeyboard: true
-                            wrapMode: TextEdit.WrapAnywhere
-                            background: Item {}
-                        }
+                    contentHeight: textArea.height
+
+                    onContentHeightChanged: {
+                        contentY = contentHeight - height;
                     }
+
+                    TextArea {
+                        id: textArea
+                        font.pointSize: 11
+                        font.family: "Courier"
+                        text: LogCollector.unfilteredLog
+                        color: Material.accent
+                        textFormat: TextEdit.RichText
+                        readOnly: true
+                        selectByMouse: true
+                        selectByKeyboard: true
+                        wrapMode: TextEdit.WrapAnywhere
+                        background: Item {}
+                        width: parent.width
+                    }
+
+                    ScrollIndicator.vertical: ScrollIndicator {}
                 }
             }
 
