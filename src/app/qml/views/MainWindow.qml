@@ -82,7 +82,7 @@ ApplicationWindow {
         CardPanel {
             Layout.preferredWidth: 300
             Layout.fillHeight: true
-            model: MainStore.cardStore.model
+            model: MainStore.moduleStore.model
             supportedModules: MainStore.moduleStore.supportedModules
             configurationUpToDate: MainStore.moduleStore.modelUpToDate
         }
@@ -110,7 +110,7 @@ ApplicationWindow {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: 160
+                height: 240
                 color: "#1f000000"
 
                 ScrollView {

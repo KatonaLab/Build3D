@@ -5,7 +5,7 @@ import "../actions"
 
 Item {
 
-    property alias backend: backend
+    property alias model: model
     property alias supportedModules: supportedModules
     property bool modelUpToDate: true
 
@@ -13,90 +13,103 @@ Item {
         var handlers = {};
 
         handlers[ActionTypes.ics_file_import] = function(args) {
-            var uids = backend.createSourceModulesFromIcsFile(args.url);
-            uids.forEach(function(uid) {
-                AppActions.notifyModuleAdded(uid);
-            });
+            // var uids = backend.createSourceModulesFromIcsFile(args.url);
+            // uids.forEach(function(uid) {
+            //     AppActions.notifyModuleAdded(uid);
+            // });
         };
 
         handlers[ActionTypes.json_file_read] = function(args) {
-            backend.readJSON("workflow.json");
+            // backend.readJSON("workflow.json");
         }
 
         handlers[ActionTypes.json_file_write] = function(args) {
-            backend.writeJSON("workflow.json");
+            // backend.writeJSON("workflow.json");
         }
 
         handlers[ActionTypes.module_add_request] = function(args) {
-            var uid = backend.createGenericModule(args.scriptPath);
-            if (uid >= 0) {
-                modelUpToDate = false;
-                AppActions.notifyModuleAdded(uid);
-            }
+            // var uid = backend.createGenericModule(args.scriptPath);
+            // if (uid >= 0) {
+            //     modelUpToDate = false;
+            //     AppActions.notifyModuleAdded(uid);
+            // }
         };
 
         handlers[ActionTypes.module_remove_request] = function(args) {
-            if (backend.hasModule(args.uid)) {
-                modelUpToDate = false;
-                backend.destroyModule(args.uid);
-                AppActions.notifyModuleRemoved(args.uid);
-                AppActions.refreshAllModuleOutput();
-            }
+            // if (backend.hasModule(args.uid)) {
+            //     modelUpToDate = false;
+            //     backend.destroyModule(args.uid);
+            //     AppActions.notifyModuleRemoved(args.uid);
+            //     AppActions.refreshAllModuleOutput();
+            // }
         };
 
         handlers[ActionTypes.module_input_change_request] = function(args) {
-            backend.disconnectInput(args.uid, args.portId);
-            var success = backend.connectInputOutput(
-                args.values.targetUid, args.values.targetPortId,
-                args.uid, args.portId);
-            if (!success) {
-                // TODO: proper error messaging
-                console.warn("can not connect ports");
-            } else {
-                modelUpToDate = false;
-                args.values.inputOptionForceReset = !success;
-                AppActions.notifyModuleInputChanged(args.uid, args.portId, args.values);
-            }
+            // backend.disconnectInput(args.uid, args.portId);
+            // var success = backend.connectInputOutput(
+            //     args.values.targetUid, args.values.targetPortId,
+            //     args.uid, args.portId);
+            // if (!success) {
+            //     // TODO: proper error messaging
+            //     console.warn("can not connect ports");
+            // } else {
+            //     modelUpToDate = false;
+            //     args.values.inputOptionForceReset = !success;
+            //     AppActions.notifyModuleInputChanged(args.uid, args.portId, args.values);
+            // }
         };
 
         handlers[ActionTypes.module_properties_change_request] = function(args) {
-            backend.setModuleProperties(args.uid, args.values);
-            var newValues = backend.getModuleProperties(args.uid);
-            AppActions.notifyModulePropertiesChanged(args.uid, newValues);
+            // backend.setModuleProperties(args.uid, args.values);
+            // var newValues = backend.getModuleProperties(args.uid);
+            // AppActions.notifyModulePropertiesChanged(args.uid, newValues);
         };
 
         handlers[ActionTypes.module_output_change_request] = function(args) {
-            AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
+            // AppActions.notifyModuleOutputChanged(args.uid, args.portId, args.values);
         };
 
         handlers[ActionTypes.module_param_change_request] = function(args) {
-            if (backend.hasModule(args.uid)) {
-                modelUpToDate = false;
-                backend.setParamPortProperty(args.uid, args.portId, args.values.value);
-                AppActions.notifyModuleParamChanged(args.uid, args.portId, args.values);
-            }
+            // if (backend.hasModule(args.uid)) {
+            //     modelUpToDate = false;
+            //     backend.setParamPortProperty(args.uid, args.portId, args.values.value);
+            //     AppActions.notifyModuleParamChanged(args.uid, args.portId, args.values);
+            // }
         };
 
         handlers[ActionTypes.platform_evaluation] = function(args) {
-            backend.evaluatePlatform();
-            AppActions.refreshAllModuleOutput();
-            modelUpToDate = true;
+            // backend.evaluatePlatform();
+            // AppActions.refreshAllModuleOutput();
+            // modelUpToDate = true;
         };
 
         handlers[ActionTypes.module_list_refresh] = function(args) {
-            var moduleFiles = backend.getModuleScriptsList();
-            supportedModules.clear();
-            moduleFiles.forEach(function(x) {
-                supportedModules.append(x);
-            });
+            // var moduleFiles = backend.getModuleScriptsList();
+            // supportedModules.clear();
+            // moduleFiles.forEach(function(x) {
+            //     supportedModules.append(x);
+            // });
         };
 
         var notHandled = function(args) {};
         (handlers[actionType] || notHandled)(args);
     }
 
-    ModulePlatformBackend {
-        id: backend
+    BackendStore {
+        id: model
+        
+        Component.onCompleted: {
+            // demo data
+            addModule(0, -1, "module", "x", "dummyType", 0);
+            addModule(0, 0, "input", "x.i0", "int", 0);
+            addModule(1, 0, "input", "x.i1", "image", 0);
+            addModule(0, 0, "output", "x.o1", "image", 0);
+            addModule(1, -1, "module", "y", "dummyType", 0);
+            addModule(0, 1, "output", "y.o0", "int", 0);
+            addModule(1, 1, "output", "y.o1", "image", 0);
+            addModule(0, 1, "output", "y.i0", "image", 0);
+        }
+        
     }
 
     ListModel {
