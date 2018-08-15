@@ -107,38 +107,87 @@ ApplicationWindow {
             }
 
             Rectangle {
+                id: consolePanel
+
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: 240
                 color: "#1f000000"
 
-                Flickable {
-                    anchors.fill: parent
-                    clip: true
-                    contentHeight: textArea.height
-
-                    onContentHeightChanged: {
-                        contentY = contentHeight - height;
+                states: State {
+                    name: "opened"
+                    when: consoleShowHide.checked
+                    PropertyChanges {
+                        target: consolePanel
+                        height: consoleShowHide.height
                     }
-
-                    TextArea {
-                        id: textArea
-                        font.pointSize: 11
-                        font.family: "Courier"
-                        text: LogCollector.unfilteredLog
-                        color: Material.accent
-                        textFormat: TextEdit.RichText
-                        readOnly: true
-                        selectByMouse: true
-                        selectByKeyboard: true
-                        wrapMode: TextEdit.WrapAnywhere
-                        background: Item {}
-                        width: parent.width
-                    }
-
-                    ScrollIndicator.vertical: ScrollIndicator {}
                 }
+
+                transitions: Transition {
+                    from: ""; to: "opened"; reversible: true
+                    NumberAnimation {
+                        properties: "height"
+                        easing.type: Easing.OutBack
+                        duration: 150
+                    }
+                }
+
+                ColumnLayout {
+                    anchors.fill: parent
+
+                    Text {
+                        id: consoleShowHide
+                        property bool checked: false
+                        Layout.preferredHeight: height
+                        Layout.fillWidth: true
+                        // TODO: nice arrows to indicate show/hide direction
+                        text: checked ? "+" : "-"
+                        horizontalAlignment: Text.AlignHCenter
+                        // TODO: text color match to the theme
+                        color: "white"
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                parent.checked = !parent.checked;
+                            }
+                        }
+                    }
+
+                    Flickable {
+                        
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+
+                        clip: true
+                        contentHeight: textArea.height
+
+                        onContentHeightChanged: {
+                            contentY = contentHeight - height;
+                        }
+
+                        TextArea {
+                            id: textArea
+                            font.pointSize: 11
+                            font.family: "Courier"
+                            text: LogCollector.unfilteredLog
+                            color: Material.accent
+                            textFormat: TextEdit.RichText
+                            readOnly: true
+                            selectByMouse: true
+                            selectByKeyboard: true
+                            wrapMode: TextEdit.WrapAnywhere
+                            background: Item {}
+                            width: parent.width - 16
+                            x: 8
+                        }
+
+                        ScrollIndicator.vertical: ScrollIndicator {}
+                    }
+
+                } // row layout
+
             }
 
         }

@@ -121,9 +121,7 @@ int BackendStore::count() const
 
 BackendStoreFilter::BackendStoreFilter(QObject* parent)
     :  QSortFilterProxyModel(parent)
-{
-    // setDynamicSortFilter(true);
-}
+{}
 
 bool BackendStoreFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
