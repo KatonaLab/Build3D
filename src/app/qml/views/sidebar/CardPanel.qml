@@ -32,9 +32,7 @@ Pane {
 
         model: moduleList
         delegate: Card {
-            uid: model.uid
-            displayName: model.name
-            moduleTypeName: model.type
+            moduleDetails: model
 
             BackendStoreFilter {
                 id: inputsModel

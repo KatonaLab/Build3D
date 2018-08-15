@@ -82,7 +82,7 @@ Repeater {
 
         Component {
             id: stringDelegate
-            ColumnLayout {
+            RowLayout {
                 Label {
                     text: details.name
                     font: root.font
@@ -99,7 +99,7 @@ Repeater {
 
         Component {
             id: filenameDelegate
-            ColumnLayout {
+            RowLayout {
                 Label {
                     Layout.fillWidth: true
                     text: details.name

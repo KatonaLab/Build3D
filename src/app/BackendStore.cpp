@@ -9,6 +9,7 @@
 #include "BackendParameter.h"
 #include "BackendOutput.h"
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 using namespace core::high_platform;
@@ -33,37 +34,52 @@ BackendStore::BackendStore(QObject* parent)
 
 void BackendStore::addModule(const QString& scriptPath)
 {
-    std::string script = "modules/examples/module_hello_parameters_module.py";
-    
-    ifstream f(script);
-    if (!f.is_open()) {
-        throw std::runtime_error("missing module script: " + script);
-    }
-    stringstream buffer;
-    buffer << f.rdbuf();
-
-    auto pyModule = make_shared<PythonComputeModule>(m_platform, buffer.str(), "Generic");
-    int numRows = 1 + (int)pyModule->numInputs() + (int)pyModule->numOutputs();
-    int uid = m_uidCounter++;
-
-    beginInsertRows(QModelIndex(), m_items.size(), m_items.size() + numRows);
-    m_items.push_back(make_unique<BackendModule>(pyModule, uid));
-
-    for (size_t i = 0; i < pyModule->numInputs(); ++i) {
-        auto port = pyModule->inputPort(i);
-        if (port.lock()->properties().hasKey("parameter")) {
-            m_items.push_back(make_unique<BackendParameter>(port, m_platform, i, uid));
-        } else {
-            m_items.push_back(make_unique<BackendInput>(port, i, uid));
+    // try {
+        std::string script = scriptPath.toStdString();
+        ifstream f(script);
+        if (!f.is_open()) {
+            throw std::runtime_error("missing module script: " + script);
         }
-    }
+        stringstream buffer;
+        buffer << f.rdbuf();
 
-    for (size_t i = 0; i < pyModule->numOutputs(); ++i) {
-        auto port = pyModule->outputPort(i);
-        m_items.push_back(make_unique<BackendOutput>(port, i, uid));
-    }
+        auto pyModule = make_shared<PythonComputeModule>(m_platform, buffer.str(), "Generic");
+        int numRows = 1 + (int)pyModule->numInputs() + (int)pyModule->numOutputs();
+        int uid = m_uidCounter++;
 
-    endInsertRows();
+        beginInsertRows(QModelIndex(), m_items.size(), m_items.size() + numRows);
+        m_items.push_back(make_unique<BackendModule>(pyModule, uid));
+
+        for (size_t i = 0; i < pyModule->numInputs(); ++i) {
+            auto port = pyModule->inputPort(i);
+            if (port.lock()->properties().hasKey("parameter")) {
+                m_items.push_back(make_unique<BackendParameter>(port, m_platform, i, uid));
+            } else {
+                m_items.push_back(make_unique<BackendInput>(port, i, uid));
+            }
+        }
+
+        for (size_t i = 0; i < pyModule->numOutputs(); ++i) {
+            auto port = pyModule->outputPort(i);
+            m_items.push_back(make_unique<BackendOutput>(port, m_platform, i, uid));
+        }
+
+        endInsertRows();
+    // } catch (exception& e) {
+        // qCritical() << e.what();
+    // }
+}
+
+void BackendStore::removeModule(int uid)
+{
+    // TODO: calling beginRowMove, beginRowRemove, etc would be a nicer solution
+    beginResetModel();
+    auto newEndIt = remove_if(m_items.begin(), m_items.end(),
+        [uid](const unique_ptr<BackendStoreItem>& item) {
+            return item->uid() == uid || item->parentUid() == uid;
+        });
+    m_items.erase(newEndIt);
+    endResetModel();
 }
 
 QHash<int, QByteArray> BackendStore::roleNames() const
@@ -152,6 +168,45 @@ QVariant BackendStore::get(int row)
 int BackendStore::count() const
 {
     return rowCount(QModelIndex());
+}
+
+bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid)
+{
+    auto b = m_items.begin();
+    auto e = m_items.end();
+ 
+    auto outIt = find_if(b, e,
+        [outModuleUid, outPortUid] (const unique_ptr<BackendStoreItem>& item) {
+            return item->uid() == outPortUid
+                && item->parentUid() == outModuleUid
+                && item->category() == "output";
+        });
+
+    auto inIt = find_if(b, e,
+        [inModuleUid, inPortUid] (const unique_ptr<BackendStoreItem>& item) {
+            return item->uid() == inPortUid
+                && item->parentUid() == inModuleUid
+                && item->category() == "input";
+        });
+
+    bool valid = (outIt != e) && (inIt != e) &&
+        (*outIt)->category() == "output" && (*inIt)->category() == "input";
+
+    if (!valid) {
+        // TODO: proper message, catch throw
+        throw std::runtime_error("no port to connect");
+    }
+
+    BackendOutput* out = dynamic_cast<BackendOutput*>((*outIt).get());
+    BackendInput* in = dynamic_cast<BackendInput*>((*inIt).get());
+    bool canConvert = out && in;
+
+    if (!canConvert) {
+        // TODO: proper message, catch throw
+        throw std::runtime_error("invalid ports to connect");
+    }
+
+    return out->source().lock()->bind(in->source());
 }
 
 BackendStoreFilter::BackendStoreFilter(QObject* parent)

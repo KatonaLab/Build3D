@@ -1,5 +1,6 @@
 #include "BackendStoreItem.h"
 
+#include <algorithm>
 #include <string>
 
 using namespace core::compute_platform;
@@ -27,4 +28,22 @@ QVariantMap details::propertyMapToQVariantMap(const PropertyMap& properties)
         }
     }
     return vmap;
+}
+
+string details::propertyMapToString(const PropertyMap& properties)
+{
+    auto ks = properties.keys();
+    return accumulate(ks.begin(), ks.end(), string(),
+        [](const std::string& acc, const std::string& key) {
+            return acc + ", " + key;
+        });
+}
+
+string details::portTypeTraitsToString(const PortTypeTraitsBase& traits)
+{
+    auto c = traits.getAll();
+    return accumulate(c.begin(), c.end(), string(),
+        [](const std::string& acc, const std::string& key) {
+            return acc + ", " + key;
+        });
 }

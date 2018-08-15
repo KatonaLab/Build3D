@@ -1,13 +1,15 @@
 #include "BackendModule.h"
 
+#include <QDebug>
+
 using namespace core::high_platform;
 
 BackendModule::BackendModule(std::shared_ptr<PythonComputeModule> sourceModule, int uid)
     : m_source(sourceModule), m_uid(uid)
 {
     // TODO: make status notifications
-    Q_EMIT nameChanged();
-    Q_EMIT statusChanged();
+    // Q_EMIT nameChanged();
+    // Q_EMIT statusChanged();
 }
 
 int BackendModule::uid() const
@@ -66,4 +68,9 @@ void BackendModule::setStatus(int status)
 bool BackendModule::setValue(QVariant value)
 {
     return false;
+}
+
+std::shared_ptr<PythonComputeModule> BackendModule::source()
+{
+    return m_source;
 }

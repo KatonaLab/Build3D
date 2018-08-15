@@ -45,9 +45,9 @@ BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
         }
     }
 
-    string errorMsg = "unknown input parameter type for port '"
-        + m_source.lock()->name()
-        + "', can not create parameter interface module for that";
+    string errorMsg = "unknown parameter type for port '"
+        + m_source.lock()->name() + "' (info:["
+        + portTypeTraitsToString(m_source.lock()->traits()) + "])";
     throw std::runtime_error(errorMsg);
 }
 
@@ -103,6 +103,5 @@ void BackendParameter::setStatus(int status)
 
 bool BackendParameter::setValue(QVariant value)
 {
-    qDebug() << name() << value;
     return m_interfaceModule->setData(value);
 }

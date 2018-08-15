@@ -18,7 +18,10 @@ Item {
         Label {
             id: arrow
             text: arrowCharacter
-
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            Layout.preferredWidth: 32
+            Layout.preferredHeight: 32
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
@@ -28,7 +31,7 @@ Item {
             }
         }
 
-        ColumnLayout {
+        RowLayout {
             TextField {
                 id: textField
                 onTextEdited: {
@@ -40,7 +43,7 @@ Item {
                 id: staticLabel
                 font: textField.font
                 Component.onCompleted: {
-                    font.pixelSize = textField.font.pixelSize - 1;
+                    font.pointSize = textField.font.pointSize - 1;
                 }
             }
         }

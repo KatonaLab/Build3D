@@ -20,6 +20,8 @@ public:
     void setName(const QString& name) override;
     void setStatus(int status) override;
     bool setValue(QVariant value) override;
+
+    std::shared_ptr<PythonComputeModule> source();
 protected:
     std::shared_ptr<PythonComputeModule> m_source;
     int m_uid = -1;

@@ -2,6 +2,7 @@
 #define _app_OutputInterfaceModule_h_
 
 #include <core/compute_platform/ComputeModule.h>
+#include <core/high_platform/PythonComputeModule.h>
 #include <core/compute_platform/port_utils.hpp>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
@@ -23,13 +24,13 @@ protected:
 };
 
 template <typename T>
-class TypedImageOutputHelperModule : public ImageOutputInterfaceModule {
+class TypedImageOutputInterfaceModule : public ImageOutputInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     template <typename R> using MultiDimImage = core::multidim_image_platform::MultiDimImage<R>;
     template <typename R> using TypedInputPortCollection = core::compute_platform::TypedInputPortCollection<R>;
     typedef core::compute_platform::OutputPortCollection OutputPortCollection;
 public:
-    TypedImageOutputHelperModule(ComputePlatform& parent);
+    TypedImageOutputInterfaceModule(ComputePlatform& parent);
     void execute() override;
 protected:
     TypedInputPortCollection<MultiDimImage<T>> m_inputs;
@@ -37,17 +38,19 @@ protected:
 };
 
 template <>
-class TypedImageOutputHelperModule<float>: public ImageOutputInterfaceModule {
+class TypedImageOutputInterfaceModule<float>: public ImageOutputInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     template <typename R> using MultiDimImage = core::multidim_image_platform::MultiDimImage<R>;
     template <typename R> using TypedInputPortCollection = core::compute_platform::TypedInputPortCollection<R>;
     typedef core::compute_platform::OutputPortCollection OutputPortCollection;
 public:
-    TypedImageOutputHelperModule(ComputePlatform& parent);
+    TypedImageOutputInterfaceModule(ComputePlatform& parent);
     void execute() override;
 protected:
     TypedInputPortCollection<MultiDimImage<float>> m_inputs;
     OutputPortCollection m_outputs;
 };
+
+#include "OutputInterfaceModules.ipp"
 
 #endif

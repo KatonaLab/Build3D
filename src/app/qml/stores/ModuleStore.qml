@@ -70,7 +70,7 @@ Item {
         };
 
         handlers[ActionTypes.module_param_change_request] = function(args) {
-            p = model.set();
+            // p = model.set();
 
             // if (backend.hasModule(args.uid)) {
             //     modelUpToDate = false;
@@ -102,15 +102,11 @@ Item {
         
         Component.onCompleted: {
             // demo data
-            addModule("hey");
-            // addModule(0, -1, "module", "x", "dummyType", 0);
-            // addModule(0, 0, "input", "x.i0", "int", 0);
-            // addModule(1, 0, "input", "x.i1", "image", 0);
-            // addModule(0, 0, "output", "x.o1", "image", 0);
-            // addModule(1, -1, "module", "y", "dummyType", 0);
-            // addModule(0, 1, "output", "y.o0", "int", 0);
-            // addModule(1, 1, "output", "y.o1", "image", 0);
-            // addModule(0, 1, "output", "y.i0", "image", 0);
+            addModule("modules/examples/module_hello_parameters_module.py");
+            addModule("modules/experimental/module_binarize.py");
+            addModule("modules/experimental/module_label_objects.py");
+            addModule("modules/experimental/module_label_objects.py");
+            addModule("modules/experimental/module_label_objects.py");
         }
         
     }

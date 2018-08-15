@@ -33,8 +33,10 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE void addModule(const QString& scriptPath);
+    Q_INVOKABLE void removeModule(int uid);
     Q_INVOKABLE QVariant get(int row);
     Q_INVOKABLE int count() const;
+    Q_INVOKABLE bool connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
     ComputePlatform m_platform;

@@ -4,7 +4,9 @@ import QtQml.Models 2.3
 import QtQuick.Controls 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
+import koki.katonalab.a3dc 1.0
 
+import "../../stores"
 import "../../actions"
 import "../components"
 
@@ -19,53 +21,45 @@ Repeater {
         id: inputDelegate
 
         ColumnLayout {
+            property var details: model
             Layout.fillWidth: true
 
             Label {
                 font: root.font
-                text: model.name
+                text: details.name
                 Layout.fillWidth: true
             }
 
-            Binding {
-                target: comboBox
-                property: "options"
-                value: options
-                delayed: false
-            }
-
-            Binding {
-                target: comboBox
-                property: "optionForceReset"
-                value: inputOptionForceReset
-                // NOTE: pretty important, see CardStore's handler
-                // of ActionTypes.module_input_changed_notification
-                // TODO: find a cleaner way
-                delayed: false
-            }
-
-            DynamicComboBox {
+            ComboBox {
                 id: comboBox
-                
-                hasDefaultOption: true
-                defaultOptionName: "- none -"
                 Layout.fillWidth: true
-
-                optionNameGenerator: function (item) {
-                    return item.targetModuleDisplayName + ":" + item.targetPortDisplayName;
+                model: BackendStoreFilter {
+                    source: MainStore.moduleStore.model
+                    includeCategory: ["output"]
+                    excludeParentUid: [root.uid]
+                    includeType: [details.type]
                 }
-                itemEqualsFunction: function(a, b) {
-                    return (a.targetUid === b.targetUid) && (a.targetPortId === b.targetPortId);
-                }
-
-                onOptionSelected: function (curr, prev) {
-                    AppActions.requestModuleInputChange(uid, portId, curr);
-                }
-
-                onOptionRemoved: function (prev) {
-                    // TOOD: nothing to do?
+                delegate: ItemDelegate {
+                    width: parent.width
+                    BackendStoreFilter {
+                        id: moduleDetails
+                        source: MainStore.moduleStore.model
+                        includeCategory: ["module"]
+                        includeUid: [model.parentUid]
+                    }
+                    text: moduleDetails.first.name + " : " + model.name + " - " + model.type + " " + model.category
+                    onClicked: {
+                        var success = MainStore.moduleStore.model.connect(
+                            model.parentUid, model.uid,
+                            details.parentUid, details.uid);
+                        if (success) {
+                            comboBox.currentIndex = index;
+                            comboBox.displayText = Qt.binding(function() { return text; });
+                        }
+                    }
                 }
             }
+
         }
     }
 }

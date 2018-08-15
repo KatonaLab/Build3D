@@ -41,6 +41,8 @@ Q_SIGNALS:
 
 namespace details {
     QVariantMap propertyMapToQVariantMap(const core::compute_platform::PropertyMap& properties);
+    std::string propertyMapToString(const core::compute_platform::PropertyMap& properties);
+    std::string portTypeTraitsToString(const core::compute_platform::PortTypeTraitsBase& traits);
 }
 
 #endif

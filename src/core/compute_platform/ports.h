@@ -6,6 +6,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace core {
 namespace compute_platform {
@@ -103,7 +104,7 @@ public:
         return hash() == ptt.hash();
     }
     virtual bool hasTrait(const std::string& trait) const = 0;
-    virtual const std::set<std::string>& getAll() const = 0;
+    virtual std::set<std::string> getAll() const = 0;
     virtual std::string typeName() const = 0;
 protected:
     virtual std::size_t hash() const = 0;
@@ -111,7 +112,19 @@ protected:
 
 template <typename T>
 struct TraitSet {
-    std::set<std::string> set = {};
+    // NOTE: if you ended up here with a compile time error, that
+    // means you are trying to access a TraitSet of a type that
+    // was not registered with the PORT_TYPE_TRAITS macro.
+    // Also check your includes, chances are you forgot
+    // the include where you call PORT_TYPE_TRAITS on your
+    // types
+    // TraitSet() = delete;
+    // static const std::set<std::string>& set() {
+    //     static std::set<std::string> empty;
+    //     return empty;
+    // }
+    // TraitSet() = delete;
+    std::set<std::string> set() const = delete;
 };
 
 template <typename T>
@@ -119,11 +132,11 @@ class PortTypeTraits : public PortTypeTraitsBase {
 public:
     bool hasTrait(const std::string& trait) const override
     {
-        return m_traits.set.find(trait) != m_traits.set.end();
+        return m_traits.set().find(trait) != m_traits.set().end();
     }
-    const std::set<std::string>& getAll() const override
+    std::set<std::string> getAll() const override
     {
-        return m_traits.set;
+        return m_traits.set();
     }
     static const PortTypeTraits& instance()
     {
@@ -144,22 +157,22 @@ protected:
 
 template <typename T> const TraitSet<T> PortTypeTraits<T>::m_traits;
 
-#define PORT_TYPE_TRAITS(Type, x) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = x; };
-#define PORT_TYPE_TRAITS_EX(Type, ...) template <> struct core::compute_platform::TraitSet<Type> { std::set<std::string> set = {__VA_ARGS__}; };
+#define PORT_TYPE_TRAITS(Type, ...) template <> struct core::compute_platform::TraitSet<Type> { \
+    std::set<std::string> set() const { return {__VA_ARGS__}; } };
 
 // TODO: remove the exact type traits, it's a hack that should be fixed with a project-wide static-dynamic typeing system
-PORT_TYPE_TRAITS_EX(uint8_t, "int-like", "uint8_t");
-PORT_TYPE_TRAITS_EX(uint16_t, "int-like", "uint16_t");
-PORT_TYPE_TRAITS_EX(uint32_t, "int-like", "uint32_t");
-PORT_TYPE_TRAITS_EX(uint64_t, "int-like", "uint64_t");
-PORT_TYPE_TRAITS_EX(int8_t, "int-like", "int8_t");
-PORT_TYPE_TRAITS_EX(int16_t, "int-like", "int16_t");
-PORT_TYPE_TRAITS_EX(int32_t, "int-like", "int32_t");
-PORT_TYPE_TRAITS_EX(int64_t, "int-like", "int64_t");
-PORT_TYPE_TRAITS_EX(float, "float-like", "float");
-PORT_TYPE_TRAITS_EX(double, "float-like", "double");
-PORT_TYPE_TRAITS_EX(bool, "bool-like", "bool");
-PORT_TYPE_TRAITS_EX(std::string, "string");
+PORT_TYPE_TRAITS(uint8_t, "int-like", "uint8_t");
+PORT_TYPE_TRAITS(uint16_t, "int-like", "uint16_t");
+PORT_TYPE_TRAITS(uint32_t, "int-like", "uint32_t");
+PORT_TYPE_TRAITS(uint64_t, "int-like", "uint64_t");
+PORT_TYPE_TRAITS(int8_t, "int-like", "int8_t");
+PORT_TYPE_TRAITS(int16_t, "int-like", "int16_t");
+PORT_TYPE_TRAITS(int32_t, "int-like", "int32_t");
+PORT_TYPE_TRAITS(int64_t, "int-like", "int64_t");
+PORT_TYPE_TRAITS(float, "float-like", "float");
+PORT_TYPE_TRAITS(double, "float-like", "double");
+PORT_TYPE_TRAITS(bool, "bool-like", "bool");
+PORT_TYPE_TRAITS(std::string, "string");
 
 // --------------------------
 

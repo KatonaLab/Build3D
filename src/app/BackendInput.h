@@ -20,10 +20,14 @@ public:
     void setName(const QString& name) override;
     void setStatus(int status) override;
     bool setValue(QVariant value) override;
+
+    std::weak_ptr<InputPort> source();
 protected:
     std::weak_ptr<InputPort> m_source;
     int m_portId = -1;
     int m_parentUid = -1;
+    QVariantMap m_hints;
+    QString m_type;
 };
 
 #endif

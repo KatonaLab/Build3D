@@ -1,10 +1,50 @@
 #include "BackendInput.h"
 
 using namespace core::compute_platform;
+using namespace std;
 
 BackendInput::BackendInput(std::weak_ptr<InputPort> source, int portId, int parentUid)
     : m_source(source), m_portId(portId), m_parentUid(parentUid)
-{}
+{
+    if (m_source.lock() == nullptr) {
+        throw std::runtime_error("invalid source port");
+    }
+
+    using namespace details;
+
+    m_hints = propertyMapToQVariantMap(m_source.lock()->properties());
+
+    static vector<pair<string, string>> types = {
+        make_pair("uint8_t", "int"),
+        make_pair("uint16_t", "int"),
+        make_pair("uint32_t", "int"),
+        make_pair("uint64_t", "int"),
+        make_pair("int8_t", "int"),
+        make_pair("int16_t", "int"),
+        make_pair("int32_t", "int"),
+        make_pair("int64_t", "int"),
+        make_pair("float", "float"),
+        make_pair("double", "float"),
+        make_pair("bool", "bool"),
+        make_pair("string", "string"),
+        make_pair("float-image", "float-image"),
+        make_pair("int-image", "int-image"),
+        make_pair("py-object", "py-object")
+    };
+
+    const auto& t = m_source.lock()->traits();
+    for (auto& pr: types) {
+        if (t.hasTrait(pr.first)) {
+            m_type = QString::fromStdString(pr.second);
+            return;
+        }
+    }
+
+    string errorMsg = "unknown input type for port '"
+        + m_source.lock()->name() + "' (info:["
+        + portTypeTraitsToString(m_source.lock()->traits()) + "])";
+    throw std::runtime_error(errorMsg);
+}
 
 int BackendInput::uid() const
 {
@@ -28,8 +68,7 @@ QString BackendInput::name() const
 
 QString BackendInput::type() const
 {
-    // TODO:
-    return QString();
+    return m_type;
 }
 
 int BackendInput::status() const
@@ -44,8 +83,7 @@ QVariant BackendInput::value() const
 
 QVariant BackendInput::hints() const
 {
-    // TODO:
-    return QVariant();
+    return m_hints;
 }
 
 void BackendInput::setName(const QString& name)
@@ -62,4 +100,9 @@ bool BackendInput::setValue(QVariant value)
 {
     // TODO:
     return false;
+}
+
+std::weak_ptr<InputPort> BackendInput::source()
+{
+    return m_source;
 }

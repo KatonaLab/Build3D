@@ -10,9 +10,7 @@ import "../components"
 
 Pane {
     id: card
-    property int uid
-    property string displayName
-    property string moduleTypeName
+    property var moduleDetails
     property var inputs
     property var parameters
     property var outputs
@@ -43,69 +41,70 @@ Pane {
 
     Container {
         anchors.fill: parent
-        leftPadding: 4
-        rightPadding: 4
+        leftPadding: 2
+        rightPadding: 2
         clip: true
         contentItem: ColumnLayout {
             id: layout
-
             RowLayout {
                 id: header
                 Layout.fillWidth: true
+                
                 ArrowEditCheckBox {
                     id: headerArrow
-                    text: card.displayName
-                    staticText: card.moduleTypeName
                     Layout.fillWidth: true
+                    text: moduleDetails.name
+                    staticText: moduleDetails.type
                     font: card.font
-                    onTitleTextChanged: function (newText) {
-                        AppActions.requestModulePropertiesChange(uid, {"displayName": newText});
+                    onTitleTextChanged: function (text) {
+                        moduleDetails.name = text;
                     }
                     // TODO: indicate the output image colors even if the card is closed
                 }
 
                 ToolButton {
+                    id: removeButton
                     // TODO: use fontellico icon for this
                     text: "x"
-                    onClicked: AppActions.requestRemoveModule(card.uid)
+                    onClicked: AppActions.requestRemoveModule(moduleDetails.uid)
                 }
             }
 
-            // TODO: hide when no inputs
-            HorizontalDivider {
-                Layout.fillWidth: true
-                visible: card.inputs.count != 0
-            }
+            // // TODO: hide when no inputs
+            // HorizontalDivider {
+            //     Layout.fillWidth: true
+            //     visible: card.inputs.first !== undefined
+            // }
 
             CardInputs {
                 id: inputsRepeater
                 model: card.inputs
-                uid: card.uid
+                uid: moduleDetails.uid
                 font: card.font
             }
 
-            // TODO: hide when no params
-            HorizontalDivider {
-                Layout.fillWidth: true
-                visible: card.parameters.count != 0
-            }
+            // // TODO: hide when no params
+            // HorizontalDivider {
+            //     Layout.fillWidth: true
+            //     visible: card.inputs.first === undefined
+            // }
 
             CardParameters {
                 id: parametersRepeater
                 model: card.parameters
-                uid: card.uid
+                uid: moduleDetails.uid
                 font: card.font
             }
 
-            // TODO: hide when no outputs
-            HorizontalDivider {
-                Layout.fillWidth: true
-                visible: card.outputs.count != 0
-            }
+            // // TODO: hide when no outputs
+            // HorizontalDivider {
+            //     Layout.fillWidth: true
+            //     visible: card.inputs.first === undefined || card.parameters.first === undefined
+            // }
 
             CardOutputs {
                 model: card.outputs
-                uid: card.uid
+                uid: moduleDetails.uid
                 font: card.font
             }
         }

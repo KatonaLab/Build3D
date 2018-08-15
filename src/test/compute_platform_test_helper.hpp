@@ -209,4 +209,6 @@ protected:
 
 }
 
+PORT_TYPE_TRAITS(compute_platform_test::Data)
+
 #endif

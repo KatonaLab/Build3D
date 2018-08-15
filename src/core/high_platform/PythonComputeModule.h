@@ -19,8 +19,16 @@
 #include <pybind11/numpy.h>
 
 // --------------------------------------------------------
-PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<float>, {"float-image"});
-PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint32_t>, {"int-image"});
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<float>, "image", "float-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<double>, "image", "double-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<int8_t>, "image", "int8-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<int16_t>, "image", "int16-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<int32_t>, "image", "int32-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<int64_t>, "image", "int64-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint8_t>, "image", "uint8-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint16_t>, "image", "uint16-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint32_t>, "image", "uint32-image");
+PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint64_t>, "image", "uint64-image");
 PORT_TYPE_TRAITS(pybind11::object, {"py-object"});
 // --------------------------------------------------------
 

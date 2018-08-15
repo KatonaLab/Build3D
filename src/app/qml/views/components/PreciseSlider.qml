@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-ColumnLayout {
+RowLayout {
     property int decimals: 4
     property alias font: field.font
     property alias from: slider.from
