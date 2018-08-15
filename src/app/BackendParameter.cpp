@@ -3,6 +3,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <QDebug>
 
 using namespace std;
 using namespace core::compute_platform;
@@ -11,11 +12,13 @@ BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
     ComputePlatform& platform, int portId, int parentUid)
     : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
-    if (source.lock() == nullptr) {
+    if (m_source.lock() == nullptr) {
         throw std::runtime_error("invalid source port");
     }
 
     using namespace details;
+
+    m_hints = propertyMapToQVariantMap(m_source.lock()->properties());
 
     static vector<tuple<string, BuildParamFunction, string>> types = {
         make_tuple("uint8_t", buildParam<uint8_t>, "int"),
@@ -32,7 +35,7 @@ BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
         make_tuple("string", buildParam<QString>, "string")
     };
 
-    const auto& t = source.lock()->traits();
+    const auto& t = m_source.lock()->traits();
     for (auto& tri: types) {
         if (t.hasTrait(get<0>(tri))) {
             m_interfaceModule = get<1>(tri)(platform);
@@ -43,7 +46,7 @@ BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
     }
 
     string errorMsg = "unknown input parameter type for port '"
-        + source.lock()->name()
+        + m_source.lock()->name()
         + "', can not create parameter interface module for that";
     throw std::runtime_error(errorMsg);
 }
@@ -81,4 +84,25 @@ int BackendParameter::status() const
 QVariant BackendParameter::value() const
 {
     return m_interfaceModule->data();
+}
+
+QVariant BackendParameter::hints() const
+{
+    return m_hints;
+}
+
+void BackendParameter::setName(const QString& name)
+{
+    // TODO: check for nullptr
+    m_source.lock()->setName(name.toStdString());
+    Q_EMIT nameChanged();
+}
+
+void BackendParameter::setStatus(int status)
+{}
+
+bool BackendParameter::setValue(QVariant value)
+{
+    qDebug() << name() << value;
+    return m_interfaceModule->setData(value);
 }

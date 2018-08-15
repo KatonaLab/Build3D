@@ -164,7 +164,7 @@ ApplicationWindow {
                         contentHeight: textArea.height
 
                         onContentHeightChanged: {
-                            contentY = contentHeight - height;
+                            contentY = Math.max(contentHeight - height, 0);
                         }
 
                         TextArea {

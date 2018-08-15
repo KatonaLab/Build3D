@@ -20,32 +20,12 @@ Repeater {
         Layout.fillWidth: true
 
         sourceComponent: {
-
             switch (model.type) {
                 case "int": return intSliderDelegate;
                 case "float": return floatSliderDelegate;
                 case "bool": return switchDelegate;
-                case "string": return stringDelegate;
+                case "string": return details.hints.file === true ? filenameDelegate : stringDelegate;
                 defualt: return unknownControllerDelegate;
-            }
-
-            // if (modelListHasItem(details.typeTraits, "string")) {
-                // if (details.hints.file === true) {
-                    // return filenameDelegate;
-                // } else {
-                    // return stringDelegate;
-                // }
-            // }
-
-            // return unknownControllerDelegate;
-        }
-
-        Component {
-            id: buttonDelegate
-            Button {
-                text: details.name
-                font: root.font
-                // TODO: action
             }
         }
 
@@ -60,30 +40,6 @@ Repeater {
         }
 
         Component {
-            id: editDelegate
-            ColumnLayout {
-                Label {
-                    text: details.name
-                    font: root.font
-                }
-                TextField {
-                    font: root.font
-                    Layout.fillWidth: true
-                }
-                // TODO: action
-            }
-        }
-
-        Component {
-            id: comboboxDelegate
-            ComboBox {
-                model: details.options
-                font: root.font
-            }
-            // TODO: action
-        }
-
-        Component {
             id: intSliderDelegate
             PreciseSlider {
                 font: root.font
@@ -92,12 +48,9 @@ Repeater {
                 from: details.hints.min || 0
                 to: details.hints.max || 1000
                 defaultValue: details.hints.default || from
-                
                 text: details.name
-
                 onValueChanged: {
-                    var values = {value: value};
-                    AppActions.requestModuleParamChange(uid, details.uid, values);
+                    details.value = value;
                 }
             }
         }
@@ -110,24 +63,8 @@ Repeater {
                 to: details.hints.max || 1.0
                 defaultValue: details.hints.default || from
                 text: details.name
-
                 onValueChanged: {
-                    var values = {value: value};
-                    AppActions.requestModuleParamChange(uid, details.uid, values);
-                }
-            }
-        }
-
-        Component {
-            id: rangeDelegate
-            PreciseRangeSlider {
-                font: root.font
-                // TODO: action
-                onFirstValueChanged: {
-                    console.warn("not implemented CardParameters/PreciseRangeSlider")
-                }
-                onSecondValueChanged: {
-                    console.warn("not implemented CardParameters/PreciseRangeSlider")
+                    details.value = value;
                 }
             }
         }
@@ -138,8 +75,7 @@ Repeater {
                 text: details.name
                 font: root.font
                 onCheckedChanged: {
-                    var values = {value: checked};
-                    AppActions.requestModuleParamChange(uid, details.uid, values);
+                    details.value = checked;
                 }
             }
         }
@@ -155,8 +91,7 @@ Repeater {
                     font: root.font
                     Layout.fillWidth: true
                     onEditingFinished: {
-                        var values = {value: text};
-                        AppActions.requestModuleParamChange(uid, details.uid, values);
+                        details.value = text;
                     }
                 }
             }
@@ -200,8 +135,7 @@ Repeater {
 
                             console.debug("select file", cleanPath);
                             filenameText.text = cleanPath;
-                            var values = {value: cleanPath};
-                            AppActions.requestModuleParamChange(uid, details.uid, values);
+                            details.value = cleanPath
                         }
                     }
                 }

@@ -75,6 +75,7 @@ QHash<int, QByteArray> BackendStore::roleNames() const
         {NameRole, "name"},
         {TypeRole, "type"},
         {StatusRole, "status"},
+        {HintsRole, "hints"},
         {ValueRole, "value"}
     };
     return roles;
@@ -95,8 +96,42 @@ QVariant BackendStore::data(const QModelIndex& index, int role) const
         case NameRole: return item->name();
         case TypeRole: return item->type();
         case StatusRole: return item->status();
+        case HintsRole: return item->hints();
         case ValueRole: return item->value();
         default: return QVariant();
+    }
+}
+
+bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid() || !value.isValid()) {
+        return false;
+    }
+
+    auto& item = m_items[index.row()];
+    switch (role) {
+        case NameRole: {
+            if (value.canConvert<QString>()) {
+                item->setName(value.toString());
+                return true;
+            } else {
+                qWarning() << "invalid value for setting the name of '" + item->name() + "'";
+                return false;
+            }
+        }
+        case StatusRole: {
+            if (value.canConvert<int>()) {
+                item->setStatus(value.toInt());
+                return true;
+            } else {
+                qWarning() << "invalid value for setting the status of '" + item->name() + "'";
+                return false;
+            }
+        }
+        case ValueRole: {
+            return item->setValue(value);
+        }
+        default: return false;
     }
 }
 

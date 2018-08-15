@@ -6,6 +6,7 @@
 #include "ParameterInterfaceModules.hpp"
 #include <functional>
 #include <memory>
+#include <QVariantMap>
 
 class BackendParameter : public BackendStoreItem {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -20,12 +21,18 @@ public:
     QString type() const override;
     int status() const override;
     QVariant value() const override;
+    QVariant hints() const override;
+
+    void setName(const QString& name) override;
+    void setStatus(int status) override;
+    bool setValue(QVariant value) override;
 protected:
     std::weak_ptr<InputPort> m_source;
     int m_portId = -1;
     int m_parentUid = -1;
     QString m_type;
     std::shared_ptr<ParameterInterfaceModule> m_interfaceModule;
+    QVariantMap m_hints;
 };
 
 namespace details {

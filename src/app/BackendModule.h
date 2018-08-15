@@ -15,6 +15,11 @@ public:
     QString type() const override;
     int status() const override;
     QVariant value() const override;
+    QVariant hints() const override;
+
+    void setName(const QString& name) override;
+    void setStatus(int status) override;
+    bool setValue(QVariant value) override;
 protected:
     std::shared_ptr<PythonComputeModule> m_source;
     int m_uid = -1;

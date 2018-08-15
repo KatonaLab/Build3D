@@ -49,3 +49,24 @@ QVariant BackendOutput::value() const
     // return m_interfaceModule->data();
     return QVariant();
 }
+
+QVariant BackendOutput::hints() const
+{
+    // TODO:
+    return QVariant();
+}
+
+void BackendOutput::setName(const QString& name)
+{
+
+}
+
+void BackendOutput::setStatus(int status)
+{
+
+}
+
+bool BackendOutput::setValue(QVariant value)
+{
+
+}

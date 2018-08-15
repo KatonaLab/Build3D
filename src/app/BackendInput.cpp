@@ -41,3 +41,25 @@ QVariant BackendInput::value() const
 {
     return QVariant();
 }
+
+QVariant BackendInput::hints() const
+{
+    // TODO:
+    return QVariant();
+}
+
+void BackendInput::setName(const QString& name)
+{
+    // TODO: check nullptr
+    m_source.lock()->setName(name.toStdString());
+    Q_EMIT nameChanged();
+}
+
+void BackendInput::setStatus(int status)
+{}
+
+bool BackendInput::setValue(QVariant value)
+{
+    // TODO:
+    return false;
+}

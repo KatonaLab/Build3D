@@ -44,3 +44,26 @@ QVariant BackendModule::value() const
 {
     return QVariant();
 }
+
+QVariant BackendModule::hints() const
+{
+    // TODO:
+    return QVariant();
+}
+
+void BackendModule::setName(const QString& name)
+{
+    m_source->setName(name.toStdString());
+    Q_EMIT nameChanged();
+}
+
+void BackendModule::setStatus(int status)
+{
+    m_status = status;
+    Q_EMIT statusChanged();
+}
+
+bool BackendModule::setValue(QVariant value)
+{
+    return false;
+}

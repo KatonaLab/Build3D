@@ -10,39 +10,6 @@
 
 #include "BackendStoreItem.h"
 
-class BackendStoreDummyItem : public BackendStoreItem {
-public:
-    BackendStoreDummyItem(
-        int uid,
-        int parentUid,
-        QString category,
-        QString name,
-        QString type,
-        int status)
-        :
-        m_uid(uid),
-        m_parentUid(parentUid),
-        m_category(category),
-        m_name(name),
-        m_type(type),
-        m_status(status)
-    {}
-    int uid() const override { return m_uid; }
-    int parentUid() const override { return m_parentUid; }
-    QString category() const override { return m_category; }
-    QString name() const override { return m_name; }
-    QString type() const override { return m_type; }
-    int status() const override { return m_status; }
-    QVariant value() const override { return QVariant(); }
-protected:
-    int m_uid;
-    int m_parentUid;
-    QString m_category;
-    QString m_name;
-    QString m_type;
-    int m_status;
-};
-
 class BackendStore: public QAbstractListModel {
     Q_OBJECT
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -54,12 +21,14 @@ public:
         NameRole,
         TypeRole,
         StatusRole,
+        HintsRole,
         ValueRole
     };
     explicit BackendStore(QObject* parent = Q_NULLPTR);
     virtual ~BackendStore() = default;
 
     QVariant data(const QModelIndex &index, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
 
