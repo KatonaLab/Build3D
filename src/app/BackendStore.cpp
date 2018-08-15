@@ -52,7 +52,7 @@ void BackendStore::addModule(const QString& scriptPath)
     for (size_t i = 0; i < pyModule->numInputs(); ++i) {
         auto port = pyModule->inputPort(i);
         if (port.lock()->properties().hasKey("parameter")) {
-            m_items.push_back(make_unique<BackendParameter>(port, i, uid));
+            m_items.push_back(make_unique<BackendParameter>(port, m_platform, i, uid));
         } else {
             m_items.push_back(make_unique<BackendInput>(port, i, uid));
         }

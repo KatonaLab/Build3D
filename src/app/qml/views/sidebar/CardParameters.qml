@@ -25,7 +25,7 @@ Repeater {
                 case "int": return intSliderDelegate;
                 case "float": return floatSliderDelegate;
                 case "bool": return switchDelegate;
-                // case "string": 
+                case "string": return stringDelegate;
                 defualt: return unknownControllerDelegate;
             }
 

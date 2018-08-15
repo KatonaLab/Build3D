@@ -1,18 +1,51 @@
 #include "BackendParameter.h"
 
-#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
 
 using namespace std;
 using namespace core::compute_platform;
 
-BackendParameter::BackendParameter(std::weak_ptr<InputPort> source, int portId, int parentUid)
+BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
+    ComputePlatform& platform, int portId, int parentUid)
     : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
-    // auto& platform = sourceModule.platform();
-    // m_source = sourceModule.inputPort((size_t)portId);
-    // // TODO:
-    // // m_interfaceModule = make_shared<ParameterInterfaceModule>(platform, m_source);
-    // m_interfaceModule->outputPort(0).lock()->bind(m_source);
+    if (source.lock() == nullptr) {
+        throw std::runtime_error("invalid source port");
+    }
+
+    using namespace details;
+
+    static vector<tuple<string, BuildParamFunction, string>> types = {
+        make_tuple("uint8_t", buildParam<uint8_t>, "int"),
+        make_tuple("uint16_t", buildParam<uint16_t>, "int"),
+        make_tuple("uint32_t", buildParam<uint32_t>, "int"),
+        make_tuple("uint64_t", buildParam<uint64_t>, "int"),
+        make_tuple("int8_t", buildParam<int8_t>, "int"),
+        make_tuple("int16_t", buildParam<int16_t>, "int"),
+        make_tuple("int32_t", buildParam<int32_t>, "int"),
+        make_tuple("int64_t", buildParam<int64_t>, "int"),
+        make_tuple("float", buildParam<float>, "float"),
+        make_tuple("double", buildParam<double>, "float"),
+        make_tuple("bool", buildParam<bool>, "bool"),
+        make_tuple("string", buildParam<QString>, "string")
+    };
+
+    const auto& t = source.lock()->traits();
+    for (auto& tri: types) {
+        if (t.hasTrait(get<0>(tri))) {
+            m_interfaceModule = get<1>(tri)(platform);
+            m_interfaceModule->outputPort(0).lock()->bind(m_source);
+            m_type = QString::fromStdString(get<2>(tri));
+            return;
+        }
+    }
+
+    string errorMsg = "unknown input parameter type for port '"
+        + source.lock()->name()
+        + "', can not create parameter interface module for that";
+    throw std::runtime_error(errorMsg);
 }
 
 int BackendParameter::uid() const
@@ -37,7 +70,7 @@ QString BackendParameter::name() const
 
 QString BackendParameter::type() const
 {
-    return QString("int");
+    return m_type;
 }
 
 int BackendParameter::status() const

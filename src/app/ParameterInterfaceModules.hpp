@@ -27,7 +27,7 @@ class TypedParameterInterfaceModule: public ParameterInterfaceModule {
     template<typename R> using TypedOutputPortCollection =
         core::compute_platform::TypedOutputPortCollection<R>;
 public:
-    TypedParameterInterfaceModule(ComputePlatform& parent, T initialValue);
+    TypedParameterInterfaceModule(ComputePlatform& parent, T initialValue = T());
     bool setData(QVariant var) override;
     void execute() override;
     QVariant data() override;
@@ -43,7 +43,7 @@ class TypedParameterInterfaceModule<QString>: public ParameterInterfaceModule {
     template<typename R> using TypedOutputPortCollection =
         core::compute_platform::TypedOutputPortCollection<R>;
 public:
-    TypedParameterInterfaceModule(ComputePlatform& parent, QString initialValue);
+    TypedParameterInterfaceModule(ComputePlatform& parent, QString initialValue = QString());
     bool setData(QVariant var) override;
     void execute() override;
     QVariant data() override;

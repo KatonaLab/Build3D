@@ -70,6 +70,8 @@ Item {
         };
 
         handlers[ActionTypes.module_param_change_request] = function(args) {
+            p = model.set();
+
             // if (backend.hasModule(args.uid)) {
             //     modelUpToDate = false;
             //     backend.setParamPortProperty(args.uid, args.portId, args.values.value);
