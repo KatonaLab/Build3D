@@ -39,7 +39,7 @@ typedef QSharedPointer<VolumeTextureImageDataGenerator> VolumeTextureImageDataGe
 class VolumeTexture : public Qt3DRender::QAbstractTexture {
     Q_OBJECT
     Q_PROPERTY(bool smooth READ smooth WRITE setSmooth)
-    Q_PROPERTY(QVector3D size READ size)
+    Q_PROPERTY(QVector3D size READ size NOTIFY sizeChanged)
 public:
     explicit VolumeTexture(Qt3DCore::QNode* parent = nullptr);
     virtual ~VolumeTexture();
@@ -47,6 +47,8 @@ public:
     QVector3D size() const { return QVector3D(m_data->width(), m_data->height(), m_data->depth()); }
     bool smooth() const { return m_smooth; }
     void setSmooth(bool val);
+Q_SIGNALS:
+    void sizeChanged();
 protected:
     std::unique_ptr<VolumeData> m_data;
     std::unique_ptr<VolumeTextureImage> m_textureImage;

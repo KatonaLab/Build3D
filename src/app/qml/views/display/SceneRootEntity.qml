@@ -41,6 +41,7 @@ Entity {
         rollBallRadius: viewPortSize.width * 0.4
         lookSpeed: 180
         linearSpeed: 1
+        zoomMax: 10
     }
 
     // TODO: find a way to do the rendering like this:
@@ -63,9 +64,11 @@ Entity {
         delegate: VolumeEntity {
             uid: model.uid
 
-            width: model.value.texture.size.x
-            height: model.value.texture.size.y
-            depth: model.value.texture.size.z
+            property real scale: 1.0/512.0
+
+            width: model.value.texture.size.x * scale
+            height: model.value.texture.size.y * scale
+            depth: model.value.texture.size.z * scale
             volumeTexture: model.value.texture
 
             backFaceMap: renderSettings.backFaceMap

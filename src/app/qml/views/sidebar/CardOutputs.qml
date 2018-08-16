@@ -70,9 +70,9 @@ Repeater {
                             // TODO:
                             color: details.value.color
                             // Layout.alignment: Qt.AlignRight
-                            onColorChanged: {
-                                details.value = {"color": color};
-                            }
+                            // onColorChanged: {
+                                // details.value = {"color": color};
+                            // }
                         }
 
                         DropShadow {

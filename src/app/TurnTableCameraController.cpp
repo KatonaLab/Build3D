@@ -13,7 +13,7 @@ TurnTableCameraController::TurnTableCameraController(Qt3DCore::QNode *parent)
     m_viewPortSize(QSize(256, 256)), // for no particular reason
     m_rollBallRadius(90), // should be smaller than the viewport half
     m_zoomMin(0.1),
-    m_zoomMax(3),
+    m_zoomMax(10),
     m_zoomRate(0.2)
 {
     // calc m_coordMultiplier and m_coordCenter
