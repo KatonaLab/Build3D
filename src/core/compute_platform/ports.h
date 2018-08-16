@@ -132,7 +132,8 @@ class PortTypeTraits : public PortTypeTraitsBase {
 public:
     bool hasTrait(const std::string& trait) const override
     {
-        return m_traits.set().find(trait) != m_traits.set().end();
+        auto s = m_traits.set();
+        return s.find(trait) != s.end();
     }
     std::set<std::string> getAll() const override
     {

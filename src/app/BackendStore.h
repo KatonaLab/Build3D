@@ -88,7 +88,7 @@ public:
 Q_SIGNALS:
     void firstChanged();
 protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     BackendStore* m_store = nullptr;
     QList<int> m_includeUid;
     QList<int> m_excludeUid;

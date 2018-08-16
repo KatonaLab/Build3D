@@ -72,14 +72,25 @@ void BackendStore::addModule(const QString& scriptPath)
 
 void BackendStore::removeModule(int uid)
 {
-    // TODO: calling beginRowMove, beginRowRemove, etc would be a nicer solution
-    beginResetModel();
-    auto newEndIt = remove_if(m_items.begin(), m_items.end(),
-        [uid](const unique_ptr<BackendStoreItem>& item) {
-            return item->uid() == uid || item->parentUid() == uid;
-        });
-    m_items.erase(newEndIt);
-    endResetModel();
+    auto removable = [uid](const unique_ptr<BackendStoreItem>& item) {
+        return (item->category() == "module" && item->uid() == uid)
+            || (item->category() != "module" && item->parentUid() == uid);
+    };
+
+    int n = 0;
+    for (int i = 0; i < m_items.size(); ++i) {
+        if (removable(m_items[i])) {
+            beginRemoveRows(QModelIndex(), i, i);
+            ++n;
+        }
+    }
+
+    auto newEndIt = remove_if(m_items.begin(), m_items.end(), removable);
+    m_items.erase(newEndIt, m_items.end());
+    
+    for (int i = 0; i < n; ++i) {
+        endRemoveRows();
+    }
 }
 
 QHash<int, QByteArray> BackendStore::roleNames() const
@@ -103,6 +114,10 @@ QVariant BackendStore::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
+    if (index.row() < 0 || index.row() >= m_items.size()) {
+        return QVariant();
+    }
+
     auto& item = m_items[index.row()];
 
     switch (role) {
@@ -120,7 +135,11 @@ QVariant BackendStore::data(const QModelIndex& index, int role) const
 
 bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || !value.isValid()) {
+    if (!index.isValid()) {
+        return false;
+    }
+
+    if (index.row() < 0 || index.row() >= m_items.size()) {
         return false;
     }
 
@@ -274,41 +293,43 @@ void BackendStoreFilter::setSourceStore(BackendStore* store)
         m_store = store;
         setSourceModel(m_store);
 
-        // TODO: optimize signal emission and invalidate filter calls
+        // connect_all(this, store);
 
-        QObject::connect(m_store, &BackendStore::dataChanged, [=](const QModelIndex& topLeft,
-            const QModelIndex& bottomRight, const QVector<int>& roles)
-        {
-            this->invalidateFilter();
-            Q_EMIT firstChanged();
-        });
+        // // TODO: optimize signal emission and invalidate filter calls
 
-        QObject::connect(m_store, &BackendStore::modelReset, [=]()
-        {
-            this->invalidateFilter();
-            Q_EMIT firstChanged();
-        });
+        // QObject::connect(m_store, &BackendStore::dataChanged, [=](const QModelIndex& topLeft,
+        //     const QModelIndex& bottomRight, const QVector<int>& roles)
+        // {
+        //     this->invalidateFilter();
+        //     Q_EMIT firstChanged();
+        // });
 
-        QObject::connect(m_store, &BackendStore::rowsInserted, [=](const QModelIndex& parent,
-            int first, int last)
-        {
-            this->invalidateFilter();
-            Q_EMIT firstChanged();
-        });
+        // QObject::connect(m_store, &BackendStore::modelReset, [=]()
+        // {
+        //     this->invalidateFilter();
+        //     Q_EMIT firstChanged();
+        // });
 
-        QObject::connect(m_store, &BackendStore::rowsMoved, [=](const QModelIndex& parent, int start,
-            int end, const QModelIndex& destination, int row)
-        {
-            this->invalidateFilter();
-            Q_EMIT firstChanged();
-        });
+        // QObject::connect(m_store, &BackendStore::rowsInserted, [=](const QModelIndex& parent,
+        //     int first, int last)
+        // {
+        //     this->invalidateFilter();
+        //     Q_EMIT firstChanged();
+        // });
 
-        QObject::connect(m_store, &BackendStore::rowsRemoved, [=](const QModelIndex& parent,
-            int first, int last)
-        {
-            this->invalidateFilter();
-            Q_EMIT firstChanged();
-        });
+        // QObject::connect(m_store, &BackendStore::rowsMoved, [=](const QModelIndex& parent, int start,
+        //     int end, const QModelIndex& destination, int row)
+        // {
+        //     this->invalidateFilter();
+        //     Q_EMIT firstChanged();
+        // });
+
+        // QObject::connect(m_store, &BackendStore::rowsRemoved, [=](const QModelIndex& parent,
+        //     int first, int last)
+        // {
+        //     this->invalidateFilter();
+        //     Q_EMIT firstChanged();
+        // });
     }
 }
 
@@ -355,41 +376,49 @@ QList<QString> BackendStoreFilter::excludeType() const
 void BackendStoreFilter::setIncludeUid(QList<int> list)
 {
     m_includeUid = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setExcludeUid(QList<int> list)
 {
     m_excludeUid = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setIncludeParentUid(QList<int> list)
 {
     m_includeParentUid = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setExcludeParentUid(QList<int> list)
 {
     m_excludeParentUid = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setIncludeCategory(QList<QString> list)
 {
     m_includeCategory = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setExcludeCategory(QList<QString> list)
 {
     m_excludeCategory = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setIncludeType(QList<QString> list)
 {
     m_includeType = list;
+    invalidateFilter();
 }
 
 void BackendStoreFilter::setExcludeType(QList<QString> list)
 {
     m_excludeType = list;
+    invalidateFilter();
 }
 
 QVariant BackendStoreFilter::get(int row) const

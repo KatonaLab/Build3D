@@ -5,6 +5,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
 
+import "../../stores"
 import "../../actions"
 import "../components"
 
@@ -66,7 +67,7 @@ Pane {
                     id: removeButton
                     // TODO: use fontellico icon for this
                     text: "x"
-                    onClicked: AppActions.requestRemoveModule(moduleDetails.uid)
+                    onClicked: MainStore.moduleStore.model.removeModule(moduleDetails.uid)
                 }
             }
 
