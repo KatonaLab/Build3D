@@ -80,11 +80,30 @@ ApplicationWindow {
         spacing: 0
 
         CardPanel {
+            id: cardPanel
             Layout.preferredWidth: 400
             Layout.fillHeight: true
             baseModel: MainStore.moduleStore.model
             supportedModules: MainStore.moduleStore.supportedModules
             configurationUpToDate: MainStore.moduleStore.modelUpToDate
+        }
+
+        Text {
+            id: splitter
+            text: "⋮"
+            Layout.alignment: Qt.AlignVCenter
+
+            onXChanged: {
+                cardPanel.Layout.preferredWidth = splitter.x;
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                drag.axis: Drag.XAxis
+                drag.minimumX: 150
+                drag.maximumX: appWindow.width - displayItem.Layout.minimumWidth
+                drag.target: splitter
+            }
         }
 
         Item {
