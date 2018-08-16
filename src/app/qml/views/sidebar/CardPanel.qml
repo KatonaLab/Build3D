@@ -27,9 +27,6 @@ Pane {
         anchors.fill: parent
         spacing: 8
 
-        // TODO: fix scrollbar hickups: https://forum.qt.io/topic/52484/problem-scrolling-listview-with-many-entries-of-different-height/2
-        // ScrollBar.vertical: scrollbar
-
         model: moduleList
         delegate: Card {
             moduleDetails: model

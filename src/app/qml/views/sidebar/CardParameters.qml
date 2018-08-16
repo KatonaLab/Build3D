@@ -11,6 +11,7 @@ import "../components"
 
 Repeater {
     id: root
+    // TODO: not sure this is neccessary
     property int uid: -1
     property font font
 

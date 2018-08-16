@@ -45,10 +45,19 @@ ApplicationWindow {
     }
 
     Settings {
+        id: settings
         property alias x: appWindow.x
         property alias y: appWindow.y
         property alias width: appWindow.width
         property alias height: appWindow.height
+        property int splitterX: 400
+        property int consoleHeight: 240
+        property bool consoleStatus: false
+    }
+
+    Component.onDestruction: {
+        settings.splitterX = splitter.x;
+        settings.consoleHeight = consolePanel.height;
     }
 
     Action {
@@ -93,6 +102,8 @@ ApplicationWindow {
             text: "⋮"
             Layout.alignment: Qt.AlignVCenter
 
+            x: settings.splitterX
+
             onXChanged: {
                 cardPanel.Layout.preferredWidth = splitter.x;
             }
@@ -131,33 +142,14 @@ ApplicationWindow {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: 240
+                height: settings.consoleHeight
                 color: "#1f000000"
-
-                states: State {
-                    name: "opened"
-                    when: consoleShowHide.checked
-                    PropertyChanges {
-                        target: consolePanel
-                        height: consoleShowHide.height
-                    }
-                }
-
-                transitions: Transition {
-                    from: ""; to: "opened"; reversible: true
-                    NumberAnimation {
-                        properties: "height"
-                        easing.type: Easing.OutBack
-                        duration: 150
-                    }
-                }
 
                 ColumnLayout {
                     anchors.fill: parent
 
                     Text {
                         id: consoleShowHide
-                        property bool checked: false
                         Layout.preferredHeight: height
                         Layout.fillWidth: true
                         // TODO: nice arrows to indicate show/hide direction
@@ -176,10 +168,6 @@ ApplicationWindow {
                             drag.minimumY: consolePanel.height - displayItem.height
                             drag.maximumY: consolePanel.height - consoleShowHide.height
                             drag.target: consoleShowHide
-                            
-                            onClicked: {
-                                parent.checked = !parent.checked;
-                            }
                         }
                     }
 

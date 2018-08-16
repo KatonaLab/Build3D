@@ -4,6 +4,7 @@ import QtQml.Models 2.3
 import QtQuick.Controls 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
+import QtGraphicalEffects 1.0
 
 import "../../actions"
 import "../components"
@@ -11,20 +12,8 @@ import "../components"
 Repeater {
     id: root
     property font font
+    // TODO: not sure this is neccessary
     property int uid: -1
-
-    // TODO: move to a shared utility js file
-    function modelListHasItem(modelList, item) {
-        if (!modelList) {
-            return false;
-        }
-        for (var i = 0; i < modelList.count; ++i) {
-            if (modelList.get(i)[item] === true) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     delegate: Loader {
         property int uid: root.uid
@@ -32,49 +21,21 @@ Repeater {
         Layout.fillWidth: true
 
         sourceComponent: {
-            if (modelListHasItem(model.typeTraits, "int-like")) {
-                return intOutputDelegate;
-            }
-
-            if (modelListHasItem(model.typeTraits, "float-like")) {
-                return floatOutputDelegate;
-            }
-
-            if (modelListHasItem(model.typeTraits, "float-image")) {
-                return floatImageOutputDelegate;
-            }
-
-            if (modelListHasItem(model.typeTraits, "int-image")) {
-                return intImageOutputDelegate;
-            }
-
-            if (modelListHasItem(model.typeTraits, "py-object")) {
-                return pyObjectOutputDelegate;
-            }
-
-            return unknownControllerDelegate;
-        }
-
-        Component {
-            id: pyObjectOutputDelegate
-            Label {
-                text: details.name + "(py object)"
-                font: root.font
+            switch (model.type) {
+                case "int-image": return floatImageOutputDelegate;
+                case "float-image": return floatImageOutputDelegate;
+                case "int":
+                case "float":
+                case "bool":
+                case "py-object": return recognizedOutputDelegate;
+                defualt: return unknownControllerDelegate;
             }
         }
 
         Component {
-            id: intOutputDelegate
+            id: recognizedOutputDelegate
             Label {
-                text: details.name + "(int)"
-                font: root.font
-            }
-        }
-
-        Component {
-            id: floatOutputDelegate
-            Label {
-                text: details.name + "(float)"
+                text: details.name + "(" + details.type + ")"
                 font: root.font
             }
         }
@@ -84,17 +45,6 @@ Repeater {
             ColumnLayout {
                 id: floatImageOutput
                 Layout.fillWidth: true
-
-                function update() {
-                    var values = {
-                        firstValue: rangeSlider.firstValue,
-                        secondValue: rangeSlider.secondValue,
-                        color: colorSelector.color,
-                        visible: visibilitySwitch.checked,
-                        labeled: false
-                    };
-                    AppActions.requestModuleOutputChange(uid, details.uid, values);
-                }
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -109,12 +59,28 @@ Repeater {
                         }
                     }
 
-                    ColorIndicator {
-                        id: colorSelector
-                        // TODO:
-                        // color: details.color
+                    Item {
                         Layout.alignment: Qt.AlignRight
-                        onColorChanged: floatImageOutput.update()
+                        width: colorSelector.width + 9
+                        height: colorSelector.height + 9
+                        
+                        ColorIndicator {
+                            id: colorSelector
+                            // TODO:
+                            // color: "cyan"
+                            // Layout.alignment: Qt.AlignRight
+                            onColorChanged: floatImageOutput.update()
+                        }
+
+                        DropShadow {
+                            anchors.fill: parent
+                            horizontalOffset: 0
+                            verticalOffset: 0
+                            radius: 9
+                            samples: 19
+                            color: "#40000000"
+                            source: colorSelector
+                        }
                     }
                 }
 
@@ -124,39 +90,6 @@ Repeater {
                     font: root.font
                     onFirstValueChanged: floatImageOutput.update()
                     onSecondValueChanged: floatImageOutput.update()
-                }
-            }
-        }
-
-        Component {
-            id: intImageOutputDelegate
-            ColumnLayout {
-                id: intImageOutput
-                Layout.fillWidth: true
-
-                function update() {
-                    var values = {
-                        firstValue: 0.,
-                        secondValue: 1.,
-                        color: Qt.rgba(1., 1., 1., 1.),
-                        visible: intVisibilitySwitch.checked,
-                        labeled: true
-                    };
-                    AppActions.requestModuleOutputChange(uid, details.uid, values);
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-
-                    Switch {
-                        id: intVisibilitySwitch
-                        Layout.fillWidth: true
-                        text: details.name
-                        font: root.font
-                        onCheckedChanged: {
-                            intImageOutput.update();
-                        }
-                    }
                 }
             }
         }

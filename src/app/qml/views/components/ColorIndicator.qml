@@ -27,8 +27,8 @@ Rectangle {
         }
     }
 
-    implicitWidth: 18
-    implicitHeight: 18
+    implicitWidth: 24
+    implicitHeight: 24
     radius: width * 0.5
 
     MouseArea {

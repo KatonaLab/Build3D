@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-ColumnLayout {
+RowLayout {
     property int decimals: 4
     property alias font: lowField.font
     property alias from: slider.from
@@ -22,6 +22,16 @@ ColumnLayout {
         visible: text != ""
     }
 
+    TextField {
+        id: lowField
+        horizontalAlignment: TextInput.AlignRight
+        validator: DoubleValidator {}
+        implicitWidth: editWidth
+        onEditingFinished: {
+            slider.first.value = Number.fromLocaleString(text);
+        }
+    }
+
     RangeSlider {
         id: slider
         Layout.fillWidth: true
@@ -33,20 +43,20 @@ ColumnLayout {
         }
     }
 
-    RowLayout {
-        TextField {
-            id: lowField
-            horizontalAlignment: TextInput.AlignRight
-            validator: DoubleValidator {}
-            implicitWidth: editWidth
-            onEditingFinished: {
-                slider.first.value = Number.fromLocaleString(text);
-            }
-        }
+    // RowLayout {
+        // TextField {
+        //     id: lowField
+        //     horizontalAlignment: TextInput.AlignRight
+        //     validator: DoubleValidator {}
+        //     implicitWidth: editWidth
+        //     onEditingFinished: {
+        //         slider.first.value = Number.fromLocaleString(text);
+        //     }
+        // }
 
-        Rectangle {
-            Layout.fillWidth: true
-        }
+        // Rectangle {
+        //     Layout.fillWidth: true
+        // }
 
         TextField {
             id: highField
@@ -58,6 +68,6 @@ ColumnLayout {
                 slider.second.value = Number.fromLocaleString(text);
             }
         }
-    }
+    // }
 }
 
