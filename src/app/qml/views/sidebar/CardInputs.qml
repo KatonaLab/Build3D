@@ -26,19 +26,34 @@ Repeater {
 
             Label {
                 font: root.font
-                text: details.name
+                text: details.name + " (" + details.type + ")"
                 Layout.fillWidth: true
             }
 
             ComboBox {
                 id: comboBox
+                property var connectedValue: details.value
+                property bool valid: connectedValue &&
+                    connectedValue.parentUid != -1 &&
+                    connectedValue.uid != -1
+                
                 Layout.fillWidth: true
+                displayText: valid ? (currentModule.first.name + "/" + currentPort.first.name) : "-"
+
+                onConnectedValueChanged: {
+                    if (connectedValue.parentUid === -1 ||
+                        connectedValue.uid === -1) {
+                            currentIndex = -1;
+                        }
+                }
+
                 model: BackendStoreFilter {
                     source: MainStore.moduleStore.model
                     includeCategory: ["output"]
                     excludeParentUid: [root.uid]
                     includeType: [details.type]
                 }
+
                 delegate: ItemDelegate {
                     width: parent.width
                     BackendStoreFilter {
@@ -47,17 +62,32 @@ Repeater {
                         includeCategory: ["module"]
                         includeUid: [model.parentUid]
                     }
-                    text: moduleDetails.first.name + " : " + model.name + " - " + model.type + " " + model.category
+                    text: moduleDetails.first.name + "/" + model.name
                     onClicked: {
                         var success = MainStore.moduleStore.model.connect(
                             model.parentUid, model.uid,
                             details.parentUid, details.uid);
                         if (success) {
                             comboBox.currentIndex = index;
-                            comboBox.displayText = Qt.binding(function() { return text; });
                         }
                     }
                 }
+
+                BackendStoreFilter {
+                    id: currentModule
+                    source: MainStore.moduleStore.model
+                    includeCategory: ["module"]
+                    includeUid: [comboBox.valid ? comboBox.connectedValue.parentUid : -1]
+                }
+
+                BackendStoreFilter {
+                    id: currentPort
+                    source: MainStore.moduleStore.model
+                    includeCategory: ["output"]
+                    includeParentUid: [comboBox.valid ? comboBox.connectedValue.parentUid : -1]
+                    includeUid: [comboBox.valid ? comboBox.connectedValue.uid : -1]
+                }
+
             }
 
         }

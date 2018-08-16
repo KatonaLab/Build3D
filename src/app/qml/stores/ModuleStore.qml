@@ -102,10 +102,12 @@ Item {
         
         Component.onCompleted: {
             // demo data
-            addModule("modules/examples/module_hello_parameters_module.py");
+            // addModule("modules/examples/module_hello_parameters_module.py");
             addModule("modules/experimental/module_binarize.py");
             addModule("modules/experimental/module_label_objects.py");
+            addModule("modules/experimental/module_binarize.py");
             addModule("modules/experimental/module_label_objects.py");
+            addModule("modules/experimental/module_binarize.py");
             addModule("modules/experimental/module_label_objects.py");
         }
         

@@ -32,6 +32,43 @@ BackendStore::BackendStore(QObject* parent)
     PythonEnvironment::instance();
 }
 
+pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
+{
+    // TODO: this is a helper function, basically for BackendInput::value()
+    // since there is no other way to get the parentUid and uid by a weak_ptr<PortBase>
+    // but to search it from the main m_items list.
+    // A mechanism that could store these infos in a weak_ptr<PortBase> would be nice.
+
+    if (!port.lock()) {
+        return make_pair(-1, -1);
+    }
+
+    pair<int, int> r;
+    auto it = find_if(m_items.begin(), m_items.end(),
+        [port](const unique_ptr<BackendStoreItem>& item)
+        {
+            if (item->category() == "input") {
+                BackendInput* bi = dynamic_cast<BackendInput*>(item.get());
+                if (bi) {
+                    return port.lock().get() == bi->source().lock().get();
+                }
+            }
+
+            if (item->category() == "output") {
+                BackendOutput* bo = dynamic_cast<BackendOutput*>(item.get());
+                if (bo) {
+                    return port.lock().get() == bo->source().lock().get();
+                }
+            }
+            return false;
+        });
+    
+    if (it == m_items.end()) {
+        return make_pair(-1, -1);
+    }
+    return make_pair((*it)->parentUid(), (*it)->uid());
+}
+
 void BackendStore::addModule(const QString& scriptPath)
 {
     // try {
@@ -55,7 +92,7 @@ void BackendStore::addModule(const QString& scriptPath)
             if (port.lock()->properties().hasKey("parameter")) {
                 m_items.push_back(make_unique<BackendParameter>(port, m_platform, i, uid));
             } else {
-                m_items.push_back(make_unique<BackendInput>(port, i, uid));
+                m_items.push_back(make_unique<BackendInput>(port, i, uid, *this));
             }
         }
 
@@ -78,7 +115,7 @@ void BackendStore::removeModule(int uid)
     };
 
     int n = 0;
-    for (int i = 0; i < m_items.size(); ++i) {
+    for (int i = 0; i < (int)m_items.size(); ++i) {
         if (removable(m_items[i])) {
             beginRemoveRows(QModelIndex(), i, i);
             ++n;
@@ -90,6 +127,15 @@ void BackendStore::removeModule(int uid)
     
     for (int i = 0; i < n; ++i) {
         endRemoveRows();
+    }
+
+    // notify all the potential connections
+    for (int i = 0; i < (int)m_items.size(); ++i) {
+        auto& item = m_items[i];
+        if (item->category() == "input") {
+            QModelIndex ix = index(i, 0, QModelIndex());
+            Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
+        }
     }
 }
 
@@ -114,7 +160,7 @@ QVariant BackendStore::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    if (index.row() < 0 || index.row() >= m_items.size()) {
+    if (index.row() < 0 || index.row() >= (int)m_items.size()) {
         return QVariant();
     }
 
@@ -139,7 +185,7 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
         return false;
     }
 
-    if (index.row() < 0 || index.row() >= m_items.size()) {
+    if (index.row() < 0 || index.row() >= (int)m_items.size()) {
         return false;
     }
 
@@ -148,6 +194,7 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
         case NameRole: {
             if (value.canConvert<QString>()) {
                 item->setName(value.toString());
+                Q_EMIT dataChanged(index, index, {role});
                 return true;
             } else {
                 qWarning() << "invalid value for setting the name of '" + item->name() + "'";
@@ -157,6 +204,7 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
         case StatusRole: {
             if (value.canConvert<int>()) {
                 item->setStatus(value.toInt());
+                Q_EMIT dataChanged(index, index, {role});
                 return true;
             } else {
                 qWarning() << "invalid value for setting the status of '" + item->name() + "'";
@@ -164,7 +212,9 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
             }
         }
         case ValueRole: {
-            return item->setValue(value);
+            bool b = item->setValue(value);
+            Q_EMIT dataChanged(index, index, {role});
+            return b;
         }
         default: return false;
     }
@@ -225,7 +275,14 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
         throw std::runtime_error("invalid ports to connect");
     }
 
-    return out->source().lock()->bind(in->source());
+    bool success = out->source().lock()->bind(in->source());
+    if (success) {
+        Q_EMIT in->valueChanged();
+        int row = distance(b, inIt);
+        QModelIndex ix = index(row, 0, QModelIndex());
+        Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
+    }
+    return success;
 }
 
 BackendStoreFilter::BackendStoreFilter(QObject* parent)

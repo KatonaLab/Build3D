@@ -161,7 +161,7 @@ ApplicationWindow {
                         Layout.preferredHeight: height
                         Layout.fillWidth: true
                         // TODO: nice arrows to indicate show/hide direction
-                        text: checked ? "+" : "-"
+                        text: "…"
                         horizontalAlignment: Text.AlignHCenter
                         // TODO: text color match to the theme
                         color: "white"

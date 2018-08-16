@@ -1,10 +1,15 @@
 #include "BackendInput.h"
+#include "BackendStore.h"
+
+#include <QDebug>
 
 using namespace core::compute_platform;
 using namespace std;
 
-BackendInput::BackendInput(std::weak_ptr<InputPort> source, int portId, int parentUid)
-    : m_source(source), m_portId(portId), m_parentUid(parentUid)
+BackendInput::BackendInput(std::weak_ptr<InputPort> source, int portId,
+    int parentUid, const BackendStore& store)
+    : m_source(source), m_portId(portId),
+    m_parentUid(parentUid), m_store(store)
 {
     if (m_source.lock() == nullptr) {
         throw std::runtime_error("invalid source port");
@@ -78,7 +83,18 @@ int BackendInput::status() const
 
 QVariant BackendInput::value() const
 {
-    return QVariant();
+    QVariantMap vmap;
+    vmap["parentUid"] = -1;
+    vmap["uid"] = -1;
+
+    if (auto p = m_source.lock()) {
+        if (p->connected()) {
+            auto uidPair = m_store.findPort(p->getSource());
+            vmap["parentUid"] = uidPair.first;
+            vmap["uid"] = uidPair.second;
+        }
+    }
+    return vmap;
 }
 
 QVariant BackendInput::hints() const

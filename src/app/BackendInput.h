@@ -4,10 +4,13 @@
 #include "BackendStoreItem.h"
 #include <core/compute_platform/ComputeModule.h>
 
+class BackendStore;
+
 class BackendInput : public BackendStoreItem {
     typedef core::compute_platform::InputPort InputPort;
 public:
-    BackendInput(std::weak_ptr<InputPort> source, int portId, int parentUid);
+    BackendInput(std::weak_ptr<InputPort> source, int portId,
+        int parentUid, const BackendStore& store);
     int uid() const override;
     int parentUid() const override;
     QString category() const override;
@@ -28,6 +31,7 @@ protected:
     int m_parentUid = -1;
     QVariantMap m_hints;
     QString m_type;
+    const BackendStore& m_store;
 };
 
 #endif

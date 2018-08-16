@@ -9,10 +9,13 @@
 #include <QString>
 
 #include "BackendStoreItem.h"
+#include <utility>
+#include <core/compute_platform/ports.h>
 
 class BackendStore: public QAbstractListModel {
     Q_OBJECT
     typedef core::compute_platform::ComputePlatform ComputePlatform;
+    typedef core::compute_platform::PortBase PortBase;
 public:
     enum ModuleRoles {
         UidRole = Qt::UserRole,
@@ -37,6 +40,8 @@ public:
     Q_INVOKABLE QVariant get(int row);
     Q_INVOKABLE int count() const;
     Q_INVOKABLE bool connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
+
+    std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
     ComputePlatform m_platform;
