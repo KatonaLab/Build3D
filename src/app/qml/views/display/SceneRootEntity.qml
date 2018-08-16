@@ -52,34 +52,40 @@ Entity {
     // 
     // so we need a per object volume rendering and then merging the results
 
-    // NodeInstantiator {
-    //     model: MainStore.sceneStore.model
-    //     delegate: VolumeEntity {
-    //         uid: model.uid
+    NodeInstantiator {
+        model: BackendStoreFilter {
+            source: MainStore.moduleStore.model
+            includeCategory: ["output"]
+            includeType: ["float-image"]
+            includeStatus: [1]
+        }
 
-    //         width: model.size.x
-    //         height: model.size.y
-    //         depth: model.size.z
-    //         volumeTexture: model.texture
+        delegate: VolumeEntity {
+            uid: model.uid
 
-    //         backFaceMap: renderSettings.backFaceMap
-    //         // TODO: count only the visible channels
-    //         // accumDivisor: 1.0 / MainStore.moduleStore.model.count
-    //         accumDivisor: 1.0
-    //         layer: sceneLayer
+            width: model.value.texture.size.x
+            height: model.value.texture.size.y
+            depth: model.value.texture.size.z
+            volumeTexture: model.value.texture
 
-    //         // note: JSValue to QColor conversion
-    //         volumeColor: Qt.rgba(model.color.r, model.color.g, model.color.b, model.color.a);
-    //         visible: model.visible
-    //         labeled: model.labeled
+            backFaceMap: renderSettings.backFaceMap
+            // TODO: count only the visible channels
+            // accumDivisor: 1.0 / MainStore.moduleStore.model.count
+            accumDivisor: 1.0
+            layer: sceneLayer
 
-    //         lutLowCut: model.lutLow
-    //         lutHighCut: model.lutHigh
-    //         Component.onCompleted: {
-    //             lutDataMax = 1.;
-    //         }
-    //     }
-    // }
+            // note: JSValue to QColor conversion
+            volumeColor: Qt.rgba(model.value.color.r, model.value.color.g, model.value.color.b, model.value.color.a);
+            visible: model.value.visible
+            labeled: false
+
+            lutLowCut: 0
+            lutHighCut: 1
+            Component.onCompleted: {
+                lutDataMax = 1.;
+            }
+        }
+    }
 
     Layer {
         id: screenQuadLayer

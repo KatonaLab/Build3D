@@ -54,8 +54,9 @@ Repeater {
                         Layout.fillWidth: true
                         text: details.name
                         font: root.font
+                        checked: details.value.visible
                         onCheckedChanged: {
-                            floatImageOutput.update();
+                            details.value = {"visible": checked};
                         }
                     }
 
@@ -67,9 +68,11 @@ Repeater {
                         ColorIndicator {
                             id: colorSelector
                             // TODO:
-                            // color: "cyan"
+                            color: details.value.color
                             // Layout.alignment: Qt.AlignRight
-                            onColorChanged: floatImageOutput.update()
+                            onColorChanged: {
+                                details.value = {"color": color};
+                            }
                         }
 
                         DropShadow {

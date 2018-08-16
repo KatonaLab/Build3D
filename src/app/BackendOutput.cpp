@@ -11,6 +11,8 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
     ComputePlatform& platform, int portId, int parentUid)
     : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
+    m_color = QColor("cyan");
+
     if (m_source.lock() == nullptr) {
         throw std::runtime_error("invalid source port");
     }
@@ -89,9 +91,12 @@ QVariant BackendOutput::value() const
 {
     QVariantMap vmap;
     auto im = m_interfaceModule->getImage();
-    if (im == nullptr) {
-        vmap["valid"] = false;
-    } else {
+
+    vmap["valid"] = false;
+    vmap["color"] = m_color;
+    vmap["visible"] = m_visible;
+
+    if (im != nullptr) {
         vmap["valid"] = true;
         VolumeTexture* tex = new VolumeTexture;
         tex->init(*im);
@@ -99,6 +104,7 @@ QVariant BackendOutput::value() const
         // TODO:
         // vmap["histogram"]
     }
+    
     return vmap;
 }
 
@@ -115,7 +121,17 @@ void BackendOutput::setStatus(int status)
 
 bool BackendOutput::setValue(QVariant value)
 {
-    return false;
+    QVariantMap vmap = value.toMap();
+    if (vmap.contains("color")) {
+        m_color = vmap["color"].value<QColor>();
+    }
+
+    if (vmap.contains("visible")) {
+        m_visible = vmap["visible"].toBool();
+    }
+
+    Q_EMIT valueChanged();
+    return true;
 }
 
 std::weak_ptr<OutputPort> BackendOutput::source()

@@ -103,5 +103,9 @@ void BackendParameter::setStatus(int status)
 
 bool BackendParameter::setValue(QVariant value)
 {
-    return m_interfaceModule->setData(value);
+    bool changed = m_interfaceModule->setData(value);
+    if (changed) {
+        Q_EMIT valueChanged();
+    }
+    return changed;
 }

@@ -285,6 +285,26 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
     return success;
 }
 
+void BackendStore::evaluate(int uid)
+{
+    if (uid == -1) {
+        m_platform.printModuleConnections();
+        m_platform.run();
+    } else {
+        // TODO:
+    }
+
+    // notify outputs
+    for (int i = 0; i < (int)m_items.size(); ++i) {
+        auto& item = m_items[i];
+        if (item->category() == "output") {
+            QModelIndex ix = index(i, 0, QModelIndex());
+            Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
+        }
+    }
+}
+
+// TODO: move to separate file
 BackendStoreFilter::BackendStoreFilter(QObject* parent)
     :  QSortFilterProxyModel(parent)
 {}
@@ -300,7 +320,9 @@ bool BackendStoreFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sour
         make_tuple(&m_includeUid, BackendStore::UidRole, true),
         make_tuple(&m_excludeUid, BackendStore::UidRole, false),
         make_tuple(&m_includeParentUid, BackendStore::ParentUidRole, true),
-        make_tuple(&m_excludeParentUid, BackendStore::ParentUidRole, false)
+        make_tuple(&m_excludeParentUid, BackendStore::ParentUidRole, false),
+        make_tuple(&m_includeStatus, BackendStore::StatusRole, true),
+        make_tuple(&m_excludeStatus, BackendStore::StatusRole, false)
     };
 
     for (auto& tri: intTri) {
@@ -349,44 +371,6 @@ void BackendStoreFilter::setSourceStore(BackendStore* store)
     if (m_store != store) {
         m_store = store;
         setSourceModel(m_store);
-
-        // connect_all(this, store);
-
-        // // TODO: optimize signal emission and invalidate filter calls
-
-        // QObject::connect(m_store, &BackendStore::dataChanged, [=](const QModelIndex& topLeft,
-        //     const QModelIndex& bottomRight, const QVector<int>& roles)
-        // {
-        //     this->invalidateFilter();
-        //     Q_EMIT firstChanged();
-        // });
-
-        // QObject::connect(m_store, &BackendStore::modelReset, [=]()
-        // {
-        //     this->invalidateFilter();
-        //     Q_EMIT firstChanged();
-        // });
-
-        // QObject::connect(m_store, &BackendStore::rowsInserted, [=](const QModelIndex& parent,
-        //     int first, int last)
-        // {
-        //     this->invalidateFilter();
-        //     Q_EMIT firstChanged();
-        // });
-
-        // QObject::connect(m_store, &BackendStore::rowsMoved, [=](const QModelIndex& parent, int start,
-        //     int end, const QModelIndex& destination, int row)
-        // {
-        //     this->invalidateFilter();
-        //     Q_EMIT firstChanged();
-        // });
-
-        // QObject::connect(m_store, &BackendStore::rowsRemoved, [=](const QModelIndex& parent,
-        //     int first, int last)
-        // {
-        //     this->invalidateFilter();
-        //     Q_EMIT firstChanged();
-        // });
     }
 }
 
@@ -408,6 +392,16 @@ QList<int> BackendStoreFilter::includeParentUid() const
 QList<int> BackendStoreFilter::excludeParentUid() const
 {
     return m_excludeParentUid;
+}
+
+QList<int> BackendStoreFilter::includeStatus() const
+{
+    return m_includeStatus;
+}
+
+QList<int> BackendStoreFilter::excludeStatus() const
+{
+    return m_excludeStatus;
 }
 
 QList<QString> BackendStoreFilter::includeCategory() const
@@ -451,6 +445,18 @@ void BackendStoreFilter::setIncludeParentUid(QList<int> list)
 void BackendStoreFilter::setExcludeParentUid(QList<int> list)
 {
     m_excludeParentUid = list;
+    invalidateFilter();
+}
+
+void BackendStoreFilter::setIncludeStatus(QList<int> list)
+{
+    m_includeStatus = list;
+    invalidateFilter();
+}
+
+void BackendStoreFilter::setExcludeStatus(QList<int> list)
+{
+    m_excludeStatus = list;
     invalidateFilter();
 }
 

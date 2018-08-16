@@ -4,6 +4,7 @@
 #include "BackendStoreItem.h"
 #include <core/compute_platform/ComputeModule.h>
 #include "OutputInterfaceModules.hpp"
+#include <QColor>
 
 class BackendOutput : public BackendStoreItem {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -32,6 +33,8 @@ protected:
     QVariantMap m_hints;
     QString m_type;
     std::shared_ptr<ImageOutputInterfaceModule> m_interfaceModule;
+    QColor m_color;
+    bool m_visible;
 };
 
 namespace details {

@@ -6,6 +6,7 @@ import QtQuick.Controls.Material 2.2
 import koki.katonalab.a3dc 1.0
 
 import "../../actions"
+import "../../stores"
 
 Pane {
     id: root
@@ -65,7 +66,7 @@ Pane {
             RoundButton {
                 text: "run"
                 onClicked: {
-                    AppActions.evaluatePlatform();
+                    MainStore.moduleStore.model.evaluate(-1);
                 }
                 Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
             }

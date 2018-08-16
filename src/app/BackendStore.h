@@ -40,6 +40,9 @@ public:
     Q_INVOKABLE QVariant get(int row);
     Q_INVOKABLE int count() const;
     Q_INVOKABLE bool connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
+    // TODO:
+    // Q_INVOKABLE bool disconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
+    Q_INVOKABLE void evaluate(int uid = -1);
 
     std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
 protected:
@@ -54,7 +57,9 @@ class BackendStoreFilter: public QSortFilterProxyModel {
     Q_PROPERTY(QList<int> includeUid READ includeUid WRITE setIncludeUid)
     Q_PROPERTY(QList<int> excludeUid READ excludeUid WRITE setExcludeUid)
     Q_PROPERTY(QList<int> includeParentUid READ includeParentUid WRITE setIncludeParentUid)
-    Q_PROPERTY(QList<int> excludeParentUid READ excludeParentUid WRITE setExcludeParentUid)    
+    Q_PROPERTY(QList<int> excludeParentUid READ excludeParentUid WRITE setExcludeParentUid)
+    Q_PROPERTY(QList<int> includeStatus READ includeStatus WRITE setIncludeStatus)
+    Q_PROPERTY(QList<int> excludeStatus READ excludeStatus WRITE setExcludeStatus)
     Q_PROPERTY(QList<QString> includeCategory READ includeCategory WRITE setIncludeCategory)
     Q_PROPERTY(QList<QString> excludeCategory READ excludeCategory WRITE setExcludeCategory)
     Q_PROPERTY(QList<QString> includeType READ includeType WRITE setIncludeType)
@@ -73,6 +78,8 @@ public:
     QList<int> excludeUid() const;
     QList<int> includeParentUid() const;
     QList<int> excludeParentUid() const;
+    QList<int> includeStatus() const;
+    QList<int> excludeStatus() const;
     QList<QString> includeCategory() const;
     QList<QString> excludeCategory() const;
     QList<QString> includeType() const;
@@ -82,6 +89,8 @@ public:
     void setExcludeUid(QList<int> list);
     void setIncludeParentUid(QList<int> list);
     void setExcludeParentUid(QList<int> list);
+    void setIncludeStatus(QList<int> list);
+    void setExcludeStatus(QList<int> list);
     void setIncludeCategory(QList<QString> list);
     void setExcludeCategory(QList<QString> list);
     void setIncludeType(QList<QString> list);
@@ -99,6 +108,8 @@ protected:
     QList<int> m_excludeUid;
     QList<int> m_includeParentUid;
     QList<int> m_excludeParentUid;
+    QList<int> m_includeStatus;
+    QList<int> m_excludeStatus;
     QList<QString> m_includeCategory;
     QList<QString> m_excludeCategory;
     QList<QString> m_includeType;
