@@ -35,6 +35,17 @@ void LogCollector::infoMsg(const QString& msg)
 
 void LogCollector::warningMsg(const QString& msg)
 {
+    // TODO: I was not able to fix these messages, but after all they seem to
+    // mean nothing, since everything works as excepted.
+    // This kind of error suppression is a bad idea, fix it.
+    if (msg == QString("Texture target does not support array layers")) {
+        return;
+    }
+    if (msg == QString("QApplication: invalid style override passed, ignoring it."))
+    {
+        return;
+    }
+
     m_log << "<span style='color:gold'>warning: " << msg.toStdString() << "</span><br/>";
     Q_EMIT logChanged();
 }

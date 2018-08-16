@@ -8,6 +8,7 @@
 #include <QOpenGLContext>
 #include <QQmlApplicationEngine>
 #include <QFontDatabase>
+#include <QStyleFactory>
 
 #include "client/crashpad_client.h"
 #include "client/crash_report_database.h"
@@ -99,8 +100,12 @@ int main(int argc, char* argv[])
     //     return -1;
     // }
 
+    qputenv("QT_STYLE_OVERRIDE", "Material");
+    QApplication::setStyle(QStyleFactory::create("Material"));
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
     QApplication app(argc, argv);
+
     app.setOrganizationName("MTA KOKI KatonaLab");
     app.setOrganizationDomain("koki.hu");
     app.setApplicationName("A3DC (" + QString(_A3DC_BUILD_GIT_SHA) + QString(_A3DC_BUILD_PLATFORM) + ")");
