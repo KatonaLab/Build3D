@@ -147,8 +147,17 @@ ApplicationWindow {
                         // TODO: text color match to the theme
                         color: "white"
 
+                        onYChanged: {
+                            consolePanel.height -= y;
+                        }
+
                         MouseArea {
                             anchors.fill: parent
+                            drag.axis: Drag.YAxis
+                            drag.minimumY: consolePanel.height - displayItem.height
+                            drag.maximumY: consolePanel.height - consoleShowHide.height
+                            drag.target: consoleShowHide
+                            
                             onClicked: {
                                 parent.checked = !parent.checked;
                             }
