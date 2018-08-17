@@ -85,26 +85,59 @@ void BackendStore::addModule(const QString& scriptPath)
         int uid = m_uidCounter++;
 
         beginInsertRows(QModelIndex(), m_items.size(), m_items.size() + numRows);
-        m_items.push_back(make_unique<BackendModule>(pyModule, uid));
+        addBackendStoreItem(make_unique<BackendModule>(pyModule, uid));
 
         for (size_t i = 0; i < pyModule->numInputs(); ++i) {
             auto port = pyModule->inputPort(i);
             if (port.lock()->properties().hasKey("parameter")) {
-                m_items.push_back(make_unique<BackendParameter>(port, m_platform, i, uid));
+                addBackendStoreItem(make_unique<BackendParameter>(port, m_platform, i, uid));
             } else {
-                m_items.push_back(make_unique<BackendInput>(port, i, uid, *this));
+                addBackendStoreItem(make_unique<BackendInput>(port, i, uid, *this));
             }
         }
 
         for (size_t i = 0; i < pyModule->numOutputs(); ++i) {
             auto port = pyModule->outputPort(i);
-            m_items.push_back(make_unique<BackendOutput>(port, m_platform, i, uid));
+            addBackendStoreItem(make_unique<BackendOutput>(port, m_platform, i, uid));
         }
 
         endInsertRows();
     // } catch (exception& e) {
         // qCritical() << e.what();
     // }
+}
+
+void BackendStore::addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item)
+{
+    const BackendStoreItem* p = item.get();
+    auto notifyGenerator = [this, p] (ModuleRoles role)
+    {
+        return [this, p, role] () {
+            this->itemChanged(p, role);
+        };
+    };
+    QObject::connect(item.get(), &BackendStoreItem::nameChanged, this,
+        notifyGenerator(ModuleRoles::NameRole));
+    QObject::connect(item.get(), &BackendStoreItem::statusChanged, this,
+        notifyGenerator(ModuleRoles::StatusRole));
+    QObject::connect(item.get(), &BackendStoreItem::valueChanged, this,
+        notifyGenerator(ModuleRoles::ValueRole));
+    QObject::connect(item.get(), &BackendStoreItem::hintsChanged, this,
+        notifyGenerator(ModuleRoles::HintsRole));
+    m_items.push_back(move(item));
+}
+
+void BackendStore::itemChanged(const BackendStoreItem* item, ModuleRoles role)
+{
+    auto it = find_if(m_items.begin(), m_items.end(),
+        [item](const unique_ptr<BackendStoreItem>& x) {
+            return x.get() == item;
+        });
+    if (it != m_items.end()) {
+        int row = distance(m_items.begin(), it);
+        QModelIndex ix = index(row, 0, QModelIndex());
+        Q_EMIT dataChanged(ix, ix, {role});
+    }
 }
 
 void BackendStore::removeModule(int uid)
@@ -194,7 +227,6 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
         case NameRole: {
             if (value.canConvert<QString>()) {
                 item->setName(value.toString());
-                Q_EMIT dataChanged(index, index, {role});
                 return true;
             } else {
                 qWarning() << "invalid value for setting the name of '" + item->name() + "'";
@@ -204,7 +236,6 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
         case StatusRole: {
             if (value.canConvert<int>()) {
                 item->setStatus(value.toInt());
-                Q_EMIT dataChanged(index, index, {role});
                 return true;
             } else {
                 qWarning() << "invalid value for setting the status of '" + item->name() + "'";
@@ -213,7 +244,6 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
         }
         case ValueRole: {
             bool b = item->setValue(value);
-            Q_EMIT dataChanged(index, index, {role});
             return b;
         }
         default: return false;
@@ -278,9 +308,6 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
     bool success = out->source().lock()->bind(in->source());
     if (success) {
         Q_EMIT in->valueChanged();
-        int row = distance(b, inIt);
-        QModelIndex ix = index(row, 0, QModelIndex());
-        Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
     }
     return success;
 }
@@ -292,15 +319,6 @@ void BackendStore::evaluate(int uid)
         m_platform.run();
     } else {
         // TODO:
-    }
-
-    // notify outputs
-    for (int i = 0; i < (int)m_items.size(); ++i) {
-        auto& item = m_items[i];
-        if (item->category() == "output") {
-            QModelIndex ix = index(i, 0, QModelIndex());
-            Q_EMIT dataChanged(ix, ix, {BackendStore::StatusRole, BackendStore::ValueRole});
-        }
     }
 }
 

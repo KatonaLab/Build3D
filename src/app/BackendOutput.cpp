@@ -7,6 +7,7 @@
 using namespace core::compute_platform;
 using namespace std;
 
+// TODO: move to separate file
 VolumeTexture* ImageOutputValue::texture() const
 {
     return m_texture;
@@ -154,6 +155,7 @@ QString BackendOutput::category() const
 
 QString BackendOutput::name() const
 {
+    // TODO: check for nullptr
     return QString::fromStdString(m_source.lock()->name());
 }
 

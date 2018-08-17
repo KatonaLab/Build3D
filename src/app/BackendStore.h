@@ -49,6 +49,8 @@ protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
     ComputePlatform m_platform;
     int m_uidCounter = 0;
+    void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
+    void itemChanged(const BackendStoreItem* item, ModuleRoles role);
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {

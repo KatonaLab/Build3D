@@ -68,6 +68,7 @@ QString BackendInput::category() const
 
 QString BackendInput::name() const
 {
+    // TODO: check for nullptr
     return QString::fromStdString(m_source.lock()->name());
 }
 
@@ -103,18 +104,13 @@ QVariant BackendInput::hints() const
 }
 
 void BackendInput::setName(const QString& name)
-{
-    // TODO: check nullptr
-    m_source.lock()->setName(name.toStdString());
-    Q_EMIT nameChanged();
-}
+{}
 
 void BackendInput::setStatus(int status)
 {}
 
 bool BackendInput::setValue(QVariant value)
 {
-    // TODO:
     return false;
 }
 

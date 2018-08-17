@@ -68,7 +68,11 @@ QString BackendParameter::category() const
 
 QString BackendParameter::name() const
 {
-    return QString::fromStdString(m_source.lock()->name());
+    if (auto p = m_source.lock()) {
+        return QString::fromStdString(p->name());
+    } else {
+        return QString();
+    }
 }
 
 QString BackendParameter::type() const
@@ -83,6 +87,7 @@ int BackendParameter::status() const
 
 QVariant BackendParameter::value() const
 {
+    // TODO: check for nullptr
     return m_interfaceModule->data();
 }
 
@@ -92,20 +97,19 @@ QVariant BackendParameter::hints() const
 }
 
 void BackendParameter::setName(const QString& name)
-{
-    // TODO: check for nullptr
-    m_source.lock()->setName(name.toStdString());
-    Q_EMIT nameChanged();
-}
+{}
 
 void BackendParameter::setStatus(int status)
 {}
 
 bool BackendParameter::setValue(QVariant value)
 {
-    bool changed = m_interfaceModule->setData(value);
-    if (changed) {
-        Q_EMIT valueChanged();
+    if (m_interfaceModule) {
+        bool changed = m_interfaceModule->setData(value);
+        if (changed) {
+            Q_EMIT valueChanged();
+        }
+        return changed;
     }
-    return changed;
+    return false;
 }

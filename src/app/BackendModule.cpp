@@ -6,11 +6,7 @@ using namespace core::high_platform;
 
 BackendModule::BackendModule(std::shared_ptr<PythonComputeModule> sourceModule, int uid)
     : m_source(sourceModule), m_uid(uid)
-{
-    // TODO: make status notifications
-    // Q_EMIT nameChanged();
-    // Q_EMIT statusChanged();
-}
+{}
 
 int BackendModule::uid() const
 {
@@ -29,11 +25,13 @@ QString BackendModule::category() const
 
 QString BackendModule::name() const
 {
+    // TODO: check for nullptr
     return QString::fromStdString(m_source->name());
 }
 
 QString BackendModule::type() const
 {
+    // TODO: check for nullptr
     return QString::fromStdString(m_source->moduleTypeName());
 }
 
@@ -55,14 +53,19 @@ QVariant BackendModule::hints() const
 
 void BackendModule::setName(const QString& name)
 {
-    m_source->setName(name.toStdString());
-    Q_EMIT nameChanged();
+    auto p = m_source;
+    if (p && p->name() != name.toStdString()) {
+        p->setName(name.toStdString());
+        Q_EMIT nameChanged();
+    }
 }
 
 void BackendModule::setStatus(int status)
 {
-    m_status = status;
-    Q_EMIT statusChanged();
+    if (m_status != status) {
+        m_status = status;
+        Q_EMIT statusChanged();
+    }
 }
 
 bool BackendModule::setValue(QVariant value)
