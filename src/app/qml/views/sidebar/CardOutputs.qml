@@ -55,8 +55,10 @@ Repeater {
                         text: details.name
                         font: root.font
                         checked: details.value.visible
-                        onCheckedChanged: {
-                            details.value = {"visible": checked};
+                        Binding {
+                            target: details.value
+                            property: "visible"
+                            value: visibilitySwitch.checked
                         }
                     }
 
@@ -67,12 +69,12 @@ Repeater {
                         
                         ColorIndicator {
                             id: colorSelector
-                            // TODO:
                             color: details.value.color
-                            // Layout.alignment: Qt.AlignRight
-                            // onColorChanged: {
-                                // details.value = {"color": color};
-                            // }
+                            Binding {
+                                target: details.value
+                                property: "color"
+                                value: colorSelector.color
+                            }
                         }
 
                         DropShadow {
@@ -91,8 +93,8 @@ Repeater {
                     id: rangeSlider
                     Layout.fillWidth: true
                     font: root.font
-                    onFirstValueChanged: floatImageOutput.update()
-                    onSecondValueChanged: floatImageOutput.update()
+                    // onFirstValueChanged: floatImageOutput.update()
+                    // onSecondValueChanged: floatImageOutput.update()
                 }
             }
         }

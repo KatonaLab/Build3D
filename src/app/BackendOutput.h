@@ -2,9 +2,42 @@
 #define _app_BackendOutput_h_
 
 #include "BackendStoreItem.h"
+#include <QObject>
 #include <core/compute_platform/ComputeModule.h>
+#include <core/multidim_image_platform/MultiDimImage.hpp>
 #include "OutputInterfaceModules.hpp"
 #include <QColor>
+#include "VolumeTexture.h"
+
+class ImageOutputValue: public QObject {
+    Q_OBJECT
+    Q_PROPERTY(VolumeTexture* texture READ texture NOTIFY textureChanged)
+    Q_PROPERTY(QVector3D size READ size NOTIFY sizeChanged)
+    Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+    Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
+    template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
+public:
+    VolumeTexture* texture() const;
+    QVector3D size() const;
+    QColor color() const;
+    bool visible() const;
+    void setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image);
+    void setColor(QColor color);
+    void setVisible(bool visible);
+
+    virtual ~ImageOutputValue();
+Q_SIGNALS:
+    void textureChanged();
+    void sizeChanged();
+    void colorChanged();
+    void visibleChanged();
+protected:
+    std::shared_ptr<MultiDimImage<float>> m_image;
+    VolumeTexture* m_texture = nullptr;
+    QColor m_color;
+    bool m_visible = false;
+    void textureDeleted();
+};
 
 class BackendOutput : public BackendStoreItem {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -32,9 +65,10 @@ protected:
     int m_parentUid = -1;
     QVariantMap m_hints;
     QString m_type;
+    bool m_ready = false;
     std::shared_ptr<ImageOutputInterfaceModule> m_interfaceModule;
-    QColor m_color;
-    bool m_visible;
+    ImageOutputValue m_internalValue;
+    void onExecuted();
 };
 
 namespace details {

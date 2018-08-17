@@ -38,6 +38,8 @@ void LogCollector::warningMsg(const QString& msg)
     // TODO: I was not able to fix these messages, but after all they seem to
     // mean nothing, since everything works as excepted.
     // This kind of error suppression is a bad idea, fix it.
+    // TODO: at least move to these as settings on the LogCollector interface
+    // so one can be alerted about log masking is used!
     if (msg == QString("Texture target does not support array layers")) {
         return;
     }

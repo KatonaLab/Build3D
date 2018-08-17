@@ -5,6 +5,7 @@
 #include <core/high_platform/PythonComputeModule.h>
 #include <core/compute_platform/port_utils.hpp>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
+#include <functional>
 
 class ImageOutputInterfaceModule : public core::compute_platform::ComputeModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -19,8 +20,13 @@ public:
         const std::string& name = "");
     std::shared_ptr<MultiDimImage<float>> getImage();
     virtual ~ImageOutputInterfaceModule() = default;
+    void setOnExecuted(std::function<void()> handler)
+    {
+        m_onExecuteHandler = handler;
+    }
 protected:
     std::shared_ptr<MultiDimImage<float>> m_result;
+    std::function<void()> m_onExecuteHandler;
 };
 
 template <typename T>

@@ -103,6 +103,8 @@ Item {
         Component.onCompleted: {
             // demo data
             addModule("modules/examples/module_volume_generator.py");
+            addModule("modules/examples/module_volume_generator.py");
+            addModule("modules/examples/module_volume_generator.py");
         }
         
     }

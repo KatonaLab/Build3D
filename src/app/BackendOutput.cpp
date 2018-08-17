@@ -1,17 +1,96 @@
 #include "BackendOutput.h"
-#include "VolumeTexture.h"
 
 #include <tuple>
 #include <string>
+#include <QDebug>
 
 using namespace core::compute_platform;
 using namespace std;
+
+VolumeTexture* ImageOutputValue::texture() const
+{
+    return m_texture;
+}
+
+QVector3D ImageOutputValue::size() const
+{
+    return m_texture ? m_texture->size() : QVector3D(0, 0, 0);
+}
+
+QColor ImageOutputValue::color() const
+{
+    return m_color;
+}
+
+bool ImageOutputValue::visible() const
+{
+    return m_visible;
+}
+
+void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image)
+{
+    if (image.get() != m_image.get()) {
+        if (image) {
+            if (!m_texture) {
+                m_texture = new VolumeTexture();
+            }
+            m_texture->init(*image);
+            QObject::connect(m_texture, &QObject::destroyed,
+                             this, &ImageOutputValue::textureDeleted);
+        }
+        Q_EMIT textureChanged();
+        Q_EMIT sizeChanged();
+    }
+}
+
+void ImageOutputValue::textureDeleted()
+{
+    m_texture = nullptr;
+}
+
+void ImageOutputValue::setColor(QColor color)
+{
+    if (m_color != color) {
+        m_color = color;
+        Q_EMIT colorChanged();
+    }
+}
+
+void ImageOutputValue::setVisible(bool visible)
+{
+    if (m_visible != visible) {
+        m_visible = visible;
+        Q_EMIT visibleChanged();
+    }
+}
+
+ImageOutputValue::~ImageOutputValue()
+{
+    if (m_texture && m_texture->parentNode() == nullptr) {
+        delete m_texture;
+    }
+}
 
 BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
     ComputePlatform& platform, int portId, int parentUid)
     : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
-    m_color = QColor("cyan");
+    static vector<QString> colorNames = {"red", "green", "blue", "cyan", "magenta", "yellow"};
+    m_internalValue.setColor(QColor(colorNames[parentUid % colorNames.size()]));
+    m_internalValue.setVisible(false);
+
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::textureChanged,
+                     this, &BackendStoreItem::valueChanged);
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::sizeChanged,
+                     this, &BackendStoreItem::valueChanged);
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::colorChanged,
+                     this, &BackendStoreItem::valueChanged);
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::visibleChanged,
+                     this, &BackendStoreItem::valueChanged);
 
     if (m_source.lock() == nullptr) {
         throw std::runtime_error("invalid source port");
@@ -44,6 +123,7 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
         if (t.hasTrait(get<0>(tri))) {
             if (get<1>(tri)) {
                 m_interfaceModule = get<1>(tri)(platform);
+                m_interfaceModule->setOnExecuted([this]() { this->onExecuted(); });
                 m_source.lock()->bind(m_interfaceModule->inputPort(0));
             }
             m_type = QString::fromStdString(get<2>(tri));
@@ -84,28 +164,12 @@ QString BackendOutput::type() const
 
 int BackendOutput::status() const
 {
-    return (int)(m_interfaceModule && m_interfaceModule->getImage());
+    return m_ready;
 }
 
 QVariant BackendOutput::value() const
 {
-    QVariantMap vmap;
-    auto im = m_interfaceModule->getImage();
-
-    vmap["valid"] = false;
-    vmap["color"] = m_color;
-    vmap["visible"] = m_visible;
-
-    if (im != nullptr) {
-        vmap["valid"] = true;
-        VolumeTexture* tex = new VolumeTexture;
-        tex->init(*im);
-        vmap["texture"] = QVariant::fromValue(tex);
-        // TODO:
-        // vmap["histogram"]
-    }
-    
-    return vmap;
+    return QVariant::fromValue((ImageOutputValue*)&m_internalValue);
 }
 
 QVariant BackendOutput::hints() const
@@ -113,28 +177,30 @@ QVariant BackendOutput::hints() const
     return m_hints;
 }
 
-void BackendOutput::setName(const QString& name)
+void BackendOutput::setName(const QString&)
 {}
 
-void BackendOutput::setStatus(int status)
+void BackendOutput::setStatus(int)
 {}
 
-bool BackendOutput::setValue(QVariant value)
+bool BackendOutput::setValue(QVariant)
 {
-    QVariantMap vmap = value.toMap();
-    if (vmap.contains("color")) {
-        m_color = vmap["color"].value<QColor>();
-    }
-
-    if (vmap.contains("visible")) {
-        m_visible = vmap["visible"].toBool();
-    }
-
-    Q_EMIT valueChanged();
-    return true;
+    return false;
 }
 
 std::weak_ptr<OutputPort> BackendOutput::source()
 {
     return m_source;
+}
+
+void BackendOutput::onExecuted()
+{
+    if (m_interfaceModule) {
+        auto im = m_interfaceModule->getImage();
+        m_internalValue.setTextureFromImage(im);
+        if (m_internalValue.texture()) {
+            m_ready = true;
+            Q_EMIT statusChanged();
+        }
+    }
 }

@@ -10,6 +10,9 @@ void TypedImageOutputInterfaceModule<T>::execute()
     if (auto imPtr = m_inputs.template input<0>()->inputPtr().lock()) {
         m_result = std::make_shared<core::multidim_image_platform::MultiDimImage<float>>();
         m_result->convertCopyFrom(*imPtr);
+        if (m_onExecuteHandler) {
+            m_onExecuteHandler();
+        }
     } else {
         m_result.reset();
     }

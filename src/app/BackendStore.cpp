@@ -299,7 +299,7 @@ void BackendStore::evaluate(int uid)
         auto& item = m_items[i];
         if (item->category() == "output") {
             QModelIndex ix = index(i, 0, QModelIndex());
-            Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
+            Q_EMIT dataChanged(ix, ix, {BackendStore::StatusRole, BackendStore::ValueRole});
         }
     }
 }

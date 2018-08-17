@@ -66,9 +66,9 @@ Entity {
 
             property real scale: 1.0/512.0
 
-            width: model.value.texture.size.x * scale
-            height: model.value.texture.size.y * scale
-            depth: model.value.texture.size.z * scale
+            width: model.value.size.x * scale
+            height: model.value.size.y * scale
+            depth: model.value.size.z * scale
             volumeTexture: model.value.texture
 
             backFaceMap: renderSettings.backFaceMap

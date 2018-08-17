@@ -20,8 +20,8 @@
 #include "VolumeTexture.h"
 #include "ModulePlatformBackend.h"
 #include "TurnTableCameraController.h"
-
 #include "BackendStore.h"
+#include "BackendOutput.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -112,18 +112,17 @@ int main(int argc, char* argv[])
 
     setSurfaceFormat();
 
-    // qmlRegisterType<ModulePlatformBackend>("koki.katonalab.a3dc", 1, 0, "ModulePlatformBackend");
+    qmlRegisterInterface<ImageOutputValue>("ImageOutputValue");
     qmlRegisterType<VolumeTexture>("koki.katonalab.a3dc", 1, 0, "VolumeTexture");
     qmlRegisterType<TurnTableCameraController>("koki.katonalab.a3dc", 1, 0, "TurnTableCameraController");
     qmlRegisterSingletonType<A3DCVersion>("koki.katonalab.a3dc", 1, 0, "A3DCVersion", singletonA3DCVersionProvider);
     // NOTE: it will initialize LogCollector and routes the all qDebug/qInfo... log through this instance
     // see LogCollector.cpp for details
     qmlRegisterSingletonType<LogCollector>("koki.katonalab.a3dc", 1, 0, "LogCollector", singletonLogCollectorProvider);
-    
+
     qmlRegisterInterface<BackendStoreItem>("BackendStoreItem");
     qmlRegisterType<BackendStore>("koki.katonalab.a3dc", 1, 0, "BackendStore");
     qmlRegisterType<BackendStoreFilter>("koki.katonalab.a3dc", 1, 0, "BackendStoreFilter");
-    // qmlRegisterType<BackendStoreMatch>("koki.katonalab.a3dc", 1, 0, "BackendStoreMatch");
 
     if (QFontDatabase::addApplicationFont(":/assets/fonts/fontello.ttf") == -1) {
         qWarning() << "Failed to load fontello.ttf";

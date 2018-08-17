@@ -21,4 +21,7 @@ TypedImageOutputInterfaceModule<float>::TypedImageOutputInterfaceModule(ComputeP
 void TypedImageOutputInterfaceModule<float>::execute()
 {
     m_result = m_inputs.input<0>()->inputPtr().lock();
+    if (m_onExecuteHandler) {
+        m_onExecuteHandler();
+    }
 }
