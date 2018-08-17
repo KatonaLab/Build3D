@@ -5,14 +5,9 @@ import QtQml.Models 2.2
 import QtQuick.Controls.Material 2.2
 import koki.katonalab.a3dc 1.0
 
-import "../../actions"
-import "../../stores"
-
 Pane {
     id: root
-    property var supportedModules
     property var baseModel
-    property bool configurationUpToDate: true
 
     padding: 12
 
@@ -31,6 +26,7 @@ Pane {
         model: moduleList
         delegate: Card {
             moduleDetails: model
+            baseModel: root.baseModel
 
             BackendStoreFilter {
                 id: inputsModel
@@ -66,9 +62,10 @@ Pane {
             RoundButton {
                 text: "run"
                 onClicked: {
-                    MainStore.moduleStore.model.evaluate(-1);
+                    baseModel.evaluate(-1);
                 }
-                Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
+                // TODO:
+                //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
             }
 
             Rectangle { color: "transparent"; height: 16; width: 1 }
@@ -101,7 +98,7 @@ Pane {
                     MenuSeparator {}
 
                     Instantiator {
-                        model: supportedModules
+                        model: ListModel {}
                         Menu {
                             id: subMenu
                             title: displayName

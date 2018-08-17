@@ -6,7 +6,6 @@ import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
 import QtQuick.Dialogs 1.2
 
-import "../../actions"
 import "../components"
 
 Repeater {

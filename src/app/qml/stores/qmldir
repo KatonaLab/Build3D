@@ -1,1 +1,1 @@
-singleton MainStore 1.0 MainStore.qml
+singleton ModuleStore 1.0 ModuleStore.qml

@@ -6,12 +6,11 @@ import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
 import koki.katonalab.a3dc 1.0
 
-import "../../stores"
-import "../../actions"
 import "../components"
 
 Repeater {
     id: root
+    property var baseModel
     // TODO: not sure this is neccessary
     property int uid: -1
     property font font
@@ -49,7 +48,7 @@ Repeater {
                 }
 
                 model: BackendStoreFilter {
-                    source: MainStore.moduleStore.model
+                    source: baseModel
                     includeCategory: ["output"]
                     excludeParentUid: [root.uid]
                     includeType: [details.type]
@@ -59,13 +58,13 @@ Repeater {
                     width: parent.width
                     BackendStoreFilter {
                         id: moduleDetails
-                        source: MainStore.moduleStore.model
+                        source: baseModel
                         includeCategory: ["module"]
                         includeUid: [model.parentUid]
                     }
                     text: moduleDetails.first.name + "/" + model.name
                     onClicked: {
-                        var success = MainStore.moduleStore.model.connect(
+                        var success = baseModel.connect(
                             model.parentUid, model.uid,
                             details.parentUid, details.uid);
                         if (success) {
@@ -76,14 +75,14 @@ Repeater {
 
                 BackendStoreFilter {
                     id: currentModule
-                    source: MainStore.moduleStore.model
+                    source: baseModel
                     includeCategory: ["module"]
                     includeUid: [comboBox.valid ? comboBox.connectedValue.parentUid : -1]
                 }
 
                 BackendStoreFilter {
                     id: currentPort
-                    source: MainStore.moduleStore.model
+                    source: baseModel
                     includeCategory: ["output"]
                     includeParentUid: [comboBox.valid ? comboBox.connectedValue.parentUid : -1]
                     includeUid: [comboBox.valid ? comboBox.connectedValue.uid : -1]

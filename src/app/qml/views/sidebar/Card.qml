@@ -5,12 +5,11 @@ import QtQuick.Controls 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
 
-import "../../stores"
-import "../../actions"
 import "../components"
 
 Pane {
     id: card
+    property var baseModel
     property var moduleDetails
     property var inputs
     property var parameters
@@ -67,7 +66,7 @@ Pane {
                     id: removeButton
                     // TODO: use fontellico icon for this
                     text: "x"
-                    onClicked: MainStore.moduleStore.model.removeModule(moduleDetails.uid)
+                    onClicked: baseModel.removeModule(moduleDetails.uid)
                 }
             }
 
@@ -82,6 +81,7 @@ Pane {
                 model: card.inputs
                 uid: moduleDetails.uid
                 font: card.font
+                baseModel: card.baseModel
             }
 
             // // TODO: hide when no params

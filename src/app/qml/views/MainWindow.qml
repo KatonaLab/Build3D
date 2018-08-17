@@ -8,7 +8,6 @@ import Qt.labs.settings 1.0
 import Qt.labs.platform 1.0
 import koki.katonalab.a3dc 1.0
 
-import "../actions"
 import "../stores"
 import "sidebar"
 import "display"
@@ -92,9 +91,7 @@ ApplicationWindow {
             id: cardPanel
             Layout.preferredWidth: 400
             Layout.fillHeight: true
-            baseModel: MainStore.moduleStore.model
-            supportedModules: MainStore.moduleStore.supportedModules
-            configurationUpToDate: MainStore.moduleStore.modelUpToDate
+            baseModel: ModuleStore.model
         }
 
         Text {
@@ -132,6 +129,7 @@ ApplicationWindow {
                 cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
                 hoverEnabled: false
                 SceneRootEntity {
+                    baseModel: ModuleStore.model
                     viewPortSize: Qt.size(displayItem.width, displayItem.height)
                 }
             }

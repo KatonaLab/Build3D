@@ -6,7 +6,6 @@ import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
 import QtGraphicalEffects 1.0
 
-import "../../actions"
 import "../components"
 
 Repeater {

@@ -3,31 +3,30 @@
 <qresource>
     <file>../../assets/fonts/fontello.ttf</file>
     
-    <file>./qml/middlewares/DialogMiddleware.qml</file>
-    <file>./qml/middlewares/Middleware.qml</file>
     <file>./qml/stores/qmldir</file>
-    <file>./qml/stores/CardStore.qml</file>
     <file>./qml/stores/ModuleStore.qml</file>
-    <file>./qml/stores/MainStore.qml</file>
-    <file>./qml/stores/SceneStore.qml</file>
     <file>./qml/main.qml</file>
-    <file>./qml/actions/AppActions.qml</file>
-    <file>./qml/actions/qmldir</file>
-    <file>./qml/actions/AppDispatcher.qml</file>
-    <file>./qml/actions/ActionTypes.qml</file>
+    <file>./qml/prototyping/Card-prototype.qml</file>
+    <file>./qml/prototyping/PreciseSlider-prototype.qml</file>
+    <file>./qml/prototyping/HorizontalDivider-prototype.qml</file>
+    <file>./qml/prototyping/PreciseRangeSlider-prototype.qml</file>
+    <file>./qml/prototyping/ArrowEditCheckBox-prototype.qml</file>
+    <file>./qml/prototyping/CardPanel-prototype.qml</file>
+    <file>./qml/prototyping/DynamicComboBox-prototype.qml</file>
+    <file>./qml/prototyping/ArrowCheckBox-prototype.qml</file>
     <file>./qml/views/sidebar/CardInputs.qml</file>
     <file>./qml/views/sidebar/Card.qml</file>
     <file>./qml/views/sidebar/CardOutputs.qml</file>
     <file>./qml/views/sidebar/CardPanel.qml</file>
     <file>./qml/views/sidebar/CardParameters.qml</file>
     <file>./qml/views/MainWindow.qml</file>
+    <file>./qml/views/components/ArrowEditCheckBox.qml</file>
     <file>./qml/views/components/PreciseRangeSlider.qml</file>
     <file>./qml/views/components/PreciseSlider.qml</file>
     <file>./qml/views/components/ColorIndicator.qml</file>
     <file>./qml/views/components/ArrowCheckBox.qml</file>
-    <file>./qml/views/components/ArrowEditCheckBox.qml</file>
-    <file>./qml/views/components/DynamicComboBox.qml</file>
     <file>./qml/views/components/HorizontalDivider.qml</file>
+    <file>./qml/views/components/DynamicComboBox.qml</file>
     <file>./qml/views/display/SceneRenderSettings.qml</file>
     <file>./qml/views/display/SceneRootEntity.qml</file>
     <file>./qml/views/display/ScreenQuadEntity.qml</file>

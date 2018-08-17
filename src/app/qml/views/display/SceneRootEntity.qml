@@ -10,6 +10,7 @@ import "../../stores"
 Entity {
     id: root
     property size viewPortSize: Qt.size(1, 1);
+    property var baseModel
 
     components: [
         SceneRenderSettings {
@@ -55,7 +56,7 @@ Entity {
 
     NodeInstantiator {
         model: BackendStoreFilter {
-            source: MainStore.moduleStore.model
+            source: baseModel
             includeCategory: ["output"]
             includeType: ["float-image"]
             includeStatus: [1]
