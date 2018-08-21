@@ -41,10 +41,9 @@ Repeater {
                 displayText: valid ? (currentModule.first.name + "/" + currentPort.first.name) : "-"
 
                 onConnectedValueChanged: {
-                    if (connectedValue.parentUid === -1 ||
-                        connectedValue.uid === -1) {
-                            currentIndex = -1;
-                        }
+                    if (connectedValue.parentUid == -1 || connectedValue.uid == -1) {
+                        currentIndex = -1;
+                    }
                 }
 
                 model: BackendStoreFilter {

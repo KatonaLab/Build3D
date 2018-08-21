@@ -250,7 +250,7 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
     }
 }
 
-int BackendStore::rowCount(const QModelIndex& parent) const
+int BackendStore::rowCount(const QModelIndex&) const
 {
     return m_items.size();
 }
@@ -446,60 +446,70 @@ void BackendStoreFilter::setIncludeUid(QList<int> list)
 {
     m_includeUid = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setExcludeUid(QList<int> list)
 {
     m_excludeUid = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setIncludeParentUid(QList<int> list)
 {
     m_includeParentUid = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setExcludeParentUid(QList<int> list)
 {
     m_excludeParentUid = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setIncludeStatus(QList<int> list)
 {
     m_includeStatus = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setExcludeStatus(QList<int> list)
 {
     m_excludeStatus = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setIncludeCategory(QList<QString> list)
 {
     m_includeCategory = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setExcludeCategory(QList<QString> list)
 {
     m_excludeCategory = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setIncludeType(QList<QString> list)
 {
     m_includeType = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 void BackendStoreFilter::setExcludeType(QList<QString> list)
 {
     m_excludeType = list;
     invalidateFilter();
+    Q_EMIT firstChanged();
 }
 
 QVariant BackendStoreFilter::get(int row) const

@@ -1,8 +1,6 @@
 #include "BackendInput.h"
 #include "BackendStore.h"
 
-#include <QDebug>
-
 using namespace core::compute_platform;
 using namespace std;
 
@@ -103,13 +101,13 @@ QVariant BackendInput::hints() const
     return m_hints;
 }
 
-void BackendInput::setName(const QString& name)
+void BackendInput::setName(const QString&)
 {}
 
-void BackendInput::setStatus(int status)
+void BackendInput::setStatus(int)
 {}
 
-bool BackendInput::setValue(QVariant value)
+bool BackendInput::setValue(QVariant)
 {
     return false;
 }

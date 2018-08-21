@@ -56,8 +56,10 @@ Pane {
                     text: moduleDetails.name
                     staticText: moduleDetails.type
                     font: card.font
-                    onTitleTextChanged: function (text) {
-                        moduleDetails.name = text;
+                    Binding {
+                        target: moduleDetails
+                        property: "name"
+                        value: headerArrow.text
                     }
                     // TODO: indicate the output image colors even if the card is closed
                 }
@@ -70,12 +72,6 @@ Pane {
                 }
             }
 
-            // // TODO: hide when no inputs
-            // HorizontalDivider {
-            //     Layout.fillWidth: true
-            //     visible: card.inputs.first !== undefined
-            // }
-
             CardInputs {
                 id: inputsRepeater
                 model: card.inputs
@@ -84,24 +80,12 @@ Pane {
                 baseModel: card.baseModel
             }
 
-            // // TODO: hide when no params
-            // HorizontalDivider {
-            //     Layout.fillWidth: true
-            //     visible: card.inputs.first === undefined
-            // }
-
             CardParameters {
                 id: parametersRepeater
                 model: card.parameters
                 uid: moduleDetails.uid
                 font: card.font
             }
-
-            // // TODO: hide when no outputs
-            // HorizontalDivider {
-            //     Layout.fillWidth: true
-            //     visible: card.inputs.first === undefined || card.parameters.first === undefined
-            // }
 
             CardOutputs {
                 model: card.outputs
