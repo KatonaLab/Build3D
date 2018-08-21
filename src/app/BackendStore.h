@@ -16,6 +16,7 @@ class BackendStore: public QAbstractListModel {
     Q_OBJECT
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     typedef core::compute_platform::PortBase PortBase;
+    Q_PROPERTY(QVariantList availableModules READ availableModules NOTIFY availableModulesChanged)
 public:
     enum ModuleRoles {
         UidRole = Qt::UserRole,
@@ -35,6 +36,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    QVariantList availableModules() const;
+    Q_INVOKABLE void refreshAvailableModules();
+
     Q_INVOKABLE void addModule(const QString& scriptPath);
     Q_INVOKABLE void removeModule(int uid);
     Q_INVOKABLE QVariant get(int row);
@@ -45,9 +49,14 @@ public:
     Q_INVOKABLE void evaluate(int uid = -1);
 
     std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
+
+Q_SIGNALS:
+    void availableModulesChanged();
+
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
     ComputePlatform m_platform;
+    QVariantList m_availableModules;
     int m_uidCounter = 0;
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);

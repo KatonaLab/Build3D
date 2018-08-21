@@ -11,7 +11,7 @@ import "../components"
 Repeater {
     id: root
     property var baseModel
-    // TODO: not sure this is neccessary
+    // TODO: not sure uid is neccessary here
     property int uid: -1
     property font font
 

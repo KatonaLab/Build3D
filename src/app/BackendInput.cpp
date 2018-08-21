@@ -31,7 +31,7 @@ BackendInput::BackendInput(std::weak_ptr<InputPort> source, int portId,
         make_pair("bool", "bool"),
         make_pair("string", "string"),
         make_pair("float-image", "float-image"),
-        make_pair("int-image", "int-image"),
+        make_pair("uint32-image", "int-image"),
         make_pair("py-object", "py-object")
     };
 

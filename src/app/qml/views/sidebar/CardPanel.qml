@@ -79,62 +79,37 @@ Pane {
             RoundButton {
                 text: "+"
                 onClicked: {
-                    menu.open();
+                    rootMenu.open();
                 }
 
                 Menu {
-                    id: menu
-                    width: 300
-                    Menu {
-                        id: defaultToolsMenu
-                        title: "general"
-                        MenuItem {
-                            text: "import ics"
-                            onTriggered: {
-                                AppActions.importIcsFile({});
-                            }
-                        }
-                    }
-                    MenuSeparator {}
-
+                    id: rootMenu
                     Instantiator {
-                        model: ListModel {}
+                        id: groupsInstantiator
+                        model: baseModel.availableModules
                         Menu {
-                            id: subMenu
-                            title: displayName
-                            width: 300
-                            Component.onCompleted: {
-                                // TODO: find an off-the-shelf solution, this is bad
-                                for (var i = 0; i < files.count; ++i) {
-                                    for(var j = 0; j < i; ++j) {
-                                        if(files.get(i).displayName < files.get(j).displayName) {
-                                            files.move(i, j, 1)
-                                        }
+                            id: itemMenu
+                            title: modelData.name
+                            Repeater {
+                                id: menuItemRepeater
+                                model: modelData.files
+                                MenuItem {
+                                    id: itemMenu
+                                    text: modelData.name
+                                    onTriggered: {
+                                        baseModel.addModule(modelData.path);
                                     }
                                 }
-
-                                // TODO: find a nicer QML-way to generate the submenu items
-                                for (var i = 0; i < files.count; ++i) {
-                                    insertItem(-1, Qt.createQmlObject('\
-                                        import QtQuick 2.9; \
-                                        import QtQuick.Controls 2.2; \
-                                        import "../../actions"; \
-                                        MenuItem { \
-                                            text: "' + files.get(i).displayName + '"; \
-                                            onTriggered: {AppActions.requestAddModule("' + files.get(i).path + '");} \
-                                        }', subMenu));
-                                }
                             }
                         }
-                        onObjectAdded: menu.insertMenu(2, object)
-                        onObjectRemoved: menu.removeMenu(object)
+                        onObjectAdded: rootMenu.insertMenu(index, object)
+                        onObjectRemoved: rootMenu.removeMenu(object)
                     }
-
                     MenuSeparator {}
                     MenuItem {
                         text: "refresh module list"
                         onTriggered: {
-                            AppActions.refreshModuleList();
+                            baseModel.refreshAvailableModules();
                         }
                     }
                 }

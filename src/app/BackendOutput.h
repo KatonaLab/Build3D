@@ -7,6 +7,8 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include "OutputInterfaceModules.hpp"
 #include <QColor>
+#include <QVector2D>
+#include <QVector3D>
 #include "VolumeTexture.h"
 
 class ImageOutputValue: public QObject {
@@ -15,15 +17,18 @@ class ImageOutputValue: public QObject {
     Q_PROPERTY(QVector3D size READ size NOTIFY sizeChanged)
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
+    Q_PROPERTY(QVector2D lutParams READ lutParams WRITE setLutParams NOTIFY lutParamsChanged)
     template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
 public:
     VolumeTexture* texture() const;
     QVector3D size() const;
     QColor color() const;
     bool visible() const;
+    QVector2D lutParams() const;
     void setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image);
     void setColor(QColor color);
     void setVisible(bool visible);
+    void setLutParams(QVector2D lutParams);
 
     virtual ~ImageOutputValue();
 Q_SIGNALS:
@@ -31,11 +36,13 @@ Q_SIGNALS:
     void sizeChanged();
     void colorChanged();
     void visibleChanged();
+    void lutParamsChanged();
 protected:
     std::shared_ptr<MultiDimImage<float>> m_image;
     VolumeTexture* m_texture = nullptr;
     QColor m_color;
     bool m_visible = false;
+    QVector2D m_lutParams = QVector2D(0, 1);
     void textureDeleted();
 };
 

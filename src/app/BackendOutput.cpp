@@ -28,6 +28,11 @@ bool ImageOutputValue::visible() const
     return m_visible;
 }
 
+QVector2D ImageOutputValue::lutParams() const
+{
+    return m_lutParams;
+}
+
 void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image)
 {
     if (image.get() != m_image.get()) {
@@ -65,6 +70,15 @@ void ImageOutputValue::setVisible(bool visible)
     }
 }
 
+void ImageOutputValue::setLutParams(QVector2D lutParams)
+{
+    if (m_lutParams != lutParams) {
+        m_lutParams = lutParams;
+        qDebug() << m_lutParams;
+        Q_EMIT lutParamsChanged();
+    }
+}
+
 ImageOutputValue::~ImageOutputValue()
 {
     if (m_texture && m_texture->parentNode() == nullptr) {
@@ -79,6 +93,7 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
     static vector<QString> colorNames = {"red", "green", "blue", "cyan", "magenta", "yellow"};
     m_internalValue.setColor(QColor(colorNames[parentUid % colorNames.size()]));
     m_internalValue.setVisible(false);
+    m_internalValue.setLutParams(QVector2D(0, 1));
 
     QObject::connect(&m_internalValue,
                      &ImageOutputValue::textureChanged,
@@ -91,6 +106,9 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
                      this, &BackendStoreItem::valueChanged);
     QObject::connect(&m_internalValue,
                      &ImageOutputValue::visibleChanged,
+                     this, &BackendStoreItem::valueChanged);
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::lutParamsChanged,
                      this, &BackendStoreItem::valueChanged);
 
     if (m_source.lock() == nullptr) {

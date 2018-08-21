@@ -83,10 +83,13 @@ Entity {
             visible: model.value.visible
             labeled: false
 
-            lutLowCut: 0
-            lutHighCut: 1
+            lutLowCut: model.value.lutParams.x
+            lutHighCut: model.value.lutParams.y
             Component.onCompleted: {
                 lutDataMax = 1.;
+            }
+            onLutLowCutChanged: {
+                console.log('VolumeEntity', model.value.lutParams.x);
             }
         }
     }

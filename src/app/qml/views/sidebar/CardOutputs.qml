@@ -21,7 +21,7 @@ Repeater {
 
         sourceComponent: {
             switch (model.type) {
-                case "int-image": return floatImageOutputDelegate;
+                case "uint32-image": return floatImageOutputDelegate;
                 case "float-image": return floatImageOutputDelegate;
                 case "int":
                 case "float":
@@ -92,8 +92,22 @@ Repeater {
                     id: rangeSlider
                     Layout.fillWidth: true
                     font: root.font
-                    // onFirstValueChanged: floatImageOutput.update()
-                    // onSecondValueChanged: floatImageOutput.update()
+                    firstValue: details.value.lutParams.x
+                    secondValue: details.value.lutParams.y
+
+                    Binding {
+                        target: details.value
+                        property: "lutParams"
+                        value: Qt.vector2d(rangeSlider.firstValue, rangeSlider.secondValue)
+                    }
+
+                    // onFirstValueChanged: {
+                    //     console.log(firstValue);
+                    //     details.value.lutParams.x = firstValue;
+                    // }
+                    // onSecondValueChanged: {
+                    //     details.value.lutParams.y = secondValue;
+                    // }
                 }
             }
         }
