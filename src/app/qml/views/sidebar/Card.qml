@@ -39,6 +39,10 @@ Pane {
         }
     }
 
+    Component.onCompleted: {
+        headerArrow.checked = false;
+    }
+
     Container {
         anchors.fill: parent
         leftPadding: 2

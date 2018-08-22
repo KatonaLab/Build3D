@@ -477,10 +477,6 @@ BackendStore* BackendStoreFilter::sourceStore() const
 void BackendStoreFilter::setSourceStore(BackendStore* store)
 {
     try {
-        if (m_store) {
-            m_store->disconnect(this);
-        }
-
         if (m_store != store) {
             m_store = store;
             setSourceModel(m_store);
