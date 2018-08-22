@@ -1,19 +1,20 @@
-#A3-DC
+# A3-DC
 TODO: description
 
-#Requirements
+# Requirements
+
 * OpenGL >=3.2
 * TODO
 
-#Getting Started
+# Getting Started
 TODO: how to install the software
 
 TODO: how to use it with a toy example
 
-#Development Infos
+# Development Infos
 
-##Requirements
+## Requirements
 
-##Build
+## Build
 
-##Contribute
+## Contribute
