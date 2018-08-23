@@ -17,17 +17,14 @@ Rectangle {
         color: root.color
         showAlphaChannel: false
         onCurrentColorChanged: {
-            // root.color = currentColor;
             root.selectedColorChanged(currentColor);
         }
 
         onAccepted: {
-            // root.color = color;
             root.selectedColorChanged(color);
         }
 
         onRejected: {
-            // root.color = color;
             root.selectedColorChanged(color);
         }
     }

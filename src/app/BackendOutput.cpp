@@ -2,7 +2,6 @@
 
 #include <tuple>
 #include <string>
-#include <QDebug>
 
 using namespace core::compute_platform;
 using namespace std;

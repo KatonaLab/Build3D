@@ -3,7 +3,6 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <QDebug>
 #include <QString>
 #include <QUrl>
 

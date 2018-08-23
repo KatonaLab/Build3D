@@ -2,7 +2,6 @@
 
 #include <tuple>
 #include <vector>
-#include <QDebug>
 #include <core/high_platform/PythonComputeModule.h>
 #include "BackendModule.h"
 #include "BackendInput.h"
