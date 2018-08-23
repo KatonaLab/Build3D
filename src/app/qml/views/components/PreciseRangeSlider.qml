@@ -3,18 +3,17 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
 RowLayout {
+    id: root
     property int decimals: 4
-    property alias font: lowField.font
-    property alias from: slider.from
-    property alias to: slider.to
-    property real firstValue: slider.first.value
-    property real secondValue: slider.second.value
+    property alias from: rangeSlider.from
+    property alias to: rangeSlider.to
+    property vector2d value: Qt.vector2d(0, 1)
     property int editWidth: 80
     property alias text: label.text
 
     Component.onCompleted: {
-        slider.first.valueChanged(from);
-        slider.second.valueChanged(to);
+        rangeSlider.first.valueChanged(from);
+        rangeSlider.second.valueChanged(to);
     }
 
     Label {
@@ -28,46 +27,36 @@ RowLayout {
         validator: DoubleValidator {}
         implicitWidth: editWidth
         onEditingFinished: {
-            slider.first.value = Number.fromLocaleString(text);
+            rangeSlider.first.value = Number.fromLocaleString(text);
         }
     }
 
     RangeSlider {
-        id: slider
+        id: rangeSlider
         Layout.fillWidth: true
+        first.value: value.x
+        second.value: value.y
+
         first.onValueChanged: {
             lowField.text = Number(first.value.toFixed(decimals)).toLocaleString();
+            root.value = Qt.vector2d(rangeSlider.first.value, rangeSlider.second.value);
         }
+
         second.onValueChanged: {
             highField.text = Number(second.value.toFixed(decimals)).toLocaleString();
+            root.value = Qt.vector2d(rangeSlider.first.value, rangeSlider.second.value);
         }
     }
 
-    // RowLayout {
-        // TextField {
-        //     id: lowField
-        //     horizontalAlignment: TextInput.AlignRight
-        //     validator: DoubleValidator {}
-        //     implicitWidth: editWidth
-        //     onEditingFinished: {
-        //         slider.first.value = Number.fromLocaleString(text);
-        //     }
-        // }
-
-        // Rectangle {
-        //     Layout.fillWidth: true
-        // }
-
-        TextField {
-            id: highField
-            font: lowField.font
-            horizontalAlignment: TextInput.AlignRight
-            validator: DoubleValidator {}
-            implicitWidth: editWidth
-            onEditingFinished: {
-                slider.second.value = Number.fromLocaleString(text);
-            }
+    TextField {
+        id: highField
+        font: lowField.font
+        horizontalAlignment: TextInput.AlignRight
+        validator: DoubleValidator {}
+        implicitWidth: editWidth
+        onEditingFinished: {
+            rangeSlider.second.value = Number.fromLocaleString(text);
         }
-    // }
+    }
 }
 

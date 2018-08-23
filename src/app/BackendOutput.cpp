@@ -33,16 +33,64 @@ QVector2D ImageOutputValue::lutParams() const
     return m_lutParams;
 }
 
+QColor details::waveLengthToQColor(double w, double gamma)
+{
+    // NOTE: from https://gist.github.com/friendly/67a7df339aa999e2bcfcfec88311abfc
+    // all credits to the original author
+
+    double R, G, B;
+    if (w >= 380.0 && w <= 440.0) {
+        double a = 0.3 + 0.7 * (w - 380.0) / (440.0 - 380.0);
+        R = pow((-(w - 440.0) / (440.0 - 380.0)) * a, gamma);
+        G = 0.0;
+        B = pow(a, gamma);
+    } else if (w >= 440.0 & w <= 490.0) {
+        R = 0.0;
+        G = pow((w - 440.0) / (490.0 - 440.0), gamma);
+        B = 1.0;
+    } else if (w >= 490.0 & w <= 510.0) {
+        R = 0.0;
+        G = 1.0;
+        B = pow(-(w - 510.0) / (510.0 - 490.0), gamma);
+    } else if (w >= 510.0 & w <= 580.0) {
+        R = pow((w - 510.0) / (580.0 - 510.0), gamma);
+        G = 1.0;
+        B = 0.0;
+    } else if (w >= 580.0 & w <= 645.0) {
+        R = 1.0;
+        G = pow(-(w - 645.0) / (645.0 - 580.0), gamma);
+        B = 0.0;
+    } else if (w >= 645.0 & w <= 750.0) {
+        double a = 0.3 + 0.7 * (750.0 - w) / (750.0 - 645.0);
+        R = pow(a, gamma);
+        G = 0.0;
+        B = 0.0;
+    } else {
+        R = 0.0;
+        G = 0.0;
+        B = 0.0;
+    }
+    R = R * 255;
+    G = G * 255;
+    B = B * 255;
+    return QColor::fromRgb(floor(R), floor(G), floor(B));
+}
+
 void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image)
 {
     if (image.get() != m_image.get()) {
-        if (image) {
+        m_image = image;
+        if (m_image) {
             if (!m_texture) {
                 m_texture = new VolumeTexture();
             }
-            m_texture->init(*image);
+            m_texture->init(*m_image);
             QObject::connect(m_texture, &QObject::destroyed,
-                             this, &ImageOutputValue::textureDeleted);
+                this, &ImageOutputValue::textureDeleted);
+            if (m_image->meta.has("wavelength")) {
+                setColor(details::waveLengthToQColor(stod(m_image->meta.get("wavelength"))));
+            }
+
         }
         Q_EMIT textureChanged();
         Q_EMIT sizeChanged();
@@ -72,9 +120,8 @@ void ImageOutputValue::setVisible(bool visible)
 
 void ImageOutputValue::setLutParams(QVector2D lutParams)
 {
-    if (m_lutParams != lutParams) {
+    if (!qFuzzyCompare(m_lutParams, lutParams)) {
         m_lutParams = lutParams;
-        qDebug() << m_lutParams;
         Q_EMIT lutParamsChanged();
     }
 }
@@ -205,7 +252,7 @@ void BackendOutput::setStatus(int)
 
 bool BackendOutput::setValue(QVariant)
 {
-    return false;
+    return true;
 }
 
 std::weak_ptr<OutputPort> BackendOutput::source()

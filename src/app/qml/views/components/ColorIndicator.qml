@@ -8,6 +8,8 @@ Rectangle {
     id: root
     property string title: "Choose a color"
 
+    signal selectedColorChanged(color c)
+
     ColorDialog {
         id: dialog
         modality: Qt.WindowModal
@@ -15,15 +17,18 @@ Rectangle {
         color: root.color
         showAlphaChannel: false
         onCurrentColorChanged: {
-            root.color = currentColor;
+            // root.color = currentColor;
+            root.selectedColorChanged(currentColor);
         }
 
         onAccepted: {
-            root.color = color;
+            // root.color = color;
+            root.selectedColorChanged(color);
         }
 
         onRejected: {
-            root.color = color;
+            // root.color = color;
+            root.selectedColorChanged(color);
         }
     }
 

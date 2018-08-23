@@ -90,6 +90,8 @@ namespace details {
     typedef std::function<
         std::shared_ptr<ImageOutputInterfaceModule>
         (core::compute_platform::ComputePlatform&)> BuildOutputFunction;
+
+    QColor waveLengthToQColor(double w, double gamma = 0.8);
 }
 
 #endif

@@ -91,6 +91,10 @@ void IcsDataSourceModule::execute()
             if (m_cache[i]) {
                 m_cache[i]->meta = meta;
                 m_cache[i]->meta.add("channel", to_string(i));
+                string wlKey = "IcsGetSensorEmissionWavelength:" + to_string(i);
+                if (meta.has(wlKey)) {
+                    m_cache[i]->meta.add("wavelength", meta.get(wlKey));
+                }
             }
         }
     }

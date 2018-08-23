@@ -69,10 +69,8 @@ Repeater {
                         ColorIndicator {
                             id: colorSelector
                             color: details.value.color
-                            Binding {
-                                target: details.value
-                                property: "color"
-                                value: colorSelector.color
+                            onSelectedColorChanged: function(c) {
+                                details.value.color = c;
                             }
                         }
 
@@ -91,23 +89,10 @@ Repeater {
                 PreciseRangeSlider {
                     id: rangeSlider
                     Layout.fillWidth: true
-                    font: root.font
-                    firstValue: details.value.lutParams.x
-                    secondValue: details.value.lutParams.y
-
-                    Binding {
-                        target: details.value
-                        property: "lutParams"
-                        value: Qt.vector2d(rangeSlider.firstValue, rangeSlider.secondValue)
+                    value: details.value.lutParams
+                    onValueChanged: {
+                        details.value.lutParams = value;
                     }
-
-                    // onFirstValueChanged: {
-                    //     console.log(firstValue);
-                    //     details.value.lutParams.x = firstValue;
-                    // }
-                    // onSecondValueChanged: {
-                    //     details.value.lutParams.y = secondValue;
-                    // }
                 }
             }
         }
