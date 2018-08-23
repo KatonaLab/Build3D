@@ -21,15 +21,24 @@ QString LogCollector::unfilteredLog()
     return QString::fromStdString(m_log.str());
 }
 
+QString newLines(const QString& msg)
+{
+    QString newOne(msg);
+    if (newOne.endsWith("\n")) {
+        newOne.remove(newOne.size() - 1, 1);
+    }
+    return newOne.replace(QString("\n"), QString("<br/>"));
+}
+
 void LogCollector::debugMsg(const QString& msg)
 {
-    m_log << "<span style='color:lightseagreen'>debug: " << msg.toStdString() << "</span><br/>";
+    m_log << "<span style='color:lightseagreen'>debug: " << newLines(msg).toStdString() << "</span><br/>";
     Q_EMIT logChanged();
 }
 
 void LogCollector::infoMsg(const QString& msg)
 {
-    m_log << "<span style='color:seagreen'>info: " << msg.toStdString() << "</span><br/>";
+    m_log << "<span style='color:seagreen'>info: " << newLines(msg).toStdString() << "</span><br/>";
     Q_EMIT logChanged();
 }
 
@@ -48,19 +57,19 @@ void LogCollector::warningMsg(const QString& msg)
         return;
     }
 
-    m_log << "<span style='color:gold'>warning: " << msg.toStdString() << "</span><br/>";
+    m_log << "<span style='color:gold'>warning: " << newLines(msg).toStdString() << "</span><br/>";
     Q_EMIT logChanged();
 }
 
 void LogCollector::criticalMsg(const QString& msg)
 {
-    m_log << "<span style='color:crimson'>critical: " << msg.toStdString() << "</span><br/>";
+    m_log << "<span style='color:crimson'>critical: " << newLines(msg).toStdString() << "</span><br/>";
     Q_EMIT logChanged();
 }
 
 void LogCollector::fatalMsg(const QString& msg)
 {
-    m_log << "<span style='color:crimson'>fatal: " << msg.toStdString() << "</span><br/>";
+    m_log << "<span style='color:crimson'>fatal: " << newLines(msg).toStdString() << "</span><br/>";
     Q_EMIT logChanged();
 }
 

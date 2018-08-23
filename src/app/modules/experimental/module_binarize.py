@@ -20,6 +20,8 @@ def module_main(ctx):
     if a3.inputs['input'].meta.has('channel'):
         print('channel', a3.inputs['input'].meta.get('channel'))
 
+    print(str(a3.inputs['input'].meta))
+
     bin_image = (input_image >= level) * 1.0
     a3.outputs['binary volume'] = a3.MultiDimImageFloat_from_ndarray(bin_image)
     print('binarization complete 🍰')

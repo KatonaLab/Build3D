@@ -116,7 +116,16 @@ void pyDeclareMetaType(pybind11::module &m)
     .def("has", &Meta::has)
     .def("get", &Meta::get)
     .def("remove", &Meta::remove)
-    .def("clear", &Meta::clear);
+    .def("clear", &Meta::clear)
+    .def("__str__", [](const Meta& meta) {
+        std::string a = "Meta: [\n";
+        const auto& x = meta.items();
+        for (auto p: x) {
+            a += p.first + ": " + p.second + "\n";
+        }
+        a += "]";
+        return a;
+    });
 }
 
 template <typename T>

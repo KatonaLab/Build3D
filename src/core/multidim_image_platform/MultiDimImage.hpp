@@ -54,6 +54,7 @@ namespace multidim_image_platform {
         bool has(const std::string& tag);
         void remove(const std::string& tag);
         void clear();
+        const std::map<std::string, std::string>& items() const { return m_items; }
     private:
         std::map<std::string, std::string> m_items;
     };

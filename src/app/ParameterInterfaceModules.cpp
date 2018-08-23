@@ -49,13 +49,13 @@ TypedParameterInterfaceModule<QUrl>::TypedParameterInterfaceModule(ComputePlatfo
     :
     ParameterInterfaceModule(parent, "ParameterInterface-QUrl", m_outputs),
     m_outputs(*this),
-    m_data(std::make_shared<Url>(initialValue.toString().toStdString()))
+    m_data(std::make_shared<Url>(initialValue.toLocalFile().toStdString()))
 {}
 
 bool TypedParameterInterfaceModule<QUrl>::setData(QVariant var)
 {
     if (var.canConvert<QUrl>()) {
-        m_data->path = var.value<QUrl>().toString().toStdString();
+        m_data->path = var.value<QUrl>().toLocalFile().toStdString();
     } else {
         throw std::runtime_error("can not convert from "
             + std::string(var.typeName()) + " to QUrl in parameter input " + name());
@@ -65,9 +65,7 @@ bool TypedParameterInterfaceModule<QUrl>::setData(QVariant var)
 
 QVariant TypedParameterInterfaceModule<QUrl>::data()
 {
-    QUrl url;
-    url.setUrl(QString::fromStdString(m_data->path));
-    return url;
+    return QUrl::fromLocalFile(QString::fromStdString(m_data->path));
 }
 
 void TypedParameterInterfaceModule<QUrl>::execute()
