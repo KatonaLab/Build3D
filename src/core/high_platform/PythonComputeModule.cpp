@@ -114,6 +114,7 @@ void pyDeclareMetaType(pybind11::module &m)
     .def(py::init<>())
     .def("add", &Meta::add)
     .def("has", &Meta::has)
+    .def("get", &Meta::get)
     .def("remove", &Meta::remove)
     .def("clear", &Meta::clear);
 }

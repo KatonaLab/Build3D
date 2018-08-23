@@ -26,6 +26,7 @@ public:
     template <typename T> md::MultiDimImage<T> readScaledConvert(bool xyztcReorder = false);
     template <typename T> void write(const std::string& filename, const md::MultiDimImage<T>& data);
     std::type_index dataType() const;
+    Ics_DataType icsDataType() const { return m_dt; }
     bool valid() const;
     void close();
     virtual ~IcsAdapter();

@@ -7,7 +7,7 @@ void Meta::add(const std::string& tag, const std::string& value)
     m_items[tag] = value;
 }
 
-const std::string& Meta::get(const std::string& tag)
+std::string Meta::get(const std::string& tag)
 {
     if (has(tag)) {
         return m_items[tag];

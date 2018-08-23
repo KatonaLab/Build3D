@@ -7,6 +7,19 @@ def module_main(ctx):
     # MultiDimImageFloat_to_ndarray and MultiDimImageFloat_from_ndarray
     # but do the leveling in-place
     input_image = a3.MultiDimImageFloat_to_ndarray(a3.inputs['input'])
+
+    if a3.inputs['input'].meta.has('type'):
+        print('type', a3.inputs['input'].meta.get('type'))
+
+    if a3.inputs['input'].meta.has('normalized'):
+        print('normalized', a3.inputs['input'].meta.get('normalized'))
+
+    if a3.inputs['input'].meta.has('path'):
+        print('path', a3.inputs['input'].meta.get('path'))
+
+    if a3.inputs['input'].meta.has('channel'):
+        print('channel', a3.inputs['input'].meta.get('channel'))
+
     bin_image = (input_image >= level) * 1.0
     a3.outputs['binary volume'] = a3.MultiDimImageFloat_from_ndarray(bin_image)
     print('binarization complete 🍰')

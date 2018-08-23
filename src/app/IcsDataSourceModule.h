@@ -19,7 +19,9 @@ public:
     IcsDataSourceModule(ComputePlatform& parent);
     void execute() override;
 protected:
+    bool modifiedParameters();
     Url m_lastPathValue;
+    bool m_lastNormalizeValue;
     std::vector<std::shared_ptr<MultiDimImage<float>>> m_cache;
     TypedInputPortCollection<Url, bool> m_inputs;
     TypedOutputPortCollection<

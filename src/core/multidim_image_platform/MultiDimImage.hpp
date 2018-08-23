@@ -14,7 +14,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <typeinfo>
-#include <unordered_map>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -50,12 +50,12 @@ namespace multidim_image_platform {
     class Meta {
     public:
         void add(const std::string& tag, const std::string& value);
-        const std::string& get(const std::string& tag);
+        std::string get(const std::string& tag);
         bool has(const std::string& tag);
         void remove(const std::string& tag);
         void clear();
     private:
-        std::unordered_map<std::string, std::string> m_items;
+        std::map<std::string, std::string> m_items;
     };
 
     // TODO: consider using Eigen matrices instead of MultiDimImage implementation
