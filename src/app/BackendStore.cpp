@@ -8,10 +8,12 @@
 #include "BackendInput.h"
 #include "BackendParameter.h"
 #include "BackendOutput.h"
+#include "IcsDataSourceModule.h"
 #include <fstream>
 #include <algorithm>
 
 using namespace std;
+using namespace core::compute_platform;
 using namespace core::high_platform;
 
 BackendStore::BackendStore(QObject* parent)
@@ -77,24 +79,39 @@ pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
 
 void BackendStore::addModule(const QString& scriptPath)
 {
+    static const QString nativePath("native://");
     try {
-        std::string script = scriptPath.toStdString();
-        ifstream f(script);
-        if (!f.is_open()) {
-            throw std::runtime_error("missing module script: " + script);
-        }
-        stringstream buffer;
-        buffer << f.rdbuf();
+        shared_ptr<ComputeModule> module;
 
-        auto pyModule = make_shared<PythonComputeModule>(m_platform, buffer.str(), "Generic");
-        int numRows = 1 + (int)pyModule->numInputs() + (int)pyModule->numOutputs();
+        if (scriptPath.startsWith(nativePath)) {
+            QString name = scriptPath.mid(nativePath.size());
+            if (name == QString("ics reader")) {
+                module = make_shared<IcsDataSourceModule>(m_platform);
+            }
+        } else {
+            std::string script = scriptPath.toStdString();
+            ifstream f(script);
+            if (!f.is_open()) {
+                throw std::runtime_error("missing module script: " + script);
+            }
+            stringstream buffer;
+            buffer << f.rdbuf();
+
+            module = make_shared<PythonComputeModule>(m_platform, buffer.str(), "Generic");
+        }
+
+        if (!module) {
+            throw std::runtime_error("unknown module to load: " + scriptPath.toStdString());
+        }
+
+        int numRows = 1 + (int)module->numInputs() + (int)module->numOutputs();
         int uid = m_uidCounter++;
 
         beginInsertRows(QModelIndex(), m_items.size(), m_items.size() + numRows);
-        addBackendStoreItem(make_unique<BackendModule>(pyModule, uid));
+        addBackendStoreItem(make_unique<BackendModule>(module, uid));
 
-        for (size_t i = 0; i < pyModule->numInputs(); ++i) {
-            auto port = pyModule->inputPort(i);
+        for (size_t i = 0; i < module->numInputs(); ++i) {
+            auto port = module->inputPort(i);
             if (port.lock()->properties().hasKey("parameter")) {
                 addBackendStoreItem(make_unique<BackendParameter>(port, m_platform, i, uid));
             } else {
@@ -102,8 +119,8 @@ void BackendStore::addModule(const QString& scriptPath)
             }
         }
 
-        for (size_t i = 0; i < pyModule->numOutputs(); ++i) {
-            auto port = pyModule->outputPort(i);
+        for (size_t i = 0; i < module->numOutputs(); ++i) {
+            auto port = module->outputPort(i);
             addBackendStoreItem(make_unique<BackendOutput>(port, m_platform, i, uid));
         }
 
@@ -405,10 +422,27 @@ void BackendStore::refreshAvailableModules()
         }
 
         m_availableModules = vlist;
+
+        addAvailableNativeModules();
+
         Q_EMIT(availableModulesChanged());
     } catch (exception& e) {
         qCritical() << e.what();
     }
+}
+
+void BackendStore::addAvailableNativeModules()
+{
+    QVariantMap groupMap;
+    QVariantMap fileMap;
+    QVariantList fileList;
+    fileMap["name"] = QString("ics reader");
+    fileMap["path"] = QString("native://ics reader");
+    fileList.append(fileMap);
+    groupMap["name"] = QString("general");
+    groupMap["files"] = fileList;
+
+    m_availableModules.append(groupMap);
 }
 
 // TODO: move to separate file

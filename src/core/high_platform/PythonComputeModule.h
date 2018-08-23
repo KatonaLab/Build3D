@@ -13,12 +13,37 @@
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+typedef std::pair<int, int> EnumPair;
+
+// TODO: move to separate file
+
+struct Point3D {
+    float x,y,z;
+};
+
+typedef std::vector<Point3D> Point3DSet;
+
+struct Tetrahedron {
+    Point3D a,b,c,d;
+};
+
+typedef std::vector<Tetrahedron> TetrahedronSet;
+
+struct Url {
+    Url() {}
+    Url(const std::string& init): path(init) {}
+    Url(const Url&) = default;
+    std::string path;
+};
+
 // --------------------------------------------------------
+// TODO: move to a separate file
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<float>, "image", "float-image");
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<double>, "image", "double-image");
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<int8_t>, "image", "int8-image");
@@ -29,7 +54,15 @@ PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint8_t>, "image",
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint16_t>, "image", "uint16-image");
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint32_t>, "image", "uint32-image");
 PORT_TYPE_TRAITS(core::multidim_image_platform::MultiDimImage<uint64_t>, "image", "uint64-image");
-PORT_TYPE_TRAITS(pybind11::object, {"py-object"});
+// --------------------------------------------------------
+PORT_TYPE_TRAITS(pybind11::object, "py-object");
+PORT_TYPE_TRAITS(EnumPair, "enum");
+PORT_TYPE_TRAITS(std::string, "string");
+PORT_TYPE_TRAITS(Url, "url");
+PORT_TYPE_TRAITS(Point3D, "point3d", "3d");
+PORT_TYPE_TRAITS(Point3DSet, "point3d-set", "set", "3d");
+PORT_TYPE_TRAITS(Tetrahedron, "tetrahedron", "3d");
+PORT_TYPE_TRAITS(TetrahedronSet, "tetrahedron-set", "set", "3d");
 // --------------------------------------------------------
 
 namespace core {
@@ -66,7 +99,13 @@ enum class PyTypes {
     TYPE_MultiDimImageFloat,
     TYPE_MultiDimImageDouble,
     TYPE_GeneralPyType,
-    TYPE_String
+    TYPE_Enum,
+    TYPE_String,
+    TYPE_Url,
+    TYPE_Point3D,
+    TYPE_Point3DSet,
+    TYPE_Tetrahedron,
+    TYPE_TetrahedronSet
 };
 
 class ArgBase {

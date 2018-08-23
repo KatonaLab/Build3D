@@ -76,7 +76,7 @@ bool IcsAdapter::open(const std::string& filename)
 
     return true;
 }
-    
+
 std::type_index IcsAdapter::dataType() const
 {
     switch (m_dt) {

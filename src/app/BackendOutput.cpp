@@ -90,8 +90,8 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
     ComputePlatform& platform, int portId, int parentUid)
     : m_source(source), m_portId(portId), m_parentUid(parentUid)
 {
-    static vector<QString> colorNames = {"red", "green", "blue", "cyan", "magenta", "yellow"};
-    m_internalValue.setColor(QColor(colorNames[parentUid % colorNames.size()]));
+    static vector<Qt::GlobalColor> colorNames = {Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow};
+    m_internalValue.setColor(QColor(colorNames[(parentUid + portId - 4) % colorNames.size()]));
     m_internalValue.setVisible(false);
     m_internalValue.setLutParams(QVector2D(0, 1));
 

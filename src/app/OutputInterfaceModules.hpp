@@ -7,6 +7,9 @@
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <functional>
 
+// for PORT_TYPE_TRAITS reg
+#include <core/high_platform/PythonComputeModule.h>
+
 class ImageOutputInterfaceModule : public core::compute_platform::ComputeModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     typedef core::compute_platform::InputPortCollectionBase InputPortCollectionBase;

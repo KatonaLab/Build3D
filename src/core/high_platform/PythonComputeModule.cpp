@@ -104,6 +104,7 @@ void PythonEnvironment::exec(std::string code)
 
 PythonEnvironment::~PythonEnvironment()
 {
+    // TODO: clear error_already_set thing, so no exception is raised
     py::finalize_interpreter();
 }
 
@@ -202,7 +203,13 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     .value("ImageFloat", PyTypes::TYPE_MultiDimImageFloat)
     .value("ImageDouble", PyTypes::TYPE_MultiDimImageDouble)
     .value("GeneralPyType", PyTypes::TYPE_GeneralPyType)
-    .value("string", PyTypes::TYPE_String);
+    .value("enum", PyTypes::TYPE_Enum)
+    .value("string", PyTypes::TYPE_String)
+    .value("url", PyTypes::TYPE_Url)
+    .value("Point3D", PyTypes::TYPE_Point3D)
+    .value("Point3DSet", PyTypes::TYPE_Point3DSet)
+    .value("Tetrahedron", PyTypes::TYPE_Tetrahedron)
+    .value("TetrahedronSet", PyTypes::TYPE_TetrahedronSet);
 
     using namespace pybind11::literals;
 
@@ -317,6 +324,10 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
 
     pyDeclareMultiDimImageType<float>(m, "MultiDimImageFloat");
     pyDeclareMultiDimImageType<double>(m, "MultiDimImageDouble");
+
+    py::class_<Url>(m, "Url")
+    .def(py::init<>())
+    .def_readwrite("path", &Url::path);
 }
 
 // --------------------------------------------------------
@@ -356,7 +367,6 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
         CASE_POD(TYPE_float, float)
         CASE_POD(TYPE_double, double)
         CASE_POD(TYPE_bool, bool)
-        CASE_POD(TYPE_String, std::string)
         CASE_NON_POD(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
@@ -371,6 +381,13 @@ PyInputPortWrapperPtr PythonComputeModule::createInputPortWrapper(PyTypes t)
             auto tp = TypedInputPort<py::object>::create(*this);
             return PyInputPortWrapperPtr(new GeneralPyTypeInputPortWrapper(tp));
         }
+        CASE_POD(TYPE_Enum, EnumPair)
+        CASE_POD(TYPE_String, std::string)
+        CASE_POD(TYPE_Url, Url)
+        CASE_POD(TYPE_Point3D, Point3D)
+        CASE_POD(TYPE_Point3DSet, Point3DSet)
+        CASE_POD(TYPE_Tetrahedron, Tetrahedron)
+        CASE_POD(TYPE_TetrahedronSet, TetrahedronSet)
         default: throw std::runtime_error("unknown input port type");
     }
     #undef CASE_POD
@@ -401,7 +418,6 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
         CASE_POD(TYPE_float, float)
         CASE_POD(TYPE_double, double)
         CASE_POD(TYPE_bool, bool)
-        CASE_POD(TYPE_String, std::string)
         CASE_NON_POD(TYPE_MultiDimImageInt8, MultiDimImage<int8_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt16, MultiDimImage<int16_t>)
         CASE_NON_POD(TYPE_MultiDimImageInt32, MultiDimImage<int32_t>)
@@ -416,6 +432,13 @@ PyOutputPortWrapperPtr PythonComputeModule::createOutputPortWrapper(PyTypes t)
             auto tp = TypedOutputPort<py::object>::create(*this);
             return PyOutputPortWrapperPtr(new GeneralPyTypeOutputPortWrapper(tp));
         }
+        CASE_POD(TYPE_Enum, EnumPair)
+        CASE_POD(TYPE_String, std::string)
+        CASE_POD(TYPE_Url, Url)
+        CASE_POD(TYPE_Point3D, Point3D)
+        CASE_POD(TYPE_Point3DSet, Point3DSet)
+        CASE_POD(TYPE_Tetrahedron, Tetrahedron)
+        CASE_POD(TYPE_TetrahedronSet, TetrahedronSet)
         default: throw std::runtime_error("unknown output port type");
     }
     #undef CASE_POD

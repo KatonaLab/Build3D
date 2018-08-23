@@ -2,9 +2,9 @@
 
 #include <QDebug>
 
-using namespace core::high_platform;
+using namespace core::compute_platform;
 
-BackendModule::BackendModule(std::shared_ptr<PythonComputeModule> sourceModule, int uid)
+BackendModule::BackendModule(std::shared_ptr<ComputeModule> sourceModule, int uid)
     : m_source(sourceModule), m_uid(uid)
 {}
 
@@ -73,7 +73,7 @@ bool BackendModule::setValue(QVariant value)
     return false;
 }
 
-std::shared_ptr<PythonComputeModule> BackendModule::source()
+std::shared_ptr<ComputeModule> BackendModule::source()
 {
     return m_source;
 }

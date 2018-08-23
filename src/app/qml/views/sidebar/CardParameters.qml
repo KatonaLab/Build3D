@@ -22,9 +22,11 @@ Repeater {
         sourceComponent: {
             switch (model.type) {
                 case "int": return intSliderDelegate;
+                case "enum": return enumDelegate;
                 case "float": return floatSliderDelegate;
                 case "bool": return switchDelegate;
-                case "string": return details.hints.file === true ? filenameDelegate : stringDelegate;
+                case "string": return stringDelegate;
+                case "url": return filenameDelegate;
                 defualt: return unknownControllerDelegate;
             }
         }
@@ -51,6 +53,32 @@ Repeater {
                 text: details.name
                 onValueChanged: {
                     details.value = value;
+                }
+            }
+        }
+
+        Component {
+            id: enumDelegate
+            RowLayout {
+                Label {
+                    Layout.fillWidth: true
+                    text: details.name
+                }
+                ComboBox {
+                    model: details.hints.enumNames
+                    currentIndex: details.value.first
+                    delegate: ItemDelegate {
+                        width: parent.width
+                        text: modelData
+                        onClicked: {
+                            details.value = {"first": index, "second": details.hints.enumValues[index]};
+                        }
+                    }
+                    Component.onCompleted: {
+                        if (details.value && details.value.first == -1) {
+                            currentIndex = 0;
+                        }
+                    }
                 }
             }
         }
@@ -110,6 +138,7 @@ Repeater {
                     Layout.fillWidth: true
                     wrapMode: Text.WrapAnywhere
                     font: root.font
+                    text: details.value ? details.value.toString() : ""
                 }
                 Button {
                     Layout.fillWidth: true
@@ -123,19 +152,7 @@ Repeater {
                         title: "Select File"
                         selectMultiple: details.hints.multipleFiles || false
                         onAccepted: {
-                            // https://stackoverflow.com/questions/24927850/get-the-path-from-a-qml-url
-                            var path = dialog.fileUrl.toString();
-                            console.log(path);
-                            // remove prefixed "file:///"
-                            path = path.replace(/^(file:\/{3})/,"");
-                            console.log(path);
-                            // unescape html codes like '%23' for '#'
-                            var cleanPath = decodeURIComponent(path);
-                            console.log(cleanPath);
-
-                            console.debug("select file", cleanPath);
-                            filenameText.text = cleanPath;
-                            details.value = cleanPath
+                            details.value = dialog.fileUrl;
                         }
                     }
                 }

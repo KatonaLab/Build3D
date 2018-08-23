@@ -4,9 +4,27 @@
 #include <tuple>
 #include <vector>
 #include <QDebug>
+#include <QString>
+#include <QUrl>
 
 using namespace std;
 using namespace core::compute_platform;
+
+QPair<QVariantList, QVariantList> details::toEnumList(const PropertyMap& properties)
+{
+    QVariantList listNames;
+    QVariantList listValues;
+    auto ks = properties.keys();
+    for (const string& key: ks) {
+        QString vmapKey = QString::fromStdString(key);
+        if (properties.getType(key) == PropertyMap::Type::Int) {
+            listNames.append(vmapKey);
+            listValues.append(properties.asInt(key));
+        }
+    }
+    return qMakePair(listNames, listValues);
+}
+
 
 BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
     ComputePlatform& platform, int portId, int parentUid)
@@ -32,8 +50,16 @@ BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
         make_tuple("float", buildParam<float>, "float"),
         make_tuple("double", buildParam<double>, "float"),
         make_tuple("bool", buildParam<bool>, "bool"),
-        make_tuple("string", buildParam<QString>, "string")
+        make_tuple("enum", buildParam<EnumPair>, "enum"),
+        make_tuple("string", buildParam<QString>, "string"),
+        make_tuple("url", buildParam<QUrl>, "url")
     };
+
+    if (m_source.lock()->traits().hasTrait("enum")) {
+        auto p = toEnumList(m_source.lock()->properties());
+        m_hints["enumNames"] = p.first;
+        m_hints["enumValues"] = p.second;
+    }
 
     const auto& t = m_source.lock()->traits();
     for (auto& tri: types) {
@@ -96,10 +122,10 @@ QVariant BackendParameter::hints() const
     return m_hints;
 }
 
-void BackendParameter::setName(const QString& name)
+void BackendParameter::setName(const QString&)
 {}
 
-void BackendParameter::setStatus(int status)
+void BackendParameter::setStatus(int)
 {}
 
 bool BackendParameter::setValue(QVariant value)

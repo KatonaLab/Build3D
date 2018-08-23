@@ -7,6 +7,8 @@
 #include <functional>
 #include <memory>
 #include <QVariantMap>
+#include <QVariantList>
+#include <QPair>
 
 class BackendParameter : public BackendStoreItem {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -47,6 +49,8 @@ namespace details {
     typedef std::function<
         std::shared_ptr<ParameterInterfaceModule>
         (core::compute_platform::ComputePlatform&)> BuildParamFunction;
+
+    QPair<QVariantList, QVariantList> toEnumList(const core::compute_platform::PropertyMap& properties);
 }
 
 #endif

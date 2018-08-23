@@ -45,7 +45,6 @@ macx {
 HEADERS += \
     VolumeData.h \
     VolumeTexture.h \
-    ModulePlatformBackend.h \
     LogCollector.h \
     TurnTableCameraController.h \
     BackendStore.h \
@@ -54,6 +53,7 @@ HEADERS += \
     BackendParameter.h \
     BackendOutput.h \
     BackendModule.h \
+    IcsDataSourceModule.h \
     ParameterInterfaceModules.hpp \
     OutputInterfaceModules.hpp \
     ../util/version.h \
@@ -66,7 +66,6 @@ SOURCES += \
     ../util/version.cpp \
     VolumeData.cpp \
     VolumeTexture.cpp \
-    ModulePlatformBackend.cpp \
     LogCollector.cpp \
     TurnTableCameraController.cpp \
     BackendStore.cpp \
@@ -75,6 +74,7 @@ SOURCES += \
     BackendParameter.cpp \
     BackendOutput.cpp \
     BackendModule.cpp \
+    IcsDataSourceModule.cpp \
     ParameterInterfaceModules.cpp \
     OutputInterfaceModules.cpp \
     main.cpp \

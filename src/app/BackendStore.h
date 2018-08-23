@@ -60,6 +60,7 @@ protected:
     int m_uidCounter = 0;
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);
+    void addAvailableNativeModules();
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {

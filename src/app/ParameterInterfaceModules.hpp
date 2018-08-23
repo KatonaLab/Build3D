@@ -3,8 +3,13 @@
 
 #include <core/compute_platform/ComputeModule.h>
 #include <core/compute_platform/port_utils.hpp>
+
+// for PORT_TYPE_TRAITS reg
+#include <core/high_platform/PythonComputeModule.h>
+
 #include <QVariant>
 #include <QString>
+#include <QUrl>
 
 class ParameterInterfaceModule : public core::compute_platform::ComputeModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -36,7 +41,21 @@ protected:
     std::shared_ptr<T> m_data;
 };
 
-// template spetialization for QString <-> std::string interchange
+template <>
+class TypedParameterInterfaceModule<EnumPair>: public ParameterInterfaceModule {
+    typedef core::compute_platform::ComputePlatform ComputePlatform;
+    template<typename R> using TypedOutputPortCollection =
+        core::compute_platform::TypedOutputPortCollection<R>;
+public:
+    TypedParameterInterfaceModule(ComputePlatform& parent, EnumPair initialValue = std::make_pair(-1, -1));
+    bool setData(QVariant var) override;
+    void execute() override;
+    QVariant data() override;
+protected:
+    TypedOutputPortCollection<EnumPair> m_outputs;
+    std::shared_ptr<EnumPair> m_data;
+};
+
 template <>
 class TypedParameterInterfaceModule<QString>: public ParameterInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
@@ -50,6 +69,21 @@ public:
 protected:
     TypedOutputPortCollection<std::string> m_outputs;
     std::shared_ptr<std::string> m_data;
+};
+
+template <>
+class TypedParameterInterfaceModule<QUrl>: public ParameterInterfaceModule {
+    typedef core::compute_platform::ComputePlatform ComputePlatform;
+    template<typename R> using TypedOutputPortCollection =
+        core::compute_platform::TypedOutputPortCollection<R>;
+public:
+    TypedParameterInterfaceModule(ComputePlatform& parent, QUrl initialValue = QUrl());
+    bool setData(QVariant var) override;
+    void execute() override;
+    QVariant data() override;
+protected:
+    TypedOutputPortCollection<Url> m_outputs;
+    std::shared_ptr<Url> m_data;
 };
 
 #include "ParameterInterfaceModules.ipp"

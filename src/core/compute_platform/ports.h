@@ -173,7 +173,6 @@ PORT_TYPE_TRAITS(int64_t, "int-like", "int64_t");
 PORT_TYPE_TRAITS(float, "float-like", "float");
 PORT_TYPE_TRAITS(double, "float-like", "double");
 PORT_TYPE_TRAITS(bool, "bool-like", "bool");
-PORT_TYPE_TRAITS(std::string, "string");
 
 // --------------------------
 
