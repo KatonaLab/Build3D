@@ -88,9 +88,6 @@ Entity {
             Component.onCompleted: {
                 lutDataMax = 1.;
             }
-            onLutLowCutChanged: {
-                console.log('VolumeEntity', model.value.lutParams.x);
-            }
         }
     }
 

@@ -83,7 +83,7 @@ void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>>
             if (!m_texture) {
                 m_texture = new VolumeTexture();
             }
-            m_texture->init(*m_image);
+            m_texture->init(m_image);
             QObject::connect(m_texture, &QObject::destroyed,
                 this, &ImageOutputValue::textureDeleted);
             if (m_image->meta.has("wavelength")) {

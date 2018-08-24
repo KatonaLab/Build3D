@@ -19,13 +19,13 @@ VolumeTexture::~VolumeTexture()
     }
 }
 
-void VolumeTexture::init(MultiDimImage<float>& source)
+void VolumeTexture::init(shared_ptr<MultiDimImage<float>> source)
 {
     if (m_textureImage) {
         removeTextureImage(m_textureImage.get());
     }
 
-    m_data = unique_ptr<VolumeData>(new VolumeData(source));
+    m_data = make_unique<VolumeData>(source);
     m_textureImage = unique_ptr<VolumeTextureImage>(new VolumeTextureImage(*m_data));
 
     setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
