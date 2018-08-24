@@ -19,7 +19,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
-typedef std::pair<int, int> EnumPair;
+typedef std::pair<int32_t, int32_t> EnumPair;
 
 // TODO: move to separate file
 

@@ -178,6 +178,8 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
         make_tuple("float", empty, "float"),
         make_tuple("double", empty, "float"),
         make_tuple("bool", empty, "bool"),
+        make_tuple("string", empty, "string"),
+        make_tuple("url", empty, "url"),
         make_tuple("float-image", buildImageOutput<float>, "float-image"),
         make_tuple("uint32-image", buildImageOutput<uint32_t>, "int-image"),
         make_tuple("py-object", empty, "py-object")
