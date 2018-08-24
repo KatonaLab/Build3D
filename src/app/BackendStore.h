@@ -7,10 +7,29 @@
 #include <core/high_platform/PythonComputeModule.h>
 #include <memory>
 #include <QString>
+#include <QUrl>
+#include <QJsonObject>
 
 #include "BackendStoreItem.h"
 #include <utility>
 #include <core/compute_platform/ports.h>
+
+class BackendStore;
+
+class CommandHistory {
+public:
+    void setInitialUidCounter(int uid);
+    void notifyAddModule(QString modulePath);
+    void notifyRemoveModule(int uid);
+    void notifyConnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
+    void notifyDisconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
+    void write(QString filename = QString("workflow.json"));
+    void read(QString filename, BackendStore& store);
+protected:
+    int m_initialUid = 0;
+    QList<QPair<QString, QVariant>> m_history;
+    void processCommand(QJsonObject& object, BackendStore& store);
+};
 
 class BackendStore: public QAbstractListModel {
     Q_OBJECT
@@ -29,7 +48,7 @@ public:
         ValueRole
     };
     explicit BackendStore(QObject* parent = Q_NULLPTR);
-    virtual ~BackendStore() = default;
+    virtual ~BackendStore();
 
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
@@ -49,6 +68,10 @@ public:
     Q_INVOKABLE void evaluate(int uid = -1);
 
     std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
+    void setUidCounter(int uid)
+    {
+        m_uidCounter = uid;
+    }
 
 Q_SIGNALS:
     void availableModulesChanged();
@@ -61,6 +84,7 @@ protected:
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);
     void addAvailableNativeModules();
+    CommandHistory m_commandHistory;
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {
@@ -110,7 +134,6 @@ public:
 
     Q_INVOKABLE QVariant get(int row) const;
     Q_INVOKABLE int count() const;
-
 Q_SIGNALS:
     void firstChanged();
 protected:

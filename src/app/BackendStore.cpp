@@ -15,6 +15,102 @@ using namespace std;
 using namespace core::compute_platform;
 using namespace core::high_platform;
 
+void CommandHistory::setInitialUidCounter(int uid)
+{
+    m_initialUid = uid;
+}
+
+void CommandHistory::notifyAddModule(QString modulePath)
+{
+    m_history.append(qMakePair(QString("add"), modulePath));
+}
+
+void CommandHistory::notifyRemoveModule(int uid)
+{
+    m_history.append(qMakePair(QString("remove"), uid));
+}
+
+void CommandHistory::notifyConnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid)
+{
+    QVariantMap vmap;
+    vmap["outModuleUid"] = outModuleUid;
+    vmap["outPortUid"] = outPortUid;
+    vmap["inModuleUid"] = inModuleUid;
+    vmap["inPortUid"] = inPortUid;
+
+    m_history.append(qMakePair(QString("connect"), vmap));
+}
+
+void CommandHistory::notifyDisconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid)
+{
+    QVariantMap vmap;
+    vmap["outModuleUid"] = outModuleUid;
+    vmap["outPortUid"] = outPortUid;
+    vmap["inModuleUid"] = inModuleUid;
+    vmap["inPortUid"] = inPortUid;
+
+    m_history.append(qMakePair(QString("disconnect"), vmap));
+}
+
+void CommandHistory::write(QString filename)
+{
+    QFile saveFile(filename);
+
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+        qWarning() << "couldn't open save file" << filename;
+    } else {
+        QJsonArray jsonArray;
+        for (auto p: m_history) {
+            QJsonObject item = {{"command", p.first}, {"params", p.second.toJsonValue()}};
+            jsonArray.append(item);
+        }
+
+        QJsonObject rootObject = {{"initialUid", m_initialUid}, {"commands", jsonArray}};
+
+        QJsonDocument saveDoc(rootObject);
+        saveFile.write(saveDoc.toJson());
+    }
+}
+
+void CommandHistory::read(QString filename, BackendStore& store)
+{
+    QFile loadFile(filename);
+
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "couldn't open file" << filename;
+    } else {
+        QByteArray data = loadFile.readAll();
+        QJsonDocument loadDoc(QJsonDocument::fromJson(data));
+        QJsonObject json = loadDoc.object();
+        store.setUidCounter(json["initialUid"].toInt());
+        QJsonArray array = json["commands"].toArray();
+        for (int i = 0; i < array.size(); ++i) {
+            QJsonObject object = array[i].toObject();
+            processCommand(object, store);
+        }
+    }
+}
+
+void CommandHistory::processCommand(QJsonObject& object, BackendStore& store)
+{
+    QString cmd = object["command"].toString();
+    QVariant params = object["params"].toVariant();
+    if (cmd == QString("add")) {
+        store.addModule(params.toString());
+    } else if (cmd == QString("remove")) {
+        store.removeModule(params.toInt());
+    } else if (cmd == QString("connect")) {
+        QVariantMap vmap = params.toMap();
+        store.connect(vmap["outModuleUid"].toInt(), vmap["outPortUid"].toInt(),
+            vmap["inModuleUid"].toInt(), vmap["inPortUid"].toInt());
+    } else if (cmd == QString("disconnect")) {
+//        store.disconnect(vmap["outModuleUid"].toInt(), vmap["outPortUid"].toInt(),
+//            vmap["inModuleUid"].toInt(), vmap["inPortUid"].toInt());
+    } else {
+        qWarning() << "unknown command from history file" << cmd;
+    }
+}
+
 BackendStore::BackendStore(QObject* parent)
     : QAbstractListModel(parent)
 {
@@ -33,10 +129,20 @@ BackendStore::BackendStore(QObject* parent)
         PythonEnvironment::outStreamRouters = routers;
         PythonEnvironment::instance();
 
+        //m_commandHistory.setInitialUidCounter(m_uidCounter);
+
         refreshAvailableModules();
+
+        m_commandHistory.read("workflow.json", *this);
+
     } catch (exception& e) {
         qCritical() << e.what();
     }
+}
+
+BackendStore::~BackendStore()
+{
+    m_commandHistory.write();
 }
 
 pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
@@ -124,6 +230,9 @@ void BackendStore::addModule(const QString& scriptPath)
         }
 
         endInsertRows();
+
+        m_commandHistory.notifyAddModule(scriptPath);
+
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -193,6 +302,9 @@ void BackendStore::removeModule(int uid)
                 Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
             }
         }
+
+        m_commandHistory.notifyRemoveModule(uid);
+
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -349,6 +461,7 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
 
         bool success = out->source().lock()->bind(in->source());
         if (success) {
+            m_commandHistory.notifyConnect(outModuleUid, outPortUid, inModuleUid, inPortUid);
             Q_EMIT in->valueChanged();
         }
         return success;
