@@ -9,6 +9,7 @@
 #include <QQmlApplicationEngine>
 #include <QFontDatabase>
 #include <QStyleFactory>
+#include <QCommandLineParser>
 
 #include "client/crashpad_client.h"
 #include "client/crash_report_database.h"
@@ -22,6 +23,7 @@
 #include "TurnTableCameraController.h"
 #include "BackendStore.h"
 #include "BackendOutput.h"
+#include "GlobalSettings.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -109,6 +111,42 @@ int main(int argc, char* argv[])
     app.setOrganizationName("MTA KOKI KatonaLab");
     app.setOrganizationDomain("koki.hu");
     app.setApplicationName("A3DC (" + QString(_A3DC_BUILD_GIT_SHA) + QString(_A3DC_BUILD_PLATFORM) + ")");
+    // TODO: call setApplicationVersion
+
+    QCommandLineParser parser;
+    QCommandLineOption pythonPathOption("python-path", "sets PYTHONHOME", "PY_PATH");
+    parser.addOption(pythonPathOption);
+    QCommandLineOption modulePathOption("module-path", "sets the module path", "MODULE_PATH");
+    parser.addOption(modulePathOption);
+    QCommandLineOption editorOption("editor", "opens the program in editor mode");
+    parser.addOption(editorOption);
+    parser.process(app);
+
+    QString pythonPath = parser.value(pythonPathOption);
+    QString modulePath = parser.value(modulePathOption);
+    GlobalSettings::editorMode = parser.isSet(editorOption);
+
+    if (pythonPath.isEmpty()) {
+        QByteArray venv = qgetenv("VIRTUAL_ENV");
+        if (venv.isEmpty()) {
+            pythonPath = QString("virtualenv");
+        } else {
+            pythonPath = QString::fromLocal8Bit(venv);
+        }
+    }
+    qputenv("PYTHONHOME", pythonPath.toLocal8Bit());
+
+    if (!modulePath.isEmpty()) {
+        GlobalSettings::modulePath = modulePath;
+    } else {
+        GlobalSettings::modulePath = QString("modules");
+    }
+
+    qInfo() << "PYTHONHOME:" << pythonPath;
+    qInfo() << "module path:" << GlobalSettings::modulePath.dirName();
+    if (GlobalSettings::editorMode) {
+        qInfo() << "editor mode";
+    }
 
     setSurfaceFormat();
 

@@ -56,6 +56,7 @@ HEADERS += \
     IcsDataSourceModule.h \
     ParameterInterfaceModules.hpp \
     OutputInterfaceModules.hpp \
+    GlobalSettings.h \
     ../util/version.h \
     ../../lib/libics/libics_ll.h \
     ../../lib/libics/libics_intern.h \
@@ -78,6 +79,7 @@ SOURCES += \
     ParameterInterfaceModules.cpp \
     OutputInterfaceModules.cpp \
     main.cpp \
+    GlobalSettings.cpp
 
 SOURCES +=  \
     ../../lib/libics/libics_preview.c \

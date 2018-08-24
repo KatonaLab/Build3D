@@ -73,6 +73,7 @@ Pane {
                     // TODO: use fontellico icon for this
                     text: "x"
                     onClicked: baseModel.removeModule(moduleDetails.uid)
+                    visible: baseModel.editorMode
                 }
             }
 

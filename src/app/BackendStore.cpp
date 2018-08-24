@@ -8,6 +8,7 @@
 #include "BackendParameter.h"
 #include "BackendOutput.h"
 #include "IcsDataSourceModule.h"
+#include "GlobalSettings.h"
 #include <fstream>
 #include <algorithm>
 
@@ -133,7 +134,9 @@ BackendStore::BackendStore(QObject* parent)
 
         refreshAvailableModules();
 
+        m_editorMode = true;
         m_commandHistory.read("workflow.json", *this);
+        m_editorMode = GlobalSettings::editorMode;
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -184,6 +187,11 @@ pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
 
 void BackendStore::addModule(const QString& scriptPath)
 {
+    if (!editorMode()) {
+        qWarning() << "not in editor mode, can not add module";
+        return;
+    }
+
     static const QString nativePath("native://");
     try {
         shared_ptr<ComputeModule> module;
@@ -194,7 +202,7 @@ void BackendStore::addModule(const QString& scriptPath)
                 module = make_shared<IcsDataSourceModule>(m_platform);
             }
         } else {
-            std::string script = scriptPath.toStdString();
+            std::string script = GlobalSettings::modulePath.filePath(scriptPath).toStdString();
             ifstream f(script);
             if (!f.is_open()) {
                 throw std::runtime_error("missing module script: " + script);
@@ -273,6 +281,11 @@ void BackendStore::itemChanged(const BackendStoreItem* item, ModuleRoles role)
 
 void BackendStore::removeModule(int uid)
 {
+    if (!editorMode()) {
+        qWarning() << "not in editor mode, can not remove module";
+        return;
+    }
+
     try {
         auto removable = [uid](const unique_ptr<BackendStoreItem>& item) {
             return (item->category() == "module" && item->uid() == uid)
@@ -424,6 +437,11 @@ int BackendStore::count() const
 
 bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid)
 {
+    if (!editorMode()) {
+        qWarning() << "not in editor mode, can connect modules";
+        return false;
+    }
+
     try {
         auto b = m_items.begin();
         auto e = m_items.end();
@@ -502,7 +520,7 @@ void BackendStore::refreshAvailableModules()
         };
 
         // TODO: move magic string constants to highlighted section/file
-        QDirIterator level1("modules");
+        QDirIterator level1(GlobalSettings::modulePath);
         while (level1.hasNext()) {
             level1.next();
             if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()
@@ -516,7 +534,8 @@ void BackendStore::refreshAvailableModules()
                     level2.next();
                     if (isModuleFile(level2.fileInfo() )) {
                         QVariantMap fileVMap;
-                        fileVMap["path"] = level2.filePath();
+                        fileVMap["path"] = GlobalSettings::modulePath
+                            .relativeFilePath(level2.fileInfo().absoluteFilePath());
                         QString name = level2.fileName()
                             .mid(QString("module").size())
                             .replace('_', ' ')

@@ -11,6 +11,7 @@
 #include <QJsonObject>
 
 #include "BackendStoreItem.h"
+#include "GlobalSettings.h"
 #include <utility>
 #include <core/compute_platform/ports.h>
 
@@ -36,6 +37,7 @@ class BackendStore: public QAbstractListModel {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     typedef core::compute_platform::PortBase PortBase;
     Q_PROPERTY(QVariantList availableModules READ availableModules NOTIFY availableModulesChanged)
+    Q_PROPERTY(bool editorMode READ editorMode NOTIFY editorModeChanged)
 public:
     enum ModuleRoles {
         UidRole = Qt::UserRole,
@@ -73,13 +75,19 @@ public:
         m_uidCounter = uid;
     }
 
+    bool editorMode()
+    {
+        return m_editorMode;
+    }
 Q_SIGNALS:
     void availableModulesChanged();
+    void editorModeChanged();
 
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
     ComputePlatform m_platform;
     QVariantList m_availableModules;
+    bool m_editorMode;
     int m_uidCounter = 0;
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);

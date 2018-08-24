@@ -45,32 +45,9 @@ if a3dc_module_interface.stderr is not None:
     )");
 }
 
-// TODO: move to some platform_specific.h/cpp place
-#ifdef _WIN32
-int setenv(const char *name, const char *value, int overwrite)
-{
-	int errcode = 0;
-	if (!overwrite) {
-		size_t envsize = 0;
-		errcode = getenv_s(&envsize, NULL, 0, name);
-		if (errcode || envsize) return errcode;
-	}
-	return _putenv_s(name, value);
-}
-#endif
-
 PythonEnvironment::PythonEnvironment()
 {
-    // TODO: unified python handling on all platforms
-    #ifdef _WIN32
-    #else
-
-        if (auto venvPath = getenv("VIRTUAL_ENV")) {
-            setenv("PYTHONHOME", venvPath, true);
-        }
-
-    #endif
-
+    // NOTE: no need to set PYTHONHOME, because it is done at main.cpp 
     py::initialize_interpreter();
 
     // TODO: it is crucial on Windows to redirect the python

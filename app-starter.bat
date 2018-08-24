@@ -1,3 +1,1 @@
-set PATH=python-3.6.5.amd64;%PATH%
-set PYTHONHOME=python-3.6.5.amd64
-app.exe -style material
+app.exe --python-path "python-3.6.5.amd64" --module-path "modules" --editor

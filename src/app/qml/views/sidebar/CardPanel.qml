@@ -50,7 +50,7 @@ Pane {
                     id: inputsModel
                     source: baseModel
                     includeCategory: ["input"]
-                    includeParentUid: [model.uid]
+                    includeParentUid: [baseModel.editorMode ? model.uid : -1]
                 }
 
                 BackendStoreFilter {
@@ -64,7 +64,7 @@ Pane {
                     id: outputsModel
                     source: baseModel
                     includeCategory: ["output"]
-                    includeParentUid: [model.uid]
+                    includeParentUid: [baseModel.editorMode ? model.uid : -1]
                 }
 
                 inputs: inputsModel
