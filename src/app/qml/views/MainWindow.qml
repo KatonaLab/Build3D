@@ -152,7 +152,6 @@ ApplicationWindow {
 
             ToolButton {
                 id: themeButton
-                anchors.right: parent.right
                 font.family: "fontello"
                 text: settings.darkTheme ? "\uF10C" : "\uF111"
                 onClicked: {
