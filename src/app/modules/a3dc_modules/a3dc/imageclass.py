@@ -18,21 +18,27 @@ class Image(object):
     
     '''
 
-    def __init__(self, image, metadata=None, database=None):
+    def __init__(self, image, metadata, database=None):
         
         #set array
         self.array=image
         
         #Set metadata
-        if metadata==None:
-            self.metadata={}
-        else:
-            self.metadata=metadata
-        self.metadata["Type"]=image.dtype
+        self.metadata=metadata
+
+ 
+        #print(self.metadata["Type"])
+        #print(str(image.dtype))
+        #self.metadata["Type"]=image.dtype
+        
+        #self.metadata={}
+        
+        
         
         #Set database if supplied
         if database!=None:
             self.database=database
+    
     
     @classmethod
     def load_image(cls, file_path, metadata=None):

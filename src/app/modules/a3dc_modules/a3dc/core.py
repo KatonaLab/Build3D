@@ -13,7 +13,8 @@ from . import segmentation
 def colocalization_connectivity(image_list, raw_img_list=None):
     '''TODO what happens if tagged image was not previouslz analyzed
     '''
-    
+    print('YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
+    print(image_list[0].array.shape)
     # Create Overlapping Image
     ovl_array = image_list[0].array
     for i in range(1, len(image_list)):
