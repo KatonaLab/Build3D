@@ -20,8 +20,8 @@ ApplicationWindow {
     height: 480
     title: "A3-DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
-    Material.theme: Material.Light
-    Material.accent: Material.Teal
+    Material.theme: settings.darkTheme ? Material.Dark : Material.Light
+    Material.accent: Material.Lime
 
     Component.onCompleted: visible = true
 
@@ -29,16 +29,40 @@ ApplicationWindow {
         Menu {
             title: "File"
             MenuItem {
-                text: importAction.text
-                onTriggered: importAction.onTriggered();
+                text: newWorkflowAction.text
+                onTriggered: newWorkflowAction.onTriggered();
             }
             MenuItem {
-                text: readJsonAction.text
-                onTriggered: readJsonAction.onTriggered();
+                text: openWorkflowAction.text
+                onTriggered: openWorkflowAction.onTriggered();
             }
             MenuItem {
-                text: writeJsonAction.text
-                onTriggered: writeJsonAction.onTriggered();
+                text: saveWorkflowAction.text
+                onTriggered: saveWorkflowAction.onTriggered();
+            }
+        }
+
+        Menu {
+            title: "View"
+            MenuItem {
+                text: toggleSmoothTexturesAction.text
+                onTriggered: toggleSmoothTexturesAction.onTriggered();
+            }
+        }
+
+        Menu {
+            title: "Workflow"
+            MenuItem {
+                text: runAction.text
+                onTriggered: runAction.onTriggered();
+            }
+            MenuItem {
+                text: runBatchAction.text
+                onTriggered: runBatchAction.onTriggered();
+            }
+            MenuItem {
+                text: stopAction.text
+                onTriggered: saveWorkflowAction.onTriggered();
             }
         }
     }
@@ -52,6 +76,8 @@ ApplicationWindow {
         property int splitterX: 400
         property int consoleHeight: 240
         property bool consoleStatus: false
+        property bool darkTheme: false
+        property bool smoothTextures: false
     }
 
     Component.onDestruction: {
@@ -59,27 +85,80 @@ ApplicationWindow {
         settings.consoleHeight = consolePanel.height;
     }
 
-    Action {
-        id: importAction
-        text: "Import"
-        onTriggered: {
-            AppActions.importIcsFile({});
-        }
-    }
+    header: ToolBar {
+        // Material.foreground: "white"
+        // Material.background: "white"
+        Material.primary: parent.Material.background
 
-    Action {
-        id: readJsonAction
-        text: "Open Workflow"
-        onTriggered: {
-            AppActions.readJson({});
-        }
-    }
+        RowLayout {
+            // anchors.fill: parent
+            anchors.left: parent.left
+            
+            ToolButton {
+                action: newWorkflowAction
+                font.family: "fontello"
+                text: "\uE800"
+            }
 
-    Action {
-        id: writeJsonAction
-        text: "Save Workflow"
-        onTriggered: {
-            AppActions.writeJson({});
+            ToolSeparator {}
+
+            ToolButton {
+                action: openWorkflowAction
+                font.family: "fontello"
+                text: "\uF115"
+            }
+
+            ToolButton {
+                action: saveWorkflowAction
+                font.family: "fontello"
+                text: "\uE80B"
+            }
+
+            ToolSeparator {}
+
+            ToolButton {
+                action: runAction
+                font.family: "fontello"
+                text: "\uE809"
+            }
+
+            ToolButton {
+                action: runBatchAction
+                font.family: "fontello"
+                text: "\uE80C"
+            }
+
+            ToolButton {
+                action: stopAction
+                font.family: "fontello"
+                text: "\uE80A"
+            }
+
+            // ToolSeparator {}
+        }
+
+        RowLayout {
+            // anchors.fill: parent
+            anchors.right: parent.right
+
+            ToolButton {
+                action: toggleSmoothTexturesAction
+                font.family: "fontello"
+                text: settings.smoothTextures ? "\uF1B3" : "\uE81B"
+                onClicked: {
+                    settings.smoothTextures = !settings.smoothTextures;
+                }
+            }
+
+            ToolButton {
+                id: themeButton
+                anchors.right: parent.right
+                font.family: "fontello"
+                text: settings.darkTheme ? "\uF10C" : "\uF111"
+                onClicked: {
+                    settings.darkTheme = !settings.darkTheme;
+                }
+            }            
         }
     }
 
@@ -204,6 +283,68 @@ ApplicationWindow {
 
             }
 
+        }
+    }
+
+    Action {
+        id: newWorkflowAction
+        text: "New Workflow"
+        onTriggered: {
+            // TODO:
+            // AppActions.importIcsFile({});
+        }
+    }
+
+    Action {
+        id: openWorkflowAction
+        text: "Open Workflow"
+        onTriggered: {
+            // TODO:
+            // AppActions.readJson({});
+        }
+    }
+
+    Action {
+        id: saveWorkflowAction
+        text: "Save Workflow"
+        onTriggered: {
+            // TODO:
+            // AppActions.writeJson({});
+        }
+    }
+
+    Action {
+        id: runAction
+        text: "Run"
+        onTriggered: {
+            ModuleStore.model.evaluate(-1);
+        }
+    }
+
+    Action {
+        id: runBatchAction
+        text: "Run Batch"
+        onTriggered: {
+            // TODO:
+            // AppActions.writeJson({});
+        }
+    }
+
+    Action {
+        id: stopAction
+        text: "Stop"
+        onTriggered: {
+            // TODO:
+            // AppActions.writeJson({});
+        }
+    }
+
+    Action {
+        id: toggleSmoothTexturesAction
+        text: "Linear Texture Interpolation"
+        onTriggered: {
+            // TODO:
+            // AppActions.writeJson({});
         }
     }
 }

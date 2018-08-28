@@ -18,121 +18,124 @@ Pane {
         includeCategory: ["module"]
     }
 
-    ColumnLayout {
-        anchors.fill: parent
+    // ColumnLayout {
+        // anchors.fill: parent
 
         // anchors.horizontalCenter: parent.horizontalCenter
-        RoundButton {
-            text: "run"
-            onClicked: {
-                baseModel.evaluate(-1);
-            }
-            // TODO:
-            //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
-        }
+        // RoundButton {
+        //     text: "run"
+        //     onClicked: {
+        //         baseModel.evaluate(-1);
+        //     }
+        //     // TODO:
+        //     //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
+        // }
 
         // Rectangle { color: "transparent"; height: 16; width: 1 }
 
-        ListView {
-            id: listView
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-    
-            spacing: 8
+    ListView {
+        id: listView
+        // Layout.fillWidth: true
+        // Layout.fillHeight: true
+        // clip: true
+        anchors.fill: parent
 
-            model: moduleList
-            delegate: Card {
-                moduleDetails: model
-                baseModel: root.baseModel
+        spacing: 8
 
-                BackendStoreFilter {
-                    id: inputsModel
-                    source: baseModel
-                    includeCategory: ["input"]
-                    includeParentUid: [baseModel.editorMode ? model.uid : -1]
-                }
+        model: moduleList
+        delegate: Card {
+            moduleDetails: model
+            baseModel: root.baseModel
 
-                BackendStoreFilter {
-                    id: parametersModel
-                    source: baseModel
-                    includeCategory: ["parameter"]
-                    includeParentUid: [model.uid]
-                }
-
-                BackendStoreFilter {
-                    id: outputsModel
-                    source: baseModel
-                    includeCategory: ["output"]
-                    includeParentUid: [baseModel.editorMode ? model.uid : -1]
-                }
-
-                inputs: inputsModel
-                parameters: parametersModel
-                outputs: outputsModel
-                width: parent.width
-                expanded: true
-                font.pointSize: 11
+            BackendStoreFilter {
+                id: inputsModel
+                source: baseModel
+                includeCategory: ["input"]
+                includeParentUid: [baseModel.editorMode ? model.uid : -1]
             }
 
-            // header: Column {
-            //     anchors.horizontalCenter: parent.horizontalCenter
-            //     RoundButton {
-            //         text: "run"
-            //         onClicked: {
-            //             baseModel.evaluate(-1);
-            //         }
-            //         // TODO:
-            //         //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
-            //     }
+            BackendStoreFilter {
+                id: parametersModel
+                source: baseModel
+                includeCategory: ["parameter"]
+                includeParentUid: [model.uid]
+            }
 
-            //     Rectangle { color: "transparent"; height: 16; width: 1 }
-            // }
+            BackendStoreFilter {
+                id: outputsModel
+                source: baseModel
+                includeCategory: ["output"]
+                includeParentUid: [model.uid]
+            }
 
-            footer: Column {
-                anchors.horizontalCenter: parent.horizontalCenter
+            inputs: inputsModel
+            parameters: parametersModel
+            outputs: outputsModel
+            width: parent.width
+            expanded: true
+            font.pointSize: 11
+        }
 
-                Rectangle { color: "transparent"; height: 16; width: 1 }
+        // header: Column {
+        //     anchors.horizontalCenter: parent.horizontalCenter
+        //     RoundButton {
+        //         text: "run"
+        //         onClicked: {
+        //             baseModel.evaluate(-1);
+        //         }
+        //         // TODO:
+        //         //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
+        //     }
 
-                RoundButton {
-                    text: "+"
-                    onClicked: {
-                        rootMenu.open();
-                    }
+        //     Rectangle { color: "transparent"; height: 16; width: 1 }
+        // }
 
-                    Menu {
-                        id: rootMenu
-                        Instantiator {
-                            id: groupsInstantiator
-                            model: baseModel.availableModules
-                            Menu {
-                                id: itemMenu
-                                title: modelData.name
-                                Repeater {
-                                    id: menuItemRepeater
-                                    model: modelData.files
-                                    MenuItem {
-                                        id: itemMenu
-                                        text: modelData.name
-                                        onTriggered: {
-                                            baseModel.addModule(modelData.path);
-                                        }
+        footer: Column {
+            visible: baseModel.editorMode
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            Rectangle { color: "transparent"; height: 16; width: 1 }
+
+            RoundButton {
+                font.family: "fontello"
+                text: "\uE805"
+                onClicked: {
+                    rootMenu.open();
+                }
+
+                Menu {
+                    id: rootMenu
+                    Instantiator {
+                        id: groupsInstantiator
+                        model: baseModel.availableModules
+                        Menu {
+                            id: itemMenu
+                            title: modelData.name
+                            Repeater {
+                                id: menuItemRepeater
+                                model: modelData.files
+                                MenuItem {
+                                    id: itemMenu
+                                    text: modelData.name
+                                    onTriggered: {
+                                        baseModel.addModule(modelData.path);
                                     }
                                 }
                             }
-                            onObjectAdded: rootMenu.insertMenu(index, object)
-                            onObjectRemoved: rootMenu.removeMenu(object)
                         }
-                        MenuSeparator {}
-                        MenuItem {
-                            text: "refresh module list"
-                            onTriggered: {
-                                baseModel.refreshAvailableModules();
-                            }
+                        onObjectAdded: rootMenu.insertMenu(index, object)
+                        onObjectRemoved: rootMenu.removeMenu(object)
+                    }
+                    MenuSeparator {}
+                    MenuItem {
+                        text: "refresh module list"
+                        onTriggered: {
+                            baseModel.refreshAvailableModules();
                         }
                     }
                 }
-            } // footer
-        } // list
-    } // column layout
+            }
+        } // footer
+    } // list
+    // } // column layout
 }

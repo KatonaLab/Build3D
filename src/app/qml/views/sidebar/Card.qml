@@ -71,7 +71,8 @@ Pane {
                 ToolButton {
                     id: removeButton
                     // TODO: use fontellico icon for this
-                    text: "x"
+                    font.family: "fontello"
+                    text: "\uE806"
                     onClicked: baseModel.removeModule(moduleDetails.uid)
                     visible: baseModel.editorMode
                 }
