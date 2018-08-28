@@ -7,6 +7,7 @@ import QtQuick.Scene3D 2.0
 import Qt.labs.settings 1.0
 import Qt.labs.platform 1.0
 import koki.katonalab.a3dc 1.0
+import QtQuick.Dialogs 1.3
 
 import "../stores"
 import "sidebar"
@@ -23,8 +24,6 @@ ApplicationWindow {
 
     Material.theme: settings.darkTheme ? Material.Dark : Material.Light
     Material.accent: Material.Lime
-
-    Component.onCompleted: visible = true
 
     MenuBar {
         Menu {
@@ -75,13 +74,13 @@ ApplicationWindow {
             }
             MenuItem {
                 text: "About"
-                onTriggered: aboutDialog.show()
+                onTriggered: aboutWindow.show()
             }
         }
     }
 
     Window {
-        id: aboutDialog
+        id: aboutWindow
         title: "About"
         visible: false
         width: layout.width + 32
@@ -130,11 +129,18 @@ ApplicationWindow {
         property bool consoleStatus: false
         property bool darkTheme: false
         property bool smoothTextures: false
+        property url dialogFolder: "."
+    }
+
+    Component.onCompleted: {
+        visible = true;
+        ModuleStore.dialogFolder = settings.dialogFolder;
     }
 
     Component.onDestruction: {
         settings.splitterX = splitter.x;
         settings.consoleHeight = consolePanel.height;
+        settings.dialogFolder = ModuleStore.dialogFolder;
     }
 
     header: ToolBar {
@@ -280,7 +286,7 @@ ApplicationWindow {
                         text: "…"
                         horizontalAlignment: Text.AlignHCenter
                         // TODO: text color match to the theme
-                        color: "white"
+                        color: Material.foreground
 
                         onYChanged: {
                             consolePanel.height -= y;
@@ -338,8 +344,8 @@ ApplicationWindow {
         id: newWorkflowAction
         text: "New Workflow"
         onTriggered: {
-            // TODO:
-            // AppActions.importIcsFile({});
+            // TODO: ask for save
+            ModuleStore.model.newWorkflow();
         }
     }
 
@@ -347,8 +353,18 @@ ApplicationWindow {
         id: openWorkflowAction
         text: "Open Workflow"
         onTriggered: {
-            // TODO:
-            // AppActions.readJson({});
+            openDialog.open();
+        }
+    }
+
+    FileDialog {
+        id: openDialog
+        title: "Open Workflow"
+        folder: ModuleStore.dialogFolder
+        nameFilters: [ "A3-DC Workflow File (*.json)", "All files (*)" ]
+        onAccepted: {
+            // TODO: check weather we would overwrite the existing work
+            ModuleStore.model.readWorkflow(openDialog.fileUrl);
         }
     }
 
@@ -356,8 +372,21 @@ ApplicationWindow {
         id: saveWorkflowAction
         text: "Save Workflow"
         onTriggered: {
-            // TODO:
-            // AppActions.writeJson({});
+            saveDialog.open();
+        }
+    }
+
+    FileDialog {
+        id: saveDialog
+        title: "Save Workflow"
+        folder: ModuleStore.dialogFolder
+        defaultSuffix: "json"
+        selectExisting: false
+        selectFolder: false
+        sidebarVisible: true
+        onAccepted: {
+            // TODO: ask for 'sure to overwrite file'
+            ModuleStore.model.writeWorkflow(saveDialog.fileUrl);
         }
     }
 

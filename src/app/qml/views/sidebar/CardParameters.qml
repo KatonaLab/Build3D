@@ -4,9 +4,10 @@ import QtQml.Models 2.3
 import QtQuick.Controls 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Material 2.2
-import QtQuick.Dialogs 1.2
+import QtQuick.Dialogs 1.3
 
 import "../components"
+import "../../stores"
 
 Repeater {
     id: root
@@ -141,6 +142,7 @@ Repeater {
                     FileDialog {
                         id: dialog
                         title: "Select File"
+                        folder: ModuleStore.dialogFolder
                         selectMultiple: details.hints.multipleFiles || false
                         onAccepted: {
                             details.value = dialog.fileUrl;

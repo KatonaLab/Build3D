@@ -24,7 +24,7 @@ public:
     void notifyRemoveModule(int uid);
     void notifyConnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
     void notifyDisconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
-    void write(QString filename = QString("workflow.json"));
+    void write(QString filename);
     void read(QString filename, BackendStore& store);
 protected:
     int m_initialUid = 0;
@@ -68,6 +68,9 @@ public:
     // TODO:
     // Q_INVOKABLE bool disconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
     Q_INVOKABLE void evaluate(int uid = -1);
+    Q_INVOKABLE void readWorkflow(const QUrl& url);
+    Q_INVOKABLE void writeWorkflow(const QUrl& url);
+    Q_INVOKABLE void newWorkflow();
 
     std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
     void setUidCounter(int uid)

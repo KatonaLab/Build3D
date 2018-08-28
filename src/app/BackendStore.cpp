@@ -11,6 +11,7 @@
 #include "GlobalSettings.h"
 #include <fstream>
 #include <algorithm>
+#include <QStandardPaths>
 
 using namespace std;
 using namespace core::compute_platform;
@@ -135,7 +136,9 @@ BackendStore::BackendStore(QObject* parent)
         refreshAvailableModules();
 
         m_editorMode = true;
-        m_commandHistory.read("workflow.json", *this);
+//        QString workflowFile = QStandardPaths::locate(
+//            QStandardPaths::DataLocation, QString("workflow.json"));
+//        m_commandHistory.read(workflowFile, *this);
         m_editorMode = GlobalSettings::editorMode;
 
     } catch (exception& e) {
@@ -145,7 +148,9 @@ BackendStore::BackendStore(QObject* parent)
 
 BackendStore::~BackendStore()
 {
-    m_commandHistory.write();
+//    QString workflowFile = QStandardPaths::locate(
+//        QStandardPaths::DataLocation, QString("workflow.json"));
+//    m_commandHistory.write(workflowFile);
 }
 
 pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
@@ -574,6 +579,31 @@ void BackendStore::addAvailableNativeModules()
     groupMap["files"] = fileList;
 
     m_availableModules.append(groupMap);
+}
+
+void BackendStore::newWorkflow()
+{
+    // TODO: try-catch
+    beginResetModel();
+    m_items.clear();
+    ComputePlatform cleanPlatform;
+    swap(m_platform, cleanPlatform);
+    CommandHistory cleanHistory;
+    swap(m_commandHistory, cleanHistory);
+    endResetModel();
+}
+
+void BackendStore::readWorkflow(const QUrl& url)
+{
+    // TODO: try-catch
+    newWorkflow();
+    m_commandHistory.read(url.toLocalFile(), *this);
+}
+
+void BackendStore::writeWorkflow(const QUrl& url)
+{
+    // TODO: try-catch
+    m_commandHistory.write(url.toLocalFile());
 }
 
 // TODO: move to separate file
