@@ -6,7 +6,6 @@ Item {
     property bool checked: false
     property string arrowCharacter: "\u25B6"
     property alias text: label.text
-    property alias font: label.font
     property int spinDuration: 200
     
     RowLayout {

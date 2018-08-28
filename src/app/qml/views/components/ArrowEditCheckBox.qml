@@ -6,7 +6,6 @@ Item {
     property bool checked: false
     property string arrowCharacter: "\u25B6"
     property alias text: textField.text
-    property alias font: textField.font
     property alias staticText: staticLabel.text
     property int spinDuration: 200
     
@@ -41,7 +40,6 @@ Item {
 
             Label {
                 id: staticLabel
-                font: textField.font
                 Component.onCompleted: {
                     font.pointSize = textField.font.pointSize - 1;
                 }

@@ -50,7 +50,6 @@ RowLayout {
 
     TextField {
         id: highField
-        font: lowField.font
         horizontalAlignment: TextInput.AlignRight
         validator: DoubleValidator {}
         implicitWidth: editWidth

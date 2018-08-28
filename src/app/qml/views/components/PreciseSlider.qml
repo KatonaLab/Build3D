@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.3
 
 RowLayout {
     property int decimals: 4
-    property alias font: field.font
     property alias from: slider.from
     property alias to: slider.to
     property real value: slider.value

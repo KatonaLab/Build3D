@@ -10,7 +10,6 @@ import "../components"
 
 Repeater {
     id: root
-    property font font
     // TODO: not sure this is neccessary
     property int uid: -1
 
@@ -35,7 +34,6 @@ Repeater {
             id: recognizedOutputDelegate
             Label {
                 text: details.name + "(" + details.type + ")"
-                font: root.font
             }
         }
 
@@ -52,7 +50,6 @@ Repeater {
                         id: visibilitySwitch
                         Layout.fillWidth: true
                         text: details.name
-                        font: root.font
                         checked: details.value.visible
                         Binding {
                             target: details.value
@@ -101,7 +98,6 @@ Repeater {
             id: unknownControllerDelegate
             Label {
                 text: "invalid type for output '" + details.name + "'"
-                font: root.font
                 color: Material.color(Material.Red)
             }
         }

@@ -59,7 +59,6 @@ Pane {
                     Layout.fillWidth: true
                     text: moduleDetails.name
                     staticText: moduleDetails.type
-                    font: card.font
                     Binding {
                         target: moduleDetails
                         property: "name"
@@ -82,7 +81,6 @@ Pane {
                 id: inputsRepeater
                 model: card.inputs
                 uid: moduleDetails.uid
-                font: card.font
                 baseModel: card.baseModel
             }
 
@@ -90,13 +88,11 @@ Pane {
                 id: parametersRepeater
                 model: card.parameters
                 uid: moduleDetails.uid
-                font: card.font
             }
 
             CardOutputs {
                 model: card.outputs
                 uid: moduleDetails.uid
-                font: card.font
             }
         }
     }

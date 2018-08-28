@@ -9,7 +9,6 @@ import koki.katonalab.a3dc 1.0
 Pane {
     id: root
     property var baseModel
-
     padding: 12
 
     BackendStoreFilter {
@@ -18,26 +17,8 @@ Pane {
         includeCategory: ["module"]
     }
 
-    // ColumnLayout {
-        // anchors.fill: parent
-
-        // anchors.horizontalCenter: parent.horizontalCenter
-        // RoundButton {
-        //     text: "run"
-        //     onClicked: {
-        //         baseModel.evaluate(-1);
-        //     }
-        //     // TODO:
-        //     //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
-        // }
-
-        // Rectangle { color: "transparent"; height: 16; width: 1 }
-
     ListView {
         id: listView
-        // Layout.fillWidth: true
-        // Layout.fillHeight: true
-        // clip: true
         anchors.fill: parent
 
         spacing: 8
@@ -73,22 +54,7 @@ Pane {
             outputs: outputsModel
             width: parent.width
             expanded: true
-            font.pointSize: 11
         }
-
-        // header: Column {
-        //     anchors.horizontalCenter: parent.horizontalCenter
-        //     RoundButton {
-        //         text: "run"
-        //         onClicked: {
-        //             baseModel.evaluate(-1);
-        //         }
-        //         // TODO:
-        //         //Material.background: configurationUpToDate ? Material.LightGreen : Material.Amber
-        //     }
-
-        //     Rectangle { color: "transparent"; height: 16; width: 1 }
-        // }
 
         footer: Column {
             visible: baseModel.editorMode
@@ -135,7 +101,6 @@ Pane {
                     }
                 }
             }
-        } // footer
-    } // list
-    // } // column layout
+        }
+    }
 }

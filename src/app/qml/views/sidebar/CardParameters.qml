@@ -12,7 +12,6 @@ Repeater {
     id: root
     // TODO: not sure this is neccessary
     property int uid: -1
-    property font font
 
     delegate: Loader {
         property int uid: root.uid
@@ -35,7 +34,6 @@ Repeater {
             id: unknownControllerDelegate
             Label {
                 text: "invalid type for property '" + details.name + "'"
-                font: root.font
                 color: Material.color(Material.Red)
                 // TODO: action
             }
@@ -44,7 +42,6 @@ Repeater {
         Component {
             id: intSliderDelegate
             PreciseSlider {
-                font: root.font
                 stepSize: details.hints.stepSize || 1
                 snapMode: Slider.SnapAlways
                 from: details.hints.min || 0
@@ -86,7 +83,6 @@ Repeater {
         Component {
             id: floatSliderDelegate
             PreciseSlider {
-                font: root.font
                 from: details.hints.min || 0.0
                 to: details.hints.max || 1.0
                 defaultValue: details.hints.default || from
@@ -101,7 +97,6 @@ Repeater {
             id: switchDelegate
             Switch {
                 text: details.name
-                font: root.font
                 onCheckedChanged: {
                     details.value = checked;
                 }
@@ -113,10 +108,8 @@ Repeater {
             RowLayout {
                 Label {
                     text: details.name
-                    font: root.font
                 }
                 TextField {
-                    font: root.font
                     Layout.fillWidth: true
                     onEditingFinished: {
                         details.value = text;
@@ -131,13 +124,11 @@ Repeater {
                 Label {
                     Layout.fillWidth: true
                     text: details.name
-                    font: root.font
                 }
                 Text {
                     id: filenameText
                     Layout.fillWidth: true
                     wrapMode: Text.WrapAnywhere
-                    font: root.font
                     text: details.value ? details.value.toString() : ""
                 }
                 Button {

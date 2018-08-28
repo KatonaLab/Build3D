@@ -13,7 +13,6 @@ Repeater {
     property var baseModel
     // TODO: not sure uid is neccessary here
     property int uid: -1
-    property font font
 
     delegate: inputDelegate
 
@@ -25,7 +24,6 @@ Repeater {
             Layout.fillWidth: true
 
             Label {
-                font: root.font
                 text: details.name + " (" + details.type + ")"
                 Layout.fillWidth: true
             }

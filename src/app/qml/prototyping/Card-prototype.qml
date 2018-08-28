@@ -17,7 +17,6 @@ Window {
     Card {
         anchors.horizontalCenter: parent.horizontalCenter
         displayName: "Demo Card"
-        font.pointSize: 12
         width: 300
         uid: 42
         y: 100

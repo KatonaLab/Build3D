@@ -15,9 +15,10 @@ import "components"
 
 ApplicationWindow {
     id: appWindow
+    font.pointSize: 11
 
-    width: 480
-    height: 480
+    width: 800
+    height: 600
     title: "A3-DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
     Material.theme: settings.darkTheme ? Material.Dark : Material.Light
@@ -65,6 +66,57 @@ ApplicationWindow {
                 onTriggered: saveWorkflowAction.onTriggered();
             }
         }
+
+        Menu {
+            title: "Help"
+            MenuItem {
+                text: "Help"
+                onTriggered: Qt.openUrlExternally("https://github.com/vivien-miczan/A3DC/wiki/Help")
+            }
+            MenuItem {
+                text: "About"
+                onTriggered: aboutDialog.show()
+            }
+        }
+    }
+
+    Window {
+        id: aboutDialog
+        title: "About"
+        visible: false
+        width: layout.width + 32
+        height: layout.height + 32
+        
+        ColumnLayout {
+            id: layout
+            anchors.centerIn: parent
+            spacing: 16
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                font.pointSize: 16
+                text: "A3-DC"
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: "made by KatonaLab @ MTA KOKI with \u2661"
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: "<a href=\"https://github.com/vivien-miczan/A3DC\">https://github.com/vivien-miczan/A3DC</a>"
+                onLinkActivated: Qt.openUrlExternally(link)
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton // we don't want to eat clicks on the Text
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                font.pointSize: 11
+                text: A3DCVersion.version()
+            }
+        }
+
     }
 
     Settings {
@@ -86,8 +138,7 @@ ApplicationWindow {
     }
 
     header: ToolBar {
-        // Material.foreground: "white"
-        // Material.background: "white"
+        font.pixelSize: 14
         Material.primary: parent.Material.background
 
         RowLayout {
@@ -133,12 +184,9 @@ ApplicationWindow {
                 font.family: "fontello"
                 text: "\uE80A"
             }
-
-            // ToolSeparator {}
         }
 
         RowLayout {
-            // anchors.fill: parent
             anchors.right: parent.right
 
             ToolButton {
@@ -261,6 +309,7 @@ ApplicationWindow {
 
                         TextArea {
                             id: textArea
+                            // TODO: set proper size
                             font.pointSize: 11
                             font.family: "Courier"
                             text: LogCollector.unfilteredLog
