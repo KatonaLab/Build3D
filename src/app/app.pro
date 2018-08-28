@@ -6,6 +6,9 @@ CONFIG += no_keywords # whihtout this config compiler complains about PyType_Slo
 
 # CONFIG -= app_bundle
 
+TARGET = a3-dc
+RC_ICONS = ../../assets/icons/favicon.ico
+
 CONFIG(release, debug|release) {
     CONFIG += optimize_full
 }

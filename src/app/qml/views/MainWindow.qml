@@ -98,7 +98,7 @@ ApplicationWindow {
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: "made by KatonaLab @ MTA KOKI with \u2661"
+                text: "made by KatonaLab @ MTA KOKI"
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter

@@ -2,18 +2,11 @@
 <!-- find . -type f \( -name "*.qml" -o -name "qmldir" -o -name "*.vert" -o -name "*.frag" -o -name "*.geom" \) | sed -e "s/\(.*\)/<file>\1<\/file>/" | pbcopy -->
 <qresource>
     <file>../../assets/fonts/fontello.ttf</file>
+    <file>../../assets/icons/favicon.ico</file>
     
     <file>./qml/stores/qmldir</file>
     <file>./qml/stores/ModuleStore.qml</file>
     <file>./qml/main.qml</file>
-    <file>./qml/prototyping/Card-prototype.qml</file>
-    <file>./qml/prototyping/PreciseSlider-prototype.qml</file>
-    <file>./qml/prototyping/HorizontalDivider-prototype.qml</file>
-    <file>./qml/prototyping/PreciseRangeSlider-prototype.qml</file>
-    <file>./qml/prototyping/ArrowEditCheckBox-prototype.qml</file>
-    <file>./qml/prototyping/CardPanel-prototype.qml</file>
-    <file>./qml/prototyping/DynamicComboBox-prototype.qml</file>
-    <file>./qml/prototyping/ArrowCheckBox-prototype.qml</file>
     <file>./qml/views/sidebar/CardInputs.qml</file>
     <file>./qml/views/sidebar/Card.qml</file>
     <file>./qml/views/sidebar/CardOutputs.qml</file>
