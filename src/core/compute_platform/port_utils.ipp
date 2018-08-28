@@ -23,7 +23,11 @@ std::weak_ptr<T> TypedOutputPort<T>::serve()
 
     if (m_numInputServed < numBinds()) {
         // T's copy constructor should do a deep copy
-        m_replicas.push_back(std::make_shared<T>(*m_original));
+        if (m_original) {
+            m_replicas.push_back(std::make_shared<T>(*m_original));
+        } else {
+            m_replicas.push_back(std::make_shared<T>());
+        }
         return std::weak_ptr<T>(m_replicas.back());
     } else if (m_numInputServed == numBinds()) {
         return std::weak_ptr<T>(m_original);
