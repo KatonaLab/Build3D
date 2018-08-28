@@ -20,6 +20,9 @@ def module_main(ctx):
     print('much float: {}'.format(a3.inputs['much float']))
     print('very bool: {}'.format(a3.inputs['very bool']))
     print('so enum: {}'.format(a3.inputs['so enum']))
+    print('int16 in [-7, 9674]: {}'.format(a3.inputs['int16 in [-7, 9674]']))
+    print('uint16 in [42, 72000]: {}'.format(a3.inputs['uint16 in [42, 72000]']))
+    print('uint32 in [42, 72000]: {}'.format(a3.inputs['uint32 in [42, 72000]']))
     print('Bye 🐕')
 
 
@@ -38,6 +41,15 @@ config = [a3.Parameter('such string 🐕', a3.types.string),
             .setIntHint("option1", 0)
             .setIntHint("option2", 1)
             .setIntHint("option3", 42),
+          a3.Parameter('int16 in [-7, 9674]', a3.types.int16)
+            .setIntHint('min', -7)
+            .setIntHint('max', 9674),
+          a3.Parameter('uint16 in [42, 72000]', a3.types.uint16)
+            .setIntHint('min', 42)
+            .setIntHint('max', 72000),
+          a3.Parameter('uint32 in [42, 72000]', a3.types.uint32)
+            .setIntHint('min', 42)
+            .setIntHint('max', 72000),
           a3.Output('string output', a3.types.string),
           a3.Output('filename output', a3.types.url),
           a3.Output('int output', a3.types.int8),
