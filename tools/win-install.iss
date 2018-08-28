@@ -1,5 +1,5 @@
 #ifndef APP_VERSION
-	#define APP_VERSION "042"
+	#define APP_VERSION "0"
 #endif
 
 #ifndef BUILD_ID
@@ -15,9 +15,9 @@ AppName=A3-DC
 AppVersion={#APP_VERSION}
 DefaultDirName={pf}\A3-DC
 DefaultGroupName=A3-DC
-;Compression=lzma2
-Compression=none
-;SolidCompression=yes
+Compression=lzma2
+;Compression=none
+SolidCompression=yes
 OutputDir=.
 OutputBaseFilename=a3-dc-setup-{#APP_VERSION}-{#BUILD_ID}
 Uninstallable=yes
