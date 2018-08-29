@@ -18,6 +18,10 @@ class IcsDataSourceModule : public core::compute_platform::ComputeModule {
 public:
     IcsDataSourceModule(ComputePlatform& parent);
     void execute() override;
+    std::string moduleTypeName() const override
+    {
+        return "ics data source";
+    }
 protected:
     bool modifiedParameters();
     Url m_lastPathValue;

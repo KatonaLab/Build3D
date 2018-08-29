@@ -113,6 +113,22 @@ void CommandHistory::processCommand(QJsonObject& object, BackendStore& store)
     }
 }
 
+QString pathToModuleName(const QString& path)
+{
+    QString x = path;
+    x = x.mid(QString("module").size()).replace('_', ' ').simplified();
+    x.chop(3);
+    return x;
+}
+
+QString BackendStore::generateModuleName(const QString &type)
+{
+    if (!m_moduleTypeCounter.count(type)) {
+        m_moduleTypeCounter[type] = 0;
+    }
+    return type + QString(" ") + QString::number(++(m_moduleTypeCounter[type]));
+}
+
 BackendStore::BackendStore(QObject* parent)
     : QAbstractListModel(parent)
 {
@@ -216,7 +232,10 @@ void BackendStore::addModule(const QString& scriptPath)
             stringstream buffer;
             buffer << f.rdbuf();
 
-            module = make_shared<PythonComputeModule>(m_platform, buffer.str(), "Generic");
+            QString type = pathToModuleName(QFileInfo(scriptPath).fileName());
+            QString name = generateModuleName(type);
+            module = make_shared<PythonComputeModule>(m_platform, buffer.str(),
+                name.toStdString(), type.toStdString());
         }
 
         if (!module) {
@@ -542,11 +561,7 @@ void BackendStore::refreshAvailableModules()
                         QVariantMap fileVMap;
                         fileVMap["path"] = GlobalSettings::modulePath
                             .relativeFilePath(level2.fileInfo().absoluteFilePath());
-                        QString name = level2.fileName()
-                            .mid(QString("module").size())
-                            .replace('_', ' ')
-                            .simplified();
-                        name.chop(3);
+                        QString name = pathToModuleName(level2.fileName());
                         fileVMap["name"] = name;
                         fileList.append(fileVMap);
                     }
