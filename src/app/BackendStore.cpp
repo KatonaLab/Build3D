@@ -208,6 +208,7 @@ void BackendStore::addModule(const QString& scriptPath)
             }
         } else {
             std::string script = GlobalSettings::modulePath.filePath(scriptPath).toStdString();
+            qInfo() << "loading module" << QString::fromStdString(script);
             ifstream f(script);
             if (!f.is_open()) {
                 throw std::runtime_error("missing module script: " + script);
@@ -525,7 +526,7 @@ void BackendStore::refreshAvailableModules()
         };
 
         // TODO: move magic string constants to highlighted section/file
-        QDirIterator level1(GlobalSettings::modulePath);
+        QDirIterator level1(GlobalSettings::modulePath.absolutePath());
         while (level1.hasNext()) {
             level1.next();
             if (level1.fileInfo().isDir() && !level1.fileInfo().isHidden()

@@ -114,27 +114,27 @@ int main(int argc, char* argv[])
     // TODO: call setApplicationVersion
 
     QCommandLineParser parser;
-    QCommandLineOption pythonPathOption("python-path", "sets PYTHONHOME", "PY_PATH");
-    parser.addOption(pythonPathOption);
+    QCommandLineOption pythonHomeOption("python-home", "sets PYTHONHOME", "PY_HOME");
+    parser.addOption(pythonHomeOption);
     QCommandLineOption modulePathOption("module-path", "sets the module path", "MODULE_PATH");
     parser.addOption(modulePathOption);
     QCommandLineOption editorOption("editor", "opens the program in editor mode");
     parser.addOption(editorOption);
     parser.process(app);
 
-    QString pythonPath = parser.value(pythonPathOption);
+    QString pythonHome = parser.value(pythonHomeOption);
     QString modulePath = parser.value(modulePathOption);
     GlobalSettings::editorMode = parser.isSet(editorOption);
 
-    if (pythonPath.isEmpty()) {
+    if (pythonHome.isEmpty()) {
         QByteArray venv = qgetenv("VIRTUAL_ENV");
         if (venv.isEmpty()) {
-            pythonPath = QString("virtualenv");
+            pythonHome = QString("virtualenv");
         } else {
-            pythonPath = QString::fromLocal8Bit(venv);
+            pythonHome = QString::fromLocal8Bit(venv);
         }
     }
-    qputenv("PYTHONHOME", pythonPath.toLocal8Bit());
+    qputenv("PYTHONHOME", pythonHome.toLocal8Bit());
 
     if (!modulePath.isEmpty()) {
         GlobalSettings::modulePath = modulePath;
@@ -142,8 +142,19 @@ int main(int argc, char* argv[])
         GlobalSettings::modulePath = QString("modules");
     }
 
-    qInfo() << "PYTHONHOME:" << pythonPath;
-    qInfo() << "module path:" << GlobalSettings::modulePath.dirName();
+    QString pythonPath = QString::fromLocal8Bit(qgetenv("PYTHONPATH"));
+    QDir d = GlobalSettings::modulePath;
+    d.cdUp();
+    if (pythonPath.isEmpty()) {
+        pythonPath = d.absolutePath();
+    } else {
+        pythonPath = d.absolutePath() + ":" + pythonPath;
+    }
+    qputenv("PYTHONPATH", pythonPath.toLocal8Bit());
+
+    qInfo() << "PYTHONHOME:" << pythonHome;
+    qInfo() << "PYTHONPATH:" << pythonPath;
+    qInfo() << "module path:" << GlobalSettings::modulePath.absolutePath();
     if (GlobalSettings::editorMode) {
         qInfo() << "editor mode";
     }
