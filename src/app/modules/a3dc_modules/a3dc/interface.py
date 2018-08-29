@@ -4,94 +4,15 @@ Created on Sun Mar 25 23:17:33 2018
 
 @author: Nerberus
 """
-
+import traceback
 import time
 import numpy as np
 import collections
 
 from . import segmentation
 from . import core
-from .error import A3dcError as A3dcError
 from .imageclass import Image
-
-####################################################Interface to call from C++####################################################
-def colocalize(ch1Array, ch1ThrArray, ch1Metadata, ch1Settings,  ch2Array, ch2ThrArray, ch2Metadata, ch2Settings, ovlSettings):
    
-        #Parameters to measure
-        measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder', 'meanIntensity', 'variance']
-        
-        
-        ch1Img=Image(ch1Array, ch1Metadata)
-        ch2Img=Image(ch2Array, ch2Metadata)
-        thresholdedImage1=Image(ch1ThrArray, ch1Metadata)
-        thresholdedImage2=Image(ch2ThrArray, ch2Metadata)
-    
-        outputPath=ch1Metadata['Path']
-        #############################################################################################################################
-        ###########################################Segmentation and Analysis#########################################################
-        #############################################################################################################################
-
-        #######################################################Channel 1#############################################################
-
-
-        #Channel 1:Tagging Image
-        taggedImage1, logText = tagImage(thresholdedImage1)
-        print(logText)
-
-        # Channel 1:Analysis and Filtering of objects
-        taggedImage1, logText = analyze(taggedImage1, imageList=[ch1Img], measurementInput=measurementList)
-        print(logText)
-        
-        taggedImage1, logText = apply_filter(taggedImage1, filterDict=ch1Settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
-        print(logText)
-        
-
-
-        #######################################################Channel 2#############################################################
-       
-
-
-        #Channel 1:Tagging Image
-        taggedImage2, logText = tagImage(thresholdedImage2)
-        print(logText)
-
-        # Channel 1:Analysis and Filtering of objects
-        taggedImage2, logText = analyze(taggedImage2, imageList=[ch2Img], measurementInput=measurementList)
-        print(logText)
-
-        
-        taggedImage2, logText = apply_filter(taggedImage2, filterDict=ch2Settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
-        print(logText)
-        
-
-        
-
-        #############################################################################################################################
-        ###################################################Colocalization############################################################
-        #############################################################################################################################
-        
-
-        #Colocalization:
-        overlappingImage, taggedImageList, logText = colocalization( [taggedImage1, taggedImage2], overlappingFilter=ovlSettings, removeFiltered=False)
-        print(logText)
-
-        suffix = ch1Img.metadata['Name']+ "_" +ch2Img.metadata['Name']+ "_overlap"
-        save_image(overlappingImage, outputPath, suffix)
-        
-        logText='\nSaving object dataBases to xlsx and text!'
-        print(logText)
-
-        
-        name1=ch1Img.metadata['Name']+'_tagged'
-        name2=ch2Img.metadata['Name']+'_tagged'
-        name=ch1Img.metadata['Name']+'_'+ch2Img.metadata['Name']
-        
-        save_data([taggedImage1,taggedImage2, overlappingImage], path=outputPath, file_name=name+'.xlsx', to_text=False)
-        save_data([taggedImage1], path=outputPath, file_name=name1+'.txt', to_text=True)
-        save_data([taggedImage1], path=outputPath, file_name=name2+'.txt', to_text=True)
-
-####################################################Interface to call from Python scripts####################################################
-        
         
         
 def tagImage(image):
@@ -115,7 +36,7 @@ def tagImage(image):
       
 
     except Exception as e:
-        raise A3dcError("Error occured while tagging image!",e)
+        raise Exception("Error occured while tagging image!",e)
 
     # Finish timing and add to logText
     tstop = time.clock()
@@ -181,13 +102,15 @@ def threshold(image, method="Otsu", **kwargs):
             raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
     except Exception as e:
-        raise A3dcError("Error occured while thresholding image!",e)
+        raise Exception("Error occured while thresholding image!",e)
 
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
     return Image(outputArray, image.metadata), logText
+
+
 
 
 def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanIntensity']):
@@ -224,7 +147,7 @@ def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanInt
         
 
     except Exception as e:
-        raise A3dcError("Error occured while analyzing image!",e)
+        raise Exception("Error occured while analyzing image!",e)
 
     # Finish timing and add to logText
     tstop = time.clock()
@@ -275,7 +198,7 @@ def apply_filter(image, filterDict=None, removeFiltered=False, overWrite=True):
         output_image.database=output_database
     
     except Exception as e:
-        raise A3dcError("Error occured while filtering database!",  e)
+        raise Exception("Error occured while filtering database!",  e)
 
     # Finish timing and add to logText
     tstop = time.clock()
@@ -314,7 +237,7 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
 
         # Determine connectivity data
         overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
-     
+        print('AGAGAGAGSDHDJKKSLKSLS:S:A')
         # Filter database and image
         overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
         
@@ -327,13 +250,15 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
         logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))
 
     except Exception as e:
-        raise A3dcError("Error occured while filtering database!",e)
+        print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRORRRRRRRRRRRRRRRRR')
+        traceback.print_exc()
+        raise Exception("Error occured durig colocalization!",e)
 
         # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return overlappingImage, tagged_img_list, logText
+    return overlappingImage, logText
 
 
 def save_data(image_list, path, file_name='output', to_text=True):
@@ -369,7 +294,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
         Image.save_data(image_list, path, file_name, to_text)
 
     except Exception as e:
-        raise A3dcError("Error occured while filtering database!",e)
+        raise Exception("Error occured while filtering database!",e)
 
 
 
@@ -400,7 +325,7 @@ def save_image(img, path, file_name):
         Image.save_image(img, path, file_name) 
         
     except Exception as e:
-        raise A3dcError("Error occured while filtering database!",e)
+        raise Exception("Error occured while filtering database!",e)
 
 
 

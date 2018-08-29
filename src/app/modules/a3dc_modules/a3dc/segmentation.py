@@ -4,15 +4,19 @@ from skimage.filters import threshold_local
 import cv2
 import numpy as np
 import SimpleITK as sitk
+from .utils import round_up_to_odd
 
 
 def tag_image(ndarray):
 
+    # Cast to 16-bit
+    ndarray = img_as_uint(ndarray)
+    
     #Convert ndarray to itk image
     itk_image = sitk.GetImageFromArray(ndarray)
 
     #Cast images to 8-bit as images should be binary anyway
-    #itk_image=sitk.Cast(itk_image, sitk.sitkUInt8)
+    #itk_image=sitk.Cast(itk_image, sitk.sitkUInt)
 
     # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
     ndarray = sitk.ConnectedComponent(itk_image, fullyConnected=True)
@@ -22,12 +26,7 @@ def tag_image(ndarray):
 
 def threshold_auto(ndarray, method, mode='Slice'):
 
-    # Cast to 16-bit
-    ndarray = img_as_uint(ndarray)
-
-    # Cast to 8-bit
-    #ndarray = img_as_ubyte(ndarray)
-
+    #Initialization
     threshold_dict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                             'Huang': sitk.HuangThresholdImageFilter(),
                             'MaxEntropy': sitk.MaximumEntropyThresholdImageFilter(),
@@ -37,6 +36,21 @@ def threshold_auto(ndarray, method, mode='Slice'):
                             'Moments': sitk.MomentsThresholdImageFilter(), 'Yen': sitk.YenThresholdImageFilter(),
                             'Shanbhag': sitk.ShanbhagThresholdImageFilter(),
                             'Triangle': sitk.TriangleThresholdImageFilter()}
+
+    mode_list=['Stack','Slice']
+    
+    if method not in threshold_dict.keys():
+        raise Exception('Method has to be amond the following:\n'+str(threshold_dict.keys))
+    if mode not in mode_list:
+        raise Exception('Mode has to be amond the following:\n'+str(mode_list))
+    
+    
+    # Cast to 16-bit
+    ndarray = img_as_uint(ndarray)
+
+    # Cast to 8-bit
+    #ndarray = img_as_ubyte(ndarray)
+    
 
     #Check if method is valid
     if method not in threshold_dict.keys():
@@ -98,8 +112,11 @@ def create_surfaceImage(ndarray):
 
 
 
-def threshold_manual(ndarray, lower=0, upper=1):
-
+def threshold_manual(ndarray, upper=1, lower=0):
+ 
+    # Cast to 16-bit
+    ndarray = img_as_uint(ndarray)
+    
     # Convert nd Image to ITK image
     itk_image = sitk.GetImageFromArray(ndarray)
 
@@ -107,6 +124,8 @@ def threshold_manual(ndarray, lower=0, upper=1):
     threshold=sitk.BinaryThresholdImageFilter()
     threshold.SetUpperThreshold(float(upper))
     threshold.SetLowerThreshold(float(lower))
+    
+    
     segmented_img=threshold.Execute(itk_image)
 
     # Threshold and Invert
@@ -116,9 +135,11 @@ def threshold_manual(ndarray, lower=0, upper=1):
 
 def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     
-    #Round to add as blocksize has to be odd
-    def round_up_to_odd(f):
-        return int(np.ceil(f) // 2 * 2 + 1)
+    #Inizialize
+    method_list = ['Mean', 'Gaussian']
+    
+    if method not in method_list:
+        raise Exception('Mode has to be amond the following:\n'+str(method_list))
     
     blocksize=round_up_to_odd(blocksize)
     
@@ -128,11 +149,11 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     #Cycle through image
     outputImage = []
     for i in range(len(converted_image)):
-        if method == 'Adaptive Mean':
+        
+        if method == 'Mean':
             outputImage.append(threshold_local(converted_image[i], blocksize, offset))
 
-        elif method == 'Adaptive Gaussian':
-
+        elif method == 'Gaussian':
             outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                 cv2.THRESH_BINARY, blocksize, offset))
         else:
