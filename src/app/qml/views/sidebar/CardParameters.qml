@@ -126,7 +126,7 @@ Repeater {
                     Layout.fillWidth: true
                     text: details.name
                 }
-                Text {
+                Label {
                     id: filenameText
                     Layout.fillWidth: true
                     wrapMode: Text.WrapAnywhere
