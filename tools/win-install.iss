@@ -25,8 +25,8 @@ CreateUninstallRegKey=yes
 
 [Files]
 Source: "..\build\src\app\{#BUILD_MODE}\vcredist_x64.exe"; DestDir: "{app}"; AfterInstall: RunVCRedistInstaller
-Source: "..\build\src\app\{#BUILD_MODE}\*"; Excludes: "*.obj,*.pdb,*.ilk,*.h,*.cpp,*.c,*.hpp,*.ipp,*.cxx,*.hxx,__pycache__,*.DS_store,Thumbs.db"; DestDir: "{app}"; Flags: recursesubdirs
-Source: "..\assets\icons\favicon.ico"; DestDir: "{app}"
+Source: "..\build\src\app\{#BUILD_MODE}\*"; Excludes: "*.obj,*.pdb,*.ilk,*.h,*.cpp,*.c,*.hpp,*.ipp,*.cxx,*.hxx,__pycache__,*.DS_store,Thumbs.db"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: recursesubdirs
+Source: "..\assets\icons\favicon.ico"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 
 [Icons]
 Name: "{group}\A3-DC"; Filename: "{app}\a3-dc.bat"; IconFilename: "{app}\favicon.ico"; Flags: runminimized
