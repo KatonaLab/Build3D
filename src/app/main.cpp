@@ -93,62 +93,71 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
-    // ensure logging is alive from the first moment
-    LogCollector::instance();
+#if defined(_WIN32) || defined(WIN32)
+	const QString envPathSep(";");
+#else 
+	const QString envPathSep(":");
+#endif
 
-    // FIXME: trial period has expired at bactrace.io so no minidump upload can be done
-    // if (startCrashHandler() == false) {
-    //     cout << "crash reporter could not start" << endl;
-    //     return -1;
-    // }
+	// ensure logging is alive from the first moment
+	LogCollector::instance();
 
-    qputenv("QT_STYLE_OVERRIDE", "Material");
-    QApplication::setStyle(QStyleFactory::create("Material"));
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	// FIXME: trial period has expired at bactrace.io so no minidump upload can be done
+	// if (startCrashHandler() == false) {
+	//     cout << "crash reporter could not start" << endl;
+	//     return -1;
+	// }
 
-    QApplication app(argc, argv);
+	qputenv("QT_STYLE_OVERRIDE", "Material");
+	QApplication::setStyle(QStyleFactory::create("Material"));
+	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    app.setOrganizationName("MTA KOKI KatonaLab");
-    app.setOrganizationDomain("koki.hu");
-    app.setApplicationName("A3DC (" + QString(_A3DC_BUILD_GIT_SHA) + QString(_A3DC_BUILD_PLATFORM) + ")");
-    // TODO: call setApplicationVersion
+	QApplication app(argc, argv);
 
-    QCommandLineParser parser;
-    QCommandLineOption pythonHomeOption("python-home", "sets PYTHONHOME", "PY_HOME");
-    parser.addOption(pythonHomeOption);
-    QCommandLineOption modulePathOption("module-path", "sets the module path", "MODULE_PATH");
-    parser.addOption(modulePathOption);
-    QCommandLineOption editorOption("editor", "opens the program in editor mode");
-    parser.addOption(editorOption);
-    parser.process(app);
+	app.setOrganizationName("MTA KOKI KatonaLab");
+	app.setOrganizationDomain("koki.hu");
+	app.setApplicationName("A3DC (" + QString(_A3DC_BUILD_GIT_SHA) + QString(_A3DC_BUILD_PLATFORM) + ")");
+	// TODO: call setApplicationVersion
 
-    QString pythonHome = parser.value(pythonHomeOption);
-    QString modulePath = parser.value(modulePathOption);
-    GlobalSettings::editorMode = parser.isSet(editorOption);
+	QCommandLineParser parser;
+	QCommandLineOption pythonHomeOption("python-home", "sets PYTHONHOME", "PY_HOME");
+	parser.addOption(pythonHomeOption);
+	QCommandLineOption modulePathOption("module-path", "sets the module path", "MODULE_PATH");
+	parser.addOption(modulePathOption);
+	QCommandLineOption editorOption("editor", "opens the program in editor mode");
+	parser.addOption(editorOption);
+	parser.process(app);
 
-    if (pythonHome.isEmpty()) {
-        QByteArray venv = qgetenv("VIRTUAL_ENV");
-        if (venv.isEmpty()) {
-            pythonHome = QString("virtualenv");
-        } else {
-            pythonHome = QString::fromLocal8Bit(venv);
-        }
-    }
-    qputenv("PYTHONHOME", pythonHome.toLocal8Bit());
+	QString pythonHome = parser.value(pythonHomeOption);
+	QString modulePath = parser.value(modulePathOption);
+	GlobalSettings::editorMode = parser.isSet(editorOption);
 
-    if (!modulePath.isEmpty()) {
-        GlobalSettings::modulePath = modulePath;
-    } else {
-        GlobalSettings::modulePath = QString("modules");
-    }
+	if (pythonHome.isEmpty()) {
+		QByteArray venv = qgetenv("VIRTUAL_ENV");
+		if (venv.isEmpty()) {
+			pythonHome = QString("virtualenv");
+		}
+		else {
+			pythonHome = QString::fromLocal8Bit(venv);
+		}
+	}
+	qputenv("PYTHONHOME", pythonHome.toLocal8Bit());
 
-    QString pythonPath = QString::fromLocal8Bit(qgetenv("PYTHONPATH"));
-    QDir d = GlobalSettings::modulePath;
-    d.cdUp();
-    if (pythonPath.isEmpty()) {
-        pythonPath = d.absolutePath();
-    } else {
-        pythonPath = d.absolutePath() + ":" + pythonPath;
+	if (!modulePath.isEmpty()) {
+		GlobalSettings::modulePath = modulePath;
+	}
+	else {
+		GlobalSettings::modulePath = QString("modules");
+	}
+
+	QString pythonPath = QString::fromLocal8Bit(qgetenv("PYTHONPATH"));
+	QDir d = GlobalSettings::modulePath;
+	d.cdUp();
+	if (pythonPath.isEmpty()) {
+		pythonPath = d.absolutePath();
+	}
+	else {
+        pythonPath = d.absolutePath() + envPathSep + pythonPath;
     }
     qputenv("PYTHONPATH", pythonPath.toLocal8Bit());
 
