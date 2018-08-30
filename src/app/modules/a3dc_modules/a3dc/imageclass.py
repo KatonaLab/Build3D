@@ -22,19 +22,10 @@ class Image(object):
         
         #set array
         self.array=image
-        
+
         #Set metadata
         self.metadata=metadata
 
- 
-        #print(self.metadata["Type"])
-        #print(str(image.dtype))
-        #self.metadata["Type"]=image.dtype
-        
-        #self.metadata={}
-        
-        
-        
         #Set database if supplied
         if database!=None:
             self.database=database

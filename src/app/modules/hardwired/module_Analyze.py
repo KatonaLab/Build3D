@@ -107,10 +107,11 @@ def module_main(ctx):
 
     #Change Name in metadata
     output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-    
+
     a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float) / np.amax(output.array.astype(np.float)))
     a3.outputs['Analyzed_DataBase']=output.database
     a3.outputs['Analyzed_Metadata']=output.metadata
+
     
 config = [a3.Output('Analyzed_Image', a3.types.ImageFloat),  a3.Output('Analyzed_DataBase', a3.types.GeneralPyType), a3.Output('Analyzed_MetaData', a3.types.GeneralPyType)]
 config.extend(add_input_fields())

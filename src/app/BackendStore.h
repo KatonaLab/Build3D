@@ -92,10 +92,13 @@ protected:
     QVariantList m_availableModules;
     bool m_editorMode;
     int m_uidCounter = 0;
+    CommandHistory m_commandHistory;
+    std::map<QString, int> m_moduleTypeCounter;
+
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);
     void addAvailableNativeModules();
-    CommandHistory m_commandHistory;
+    QString generateModuleName(const QString &type);
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {
@@ -161,5 +164,7 @@ protected:
     QList<QString> m_includeType;
     QList<QString> m_excludeType;
 };
+
+QString pathToModuleName(const QString& path);
 
 #endif

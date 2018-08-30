@@ -384,8 +384,8 @@ protected:
 // --------------------------------------------------------
 
 class DynamicInputPortCollection : public cp::InputPortCollection {
-    typedef std::map<std::string, PyInputPortWrapperPtr> MapType;
 public:
+    typedef std::map<std::string, PyInputPortWrapperPtr> MapType;
     DynamicInputPortCollection(cp::ComputeModule& parent);
     void fetch() override;
     std::weak_ptr<cp::InputPort> get(size_t portId) override;
@@ -401,8 +401,8 @@ protected:
 // --------------------------------------------------------
 
 class DynamicOutputPortCollection : public cp::OutputPortCollection {
-    typedef std::map<std::string, PyOutputPortWrapperPtr> MapType;
 public:
+    typedef std::map<std::string, PyOutputPortWrapperPtr> MapType;
     DynamicOutputPortCollection(cp::ComputeModule& parent);
     std::weak_ptr<cp::OutputPort> get(size_t portId) override;
     size_t size() const override;
@@ -420,10 +420,10 @@ class PythonComputeModule : public cp::ComputeModule {
 public:
     PythonComputeModule(cp::ComputePlatform& platform,
         std::string code,
-        const std::string& name = "");
+        const std::string& name = "", const std::string& type = "");
     std::string moduleTypeName() const override
     {
-        return "Unknown Python Module";
+        return m_type;
     }
 protected:
     void buildPorts();
@@ -436,6 +436,7 @@ private:
     DynamicInputPortCollection m_inputPorts;
     DynamicOutputPortCollection m_outputPorts;
     std::string m_code;
+    std::string m_type;
     ProcessFunc m_func;
     ModuleContext m_moduleContext;
 };

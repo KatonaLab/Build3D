@@ -90,16 +90,16 @@ ApplicationWindow {
             id: layout
             anchors.centerIn: parent
             spacing: 16
-            Text {
+            Label {
                 Layout.alignment: Qt.AlignHCenter
                 font.pointSize: 16
                 text: "A3-DC"
             }
-            Text {
+            Label {
                 Layout.alignment: Qt.AlignHCenter
                 text: "made by KatonaLab @ MTA KOKI"
             }
-            Text {
+            Label {
                 Layout.alignment: Qt.AlignHCenter
                 text: "<a href=\"https://github.com/vivien-miczan/A3DC\">https://github.com/vivien-miczan/A3DC</a>"
                 onLinkActivated: Qt.openUrlExternally(link)
@@ -109,7 +109,7 @@ ApplicationWindow {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
-            Text {
+            Label {
                 Layout.alignment: Qt.AlignHCenter
                 font.pointSize: 11
                 text: A3DCVersion.version()
@@ -226,7 +226,7 @@ ApplicationWindow {
             baseModel: ModuleStore.model
         }
 
-        Text {
+        Label {
             id: splitter
             text: "⋮"
             Layout.alignment: Qt.AlignVCenter
@@ -286,7 +286,7 @@ ApplicationWindow {
                         text: "…"
                         horizontalAlignment: Text.AlignHCenter
                         // TODO: text color match to the theme
-                        color: Material.foreground
+                        color: "white"
 
                         onYChanged: {
                             consolePanel.height -= y;

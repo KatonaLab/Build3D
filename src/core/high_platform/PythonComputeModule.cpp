@@ -321,12 +321,17 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
 
 PythonComputeModule::PythonComputeModule(ComputePlatform& platform,
     std::string code,
-    const std::string& name)
+    const std::string& name,
+    const std::string& type)
     : ComputeModule(platform, m_inputPorts, m_outputPorts, name),
     m_inputPorts(*this),
     m_outputPorts(*this),
-    m_code(code)
+    m_code(code),
+    m_type(type)
 {
+    if (m_type.empty()) {
+        m_type = "unknown module type";
+    }
     buildPorts();
 }
 
@@ -492,6 +497,7 @@ void PythonComputeModule::execute()
     py::object outputs = m.attr("outputs");
 
     inputs.attr("clear")();
+    outputs.attr("clear")();
 
     for (auto& p : m_inputPorts) {
         inputs.attr("__setitem__")(p.first, p.second->toPyObject());
@@ -503,6 +509,22 @@ void PythonComputeModule::execute()
 
     m_moduleContext.name = name();
     m_func(m_moduleContext);
+
+    // check for bad outputs
+    std::vector<std::string> keys;
+    for (auto x: outputs) {
+        keys.push_back(x.cast<std::string>());
+    }
+    for (auto key: keys) {
+        auto it = find_if(m_outputPorts.begin(), m_outputPorts.end(),
+            [key](const DynamicOutputPortCollection::MapType::value_type& x)
+            {
+                return x.first == key;
+            });
+        if (it == m_outputPorts.end()) {
+            throw std::runtime_error("module '" + name() + "' has no output with name '" + key + "'");
+        }
+    }
 
     for (auto& p : m_outputPorts) {
         p.second->fromPyObject(outputs.attr("__getitem__")(p.first));
