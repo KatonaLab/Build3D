@@ -18,11 +18,10 @@ import numpy as np
 FILTERS = ['volume', 'voxelCount','pixelsOnBorder', 'ch1_colocalizationCount','ch1_overlappingRatio', 
            'ch1_totalOverlappingRatio', 'ch2_colocalizationCount','ch2_overlappingRatio', 'ch2_totalOverlappingRatio']
 ####################################################Interface to call from C++####################################################
-def colocalize(ch1Img, ch2Img, ovlSettings, show=True, to_text=False):
+def colocalize(ch1Img, ch2Img, ovlSettings, path, show=True, to_text=False):
 
-        #TEMP###########TEMP##############TEMP#################TEMP
-        #outputPath=ch1Img.metadata['Path']+'/Output'
-        outputPath='./Output'
+        #Set path
+        outputPath=path
         if not os.path.exists(outputPath):
             os.makedirs(outputPath)
         
@@ -59,6 +58,7 @@ def colocalize(ch1Img, ch2Img, ovlSettings, show=True, to_text=False):
             #os_open(os.path.join(outputPath, file_name))
         print('Colocalization analysis was run successfully!')
         print("\n%s\n" % str(quote()))
+        
         return overlappingImage
 
 
@@ -68,11 +68,7 @@ def read_params(filters=FILTERS):
 
     out_dict['Ch1_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1_Image']), a3.inputs['Ch1_MetaData'], a3.inputs['Ch1_DataBase'])
     out_dict['Ch2_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2_Image']), a3.inputs['Ch2_MetaData'], a3.inputs['Ch2_DataBase'])
-    print(a3.inputs['Ch1_MetaData'])
-    print(out_dict['Ch1_Image'].metadata)
-    print('SEPARSEPAR')
-    
-        
+       
     settings = {}
     for f in filters:
         settings[f] = {}
@@ -80,7 +76,8 @@ def read_params(filters=FILTERS):
             settings[f][m] = a3.inputs['{} {}'.format( f, m)]
 
     out_dict['Settings'] = settings
-    print(settings) 
+    out_dict['FileName']=a3.inputs['FileName']
+
     return out_dict    
     
 def module_main(ctx):
@@ -89,14 +86,16 @@ def module_main(ctx):
     
     output=colocalize(params['Ch1_Image'],
                params['Ch2_Image'],
-               params['Settings'])
+               params['Settings'], params['FileName'])
 
     a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float) / np.amax(output.array.astype(np.float)))
     a3.outputs['Analyzed_DataBased']=output.database
   
 
 def add_input_fields(config, filters=FILTERS):
-
+    
+    config.append(a3.Parameter('FileName', a3.types.url))
+    
     for f in filters:
         for m in ['min', 'max']:
             config.append(
@@ -104,7 +103,9 @@ def add_input_fields(config, filters=FILTERS):
                 .setIntHint('min', 0)
                 .setIntHint('max', 10000000)
                 .setIntHint('default', 0 if m == 'min' else 10000000))
-
+    
+    
+    
     return config
 
 config=[a3.Input('Ch1_Image', a3.types.ImageFloat), 
@@ -118,6 +119,5 @@ config=[a3.Input('Ch1_Image', a3.types.ImageFloat),
         a3.Output('Analyzed_DataBase', a3.types.GeneralPyType)]
 
 config=add_input_fields(config)
-#config.extend(add_input_fields())
 
 a3.def_process_module(config, module_main)

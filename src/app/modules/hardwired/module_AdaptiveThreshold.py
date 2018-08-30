@@ -56,7 +56,7 @@ def init_config(methods=METHODS):
     config.append(method_param)
     
     #Add inputfield for BlockSize
-    param_blocksize=a3.Parameter('BlockSize', a3.types.int8)
+    param_blocksize=a3.Parameter('BlockSize', a3.types.float)
     param_blocksize.setIntHint('min', 2)
     param_blocksize.setIntHint('max', 800)
     param_blocksize.setIntHint('stepSize', 1),
@@ -64,7 +64,7 @@ def init_config(methods=METHODS):
     
     
     #Add inputfield for Offset
-    param_offset=a3.Parameter('Offset', a3.types.int8)
+    param_offset=a3.Parameter('Offset', a3.types.float)
     param_offset.setIntHint('min', 0)
     param_offset.setIntHint('max', 800)
     param_offset.setIntHint('stepSize', 1),

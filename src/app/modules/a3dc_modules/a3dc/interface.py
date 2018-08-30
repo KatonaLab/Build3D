@@ -237,7 +237,6 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
 
         # Determine connectivity data
         overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
-        print('AGAGAGAGSDHDJKKSLKSLS:S:A')
         # Filter database and image
         overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
         
@@ -250,7 +249,6 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
         logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))
 
     except Exception as e:
-        print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRORRRRRRRRRRRRRRRRR')
         traceback.print_exc()
         raise Exception("Error occured durig colocalization!",e)
 

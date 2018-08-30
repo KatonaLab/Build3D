@@ -4,7 +4,7 @@ import numpy as np
 
 
 def module_main(_):
-    filename = a3.inputs['Filename'].path
+    filename = a3.inputs['FileName'].path
    
     print('Loading the following image: ', filename)
     
@@ -31,20 +31,21 @@ def module_main(_):
     #Modify metadata 
     img.metadata['SamplesPerPixel']=img.metadata['SamplesPerPixel'][ch]
     img.metadata['Name']=img.metadata['Name'][ch]   
+    #img.metadata['Path']=filename
     
     #Create Output
     a3.outputs['Volume'] = a3.MultiDimImageFloat_from_ndarray((array/np.amax(array)).astype(np.float))
-    a3.outputs['Metadata']=img.metadata
+    a3.outputs['MetaData']=img.metadata
     
     print('File loaded succesfully!')
 
 config = [
-    a3.Parameter('Filename', a3.types.url),
+    a3.Parameter('FileName', a3.types.url),
     a3.Parameter('Channel', a3.types.int8)
             .setIntHint('min', 0)
             .setIntHint('max', 8)
             .setIntHint('stepSize', 1),
     a3.Output('Volume', a3.types.ImageFloat),
-    a3.Output('Metadata', a3.types.GeneralPyType)]
+    a3.Output('MetaData', a3.types.GeneralPyType)]
 
 a3.def_process_module(config, module_main)
