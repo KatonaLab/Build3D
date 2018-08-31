@@ -14,14 +14,38 @@ import os
 import numpy as np
 
 
-
-FILTERS = ['volume', 'voxelCount','pixelsOnBorder', 'ch1_colocalizationCount','ch1_overlappingRatio', 
+OBJFILTERS=['volume', 'voxelCount','pixelsOnBorder']
+OVLFILTERS=['ch1_colocalizationCount','ch1_overlappingRatio', 
            'ch1_totalOverlappingRatio', 'ch2_colocalizationCount','ch2_overlappingRatio', 'ch2_totalOverlappingRatio']
-####################################################Interface to call from C++####################################################
-def colocalize(ch1Img, ch2Img, ovlSettings, path, show=True, to_text=False):
 
+FILTERS = OBJFILTERS+OVLFILTERS
+
+####################################################Interface to call from C++####################################################
+def colocalize(ch1Img, ch2Img, ovlSettings, path=None, show=True, to_text=False):
+       
+        #Rename filter keys
+        for key in ovlSettings:
+            
+            if key in OVLFILTERS:
+                
+                prefix=key.split('_', 1)[0]
+                filter_key=key.split('_', 1)[-1]
+               
+                if prefix=='ch1':
+                    print(filter_key+' in '+str(ch1Img.metadata['Name']))
+                    ovlSettings[filter_key+' in '+str(ch1Img.metadata['Name'])] = ovlSettings[key]
+                    del ovlSettings[key]
+                    
+                if prefix=='ch2':
+                    print(filter_key+' in '+str(ch2Img.metadata['Name']))
+                    ovlSettings[filter_key+' in '+str(ch2Img.metadata['Name'])] = ovlSettings[key]
+                    del ovlSettings[key]
+       
         #Set path
-        outputPath=path
+        if path==None:
+            outputPath="D:\Playground"
+        else:
+            outputPath=path
         if not os.path.exists(outputPath):
             os.makedirs(outputPath)
         
@@ -31,10 +55,10 @@ def colocalize(ch1Img, ch2Img, ovlSettings, path, show=True, to_text=False):
         overlappingImage, taggedImageList, logText = colocalization( [ch1Img, ch2Img], overlappingFilter=ovlSettings, removeFiltered=False)
         print(logText)
         
-        name = ch1Img.metadata['Name']+"_tagged"
+        name = ch1Img.metadata['Name']#+"_tagged"
         save_image(ch1Img, outputPath, name)
         
-        name = ch2Img.metadata['Name']+"_tagged"
+        name = ch2Img.metadata['Name']#+"_tagged"
         save_image(ch2Img, outputPath, name)
         
         name = ch1Img.metadata['Name']+ "_" +ch2Img.metadata['Name']+ "_overlap"
@@ -76,8 +100,9 @@ def read_params(filters=FILTERS):
             settings[f][m] = a3.inputs['{} {}'.format( f, m)]
 
     out_dict['Settings'] = settings
-    out_dict['FileName']=a3.inputs['FileName']
-
+    #out_dict['FileName']=a3.inputs['FileName']
+    out_dict['FileName']=None
+    
     return out_dict    
     
 def module_main(ctx):
@@ -94,7 +119,7 @@ def module_main(ctx):
 
 def add_input_fields(config, filters=FILTERS):
     
-    config.append(a3.Parameter('FileName', a3.types.url))
+    #config.append(a3.Parameter('FileName', a3.types.url))
     
     for f in filters:
         for m in ['min', 'max']:

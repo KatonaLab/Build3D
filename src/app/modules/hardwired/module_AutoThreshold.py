@@ -31,9 +31,15 @@ def auto_threshold(image, method="Otsu", mode="Slice"):
         
     # Run thresholding functions
     try:
-
-        outputArray, thresholdValue = threshold_auto(image.array, method, mode)
-        logText += '\n\tThreshold values: ' + str(thresholdValue)
+        
+        #Threshold image
+        output_array, threshold_value = threshold_auto(image.array, method, mode)
+        #Create metadata
+        
+        output_metadta=image.metadata
+        output_metadta['Type']=output_array.dtype
+        
+        logText += '\n\tThreshold values: ' + str(threshold_value)
 
     except Exception as e:
         raise Exception("Error occured while thresholding image!",e)
@@ -42,7 +48,7 @@ def auto_threshold(image, method="Otsu", mode="Slice"):
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return Image(outputArray, image.metadata), logText
+    return Image(output_array, output_metadta), logText
 
 
 def init_config(methods=METHODS):
@@ -82,12 +88,12 @@ def module_main(ctx):
     print(logText)
 
     #Change Name in metadata
-    output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
+    #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
     
     #Set output
-    a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
+    a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array)
     a3.outputs['Output_Metadata']=output_img.metadata
-    
+
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
 config.append(a3.Output('Output_Metadata', a3.types.GeneralPyType))

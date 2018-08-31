@@ -49,10 +49,12 @@ def colocalization_connectivity(image_list, raw_img_list=None):
         object_list = [None for i in range(len(ovl_pixels))]
         ovl_ratio_list = [None for i in range(len(ovl_pixels))]
 
+        
         for j in range(len(ovl_pixels)):
             ovl_position = ovl_pixels[j]
+            
             object_list[j] = itk_image.GetPixel(ovl_position)
-
+            print(object_list[j])
             ovl_ratio_list[j] = ovl_image.database['voxelCount'][j] / image_list[i].database['voxelCount'][image_list[i].database['tag'].index(object_list[j])]
 
         ovl_image.database['object in ' + name_list[i]] = object_list

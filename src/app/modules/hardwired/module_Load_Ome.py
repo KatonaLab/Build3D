@@ -36,7 +36,7 @@ def module_main(_):
     #Create Output
     a3.outputs['Volume'] = a3.MultiDimImageFloat_from_ndarray((array/np.amax(array)).astype(np.float))
     a3.outputs['MetaData']=img.metadata
-    
+
     print('File loaded succesfully!')
 
 config = [

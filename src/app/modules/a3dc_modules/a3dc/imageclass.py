@@ -20,22 +20,41 @@ class Image(object):
 
     def __init__(self, image, metadata, database=None):
         
-        #set array
-        self.array=image
-
         #Set metadata
-        self.metadata=metadata
+        self.metadata=metadata        
+        
+        #set array
+        self.array=self.__validate(image, metadata)
 
         #Set database if supplied
         if database!=None:
             self.database=database
     
+    def __validate(self, array, metadata):
+        
+        #Check if compulsory keys are missing
+        key_list=['Type']
+        for key in key_list:
+            if key not in metadata:
+                raise Exception('Invalid Metadata!')
+
+        if metadata['Type']!=array.dtype:
+            array=array.astype(metadata['Type'])
+           
+
+        return array
     
     @classmethod
     def load_image(cls, file_path, metadata=None):
         #Load image using scikit/image im read
         return Image(imread(str(file_path)), metadata)
-
+    
+    @classmethod
+    def image_from_a3(cls, file_path, metadata=None):
+        #Load image using scikit/image im read
+        #return Image(imread(str(file_path)), metadata)
+        pass
+    
     @staticmethod
     def save_image(img, path, file_name='output'):
         

@@ -237,10 +237,11 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
 
         # Determine connectivity data
         overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
+        
+        print(overlappingImage.database.keys())
         # Filter database and image
         overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
         
-
         # Analyze colocalization
         overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
 

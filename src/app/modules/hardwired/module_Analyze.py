@@ -23,7 +23,10 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         #############################################################################################################################
         ##################################################Inizialization#############################################################
         #############################################################################################################################
-        
+        print(mask.metadata['Type'])
+        print(mask.array.dtype)
+        print(np.amax(mask.array))
+        print(np.amin(mask.array))
         #Parameters to measure
         measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder']
         
@@ -52,7 +55,6 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         
         taggedImage, logText = apply_filter(taggedImage, filterDict=settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
         print(logText)
-        
         
         return taggedImage
 
@@ -101,16 +103,18 @@ def module_main(ctx):
     
     params = read_params(ctx.name())
     
+
+    
     output=analyze_image(params['Source'],
                params['Mask'],
                params['Settings'])
 
     #Change Name in metadata
-    output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
+    #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
 
     a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float) / np.amax(output.array.astype(np.float)))
     a3.outputs['Analyzed_DataBase']=output.database
-    a3.outputs['Analyzed_Metadata']=output.metadata
+    a3.outputs['Analyzed_MetaData']=output.metadata
 
     
 config = [a3.Output('Analyzed_Image', a3.types.ImageFloat),  a3.Output('Analyzed_DataBase', a3.types.GeneralPyType), a3.Output('Analyzed_MetaData', a3.types.GeneralPyType)]

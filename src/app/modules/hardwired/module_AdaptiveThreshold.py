@@ -88,12 +88,12 @@ def module_main(ctx):
     print(logText)
     
     #Change Name in metadata
-    output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
+    #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
 
     #Set output
     a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
     a3.outputs['Output_Metadata']=output_img.metadata
-    
+        
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
 config.append(a3.Output('Output_Metadata', a3.types.GeneralPyType))
