@@ -238,7 +238,9 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
         # Determine connectivity data
         overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
         
+        print(overlappingFilter.keys())
         print(overlappingImage.database.keys())
+        print(overlappingImage.database['meanIntensity in Ch0Ch1'])
         # Filter database and image
         overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
         

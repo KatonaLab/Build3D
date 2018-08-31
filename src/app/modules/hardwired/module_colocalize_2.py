@@ -22,25 +22,25 @@ FILTERS = OBJFILTERS+OVLFILTERS
 
 ####################################################Interface to call from C++####################################################
 def colocalize(ch1Img, ch2Img, ovlSettings, path=None, show=True, to_text=False):
-       
+
         #Rename filter keys
-        for key in ovlSettings:
-            
-            if key in OVLFILTERS:
+        for key in OVLFILTERS:
+
+            if key in ovlSettings:
                 
                 prefix=key.split('_', 1)[0]
                 filter_key=key.split('_', 1)[-1]
-               
+                
                 if prefix=='ch1':
-                    print(filter_key+' in '+str(ch1Img.metadata['Name']))
+                   
                     ovlSettings[filter_key+' in '+str(ch1Img.metadata['Name'])] = ovlSettings[key]
                     del ovlSettings[key]
                     
                 if prefix=='ch2':
-                    print(filter_key+' in '+str(ch2Img.metadata['Name']))
                     ovlSettings[filter_key+' in '+str(ch2Img.metadata['Name'])] = ovlSettings[key]
                     del ovlSettings[key]
-       
+        
+        
         #Set path
         if path==None:
             outputPath="D:\Playground"
