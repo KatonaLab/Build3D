@@ -23,10 +23,6 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         #############################################################################################################################
         ##################################################Inizialization#############################################################
         #############################################################################################################################
-        print(mask.metadata['Type'])
-        print(mask.array.dtype)
-        print(np.amax(mask.array))
-        print(np.amin(mask.array))
         #Parameters to measure
         measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder']
         

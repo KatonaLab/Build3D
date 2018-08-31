@@ -187,7 +187,7 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
                                'getWeightedPrincipalAxes': itk_filter.GetWeightedPrincipalAxes,
                                'getWeightedPrincipalMoments': itk_filter.GetWeightedPrincipalMoments}
 
-    single_img_meas_list = ['voxelCount', 'pixelsOnBorder', 'centroid']
+    single_img_meas_list = ['volume', 'voxelCount', 'pixelsOnBorder', 'centroid']
     multi_img_meas_list = ['meanIntensity', 'maximumPixel']
 
     if meas_list!=None:
