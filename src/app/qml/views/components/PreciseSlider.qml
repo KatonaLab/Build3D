@@ -6,16 +6,11 @@ RowLayout {
     property int decimals: 4
     property alias from: slider.from
     property alias to: slider.to
-    property real value: slider.value
-    property real defaultValue
+    property alias value: slider.value
     property alias editWidth: field.implicitWidth
     property alias stepSize: slider.stepSize
     property alias snapMode: slider.snapMode
     property alias text: label.text
-
-    Component.onCompleted: {
-        slider.value = defaultValue;
-    }
 
     Label {
         id: label

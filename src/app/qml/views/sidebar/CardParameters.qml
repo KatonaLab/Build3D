@@ -43,11 +43,12 @@ Repeater {
         Component {
             id: intSliderDelegate
             PreciseSlider {
+                id: intSlider
+                value: details.value
                 stepSize: details.hints.stepSize || 1
                 snapMode: Slider.SnapAlways
                 from: details.hints.min || 0
                 to: details.hints.max || 1000
-                defaultValue: details.hints.default || from
                 text: details.name
                 onValueChanged: {
                     details.value = value;
@@ -84,10 +85,11 @@ Repeater {
         Component {
             id: floatSliderDelegate
             PreciseSlider {
+                id: floatSlider
                 from: details.hints.min || 0.0
                 to: details.hints.max || 1.0
-                defaultValue: details.hints.default || from
                 text: details.name
+                value: details.value
                 onValueChanged: {
                     details.value = value;
                 }
@@ -98,6 +100,7 @@ Repeater {
             id: switchDelegate
             Switch {
                 text: details.name
+                checked: details.value
                 onCheckedChanged: {
                     details.value = checked;
                 }
@@ -112,6 +115,7 @@ Repeater {
                 }
                 TextField {
                     Layout.fillWidth: true
+                    text: details.value
                     onEditingFinished: {
                         details.value = text;
                     }
@@ -141,6 +145,7 @@ Repeater {
 
                     FileDialog {
                         id: dialog
+                        // TODO: value: details.value
                         title: "Select File"
                         folder: ModuleStore.dialogFolder
                         selectMultiple: details.hints.multipleFiles || false

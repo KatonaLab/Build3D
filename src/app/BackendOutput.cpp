@@ -2,9 +2,62 @@
 
 #include <tuple>
 #include <string>
+#include <QMetaType>
+#include <QJsonObject>
 
 using namespace core::compute_platform;
 using namespace std;
+
+ImageOutputValue::ImageOutputValue(QObject* parent)
+    : QObject(parent)
+{
+    static bool registered = false;
+    if (!registered) {
+        QMetaType::registerConverter<ImageOutputValue*, QVariantMap>(ImageOutputValue::convertToVariantMap);
+        registered = true;
+    }
+}
+
+QVariantMap ImageOutputValue::convertToVariantMap(ImageOutputValue* x)
+{
+    if (x == nullptr) {
+        qWarning() << "invalid ImageOutputValue";
+        return QVariantMap();
+    }
+
+    return x->toVariantMap();
+}
+
+QVariantMap ImageOutputValue::toVariantMap() const
+{
+    QVariantMap vmap;
+    vmap["color"] = m_color;
+    vmap["visible"] = m_visible;
+    QVariantMap vec;
+    vec["x"] = m_lutParams.x();
+    vec["y"] = m_lutParams.y();
+    vmap["lutParams"] = vec;
+    return vmap;
+}
+
+void ImageOutputValue::fromVariantMap(QVariantMap vmap)
+{
+    if (vmap.count("color") && vmap["color"].canConvert<QColor>()) {
+        setColor(vmap["color"].value<QColor>());
+    }
+
+    if (vmap.count("visible") && vmap["visible"].canConvert<bool>()) {
+        setVisible(vmap["visible"].toBool());
+    }
+
+    if (vmap.count("lutParams")) {
+        QVariantMap p = vmap["lutParams"].toMap();
+        if (p.count("x") && p.count("y")
+            && p["x"].canConvert<double>() && p["y"].canConvert<double>()) {
+            setLutParams(QVector2D(p["x"].toDouble(), p["y"].toDouble()));
+        }
+    }
+}
 
 // TODO: move to separate file
 VolumeTexture* ImageOutputValue::texture() const
@@ -89,7 +142,6 @@ void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>>
             if (m_image->meta.has("wavelength")) {
                 setColor(details::waveLengthToQColor(stod(m_image->meta.get("wavelength"))));
             }
-
         }
         Q_EMIT textureChanged();
         Q_EMIT sizeChanged();
@@ -251,8 +303,9 @@ void BackendOutput::setName(const QString&)
 void BackendOutput::setStatus(int)
 {}
 
-bool BackendOutput::setValue(QVariant)
+bool BackendOutput::setValue(QVariant value)
 {
+    m_internalValue.fromVariantMap(value.toMap());
     return true;
 }
 

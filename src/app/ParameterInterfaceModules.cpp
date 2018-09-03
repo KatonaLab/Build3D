@@ -22,12 +22,16 @@ bool TypedParameterInterfaceModule<EnumPair>::setData(QVariant var)
     QVariantMap map = var.toMap();
     if (map.contains("first") && map["first"].canConvert<int>() &&
         map.contains("second") && map["second"].canConvert<int>()) {
-        *m_data = make_pair(map["first"].toInt(), map["second"].toInt());
+        auto p = make_pair(map["first"].toInt(), map["second"].toInt());
+        if (*m_data != p) {
+            *m_data = p;
+            return true;
+        }
     } else {
         throw std::runtime_error("can not convert from "
             + std::string(var.typeName()) + " to EnumPair in parameter input " + name());
     }
-    return true;
+    return false;
 }
 
 QVariant TypedParameterInterfaceModule<EnumPair>::data()
@@ -55,12 +59,16 @@ TypedParameterInterfaceModule<QUrl>::TypedParameterInterfaceModule(ComputePlatfo
 bool TypedParameterInterfaceModule<QUrl>::setData(QVariant var)
 {
     if (var.canConvert<QUrl>()) {
-        m_data->path = var.value<QUrl>().toLocalFile().toStdString();
+        string s = var.value<QUrl>().toLocalFile().toStdString();
+        if (m_data->path != s) {
+            m_data->path = s;
+            return true;
+        }
     } else {
         throw std::runtime_error("can not convert from "
             + std::string(var.typeName()) + " to QUrl in parameter input " + name());
     }
-    return true;
+    return false;
 }
 
 QVariant TypedParameterInterfaceModule<QUrl>::data()
@@ -85,12 +93,16 @@ TypedParameterInterfaceModule<QString>::TypedParameterInterfaceModule(core::comp
 bool TypedParameterInterfaceModule<QString>::setData(QVariant var)
 {
     if (var.canConvert<QString>()) {
-        *m_data = var.value<QString>().toStdString();
+        string s = var.value<QString>().toStdString();
+        if (*m_data != s) {
+            *m_data = s;
+            return true;
+        }
     } else {
         throw std::runtime_error("can not convert from "
             + std::string(var.typeName()) + " to QString in parameter input " + name());
     }
-    return true;
+    return false;
 }
 
 QVariant TypedParameterInterfaceModule<QString>::data()

@@ -1,3 +1,5 @@
+#include <QDebug>
+
 template <typename T>
 TypedParameterInterfaceModule<T>::TypedParameterInterfaceModule(ComputePlatform& parent, T initialValue)
     :
@@ -10,11 +12,14 @@ template <typename T>
 bool TypedParameterInterfaceModule<T>::setData(QVariant var)
 {
     if (var.canConvert<T>()) {
-        *m_data = var.value<T>();
-        return true;
+        auto v = var.value<T>();
+        if (*m_data != v) {
+            *m_data = v;
+            return true;
+        }
     } else {
         throw std::runtime_error("can not convert from "
-            + std::string(var.typeName()) + " to " + typeid(T).name()
+            + std::string(var.isNull() ? "null" : var.typeName()) + " to " + typeid(T).name()
             + " in parameter input " + name());
     }
     return false;
@@ -23,8 +28,7 @@ bool TypedParameterInterfaceModule<T>::setData(QVariant var)
 template <typename T>
 QVariant TypedParameterInterfaceModule<T>::data()
 {
-    // TODO:
-    return QVariant();
+    return QVariant(*m_data);
 }
 
 template <typename T>

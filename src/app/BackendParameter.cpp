@@ -64,8 +64,12 @@ BackendParameter::BackendParameter(std::weak_ptr<InputPort> source,
     for (auto& tri: types) {
         if (t.hasTrait(get<0>(tri))) {
             m_interfaceModule = get<1>(tri)(platform);
+            // TODO: check for nullptr
             m_interfaceModule->outputPort(0).lock()->bind(m_source);
             m_type = QString::fromStdString(get<2>(tri));
+            if (m_hints.count("default")) {
+                m_interfaceModule->setData(m_hints["default"]);
+            }
             return;
         }
     }

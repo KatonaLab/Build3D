@@ -1,11 +1,10 @@
 #include "BackendModule.h"
 
-#include <QDebug>
-
 using namespace core::compute_platform;
 
-BackendModule::BackendModule(std::shared_ptr<ComputeModule> sourceModule, int uid)
-    : m_source(sourceModule), m_uid(uid)
+BackendModule::BackendModule(std::shared_ptr<ComputeModule> sourceModule,
+    int uid, QString scriptPath)
+    : m_source(sourceModule), m_uid(uid), m_scriptPath(scriptPath)
 {}
 
 int BackendModule::uid() const
@@ -47,8 +46,7 @@ QVariant BackendModule::value() const
 
 QVariant BackendModule::hints() const
 {
-    // TODO:
-    return QVariant();
+    return m_scriptPath;
 }
 
 void BackendModule::setName(const QString& name)

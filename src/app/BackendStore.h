@@ -17,19 +17,10 @@
 
 class BackendStore;
 
-class CommandHistory {
+class BackendStoreSerializer {
 public:
-    void setInitialUidCounter(int uid);
-    void notifyAddModule(QString modulePath);
-    void notifyRemoveModule(int uid);
-    void notifyConnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
-    void notifyDisconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
-    void write(QString filename);
+    void write(QString filename, BackendStore& store);
     void read(QString filename, BackendStore& store);
-protected:
-    int m_initialUid = 0;
-    QList<QPair<QString, QVariant>> m_history;
-    void processCommand(QJsonObject& object, BackendStore& store);
 };
 
 class BackendStore: public QAbstractListModel {
@@ -38,6 +29,8 @@ class BackendStore: public QAbstractListModel {
     typedef core::compute_platform::PortBase PortBase;
     Q_PROPERTY(QVariantList availableModules READ availableModules NOTIFY availableModulesChanged)
     Q_PROPERTY(bool editorMode READ editorMode NOTIFY editorModeChanged)
+
+    friend class BackendStoreSerializer;
 public:
     enum ModuleRoles {
         UidRole = Qt::UserRole,
@@ -73,10 +66,7 @@ public:
     Q_INVOKABLE void newWorkflow();
 
     std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
-    void setUidCounter(int uid)
-    {
-        m_uidCounter = uid;
-    }
+    BackendStoreItem* getItem(int parentUid, int uid, QString category);
 
     bool editorMode()
     {
@@ -92,7 +82,6 @@ protected:
     QVariantList m_availableModules;
     bool m_editorMode;
     int m_uidCounter = 0;
-    CommandHistory m_commandHistory;
     std::map<QString, int> m_moduleTypeCounter;
 
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);

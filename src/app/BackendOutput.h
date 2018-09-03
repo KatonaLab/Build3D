@@ -10,6 +10,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include "VolumeTexture.h"
+#include <QJsonValue>
 
 class ImageOutputValue: public QObject {
     Q_OBJECT
@@ -20,6 +21,7 @@ class ImageOutputValue: public QObject {
     Q_PROPERTY(QVector2D lutParams READ lutParams WRITE setLutParams NOTIFY lutParamsChanged)
     template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
 public:
+    ImageOutputValue(QObject* parent = nullptr);
     VolumeTexture* texture() const;
     QVector3D size() const;
     QColor color() const;
@@ -29,8 +31,10 @@ public:
     void setColor(QColor color);
     void setVisible(bool visible);
     void setLutParams(QVector2D lutParams);
-
     virtual ~ImageOutputValue();
+    static QVariantMap convertToVariantMap(ImageOutputValue* x);
+    QVariantMap toVariantMap() const;
+    void fromVariantMap(QVariantMap vmap);
 Q_SIGNALS:
     void textureChanged();
     void sizeChanged();

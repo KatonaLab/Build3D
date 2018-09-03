@@ -17,64 +17,45 @@ using namespace std;
 using namespace core::compute_platform;
 using namespace core::high_platform;
 
-void CommandHistory::setInitialUidCounter(int uid)
-{
-    m_initialUid = uid;
-}
-
-void CommandHistory::notifyAddModule(QString modulePath)
-{
-    m_history.append(qMakePair(QString("add"), modulePath));
-}
-
-void CommandHistory::notifyRemoveModule(int uid)
-{
-    m_history.append(qMakePair(QString("remove"), uid));
-}
-
-void CommandHistory::notifyConnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid)
-{
-    QVariantMap vmap;
-    vmap["outModuleUid"] = outModuleUid;
-    vmap["outPortUid"] = outPortUid;
-    vmap["inModuleUid"] = inModuleUid;
-    vmap["inPortUid"] = inPortUid;
-
-    m_history.append(qMakePair(QString("connect"), vmap));
-}
-
-void CommandHistory::notifyDisconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid)
-{
-    QVariantMap vmap;
-    vmap["outModuleUid"] = outModuleUid;
-    vmap["outPortUid"] = outPortUid;
-    vmap["inModuleUid"] = inModuleUid;
-    vmap["inPortUid"] = inPortUid;
-
-    m_history.append(qMakePair(QString("disconnect"), vmap));
-}
-
-void CommandHistory::write(QString filename)
+void BackendStoreSerializer::write(QString filename, BackendStore& store)
 {
     QFile saveFile(filename);
 
     if (!saveFile.open(QIODevice::WriteOnly)) {
         qWarning() << "couldn't open save file" << filename;
-    } else {
-        QJsonArray jsonArray;
-        for (auto p: m_history) {
-            QJsonObject item = {{"command", p.first}, {"params", p.second.toJsonValue()}};
-            jsonArray.append(item);
-        }
-
-        QJsonObject rootObject = {{"initialUid", m_initialUid}, {"commands", jsonArray}};
-
-        QJsonDocument saveDoc(rootObject);
-        saveFile.write(saveDoc.toJson());
+        return;
     }
+
+    QJsonArray jsonArray;
+    for (size_t i = 0; i < store.m_items.size(); ++i) {
+        auto& item = store.m_items[i];
+        QJsonObject obj = {
+            {"parentUid", item->parentUid()},
+            {"uid", item->uid()},
+            {"category", item->category()}};
+        if (item->category() == QString("module")) {
+            obj["order"] = (int)i;
+            obj["name"] = item->name();
+            obj["module"] = item->hints().toJsonValue();
+        } else if (item->category() == QString("input")) {
+            obj["connection"] = item->value().toJsonValue();
+        } else {
+            QVariantMap vmap = item->value().toMap();
+            if (vmap.empty()) {
+                obj["value"] = QJsonValue::fromVariant(item->value());
+            } else {
+                obj["value"] = QJsonObject::fromVariantMap(vmap);
+            }
+        }
+        jsonArray.append(obj);
+    }
+    QJsonObject rootObject = {{"uidCounter", store.m_uidCounter},
+        {"items", jsonArray}};
+    QJsonDocument saveDoc(rootObject);
+    saveFile.write(saveDoc.toJson());
 }
 
-void CommandHistory::read(QString filename, BackendStore& store)
+void BackendStoreSerializer::read(QString filename, BackendStore& store)
 {
     QFile loadFile(filename);
 
@@ -84,32 +65,55 @@ void CommandHistory::read(QString filename, BackendStore& store)
         QByteArray data = loadFile.readAll();
         QJsonDocument loadDoc(QJsonDocument::fromJson(data));
         QJsonObject json = loadDoc.object();
-        store.setUidCounter(json["initialUid"].toInt());
-        QJsonArray array = json["commands"].toArray();
-        for (int i = 0; i < array.size(); ++i) {
-            QJsonObject object = array[i].toObject();
-            processCommand(object, store);
-        }
-    }
-}
+        QJsonArray array = json["items"].toArray();
 
-void CommandHistory::processCommand(QJsonObject& object, BackendStore& store)
-{
-    QString cmd = object["command"].toString();
-    QVariant params = object["params"].toVariant();
-    if (cmd == QString("add")) {
-        store.addModule(params.toString());
-    } else if (cmd == QString("remove")) {
-        store.removeModule(params.toInt());
-    } else if (cmd == QString("connect")) {
-        QVariantMap vmap = params.toMap();
-        store.connect(vmap["outModuleUid"].toInt(), vmap["outPortUid"].toInt(),
-            vmap["inModuleUid"].toInt(), vmap["inPortUid"].toInt());
-    } else if (cmd == QString("disconnect")) {
-//        store.disconnect(vmap["outModuleUid"].toInt(), vmap["outPortUid"].toInt(),
-//            vmap["inModuleUid"].toInt(), vmap["inPortUid"].toInt());
-    } else {
-        qWarning() << "unknown command from history file" << cmd;
+        // TODO: restore module order by the "order" parameter in the json file
+        for (int i = 0; i < array.size(); ++i) {
+            QJsonObject obj = array[i].toObject();
+            QString cat = obj["category"].toString();
+            if (cat == QString("module")) {
+                int uid = obj["uid"].toInt();
+                store.m_uidCounter = uid;
+                store.addModule(obj["module"].toString());
+                auto it = store.getItem(-1, uid, cat);
+                if (it) {
+                    it->setName(obj["name"].toString());
+                } else {
+                    qWarning() << "could not load module" << obj;
+                }
+            }
+        }
+
+        for (int i = 0; i < array.size(); ++i) {
+            QJsonObject obj = array[i].toObject();
+            QString cat = obj["category"].toString();
+            if (cat == QString("module")) {
+                // nothing to do
+            } else if (cat == QString("input")) {
+                bool ok = store.connect(
+                    obj["connection"].toObject()["parentUid"].toInt(),
+                    obj["connection"].toObject()["uid"].toInt(),
+                    obj["parentUid"].toInt(),
+                    obj["uid"].toInt());
+                if (!ok) {
+                    qWarning() << "could not connect" << obj;
+                }
+            } else {
+                int parentUid = obj["parentUid"].toInt();
+                int uid = obj["uid"].toInt();
+                auto it = store.getItem(parentUid, uid, cat);
+                if (it) {
+                    QVariant var = obj["value"].toVariant();
+                    if (var.isValid() && !var.isNull()) {
+                        it->setValue(var);
+                    }
+                } else {
+                    qWarning() << "could not set value for" << obj;
+                }
+            }
+        }
+
+        store.m_uidCounter = json["uidCounter"].toInt();
     }
 }
 
@@ -206,6 +210,24 @@ pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
     return make_pair((*it)->parentUid(), (*it)->uid());
 }
 
+BackendStoreItem* BackendStore::getItem(int parentUid, int uid, QString category)
+{
+    auto it = find_if(m_items.begin(), m_items.end(),
+        [parentUid, uid, category](const unique_ptr<BackendStoreItem>& item)
+        {
+            return (item->category() == category) &&
+                ((item->parentUid() < 0 && item->uid() == uid) ||
+                (item->parentUid() == parentUid && item->uid() == uid));
+        });
+
+    if (it != m_items.end()) {
+        // TODO: dont use naked pointer
+        return it->get();
+    } else {
+        return nullptr;
+    }
+}
+
 void BackendStore::addModule(const QString& scriptPath)
 {
     if (!editorMode()) {
@@ -246,7 +268,7 @@ void BackendStore::addModule(const QString& scriptPath)
         int uid = m_uidCounter++;
 
         beginInsertRows(QModelIndex(), m_items.size(), m_items.size() + numRows);
-        addBackendStoreItem(make_unique<BackendModule>(module, uid));
+        addBackendStoreItem(make_unique<BackendModule>(module, uid, scriptPath));
 
         for (size_t i = 0; i < module->numInputs(); ++i) {
             auto port = module->inputPort(i);
@@ -263,8 +285,6 @@ void BackendStore::addModule(const QString& scriptPath)
         }
 
         endInsertRows();
-
-        m_commandHistory.notifyAddModule(scriptPath);
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -288,6 +308,7 @@ void BackendStore::addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item)
         notifyGenerator(ModuleRoles::ValueRole));
     QObject::connect(item.get(), &BackendStoreItem::hintsChanged, this,
         notifyGenerator(ModuleRoles::HintsRole));
+
     m_items.push_back(move(item));
 }
 
@@ -340,8 +361,6 @@ void BackendStore::removeModule(int uid)
                 Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
             }
         }
-
-        m_commandHistory.notifyRemoveModule(uid);
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -504,7 +523,6 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
 
         bool success = out->source().lock()->bind(in->source());
         if (success) {
-            m_commandHistory.notifyConnect(outModuleUid, outPortUid, inModuleUid, inPortUid);
             Q_EMIT in->valueChanged();
         }
         return success;
@@ -599,27 +617,36 @@ void BackendStore::addAvailableNativeModules()
 
 void BackendStore::newWorkflow()
 {
-    // TODO: try-catch
     beginResetModel();
-    m_items.clear();
-    ComputePlatform cleanPlatform;
-    swap(m_platform, cleanPlatform);
-    CommandHistory cleanHistory;
-    swap(m_commandHistory, cleanHistory);
+    try {
+        m_items.clear();
+        ComputePlatform cleanPlatform;
+        swap(m_platform, cleanPlatform);
+    } catch (exception& e) {
+        qCritical() << e.what();
+    }
     endResetModel();
 }
 
 void BackendStore::readWorkflow(const QUrl& url)
 {
-    // TODO: try-catch
-    newWorkflow();
-    m_commandHistory.read(url.toLocalFile(), *this);
+    try {
+        newWorkflow();
+        BackendStoreSerializer ser;
+        ser.read(url.toLocalFile(), *this);
+    } catch (exception& e) {
+        qCritical() << e.what();
+    }
 }
 
 void BackendStore::writeWorkflow(const QUrl& url)
 {
-    // TODO: try-catch
-    m_commandHistory.write(url.toLocalFile());
+    try {
+        BackendStoreSerializer ser;
+        ser.write(url.toLocalFile(), *this);
+    } catch (exception& e) {
+        qCritical() << e.what();
+    }
 }
 
 // TODO: move to separate file

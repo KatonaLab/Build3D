@@ -7,7 +7,8 @@
 class BackendModule : public BackendStoreItem {
     typedef core::compute_platform::ComputeModule ComputeModule;
 public:
-    BackendModule(std::shared_ptr<ComputeModule> sourceModule, int uid);
+    BackendModule(std::shared_ptr<ComputeModule> sourceModule,
+        int uid, QString scriptPath);
     int uid() const override;
     int parentUid() const override;
     QString category() const override;
@@ -26,6 +27,7 @@ protected:
     std::shared_ptr<ComputeModule> m_source;
     int m_uid = -1;
     int m_status = 0;
+    QString m_scriptPath;
 };
 
 #endif
