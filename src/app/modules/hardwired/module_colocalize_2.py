@@ -4,41 +4,28 @@ Created on Tue Aug 21 15:21:27 2018
 
 @author: pongor.csaba
 """
-
+import traceback, time
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter, colocalization, save_data, save_image
+from modules.a3dc_modules.a3dc.core import filter_database, colocalization_connectivity, colocalization_analysis 
 from modules.a3dc_modules.a3dc.utils import os_open, quote
 
 import os
 import numpy as np
 
 
-OBJFILTERS=['volume', 'voxelCount','pixelsOnBorder']
-OVLFILTERS=['ch1_colocalizationCount','ch1_overlappingRatio', 
-           'ch1_totalOverlappingRatio', 'ch2_colocalizationCount','ch2_overlappingRatio', 'ch2_totalOverlappingRatio']
 
-FILTERS = OBJFILTERS+OVLFILTERS
+CHFILTERS=['ch1_totalOverlappingRatio', 'ch2_totalOverlappingRatio', 
+            'ch2_colocalizationCount','ch1_colocalizationCount']
+OVLFILTERS=['volume', 'voxelCount','pixelsOnBorder','ch1_overlappingRatio','ch2_overlappingRatio']
+
+FILTERS = OVLFILTERS+CHFILTERS
 
 ####################################################Interface to call from C++####################################################
-def colocalize(ch1Img, ch2Img, ovlSettings, path=None, show=True, to_text=False):
-
-        #Rename filter keys
-        for key in OVLFILTERS:
-
-            if key in ovlSettings:
-                
-                prefix=key.split('_', 1)[0]
-                filter_key=key.split('_', 1)[-1]
-                
-                if prefix=='ch1':
-                   
-                    ovlSettings[filter_key+' in '+str(ch1Img.metadata['Name'])] = ovlSettings[key]
-                    del ovlSettings[key]
-                    
-                if prefix=='ch2':
-                    ovlSettings[filter_key+' in '+str(ch2Img.metadata['Name'])] = ovlSettings[key]
-                    del ovlSettings[key]
+def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=None, show=True, to_text=False):
+        
+        tagged_img_list=[ch1_img, ch2_img]
         
         
         #Set path
@@ -52,38 +39,77 @@ def colocalize(ch1Img, ch2Img, ovlSettings, path=None, show=True, to_text=False)
         #############################################################################################################################
         ###################################################Colocalization############################################################
         #############################################################################################################################
-        overlappingImage, taggedImageList, logText = colocalization( [ch1Img, ch2Img], overlappingFilter=ovlSettings, removeFiltered=False)
-        print(logText)
-        
-        name = ch1Img.metadata['Name']#+"_tagged"
-        save_image(ch1Img, outputPath, name)
-        
-        name = ch2Img.metadata['Name']#+"_tagged"
-        save_image(ch2Img, outputPath, name)
-        
-        name = ch1Img.metadata['Name']+ "_" +ch2Img.metadata['Name']+ "_overlap"
-        save_image(overlappingImage, outputPath, name)
-        
-        logText='\nSaving object dataBases to xlsx or text!'
-        print(logText)
+            # Start timingsourceDictionayList
+        tstart = time.clock()
+    
+        try:
+    
+            # Creatre LogText
+            print('\nColocalization analysis started using: ')
+            for img in tagged_img_list:
+                print('\t ' + str(img.metadata['Name']))
+    
+            # Add Filter settings
+            print('\n\tFilter settings: ' + str(ovl_settings).replace('{', ' ').replace('}', ' '))
 
-        #Save File
-        name=ch1Img.metadata['Name']+'_'+ch2Img.metadata['Name']
-        if to_text==True:
-            file_name=name+'.txt'    
-        else:
-            file_name=name+'.xlsx'
-        save_data([ch1Img, ch2Img ,overlappingImage], path=outputPath, file_name=file_name, to_text=to_text)
-
-        
-        #Show file
-        #if show==True:
+            # Determine connectivity data
+            ovl_img = colocalization_connectivity(tagged_img_list)
             
-            #os_open(os.path.join(outputPath, file_name))
-        print('Colocalization analysis was run successfully!')
-        print("\n%s\n" % str(quote()))
+            # Filter database and image
+            #overlappingImage, _ = apply_filter(overlappingImage, ovl_settings)
+            ovl_img.database=filter_database(ch1_img.database, ovl_settings, overwrite=False)
+            
+            # Analyze colocalization
+            ovl_img, _ = colocalization_analysis(tagged_img_list, ovl_img)
+            
+            ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=False)
         
-        return overlappingImage
+            ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=False)
+    
+
+    
+            # Finish timing and add to logText
+            tstop = time.clock()
+            
+            #Print number of objects to logText
+            print('\n\tNumber of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
+            print('\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! ')
+            
+            #Save images
+            print('\nSaving object dataBases to xlsx or text!')
+            name = ch1_img.metadata['Name']#+"_tagged"
+            save_image(ch1_img, outputPath, name)
+            
+            name = ch2_img.metadata['Name']#+"_tagged"
+            save_image(ch2_img, outputPath, name)
+            
+            name = ch1_img.metadata['Name']+ "_" +ch2_img.metadata['Name']+ "_overlap"
+            save_image(ovl_img, outputPath, name)
+            
+            
+            #Save databases
+            name=ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
+            if to_text==True:
+                file_name=name+'.txt'    
+            else:
+                file_name=name+'.xlsx'
+            save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
+        
+            #Show file
+            #if show==True:
+                
+                #os_open(os.path.join(outputPath, file_name))
+            
+            print('Colocalization analysis was run successfully!')
+            print("\n%s\n" % str(quote()))
+        
+        
+
+        except Exception as e:
+            traceback.print_exc()
+            raise Exception("Error occured durig colocalization!",e)
+    
+        return ovl_img
 
 
 def read_params(filters=FILTERS):
@@ -99,10 +125,48 @@ def read_params(filters=FILTERS):
         for m in ['min', 'max']:
             settings[f][m] = a3.inputs['{} {}'.format( f, m)]
 
-    out_dict['Settings'] = settings
+    
+    ch1_settings={}
+    ch2_settings={}
+    for key in CHFILTERS:
+        if key in settings:
+            prefix=key.split('_', 1)[0]
+            filter_key=key.split('_', 1)[-1]
+            
+            if prefix=='ch1':
+                ch1_settings[filter_key+' in '+str(a3.inputs['Ch1_MetaData']['Name'])] = settings[key]
+
+            if prefix=='ch2':
+                ch2_settings[filter_key+' in '+str(a3.inputs['Ch2_MetaData']['Name'])] = settings[key]
+    out_dict['Ch1'] = ch1_settings
+    out_dict['Ch2'] = ch2_settings
+            
+    #Rename filter keys
+    ovl_settings={}
+    for key in OVLFILTERS:
+
+        if key in settings:
+            
+            prefix=key.split('_', 1)[0]
+            filter_key=key.split('_', 1)[-1]
+            
+            if prefix=='ch1':
+                ovl_settings[filter_key+' in '+str(a3.inputs['Ch1_MetaData']['Name'])] = settings[key]
+     
+            if prefix=='ch2':
+                ovl_settings[filter_key+' in '+str(a3.inputs['Ch2_MetaData']['Name'])] = settings[key]
+
+        else:
+            ovl_settings[key] = settings[key]
+    out_dict['Ovl'] = ovl_settings    
+    
     #out_dict['FileName']=a3.inputs['FileName']
     out_dict['FileName']=None
-    
+    print('###################################')
+    print(out_dict['Ch1'])
+    print(out_dict['Ch2'])
+    print(out_dict['Ovl'])
+    print('###################################')
     return out_dict    
     
 def module_main(ctx):
@@ -111,7 +175,10 @@ def module_main(ctx):
     
     output=colocalize(params['Ch1_Image'],
                params['Ch2_Image'],
-               params['Settings'], params['FileName'])
+               params['Ch1'],
+               params['Ch2'],
+               params['Ovl'], 
+               params['FileName'])
 
     a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float) / np.amax(output.array.astype(np.float)))
     a3.outputs['Analyzed_DataBased']=output.database
@@ -129,8 +196,7 @@ def add_input_fields(config, filters=FILTERS):
                 .setIntHint('max', 10000000)
                 .setIntHint('default', 0 if m == 'min' else 10000000))
     
-    
-    
+
     return config
 
 config=[a3.Input('Ch1_Image', a3.types.ImageFloat), 
