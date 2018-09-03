@@ -29,6 +29,7 @@ class BackendStore: public QAbstractListModel {
     typedef core::compute_platform::PortBase PortBase;
     Q_PROPERTY(QVariantList availableModules READ availableModules NOTIFY availableModulesChanged)
     Q_PROPERTY(bool editorMode READ editorMode NOTIFY editorModeChanged)
+    Q_PROPERTY(bool unsaved READ unsaved NOTIFY unsavedChanged)
 
     friend class BackendStoreSerializer;
 public:
@@ -43,7 +44,6 @@ public:
         ValueRole
     };
     explicit BackendStore(QObject* parent = Q_NULLPTR);
-    virtual ~BackendStore();
 
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
@@ -55,7 +55,7 @@ public:
 
     Q_INVOKABLE void addModule(const QString& scriptPath);
     Q_INVOKABLE void removeModule(int uid);
-    Q_INVOKABLE QVariant get(int row);
+    Q_INVOKABLE QVariant get(int row) const;
     Q_INVOKABLE int count() const;
     Q_INVOKABLE bool connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
     // TODO:
@@ -68,13 +68,20 @@ public:
     std::pair<int, int> findPort(std::weak_ptr<PortBase> port) const;
     BackendStoreItem* getItem(int parentUid, int uid, QString category);
 
+    // TODO: definition goes to .cpp
     bool editorMode()
     {
         return m_editorMode;
     }
+
+    bool unsaved()
+    {
+        return m_unsaved;
+    }
 Q_SIGNALS:
     void availableModulesChanged();
     void editorModeChanged();
+    void unsavedChanged();
 
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
@@ -82,12 +89,14 @@ protected:
     QVariantList m_availableModules;
     bool m_editorMode;
     int m_uidCounter = 0;
+    bool m_unsaved = false;
     std::map<QString, int> m_moduleTypeCounter;
 
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);
     void addAvailableNativeModules();
     QString generateModuleName(const QString &type);
+    void dirty();
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {

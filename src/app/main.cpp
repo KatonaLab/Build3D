@@ -19,7 +19,6 @@
 #include "LogCollector.h"
 #include "VolumeData.h"
 #include "VolumeTexture.h"
-#include "ModulePlatformBackend.h"
 #include "TurnTableCameraController.h"
 #include "BackendStore.h"
 #include "BackendOutput.h"

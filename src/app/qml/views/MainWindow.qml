@@ -340,12 +340,24 @@ ApplicationWindow {
         }
     }
 
+    MessageDialog {
+        id: unsavedWorkflowMessageBox
+        title: "Unsaved Workflow"
+        text: "All unsaved modifications will be lost. Are you sure to proceed?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+    }
+
     Action {
         id: newWorkflowAction
         text: "New Workflow"
         onTriggered: {
-            // TODO: ask for save
-            ModuleStore.model.newWorkflow();
+            if (ModuleStore.model.unsaved) {
+                unsavedWorkflowMessageBox.yes.disconnect(openDialog.open);
+                unsavedWorkflowMessageBox.yes.connect(ModuleStore.model.newWorkflow);
+                unsavedWorkflowMessageBox.open();
+            } else {
+                ModuleStore.model.newWorkflow();
+            }
         }
     }
 
@@ -353,7 +365,13 @@ ApplicationWindow {
         id: openWorkflowAction
         text: "Open Workflow"
         onTriggered: {
-            openDialog.open();
+            if (ModuleStore.model.unsaved) {
+                unsavedWorkflowMessageBox.yes.disconnect(ModuleStore.model.newWorkflow);
+                unsavedWorkflowMessageBox.yes.connect(openDialog.open);
+                unsavedWorkflowMessageBox.open();
+            } else {
+                openDialog.open();
+            }
         }
     }
 

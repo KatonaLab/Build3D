@@ -125,6 +125,14 @@ QString pathToModuleName(const QString& path)
     return x;
 }
 
+void BackendStore::dirty()
+{
+    if (!m_unsaved) {
+        m_unsaved = true;
+        Q_EMIT unsavedChanged();
+    }
+}
+
 QString BackendStore::generateModuleName(const QString &type)
 {
     if (!m_moduleTypeCounter.count(type)) {
@@ -151,26 +159,12 @@ BackendStore::BackendStore(QObject* parent)
         PythonEnvironment::outStreamRouters = routers;
         PythonEnvironment::instance();
 
-        //m_commandHistory.setInitialUidCounter(m_uidCounter);
-
         refreshAvailableModules();
-
-        m_editorMode = true;
-//        QString workflowFile = QStandardPaths::locate(
-//            QStandardPaths::DataLocation, QString("workflow.json"));
-//        m_commandHistory.read(workflowFile, *this);
         m_editorMode = GlobalSettings::editorMode;
 
     } catch (exception& e) {
         qCritical() << e.what();
     }
-}
-
-BackendStore::~BackendStore()
-{
-//    QString workflowFile = QStandardPaths::locate(
-//        QStandardPaths::DataLocation, QString("workflow.json"));
-//    m_commandHistory.write(workflowFile);
 }
 
 pair<int, int> BackendStore::findPort(weak_ptr<PortBase> port) const
@@ -238,6 +232,7 @@ void BackendStore::addModule(const QString& scriptPath)
     static const QString nativePath("native://");
     try {
         shared_ptr<ComputeModule> module;
+        dirty();
 
         if (scriptPath.startsWith(nativePath)) {
             QString name = scriptPath.mid(nativePath.size());
@@ -321,6 +316,7 @@ void BackendStore::itemChanged(const BackendStoreItem* item, ModuleRoles role)
     if (it != m_items.end()) {
         int row = distance(m_items.begin(), it);
         QModelIndex ix = index(row, 0, QModelIndex());
+        dirty();
         Q_EMIT dataChanged(ix, ix, {role});
     }
 }
@@ -333,6 +329,7 @@ void BackendStore::removeModule(int uid)
     }
 
     try {
+        dirty();
         auto removable = [uid](const unique_ptr<BackendStoreItem>& item) {
             return (item->category() == "module" && item->uid() == uid)
                 || (item->category() != "module" && item->parentUid() == uid);
@@ -423,6 +420,7 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
             return false;
         }
 
+        dirty();
         auto& item = m_items[index.row()];
         switch (role) {
             case NameRole: {
@@ -460,7 +458,7 @@ int BackendStore::rowCount(const QModelIndex&) const
     return m_items.size();
 }
 
-QVariant BackendStore::get(int row)
+QVariant BackendStore::get(int row) const
 {
     try {
         if (row >= 0 && row < (int)m_items.size()) {
@@ -523,6 +521,7 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
 
         bool success = out->source().lock()->bind(in->source());
         if (success) {
+            dirty();
             Q_EMIT in->valueChanged();
         }
         return success;
@@ -622,6 +621,7 @@ void BackendStore::newWorkflow()
         m_items.clear();
         ComputePlatform cleanPlatform;
         swap(m_platform, cleanPlatform);
+        m_unsaved = false;
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -634,6 +634,7 @@ void BackendStore::readWorkflow(const QUrl& url)
         newWorkflow();
         BackendStoreSerializer ser;
         ser.read(url.toLocalFile(), *this);
+        m_unsaved = false;
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -644,6 +645,7 @@ void BackendStore::writeWorkflow(const QUrl& url)
     try {
         BackendStoreSerializer ser;
         ser.write(url.toLocalFile(), *this);
+        m_unsaved = false;
     } catch (exception& e) {
         qCritical() << e.what();
     }
