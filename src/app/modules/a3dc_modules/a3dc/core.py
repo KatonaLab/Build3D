@@ -37,6 +37,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     
     ovl_image=analyze(ovl_image, raw_img_list)
 
+    
     # Generate array lists and name lists
     name_list = [x.metadata['Name'] for x in image_list]
 
@@ -54,13 +55,13 @@ def colocalization_connectivity(image_list, raw_img_list=None):
             ovl_position = ovl_pixels[j]
             
             object_list[j] = itk_image.GetPixel(ovl_position)
-            print(object_list[j])
+ 
             ovl_ratio_list[j] = ovl_image.database['voxelCount'][j] / image_list[i].database['voxelCount'][image_list[i].database['tag'].index(object_list[j])]
 
         ovl_image.database['object in ' + name_list[i]] = object_list
         ovl_image.database['overlappingRatio in ' + name_list[i]] = ovl_ratio_list
 
-
+        
     return ovl_image
 
 
