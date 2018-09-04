@@ -545,6 +545,25 @@ void BackendStore::evaluate(int uid)
     }
 }
 
+void BackendStore::evaluateBatch()
+{
+    try {
+        bool shouldRun = false;
+        int runIdCnt = 0;
+        do {
+            ModuleContext ctx;
+            ctx.runId = runIdCnt++;
+            vector<ModuleContext> ctxs = m_platform.run(ctx);
+            shouldRun = any_of(ctxs.begin(), ctxs.end(),
+                [](ModuleContext ctx) {
+                    return ctx.hasNext;
+                });
+        } while(shouldRun);
+    } catch (exception& e) {
+        qCritical() << e.what();
+    }
+}
+
 QVariantList BackendStore::availableModules() const
 {
     return m_availableModules;

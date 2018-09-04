@@ -4,6 +4,7 @@
 #include <core/compute_platform/ComputeModule.h>
 #include <core/high_platform/PythonComputeModule.h>
 #include <core/compute_platform/port_utils.hpp>
+#include <core/compute_platform/ModuleContext.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 #include <functional>
 
@@ -38,9 +39,10 @@ class TypedImageOutputInterfaceModule : public ImageOutputInterfaceModule {
     template <typename R> using MultiDimImage = core::multidim_image_platform::MultiDimImage<R>;
     template <typename R> using TypedInputPortCollection = core::compute_platform::TypedInputPortCollection<R>;
     typedef core::compute_platform::OutputPortCollection OutputPortCollection;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     TypedImageOutputInterfaceModule(ComputePlatform& parent);
-    void execute() override;
+    void execute(ModuleContext&) override;
 protected:
     TypedInputPortCollection<MultiDimImage<T>> m_inputs;
     OutputPortCollection m_outputs;
@@ -52,9 +54,10 @@ class TypedImageOutputInterfaceModule<float>: public ImageOutputInterfaceModule 
     template <typename R> using MultiDimImage = core::multidim_image_platform::MultiDimImage<R>;
     template <typename R> using TypedInputPortCollection = core::compute_platform::TypedInputPortCollection<R>;
     typedef core::compute_platform::OutputPortCollection OutputPortCollection;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     TypedImageOutputInterfaceModule(ComputePlatform& parent);
-    void execute() override;
+    void execute(ModuleContext&) override;
 protected:
     TypedInputPortCollection<MultiDimImage<float>> m_inputs;
     OutputPortCollection m_outputs;

@@ -13,6 +13,7 @@ SOURCES += \
     ../core/compute_platform/ports.cpp \
     ../core/compute_platform/ComputeModule.cpp \
     ../core/compute_platform/ComputePlatform.cpp \
+    ../core/compute_platform/ModuleContext.cpp \
     ../core/compute_platform/port_utils.hpp \
     multidim_image_platform_test.cpp \
     ../core/multidim_image_platform/MultiDimImage.hpp \

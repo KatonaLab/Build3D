@@ -18,7 +18,7 @@ TypedImageOutputInterfaceModule<float>::TypedImageOutputInterfaceModule(ComputeP
     m_inputs(*this), m_outputs(*this)
 {}
 
-void TypedImageOutputInterfaceModule<float>::execute()
+void TypedImageOutputInterfaceModule<float>::execute(ModuleContext&)
 {
     m_result = m_inputs.input<0>()->inputPtr().lock();
     if (m_onExecuteHandler) {

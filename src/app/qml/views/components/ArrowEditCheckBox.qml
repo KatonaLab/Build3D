@@ -10,7 +10,6 @@ Item {
     property int spinDuration: 200
     
     implicitHeight: layout.height
-    signal titleTextChanged(string text);
 
     RowLayout {
         id: layout
@@ -33,9 +32,6 @@ Item {
         RowLayout {
             TextField {
                 id: textField
-                onTextEdited: {
-                    titleTextChanged(textField.text);
-                }
             }
 
             Label {

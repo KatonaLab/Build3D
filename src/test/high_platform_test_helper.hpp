@@ -27,7 +27,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.template output<0>()->forwardFromSharedPtr(m_seed);
     }
@@ -49,7 +49,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_result = m_inputs.template input<0>()->value();
     }
@@ -71,7 +71,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromSharedPtr(m_seed);
     }
@@ -92,7 +92,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
     }
@@ -108,7 +108,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
     }
@@ -124,7 +124,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }
@@ -145,7 +145,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }

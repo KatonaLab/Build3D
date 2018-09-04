@@ -4,6 +4,7 @@
 #include <core/compute_platform/ComputeModule.h>
 #include <core/compute_platform/ports.h>
 #include <core/compute_platform/port_utils.hpp>
+#include <core/compute_platform/ModuleContext.h>
 #include <core/multidim_image_platform/MultiDimImage.hpp>
 
 // for QUrl PORT_TYPE_TRAITS reg
@@ -15,9 +16,10 @@ class IcsDataSourceModule : public core::compute_platform::ComputeModule {
     template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
     template <typename T, typename ...Ts> using TypedInputPortCollection = core::compute_platform::TypedInputPortCollection<T, Ts...>;
     template <typename T, typename ...Ts> using TypedOutputPortCollection = core::compute_platform::TypedOutputPortCollection<T, Ts...>;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     IcsDataSourceModule(ComputePlatform& parent);
-    void execute() override;
+    void execute(ModuleContext&) override;
     std::string moduleTypeName() const override
     {
         return "ics data source";

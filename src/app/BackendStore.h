@@ -61,6 +61,7 @@ public:
     // TODO:
     // Q_INVOKABLE bool disconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
     Q_INVOKABLE void evaluate(int uid = -1);
+    Q_INVOKABLE void evaluateBatch();
     Q_INVOKABLE void readWorkflow(const QUrl& url);
     Q_INVOKABLE void writeWorkflow(const QUrl& url);
     Q_INVOKABLE void newWorkflow();

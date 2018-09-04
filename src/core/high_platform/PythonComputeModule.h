@@ -145,13 +145,8 @@ public:
     }
 };
 
-class ModuleContext {
-public:
-    std::string name;
-};
-
 typedef std::vector<std::shared_ptr<ArgBase>> ProcessArg;
-typedef std::function<void(ModuleContext&)> ProcessFunc;
+typedef std::function<void(core::compute_platform::ModuleContext*)> ProcessFunc;
 
 // --------------------------------------------------------
 
@@ -427,7 +422,7 @@ public:
     }
 protected:
     void buildPorts();
-    void execute() override;
+    void execute(cp::ModuleContext& ctx) override;
     PyInputPortWrapperPtr createInputPortWrapper(PyTypes t);
     PyOutputPortWrapperPtr createOutputPortWrapper(PyTypes t);
     PyTypes inputPortPyType(std::string name);
@@ -438,7 +433,6 @@ private:
     std::string m_code;
     std::string m_type;
     ProcessFunc m_func;
-    ModuleContext m_moduleContext;
 };
 
 // --------------------------------------------------------

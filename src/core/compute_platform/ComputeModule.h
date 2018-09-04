@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <core/directed_acyclic_graph/Node.h>
 #include <string>
+#include "ModuleContext.h"
 
 namespace core {
 namespace compute_platform {
@@ -38,18 +39,23 @@ namespace compute_platform {
         virtual ~ComputeModule();
         // TODO: test this function
         ComputePlatform& platform();
+        // TODO: test this function
+        void setContext(ModuleContext ctx);
+        ModuleContext context();
     protected:
         ComputeModule(ComputePlatform& parent,
             InputPortCollectionBase& inputs,
             OutputPortCollectionBase& outputs,
             const std::string& name = "");
-        virtual void execute() = 0;
+        // TODO: test context parameter
+        virtual void execute(ModuleContext& ctx) = 0;
     private:
         ComputePlatform& m_parent;
         InputPortCollectionBase& m_inputs;
         OutputPortCollectionBase& m_outputs;
         std::shared_ptr<TriggerNode> m_node;
         std::string m_name;
+        ModuleContext m_context;
     };
     
     bool connectPorts(ComputeModule& outputModule, std::size_t outputId,

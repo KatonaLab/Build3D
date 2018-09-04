@@ -15,6 +15,7 @@ class ParameterInterfaceModule : public core::compute_platform::ComputeModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     typedef core::compute_platform::OutputPortCollectionBase OutputPortCollectionBase;
     typedef core::compute_platform::InputPortCollection InputPortCollection;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     ParameterInterfaceModule(ComputePlatform& parent,
         const std::string& name,
@@ -31,10 +32,11 @@ class TypedParameterInterfaceModule: public ParameterInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     template<typename R> using TypedOutputPortCollection =
         core::compute_platform::TypedOutputPortCollection<R>;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     TypedParameterInterfaceModule(ComputePlatform& parent, T initialValue = T());
     bool setData(QVariant var) override;
-    void execute() override;
+    void execute(ModuleContext&) override;
     QVariant data() override;
 protected:
     TypedOutputPortCollection<T> m_outputs;
@@ -46,10 +48,11 @@ class TypedParameterInterfaceModule<EnumPair>: public ParameterInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     template<typename R> using TypedOutputPortCollection =
         core::compute_platform::TypedOutputPortCollection<R>;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     TypedParameterInterfaceModule(ComputePlatform& parent, EnumPair initialValue = std::make_pair(-1, -1));
     bool setData(QVariant var) override;
-    void execute() override;
+    void execute(ModuleContext&) override;
     QVariant data() override;
 protected:
     TypedOutputPortCollection<EnumPair> m_outputs;
@@ -61,10 +64,11 @@ class TypedParameterInterfaceModule<QString>: public ParameterInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     template<typename R> using TypedOutputPortCollection =
         core::compute_platform::TypedOutputPortCollection<R>;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     TypedParameterInterfaceModule(ComputePlatform& parent, QString initialValue = QString());
     bool setData(QVariant var) override;
-    void execute() override;
+    void execute(ModuleContext&) override;
     QVariant data() override;
 protected:
     TypedOutputPortCollection<std::string> m_outputs;
@@ -76,10 +80,11 @@ class TypedParameterInterfaceModule<QUrl>: public ParameterInterfaceModule {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     template<typename R> using TypedOutputPortCollection =
         core::compute_platform::TypedOutputPortCollection<R>;
+    typedef core::compute_platform::ModuleContext ModuleContext;
 public:
     TypedParameterInterfaceModule(ComputePlatform& parent, QUrl initialValue = QUrl());
     bool setData(QVariant var) override;
-    void execute() override;
+    void execute(ModuleContext&) override;
     QVariant data() override;
 protected:
     TypedOutputPortCollection<Url> m_outputs;

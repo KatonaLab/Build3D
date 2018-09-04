@@ -42,7 +42,7 @@ QVariant TypedParameterInterfaceModule<EnumPair>::data()
     return map;
 }
 
-void TypedParameterInterfaceModule<EnumPair>::execute()
+void TypedParameterInterfaceModule<EnumPair>::execute(ModuleContext&)
 {
     m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
 }
@@ -76,7 +76,7 @@ QVariant TypedParameterInterfaceModule<QUrl>::data()
     return QUrl::fromLocalFile(QString::fromStdString(m_data->path));
 }
 
-void TypedParameterInterfaceModule<QUrl>::execute()
+void TypedParameterInterfaceModule<QUrl>::execute(ModuleContext&)
 {
     m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
 }
@@ -111,7 +111,7 @@ QVariant TypedParameterInterfaceModule<QString>::data()
     return QString::fromStdString(*m_data);
 }
 
-void TypedParameterInterfaceModule<QString>::execute()
+void TypedParameterInterfaceModule<QString>::execute(ModuleContext&)
 {
     m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
 }

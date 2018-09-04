@@ -45,44 +45,12 @@ macx {
     # QMAKE_CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
 }
 
-HEADERS += \
-    VolumeData.h \
-    VolumeTexture.h \
-    LogCollector.h \
-    TurnTableCameraController.h \
-    BackendStore.h \
-    BackendStoreItem.h \
-    BackendInput.h \
-    BackendParameter.h \
-    BackendOutput.h \
-    BackendModule.h \
-    IcsDataSourceModule.h \
-    ParameterInterfaceModules.hpp \
-    OutputInterfaceModules.hpp \
-    GlobalSettings.h \
-    ../util/version.h \
-    ../../lib/libics/libics_ll.h \
-    ../../lib/libics/libics_intern.h \
-    ../../lib/libics/libics.h \
-    ../../lib/libics/libics_sensor.h
-
-SOURCES += \
-    ../util/version.cpp \
-    VolumeData.cpp \
-    VolumeTexture.cpp \
-    LogCollector.cpp \
-    TurnTableCameraController.cpp \
-    BackendStore.cpp \
-    BackendStoreItem.cpp \
-    BackendInput.cpp \
-    BackendParameter.cpp \
-    BackendOutput.cpp \
-    BackendModule.cpp \
-    IcsDataSourceModule.cpp \
-    ParameterInterfaceModules.cpp \
-    OutputInterfaceModules.cpp \
-    main.cpp \
-    GlobalSettings.cpp
+SOURCES += $$files("*.cpp", true)
+SOURCES += $$files("../core/*.cpp", true)
+SOURCES += $$files("../util/*.cpp", true)
+HEADERS += $$files("../*.h", true)
+HEADERS += $$files("../*.hpp", true)
+HEADERS += $$files("../*.ipp", true)
 
 SOURCES +=  \
     ../../lib/libics/libics_preview.c \
@@ -98,17 +66,77 @@ SOURCES +=  \
     ../../lib/libics/libics_gzip.c \
     ../../lib/libics/libics_compress.c
 
-SOURCES += \
-    ../core/directed_acyclic_graph/Node.cpp \
-    ../core/directed_acyclic_graph/Graph.cpp \
-    ../core/compute_platform/ports.cpp \
-    ../core/compute_platform/ComputeModule.cpp \
-    ../core/compute_platform/ComputePlatform.cpp \
-    ../core/compute_platform/port_utils.hpp \
-    ../core/multidim_image_platform/MultiDimImage.hpp \
-    ../core/multidim_image_platform/MultiDimImage.cpp \
-    ../core/high_platform/PythonComputeModule.cpp \
-    ../core/io_utils/IcsAdapter.cpp
+# HEADERS += \
+#     ../../lib/libics/libics_ll.h \
+#     ../../lib/libics/libics_intern.h \
+#     ../../lib/libics/libics.h \
+#     ../../lib/libics/libics_sensor.h
+
+# //HEADERS += \
+# //    VolumeData.h \
+# //    VolumeTexture.h \
+# //    LogCollector.h \
+# //    TurnTableCameraController.h \
+# //    BackendStore.h \
+# //    BackendStoreItem.h \
+# //    BackendInput.h \
+# //    BackendParameter.h \
+# //    BackendOutput.h \
+# //    BackendModule.h \
+# //    IcsDataSourceModule.h \
+# //    ParameterInterfaceModules.hpp \
+# //    OutputInterfaceModules.hpp \
+# //    GlobalSettings.h \
+# //    ../util/version.h \
+# //    ../../lib/libics/libics_ll.h \
+# //    ../../lib/libics/libics_intern.h \
+# //    ../../lib/libics/libics.h \
+# //    ../../lib/libics/libics_sensor.h
+# //
+# //SOURCES += \
+# //    ../util/version.cpp \
+# //    VolumeData.cpp \
+# //    VolumeTexture.cpp \
+# //    LogCollector.cpp \
+# //    TurnTableCameraController.cpp \
+# //    BackendStore.cpp \
+# //    BackendStoreItem.cpp \
+# //    BackendInput.cpp \
+# //    BackendParameter.cpp \
+# //    BackendOutput.cpp \
+# //    BackendModule.cpp \
+# //    IcsDataSourceModule.cpp \
+# //    ParameterInterfaceModules.cpp \
+# //    OutputInterfaceModules.cpp \
+# //    main.cpp \
+# //    GlobalSettings.cpp
+# //
+# //SOURCES +=  \
+# //    ../../lib/libics/libics_preview.c \
+# //    ../../lib/libics/libics_read.c \
+# //    ../../lib/libics/libics_top.c \
+# //    ../../lib/libics/libics_sensor.c \
+# //    ../../lib/libics/libics_history.c \
+# //    ../../lib/libics/libics_util.c \
+# //    ../../lib/libics/libics_data.c \
+# //    ../../lib/libics/libics_binary.c \
+# //    ../../lib/libics/libics_test.c \
+# //    ../../lib/libics/libics_write.c \
+# //    ../../lib/libics/libics_gzip.c \
+# //    ../../lib/libics/libics_compress.c
+# //
+# //SOURCES += \
+# //    ../core/directed_acyclic_graph/Node.cpp \
+# //    ../core/directed_acyclic_graph/Graph.cpp \
+# //    ../core/compute_platform/ports.cpp \
+# //    ../core/compute_platform/ComputeModule.cpp \
+# //    ../core/compute_platform/ComputePlatform.cpp \
+# //    ../core/compute_platform/ModuleContext.cpp \
+# //    ../core/compute_platform/port_utils.hpp \
+# //    ../core/multidim_image_platform/MultiDimImage.hpp \
+# //    ../core/multidim_image_platform/MultiDimImage.cpp \
+# //    ../core/high_platform/PythonComputeModule.cpp \
+# //    ../core/io_utils/IcsAdapter.cpp
 
 RESOURCES += resources.qrc
 

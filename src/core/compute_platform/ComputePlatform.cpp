@@ -44,16 +44,23 @@ size_t ComputePlatform::size() const
     return m_modules.size();
 }
 
-void ComputePlatform::run()
+vector<ModuleContext> ComputePlatform::run(ModuleContext ctx)
 {
     for (ComputeModule& module : m_modules) {
         module.reset();
+        module.setContext(ctx);
     }
 
     auto t = m_graph->traverse();
     while (t.hasNext()) {
         t.next()->notified();
     }
+
+    vector<ModuleContext> ctxs;
+    for (ComputeModule& module : m_modules) {
+        ctxs.push_back(module.context());
+    }
+    return ctxs;
 }
 
 bool ComputePlatform::checkCompleteness()

@@ -41,7 +41,7 @@ IcsDataSourceModule::IcsDataSourceModule(ComputePlatform& parent)
     m_outputs.output<3>()->setName("channel 3");
 }
 
-void IcsDataSourceModule::execute()
+void IcsDataSourceModule::execute(ModuleContext&)
 {
     // TODO: raise exception on error!
     if (modifiedParameters()) {
