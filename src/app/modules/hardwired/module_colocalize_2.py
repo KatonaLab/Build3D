@@ -26,7 +26,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
         
         tagged_img_list=[ch1_img, ch2_img]
         
-        
         #Set path
         if path==None:
             outputPath="D:\Playground"
@@ -42,33 +41,23 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
         tstart = time.clock()
     
         try:
-    
             # Creatre LogText
             print('\nColocalization analysis started using: ')
-            for img in tagged_img_list:
-                print('\t ' + str(img.metadata['Name']))
+            print('\t ' + str([img.metadata['Name'] for img in tagged_img_list]))
     
             # Add Filter settings
             print('\n\tFilter settings: ' + str(ovl_settings).replace('{', ' ').replace('}', ' '))
 
-            # Determine connectivity data
-            ovl_img = colocalization_connectivity(tagged_img_list)
-            print(ovl_img.database.keys())
+            ovl_img, _=colocalization(tagged_img_list, overlappingFilter=ovl_settings)
+            #print('########################################')
+            #print(ovl_img.array.dtype)
+            #print(np.amax(ovl_img.array))
+            #print(np.amin(ovl_img.array))            
             
-            
-            # Filter database and image
-            #overlappingImage, _ = apply_filter(overlappingImage, ovl_settings)
-            ovl_img.database=filter_database(ovl_img.database, ovl_settings, overwrite=False)
-         
-            # Analyze colocalization
-            ovl_img, _ = colocalization_analysis(tagged_img_list, ovl_img)
-            print(ch1_img.database.keys())
             ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=False)
-            print(ch1_img.database.keys())
+  
             
             ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=False)
-            print(ch2_img.database.keys())
-
     
             # Finish timing and add to logText
             tstop = time.clock()
@@ -77,8 +66,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
             print('\n\tNumber of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
             print('\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! ')
             
-
-
             #Save databases
             print('\nSaving object dataBases to xlsx or text!')
             name=ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']

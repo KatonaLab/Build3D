@@ -66,6 +66,12 @@ class Image(object):
         imsave(os.path.join(path, file_name), img.array)
 
 
+    def as_type(self, dtype):
+        
+        if dtype!=self.metadata['Type']:
+            self.array=self.array.astype(dtype)
+            self.metadata['Type']=dtype
+
     
     @staticmethod
     def save_data(img_list, path, file_name='output', to_text=True):
