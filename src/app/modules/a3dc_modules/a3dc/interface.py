@@ -31,10 +31,13 @@ def tagImage(image):
 
     try:
 
+        #Tag image
+        output_array=segmentation.tag_image(image.array)
+        
+        #Create metadata ditionary and set type to match tagged image
+        output_metadata=image.metadata
+        image.metadata['Type']=str(output_array.dtype)
     
-        outputArray=segmentation.tag_image(image.array)
-      
-
     except Exception as e:
         raise Exception("Error occured while tagging image!",e)
 
@@ -42,7 +45,7 @@ def tagImage(image):
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return Image(outputArray, image.metadata), logText
+    return Image(output_array, output_metadata), logText
 
 
 def threshold(image, method="Otsu", **kwargs):

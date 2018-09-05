@@ -51,7 +51,12 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         
         taggedImage, logText = apply_filter(taggedImage, filterDict=settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
         print(logText)
-          
+        taggedImage.as_type(np.int64)#(taggedImage.metadata['Type'])
+        print('###############Analyze################')
+        print(taggedImage.array.dtype)
+        print(np.amax(taggedImage.array))
+        print(np.amin(taggedImage.array))
+        
         return taggedImage
 
 
@@ -107,8 +112,10 @@ def module_main(ctx):
 
     #Change Name in metadata
     #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-
-    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float))
+    print('#######################################################')
+    print(str(output.metadata['Type']))
+    print('#######################################################')
+    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float) / np.amax(output.array.astype(np.float)))
     a3.outputs['Analyzed_DataBase']=output.database
     a3.outputs['Analyzed_MetaData']=output.metadata
 

@@ -108,7 +108,11 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
 def read_params(filters=FILTERS):
     
     out_dict = {}
-
+    print('#######################################################')
+    print(str(a3.inputs['Ch1_MetaData']['Type']))
+    print(str(a3.inputs['Ch2_MetaData']['Type']))
+    print('#######################################################')
+    
     out_dict['Ch1_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1_Image']), a3.inputs['Ch1_MetaData'], a3.inputs['Ch1_DataBase'])
     out_dict['Ch2_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2_Image']), a3.inputs['Ch2_MetaData'], a3.inputs['Ch2_DataBase'])
        
