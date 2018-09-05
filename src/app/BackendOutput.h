@@ -19,6 +19,7 @@ class ImageOutputValue: public QObject {
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
     Q_PROPERTY(QVector2D lutParams READ lutParams WRITE setLutParams NOTIFY lutParamsChanged)
+    Q_PROPERTY(QVector2D lutLimits READ lutLimits NOTIFY lutLimitsChanged)
     template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
 public:
     ImageOutputValue(QObject* parent = nullptr);
@@ -27,6 +28,7 @@ public:
     QColor color() const;
     bool visible() const;
     QVector2D lutParams() const;
+    QVector2D lutLimits() const;
     void setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image);
     void setColor(QColor color);
     void setVisible(bool visible);
@@ -35,18 +37,21 @@ public:
     static QVariantMap convertToVariantMap(ImageOutputValue* x);
     QVariantMap toVariantMap() const;
     void fromVariantMap(QVariantMap vmap);
+    void calculateLutLimits();
 Q_SIGNALS:
     void textureChanged();
     void sizeChanged();
     void colorChanged();
     void visibleChanged();
     void lutParamsChanged();
+    void lutLimitsChanged();
 protected:
     std::shared_ptr<MultiDimImage<float>> m_image;
     VolumeTexture* m_texture = nullptr;
     QColor m_color;
     bool m_visible = false;
     QVector2D m_lutParams = QVector2D(0, 1);
+    QVector2D m_lutLimits = QVector2D(0, 0);
     void textureDeleted();
 };
 
