@@ -50,7 +50,7 @@ protected:
     VolumeTexture* m_texture = nullptr;
     QColor m_color;
     bool m_visible = false;
-    QVector2D m_lutParams = QVector2D(0, 1);
+    QVector2D m_lutParams = QVector2D(0, 0);
     QVector2D m_lutLimits = QVector2D(0, 0);
     void textureDeleted();
 };

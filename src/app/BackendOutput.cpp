@@ -157,6 +157,7 @@ QVector2D ImageOutputValue::lutLimits() const
 void ImageOutputValue::calculateLutLimits()
 {
     bool uninited = qFuzzyCompare(m_lutLimits, QVector2D(0, 0));
+    QVector2D newLutLimits;
     if (m_image) {
         auto& d = m_image->unsafeData();
         float minVal = numeric_limits<float>::infinity();
@@ -171,11 +172,15 @@ void ImageOutputValue::calculateLutLimits()
                 }
             }
         }
-        m_lutLimits = QVector2D(minVal, maxVal);
+        newLutLimits = QVector2D(minVal, maxVal);
     } else {
-        m_lutLimits = QVector2D(0, 0);
+        newLutLimits = QVector2D(0, 0);
     }
-    Q_EMIT lutLimitsChanged();
+
+    if (!qFuzzyCompare(newLutLimits, m_lutLimits)) {
+        m_lutLimits = newLutLimits;
+        Q_EMIT lutLimitsChanged();
+    }
 
     if (uninited) {
         setLutParams(m_lutLimits);
@@ -242,6 +247,9 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
     QObject::connect(&m_internalValue,
                      &ImageOutputValue::lutParamsChanged,
                      this, &BackendStoreItem::valueChanged);
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::lutLimitsChanged,
+                     this, &BackendStoreItem::valueChanged);
 
     if (m_source.lock() == nullptr) {
         throw std::runtime_error("invalid source port");
@@ -307,8 +315,11 @@ QString BackendOutput::category() const
 
 QString BackendOutput::name() const
 {
-    // TODO: check for nullptr
-    return QString::fromStdString(m_source.lock()->name());
+    if (m_source.lock()) {
+        return QString::fromStdString(m_source.lock()->name());
+    } else {
+        return QString("invalid output");
+    }
 }
 
 QString BackendOutput::type() const
@@ -354,9 +365,9 @@ void BackendOutput::onExecuted()
         auto im = m_interfaceModule->getImage();
         m_internalValue.setTextureFromImage(im);
         if (m_internalValue.texture()) {
-            m_internalValue.calculateLutLimits();
             m_ready = true;
             Q_EMIT statusChanged();
+            m_internalValue.calculateLutLimits();
         }
     }
 }

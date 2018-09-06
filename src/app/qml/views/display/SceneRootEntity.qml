@@ -72,6 +72,16 @@ Entity {
             depth: model.value.size.z * scale
             volumeTexture: model.value.texture
 
+            Binding {
+                target: model.value.texture
+                property: "smooth"
+                value: baseModel.smoothTextures
+            }
+
+            Component.onCompleted: {
+                lutDataMax = 1.;
+            }
+
             backFaceMap: renderSettings.backFaceMap
             // TODO: count only the visible channels
             // accumDivisor: 1.0 / MainStore.moduleStore.model.count
@@ -85,9 +95,6 @@ Entity {
 
             lutLowCut: model.value.lutParams.x
             lutHighCut: model.value.lutParams.y
-            Component.onCompleted: {
-                lutDataMax = 1.;
-            }
         }
     }
 

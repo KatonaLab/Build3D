@@ -28,7 +28,7 @@ void VolumeTexture::init(shared_ptr<MultiDimImage<float>> source)
     m_data = make_unique<VolumeData>(source);
     m_textureImage = unique_ptr<VolumeTextureImage>(new VolumeTextureImage(*m_data));
 
-    setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToBorder));
+    setWrapMode(Qt3DRender::QTextureWrapMode(QTextureWrapMode::ClampToEdge));
     setSmooth(false);
     addTextureImage(m_textureImage.get());
 }
