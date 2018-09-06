@@ -1,11 +1,16 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.external.PythImage import Image
 import numpy as np
-
+from modules.a3dc_modules.a3dc.utils import SEPARATOR
+import time
 
 def module_main(_):
+
     filename = a3.inputs['FileName'].path
-   
+    
+    #Inizialization
+    tstart = time.clock()
+    print(SEPARATOR)
     print('Loading the following image: ', filename)
     
     #Load and reshape image
@@ -37,7 +42,12 @@ def module_main(_):
     a3.outputs['Volume'] = a3.MultiDimImageFloat_from_ndarray(array.astype(np.float))
     a3.outputs['MetaData']=img.metadata
 
-    print('File loaded succesfully!')
+    #Finalization
+    tstop = time.clock()
+    print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
+    print('Image loaded successfully!')
+    print(SEPARATOR)
+
 
 config = [
     a3.Parameter('FileName', a3.types.url),

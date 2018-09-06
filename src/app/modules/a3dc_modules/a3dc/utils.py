@@ -9,38 +9,9 @@ import os, sys, subprocess
 import random
 import numpy as np
 
-def round_up_to_odd(f):
-    #Round to add as blocksize has to be odd
-    return int(np.ceil(f) // 2 * 2 + 1)
+SEPARATOR='#####################################################################################################################'
 
-def os_open(path):
-    '''Open file using its associated program in an os (MacOS, Linux, Windows) 
-    dependent manner. Exceptions are raised as warnings using a try statement.
-    
-    path(str): The path of the file to be opened
-    '''
-    try:
-        #Windows
-        if sys.platform == "win32":
-            os.startfile(path)
-        #MacOS
-        elif sys.platform == "darwin":
-           subprocess.call(["open", path]) 
-        #Linux/Unix
-        else:
-            subprocess.call(["xdg-open", path])
-    
-    except Exception as e:
-        raise Warning(str(e))
-
-
-
-def quote():
-	
-    '''Generates a random quote (most of which are from Gaussian03).
-    '''
-	
-    quote_list=["You know you're a teacher when you say 2, write 3, and mean 4.\n     -Ronald Anstrom, high school teacher, Underwood, N.D. 1974",
+QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n     -Ronald Anstrom, high school teacher, Underwood, N.D. 1974",
 		"Research is what I am doing when I don't know what I am doing.\n     -Werner von Braun",
 		"Learn from yesterday, live for today, look to tomorrow, rest this afternoon.\n     -Snoopy",
 		"The great thing about being imperfect is the joy it brings others.\n     -Sign outside Lake Agassiz Jr. High School, Fargo, N.D.",
@@ -115,7 +86,6 @@ def quote():
 		"All papers that you save will never be needed until such time as they are disposed of, when they become essential.\n     -John Corcoran in Paul Dickson's 'The Official Rules'",
 		"There is no subject, however complex, which, if studied with patience and intelligience will not become more complex.\n     -Quoted by D. Gordon Rohman",
 		"If you get confused, logic out your dilemma.\n     -Picker X-ray corp. digital printer manual CA. 1964", 
-		"Fatherhood is pretending the present you love most is soap-on-a-rope.\n     -Bill Cosby",
 		"To err is human - and to blame it on a computer is even more so.\n     -Gaussian QC",
 		"If you want to learn from the theoretical physicists about the methods which they use, I advise you to follow this principle very strictly:/ndont listen to their words; pay attention, instead, to their actions.\n     -A. Einstein, 1934",
 		"Those with the gold make the rules.\n     -Peter's golden rule",
@@ -134,16 +104,61 @@ def quote():
 		"Michael Faraday, asked by a politician what good his electrical discoveries were, replied ""at present I do not know, but one day you will be able to tax them.""",
 		"A chemical physicist makes precise measurements on impure compounds. A theoretical physical chemist makes imprecise measurements on pure compounds. An experimental physical chemist makes imprecise measurements on impure compounds.\n     -Gaussian QC",
 		"KNOWING is a barrier which prevents learning.\n     -Teaching of the Bene Gesserit",
-       "You shall know the truth, and the truth shall set you free.\n     -Jesus(John 8:32)",
+       "You shall know the truth, and the truth shall set you free.\n     -Jesus of Nasareth (John 8:32)",
        "Scientific progress is the discovery of a more and more comprehensive simplicity... The previous successes give us confidence in the future of science: we become more and more conscious of the fact that the universe is cognizable.\n     -Monsignor Georges Lemaître",
        "The miracle of the appropriateness of the language of mathematics for the formulation of the laws of physics is a wonderful gift which we neither understand nor deserve.\n     -Wigner Eugene",
        "The eternal mystery of the world is its comprehensibility…The fact that it is comprehensible is a miracle.\n     -Albert Einstein",
        "Better to illuminate than merely to shine, to deliver to others contemplated truths than merely to contemplate.\n     -Thomas Aquinas",
-       "The things that we love tell us what we are.\n     -Thomas Aquinas"
+       "The things that we love tell us what we are.\n     -Thomas Aquinas",
+       "Nonsense is nonsense even when spoken by world-famous scientists.\n     -John Lennox",
+       "Begin with the beautiful, which leads you to the good, which leads you to the truth.\n     -Robert Barron",
+       "Start by doing what's necessary; then do what's possible; and suddenly you are doing the impossible.\n    -Francis of Assisi",
+       "The task of the modern educator is not to cut down jungles, but to irrigate deserts.\n     -C.S. Lewis",
+       "The future is something which everyone reaches at the rate of 60 minutes an hour, whatever he does, whoever he is.\n     -C.S. Lewis",
+       "Failures, repeated failures, are finger posts on the road to achievement. One fails forward toward success.\n     -C.S. Lewis",
+       "Yet trees are not 'trees', until so named and seen\n and never were so named, till those had been\n who speech's involuted breath unfurled,\n faint echo and dim picture of the world\n     -J.R.R. Tolkien",
+       "The heart of Man is not compound of lies, but draws some wisdom from the only Wise.\n     -J.R.R. Tolkien",
+       "For surely “nothing” is every bit as physical as “something,” especially if it is to be defined as the “absence of something.\n     -Lorentz Krauss"
+       "Imagine a kettle boiling on a stove. The scientist can tell you much about it. What temperature the water will boil at, the interaction of atoms at different temperatures, the change in the nature of matter and many other interesting and important things.\n But what science can never discover is that that the kettle is on the stove so that you can have a cup of tea with a friend. That is the real reason the you are boiling the kettle and science can't, nor was it ever designed to, tell you that.\n     -Sir John Polkinghorne",
+       "It is important to realize that in physics today, we have no knowledge of what energy “is”.\n     -Richard Feynman",
+       "THE WORLD IS TOO COMPLICATED IN ALL ITS PARTS AND INTERCONNECTIONS TO BE DUE TO CHANCE ALONE.\n     -Alan Sandage"
 		]
     
-    separator='\n#####################################################################################################################\n'
-    quote=quote_list[random.randint(1,len(quote_list))]
+
+def round_up_to_odd(f):
+    #Round to add as blocksize has to be odd
+    return int(np.ceil(f) // 2 * 2 + 1)
+
+def os_open(path):
+    '''Open file using its associated program in an os (MacOS, Linux, Windows) 
+    dependent manner. Exceptions are raised as warnings using a try statement.
     
+    path(str): The path of the file to be opened
+    '''
+    try:
+        #Windows
+        if sys.platform == "win32":
+            os.startfile(path)
+        #MacOS
+        elif sys.platform == "darwin":
+           subprocess.call(["open", path]) 
+        #Linux/Unix
+        else:
+            subprocess.call(["xdg-open", path])
     
-    return separator+quote+separator
+    except Exception as e:
+        raise Warning(str(e))
+
+
+
+def quote():
+	
+    '''Generates a random quote (most of which are from Gaussian03).
+    '''
+	 #Generate random index
+    index=random.randint(0,len(QUOTE_LIST)-1)
+    
+    #Get quote
+    quote=QUOTE_LIST[index]
+    
+    return '\n'+SEPARATOR+'\n'+quote+'\n'+SEPARATOR+'\n'

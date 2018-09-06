@@ -7,27 +7,20 @@ Created on Tue Aug 21 15:21:27 2018
 import traceback, time
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
-from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter, colocalization, save_data, save_image
-from modules.a3dc_modules.a3dc.core import filter_database, colocalization_connectivity, colocalization_analysis 
-from modules.a3dc_modules.a3dc.utils import os_open, quote
-
+from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image
+from modules.a3dc_modules.a3dc.core import filter_database
+from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR
 import os
-import numpy as np
-
-
 
 CHFILTERS=['ch1_totalOverlappingRatio', 'ch2_totalOverlappingRatio','ch2_colocalizationCount','ch1_colocalizationCount']
-OVLFILTERS=['volume', 'voxelCount','pixelsOnBorder','ch1_overlappingRatio','ch2_overlappingRatio']
-
+OVLFILTERS=[ 'voxelCount','pixelsOnBorder','ch1_overlappingRatio','ch2_overlappingRatio']
+#'volume',
 FILTERS = OVLFILTERS+CHFILTERS
 
-####################################################Interface to call from C++####################################################
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=None, show=True, to_text=False):
         
-
         tagged_img_list=[ch1_img, ch2_img]
-        print(ch1_img.array.dtype)
-        
+
         #Set path
         if path==None:
             outputPath="D:\Playground"
@@ -36,33 +29,22 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
         if not os.path.exists(outputPath):
             os.makedirs(outputPath)
         
-        #############################################################################################################################
-        ###################################################Colocalization############################################################
-        #############################################################################################################################
-        # Start timingsourceDictionayList
-        tstart = time.clock()
-    
         try:
-            # Creatre LogText
-            print('\nColocalization analysis started using: ')
-            print('\t ' + str([img.metadata['Name'] for img in tagged_img_list]))
-    
+
+            print('Processing the follofing channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
+            
             # Add Filter settings
             print('\n\tFilter settings: ' + str(ovl_settings).replace('{', ' ').replace('}', ' '))
             ovl_img, _=colocalization(tagged_img_list, overlappingFilter=ovl_settings)
             
             ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
             ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
-    
-            # Finish timing and add to logText
-            tstop = time.clock()
-            
+        
             #Print number of objects to logText
-            print('\n\tNumber of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
-            print('\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! ')
-            
+            print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
+
             #Save databases
-            print('\nSaving object dataBases to xlsx or text!')
+            print('Saving object dataBases to xlsx or text!')
             name=ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
             if to_text==True:
                 file_name=name+'.txt'    
@@ -71,7 +53,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
             save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
         
             #Save images
-            print('\nSaving output images!')
+            print('Saving output images!')
             name = ch1_img.metadata['Name']#+"_tagged"
             save_image(ch1_img, outputPath, name)
             
@@ -84,9 +66,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
             #Show file
             #if show==True:    
                 #os_open(os.path.join(outputPath, file_name))
-            
-            print('Colocalization analysis was run successfully!')
-            print("\n%s\n" % str(quote()))
         
         except Exception as e:
             traceback.print_exc()
@@ -97,20 +76,16 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
 
 def read_params(filters=FILTERS):
     
-    out_dict = {}
-    
+    out_dict = {}   
     out_dict['Ch1_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1_Image']), a3.inputs['Ch1_MetaData'], a3.inputs['Ch1_DataBase'])
     out_dict['Ch2_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2_Image']), a3.inputs['Ch2_MetaData'], a3.inputs['Ch2_DataBase'])
-
-
-       
+ 
     settings = {}
     for f in filters:
         settings[f] = {}
         for m in ['min', 'max']:
             settings[f][m] = a3.inputs['{} {}'.format( f, m)]
-
-    
+            
     ch1_settings={}
     ch2_settings={}
     for key in CHFILTERS:
@@ -143,6 +118,7 @@ def read_params(filters=FILTERS):
 
         else:
             ovl_settings[key] = settings[key]
+    
     out_dict['Ovl'] = ovl_settings    
     
     #out_dict['FileName']=a3.inputs['FileName']
@@ -151,7 +127,14 @@ def read_params(filters=FILTERS):
     return out_dict    
     
 def module_main(ctx):
+       
+    #Inizialization
+    tstart = time.clock()
+    print(SEPARATOR)
+    print('Colocalization analysis started!')
     
+    #Read Parameters
+    print('Reading input parameters!')
     params = read_params()
     
     output=colocalize(params['Ch1_Image'],
@@ -165,7 +148,14 @@ def module_main(ctx):
     a3.outputs['Overlapping_MetaData'] =output.metadata
     a3.outputs['Overlapping_DataBase']=output.database
   
+    #Finalization
+    tstop = time.clock()
+    print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
+    print('Object analysis was run successfully!')
+    print(SEPARATOR)
+    print(str(quote()))  
 
+    
 def add_input_fields(config, filters=FILTERS):
     
     #config.append(a3.Parameter('FileName', a3.types.url))

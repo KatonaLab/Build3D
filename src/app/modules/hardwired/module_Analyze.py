@@ -8,21 +8,19 @@ Created on Tue Aug 21 15:21:27 2018
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
-from modules.a3dc_modules.a3dc.utils import os_open, quote
+from modules.a3dc_modules.a3dc.utils import SEPARATOR
+import time
 
 
 import numpy as np
 
 
-FILTERS = ['volume', 'voxelCount',
+FILTERS = ['voxelCount',
            'pixelsOnBorder', 'meanIntensity']
+#'volume', 
 
-####################################################Interface to call from C++####################################################
 def analyze_image(source, mask, settings, show=True, to_text=False):
 
-        #############################################################################################################################
-        ##################################################Inizialization#############################################################
-        #############################################################################################################################
         #Parameters to measure
         measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder']
         
@@ -36,10 +34,6 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
             if key in multi_img_keys:
                 settings[str(key)+' in '+str(source.metadata['Name'])] = settings[key]
                 del settings[key]
-
-        #############################################################################################################################
-        ###########################################Segmentation and Analysis#########################################################
-        #############################################################################################################################
 
         #Channel 1:Tagging Image
         taggedImage, logText = tagImage(mask)
@@ -57,14 +51,10 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         return taggedImage
 
 
-def read_params(name, use_images=True, filters=FILTERS):
+def read_params(filters=FILTERS):
     
     out_dict = {}
-
-    if use_images:
-
-
-        out_dict = {'Source': Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Source_Image']),a3.inputs['Source_MetaData'] ),
+    out_dict = {'Source': Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Source_Image']),a3.inputs['Source_MetaData'] ),
                     'Mask':Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Mask_Image']),a3.inputs['Mask_MetaData'] )}
 
     settings = {}
@@ -77,8 +67,6 @@ def read_params(name, use_images=True, filters=FILTERS):
      
     return out_dict    
     
-
-
 
 def add_input_fields( filters=FILTERS):
     
@@ -99,7 +87,17 @@ def add_input_fields( filters=FILTERS):
 
 def module_main(ctx):
     
-    params = read_params(ctx.name())
+    #Inizialization
+    #print(ctx.name())
+    tstart = time.clock()
+    print(SEPARATOR)
+    print('Object analysis started!')
+    
+    #Read Parameters
+    print('Reading input parameters!')
+    params = read_params()
+    
+    params = read_params()
     
     output=analyze_image(params['Source'],
                params['Mask'],
@@ -110,6 +108,12 @@ def module_main(ctx):
     a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float))
     a3.outputs['Analyzed_DataBase']=output.database
     a3.outputs['Analyzed_MetaData']=output.metadata
+
+    #Finalization
+    tstop = time.clock()
+    print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
+    print('Object analysis was run successfully!')
+    print(SEPARATOR)
 
     
 config = [a3.Output('Analyzed_Image', a3.types.ImageFloat),  a3.Output('Analyzed_DataBase', a3.types.GeneralPyType), a3.Output('Analyzed_MetaData', a3.types.GeneralPyType)]
