@@ -51,8 +51,8 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
             print('\n\tFilter settings: ' + str(ovl_settings).replace('{', ' ').replace('}', ' '))
             ovl_img, _=colocalization(tagged_img_list, overlappingFilter=ovl_settings)
             
-            ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=False)
-            ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=False)
+            ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
+            ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
     
             # Finish timing and add to logText
             tstop = time.clock()
