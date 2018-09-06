@@ -7,7 +7,7 @@ Created on Sun Mar 25 22:55:01 2018
 
 import pandas as pd
 import os
-
+import numpy as np
 from skimage.external.tifffile import imread, imsave
 
 
@@ -33,15 +33,23 @@ class Image(object):
     def __validate(self, array, metadata):
         
         #Check if compulsory keys are missing
-        key_list=['Type']
+        key_list=['Type']# 'Name', 'SizeC', 'SizeT', 'SizeX', 'SizeY', 'SizeZ', 'DimensionOrder']
+        missing_keys=[]
         for key in key_list:
             if key not in metadata:
-                raise Exception('Invalid Metadata!')
-
+                missing_keys.append(key)
+        if len(missing_keys)>0:
+            raise Exception('Invalid Metadata! Missing the following keys: '+str(missing_keys))
+        
+        
+        #Check if metadata 'Type' field matches the type of the image
         if metadata['Type']!=array.dtype:
-            array=array.astype(metadata['Type'])
-           
-
+             #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
+             if 'NormFactor' in metadata.keys():
+               array=array*metadata['NormFactor']  
+            
+             array=array.astype(metadata['Type'])
+             
         return array
     
     @classmethod

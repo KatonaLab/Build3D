@@ -37,6 +37,9 @@ def tagImage(image):
         #Create metadata ditionary and set type to match tagged image
         output_metadata=image.metadata
         image.metadata['Type']=str(output_array.dtype)
+        #TempTemp
+        if 'NormFactor' in image.metadata.keys():
+            del image.metadata['NormFactor']
     
     except Exception as e:
         raise Exception("Error occured while tagging image!",e)
@@ -236,7 +239,6 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
         logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
         logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
         logText += '\n\t\toverwrite=' + str(overWrite)
-
 
         # Determine connectivity data
         overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)

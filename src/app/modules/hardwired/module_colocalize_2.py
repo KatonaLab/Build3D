@@ -24,7 +24,9 @@ FILTERS = OVLFILTERS+CHFILTERS
 ####################################################Interface to call from C++####################################################
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=None, show=True, to_text=False):
         
+
         tagged_img_list=[ch1_img, ch2_img]
+        print(ch1_img.array.dtype)
         
         #Set path
         if path==None:
@@ -47,16 +49,9 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
     
             # Add Filter settings
             print('\n\tFilter settings: ' + str(ovl_settings).replace('{', ' ').replace('}', ' '))
-
             ovl_img, _=colocalization(tagged_img_list, overlappingFilter=ovl_settings)
-            #print('########################################')
-            #print(ovl_img.array.dtype)
-            #print(np.amax(ovl_img.array))
-            #print(np.amin(ovl_img.array))            
             
             ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=False)
-  
-            
             ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=False)
     
             # Finish timing and add to logText
@@ -87,17 +82,12 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
             save_image(ovl_img, outputPath, name)
                         
             #Show file
-            #print(str(outputPath))
-            #print(os.path.join(outputPath, file_name))
-            #print(os.path.isfile(os.path.join(outputPath, file_name)))
-            #show=True
             #if show==True:    
                 #os_open(os.path.join(outputPath, file_name))
             
             print('Colocalization analysis was run successfully!')
             print("\n%s\n" % str(quote()))
         
-
         except Exception as e:
             traceback.print_exc()
             raise Exception("Error occured durig colocalization!",e)
@@ -108,13 +98,11 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
 def read_params(filters=FILTERS):
     
     out_dict = {}
-    print('#######################################################')
-    print(str(a3.inputs['Ch1_MetaData']['Type']))
-    print(str(a3.inputs['Ch2_MetaData']['Type']))
-    print('#######################################################')
     
     out_dict['Ch1_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1_Image']), a3.inputs['Ch1_MetaData'], a3.inputs['Ch1_DataBase'])
     out_dict['Ch2_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2_Image']), a3.inputs['Ch2_MetaData'], a3.inputs['Ch2_DataBase'])
+
+
        
     settings = {}
     for f in filters:
@@ -173,8 +161,9 @@ def module_main(ctx):
                params['Ovl'], 
                params['FileName'])
 
-    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array)
-    a3.outputs['Analyzed_DataBase']=output.database
+    a3.outputs['Overlapping_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(float)/np.amax(output.array.astype(float)))
+    a3.outputs['Overlapping_MetaData'] =output.metadata
+    a3.outputs['Overlapping_DataBase']=output.database
   
 
 def add_input_fields(config, filters=FILTERS):
@@ -198,8 +187,8 @@ config=[a3.Input('Ch1_Image', a3.types.ImageFloat),
         a3.Input('Ch2_DataBase', a3.types.GeneralPyType),
         a3.Output('Overlapping_Image', a3.types.ImageFloat),
         a3.Output('Overlapping_MetaData', a3.types.GeneralPyType),
-        a3.Output('Analyzed_Image', a3.types.GeneralPyType),
-        a3.Output('Analyzed_DataBase', a3.types.GeneralPyType)]
+        a3.Output('Overlapping_DataBase', a3.types.GeneralPyType)]
+
 
 config=add_input_fields(config)
 

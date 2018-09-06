@@ -118,7 +118,7 @@ def quote():
 		"Fatherhood is pretending the present you love most is soap-on-a-rope.\n     -Bill Cosby",
 		"To err is human - and to blame it on a computer is even more so.\n     -Gaussian QC",
 		"If you want to learn from the theoretical physicists about the methods which they use, I advise you to follow this principle very strictly:/ndon''t listen to their words; pay attention, instead, to their actions.\n     -A. Einstein, 1934",
-		"Those with the gold make the rules.\n     -Peter''s golden rule",
+		"Those with the gold make the rules.\n     -Peter's golden rule",
 		"To suspect your own mortality is to know the beginning of terror. To learn irrefutably that you are mortal is to know the end of terror.\n     -Jessica: Children of Dune by Frank Herbert",
 		"A politician is a person who can make waves and then make you think he''s the only one who can save the ship.\n     -Ivern Ball",
 		"Wisdom is knowing what to do, skill is knowing how to do it, and virtue is not doing it.\n     -Gaussian QC",
@@ -133,7 +133,17 @@ def quote():
 		"Never teach a pig to sing. It wastes your time and annoys the pig.\n     -Seen on a greeting card",
 		"Michael Faraday, asked by a politician what good his electrical discoveries were, replied ""at present I do not know, but one day you will be able to tax them.""",
 		"A chemical physicist makes precise measurements on impure compounds. A theoretical physical chemist makes imprecise measurements on pure compounds. An experimental physical chemist makes imprecise measurements on impure compounds.\n     -Gaussian QC",
-		"KNOWING is a barrier which prevents learning.\n     -Teaching of the Bene Gesserit"
+		"KNOWING is a barrier which prevents learning.\n     -Teaching of the Bene Gesserit",
+       "You shall know the truth, and the truth shall set you free.\n     -Jesus(John 8:32)",
+       "Scientific progress is the discovery of a more and more comprehensive simplicity... The previous successes give us confidence in the future of science: we become more and more conscious of the fact that the universe is cognizable.\n     -Monsignor Georges Lemaître",
+       "The miracle of the appropriateness of the language of mathematics for the formulation of the laws of physics is a wonderful gift which we neither understand nor deserve.\n     -Wigner Eugene",
+       "The eternal mystery of the world is its comprehensibility…The fact that it is comprehensible is a miracle.\n     -Albert Einstein",
+       "Better to illuminate than merely to shine, to deliver to others contemplated truths than merely to contemplate.\n     -Thomas Aquinas",
+       "The things that we love tell us what we are.\n     -Thomas Aquinas"
 		]
-
-    return quote_list[random.randint(1,len(quote_list))]
+    
+    separator='\n#####################################################################################################################\n'
+    quote=quote_list[random.randint(1,len(quote_list))]
+    
+    
+    return separator+quote+separator
