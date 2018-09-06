@@ -37,9 +37,6 @@ def tagImage(image):
         #Create metadata ditionary and set type to match tagged image
         output_metadata=image.metadata
         image.metadata['Type']=str(output_array.dtype)
-        #TempTemp
-        if 'NormFactor' in image.metadata.keys():
-            del image.metadata['NormFactor']
     
     except Exception as e:
         raise Exception("Error occured while tagging image!",e)

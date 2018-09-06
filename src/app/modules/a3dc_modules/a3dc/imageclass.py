@@ -45,9 +45,6 @@ class Image(object):
         #Check if metadata 'Type' field matches the type of the image
         if metadata['Type']!=array.dtype:
              #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
-             if 'NormFactor' in metadata.keys():
-               array=array*metadata['NormFactor']  
-            
              array=array.astype(metadata['Type'])
              
         return array
