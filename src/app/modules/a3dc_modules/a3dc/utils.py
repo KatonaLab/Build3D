@@ -18,7 +18,7 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
 		"It is unworthy of excellent men to lose hours like slaves in the labor of calculation which could be safely relegated to anyone else if a machine were used.\n     -G. W. von Leibniz",
 		"Achievement - the man who rows the boat generally doesn't have time to rock it.\n     -From the back of a sugar packet",
 		"Nothing will be attempted if all possible objections must first be overcome.\n     -The golden principle, Paul Dickson's ""The Official Rules""",
-		"The reason man's best friend is a dog is because he wags his tail instead of his tongue.\nIf you perceive that there are four possible ways in which a procedure can go wrong and circumvent these, then a fifth way will develop.\n     -Murphy's twelfth law",
+		"If you perceive that there are four possible ways in which a procedure can go wrong and circumvent these, then a fifth way will develop.\n     -Murphy's twelfth law",
 		"Standing in the middle of the road is very dangerous; you get knocked down by the traffic from both sides.\n     -Margaret Thatcher",
 		"You will never ""find"" time for anything. If you want time, you must make it.\n     -Charles Bixton)",
 		"Be not the first by whom the new are tried, nor yet the the last to lay the old aside.\n     -Alexander Pope",
@@ -121,7 +121,8 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
        "For surely “nothing” is every bit as physical as “something,” especially if it is to be defined as the “absence of something.\n     -Lorentz Krauss"
        "Imagine a kettle boiling on a stove. The scientist can tell you much about it. What temperature the water will boil at, the interaction of atoms at different temperatures, the change in the nature of matter and many other interesting and important things.\n But what science can never discover is that that the kettle is on the stove so that you can have a cup of tea with a friend. That is the real reason the you are boiling the kettle and science can't, nor was it ever designed to, tell you that.\n     -Sir John Polkinghorne",
        "It is important to realize that in physics today, we have no knowledge of what energy “is”.\n     -Richard Feynman",
-       "THE WORLD IS TOO COMPLICATED IN ALL ITS PARTS AND INTERCONNECTIONS TO BE DUE TO CHANCE ALONE.\n     -Alan Sandage"
+       "THE WORLD IS TOO COMPLICATED IN ALL ITS PARTS AND INTERCONNECTIONS TO BE DUE TO CHANCE ALONE.\n     -Alan Sandage",
+       "The reason man's best friend is a dog is because he wags his tail instead of his tongue.\n     -Anonymus"
 		]
     
 
