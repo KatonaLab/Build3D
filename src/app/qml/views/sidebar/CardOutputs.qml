@@ -86,12 +86,14 @@ Repeater {
                 PreciseRangeSlider {
                     id: rangeSlider
                     Layout.fillWidth: true
-                    value: details.value.lutParams
+                    firstValue: details.value.lutParams.x
+                    secondValue: details.value.lutParams.y
                     from: details.value.lutLimits.x
                     to: details.value.lutLimits.y
-                    onValueChanged: {
-                        details.value.lutParams = value;
+                    onRangeChanged: function (x, y) {
+                        details.value.lutParams = Qt.vector2d(x, y);
                     }
+                    visible: details.status
                 }
             }
         }

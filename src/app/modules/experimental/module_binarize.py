@@ -1,5 +1,5 @@
 import a3dc_module_interface as a3
-
+from skimage.filters import threshold_mean
 
 def module_main(ctx):
     level = a3.inputs['level']

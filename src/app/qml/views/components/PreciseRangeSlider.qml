@@ -7,14 +7,12 @@ RowLayout {
     property int decimals: 4
     property alias from: rangeSlider.from
     property alias to: rangeSlider.to
-    property vector2d value: Qt.vector2d(0, 1)
+    property real firstValue
+    property real secondValue
     property int editWidth: 80
     property alias text: label.text
 
-    Component.onCompleted: {
-        rangeSlider.first.valueChanged(from);
-        rangeSlider.second.valueChanged(to);
-    }
+    signal rangeChanged(real x, real y)
 
     Label {
         id: label
@@ -34,18 +32,18 @@ RowLayout {
     RangeSlider {
         id: rangeSlider
         Layout.fillWidth: true
-        first.value: value.x
-        second.value: value.y
+        first.value: firstValue
+        second.value: secondValue
 
-        first.onValueChanged: {
+        function update() {
             lowField.text = Number(first.value.toFixed(decimals)).toLocaleString();
-            root.value = Qt.vector2d(rangeSlider.first.value, rangeSlider.second.value);
+            highField.text = Number(second.value.toFixed(decimals)).toLocaleString();
+            rangeChanged(first.value, second.value);
         }
 
-        second.onValueChanged: {
-            highField.text = Number(second.value.toFixed(decimals)).toLocaleString();
-            root.value = Qt.vector2d(rangeSlider.first.value, rangeSlider.second.value);
-        }
+        Component.onCompleted: update()
+        first.onValueChanged: update()
+        second.onValueChanged: update()
     }
 
     TextField {
