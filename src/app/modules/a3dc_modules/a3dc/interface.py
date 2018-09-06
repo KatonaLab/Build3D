@@ -31,10 +31,16 @@ def tagImage(image):
 
     try:
 
+        #Tag image
+        output_array=segmentation.tag_image(image.array)
+        
+        #Create metadata ditionary and set type to match tagged image
+        output_metadata=image.metadata
+        image.metadata['Type']=str(output_array.dtype)
+        #TempTemp
+        if 'NormFactor' in image.metadata.keys():
+            del image.metadata['NormFactor']
     
-        outputArray=segmentation.tag_image(image.array)
-      
-
     except Exception as e:
         raise Exception("Error occured while tagging image!",e)
 
@@ -42,7 +48,7 @@ def tagImage(image):
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return Image(outputArray, image.metadata), logText
+    return Image(output_array, output_metadata), logText
 
 
 def threshold(image, method="Otsu", **kwargs):
@@ -233,7 +239,6 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
         logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
         logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
         logText += '\n\t\toverwrite=' + str(overWrite)
-
 
         # Determine connectivity data
         overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)

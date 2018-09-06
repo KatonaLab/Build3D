@@ -7,10 +7,10 @@ Created on Tue Aug 21 15:21:27 2018
 
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
-from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter, colocalization, save_data, save_image
+from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
 from modules.a3dc_modules.a3dc.utils import os_open, quote
-from modules.a3dc_modules.a3dc.imageclass import Image
-import os
+
+
 import numpy as np
 
 
@@ -51,7 +51,9 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         
         taggedImage, logText = apply_filter(taggedImage, filterDict=settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
         print(logText)
-          
+        
+        taggedImage.as_type(np.int64)#(taggedImage.metadata['Type'])
+        
         return taggedImage
 
 
@@ -99,16 +101,15 @@ def module_main(ctx):
     
     params = read_params(ctx.name())
     
-
-    
     output=analyze_image(params['Source'],
                params['Mask'],
                params['Settings'])
 
     #Change Name in metadata
     #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-
-    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float))
+    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float)/np.amax(output.array.astype(float)))
+    output.metadata['NormFactor']=np.amax(output.array.astype(float))
+    
     a3.outputs['Analyzed_DataBase']=output.database
     a3.outputs['Analyzed_MetaData']=output.metadata
 

@@ -10,7 +10,7 @@ from .utils import round_up_to_odd
 def tag_image(ndarray):
 
     # Cast to 16-bit
-    ndarray = img_as_uint(ndarray)
+    ndarray = img_as_uint(ndarray/np.amax(ndarray))
     
     #Convert ndarray to itk image
     itk_image = sitk.GetImageFromArray(ndarray)
@@ -46,7 +46,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
     
     
     # Cast to 16-bit
-    ndarray = img_as_uint(ndarray)
+    ndarray = img_as_uint(ndarray/np.amax(ndarray))
 
     # Cast to 8-bit
     #ndarray = img_as_ubyte(ndarray)
@@ -115,7 +115,7 @@ def create_surfaceImage(ndarray):
 def threshold_manual(ndarray, upper=1, lower=0):
  
     # Cast to 16-bit
-    ndarray = img_as_uint(ndarray)
+    ndarray = img_as_uint(ndarray/np.amax(ndarray))
     
     # Convert nd Image to ITK image
     itk_image = sitk.GetImageFromArray(ndarray)

@@ -91,7 +91,7 @@ def module_main(ctx):
     #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
     
     #Set output
-    a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array)
+    a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(float))
     a3.outputs['Output_Metadata']=output_img.metadata
 
 config = init_config()

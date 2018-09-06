@@ -13,18 +13,28 @@ from . import segmentation
 def colocalization_connectivity(image_list, raw_img_list=None):
     '''TODO what happens if tagged image was not previouslz analyzed
     '''
-
+    
     # Create Overlapping Image
     ovl_array = image_list[0].array
+     
     for i in range(1, len(image_list)):
-        ovl_array = np.multiply(ovl_array, image_list[i].array)
+        temp_img=image_list[i].array
 
+        ovl_array = np.multiply(ovl_array, temp_img)
+
+
+        
+    ovl_array[ovl_array>0]=1
+      
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
     name=''
     for img in image_list:
         name+=img.metadata['Name']
     metadata['Name']=name
+    #TempTempTemp
+    if 'NormFactor' in metadata.keys():
+            del metadata['NormFactor']
     
     #Create overlapping image
     ovl_image=Image(segmentation.tag_image(ovl_array), metadata)
@@ -60,8 +70,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
 
         ovl_image.database['object in ' + name_list[i]] = object_list
         ovl_image.database['overlappingRatio in ' + name_list[i]] = ovl_ratio_list
-
-        
+  
     return ovl_image
 
 
@@ -147,6 +156,7 @@ def colocalization_analysis(image_list, ovl_img):
 
 def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']):
 
+
     #Convert tagged image to ITK image
     itk_img = sitk.GetImageFromArray(tagged_Img.array)
 
@@ -217,7 +227,6 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
         img_list = []
         img_list.append(tagged_Img)
 
-    
     for i in range(len(img_list)):
 
         itk_raw = sitk.GetImageFromArray(img_list[i].array)
