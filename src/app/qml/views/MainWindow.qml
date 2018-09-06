@@ -143,6 +143,12 @@ ApplicationWindow {
         settings.dialogFolder = ModuleStore.dialogFolder;
     }
 
+    Binding {
+        target: ModuleStore.model
+        property: "smoothTextures"
+        value: settings.smoothTextures
+    }
+
     header: ToolBar {
         font.pixelSize: 14
         Material.primary: parent.Material.background
@@ -199,9 +205,6 @@ ApplicationWindow {
                 action: toggleSmoothTexturesAction
                 font.family: "fontello"
                 text: settings.smoothTextures ? "\uF1B3" : "\uE81B"
-                onClicked: {
-                    settings.smoothTextures = !settings.smoothTextures;
-                }
             }
 
             ToolButton {
@@ -437,8 +440,7 @@ ApplicationWindow {
         id: toggleSmoothTexturesAction
         text: "Linear Texture Interpolation"
         onTriggered: {
-            // TODO:
-            // AppActions.writeJson({});
+            settings.smoothTextures = !settings.smoothTextures;
         }
     }
 }

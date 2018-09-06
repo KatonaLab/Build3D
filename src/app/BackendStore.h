@@ -30,6 +30,7 @@ class BackendStore: public QAbstractListModel {
     Q_PROPERTY(QVariantList availableModules READ availableModules NOTIFY availableModulesChanged)
     Q_PROPERTY(bool editorMode READ editorMode NOTIFY editorModeChanged)
     Q_PROPERTY(bool unsaved READ unsaved NOTIFY unsavedChanged)
+    Q_PROPERTY(bool smoothTextures READ smoothTextures WRITE setSmoothTextures NOTIFY smoothTexturesChanged)
 
     friend class BackendStoreSerializer;
 public:
@@ -79,10 +80,24 @@ public:
     {
         return m_unsaved;
     }
+
+    bool smoothTextures()
+    {
+        return m_smoothTextures;
+    }
+
+    void setSmoothTextures(bool value)
+    {
+        if (m_smoothTextures != value) {
+            m_smoothTextures = value;
+            Q_EMIT smoothTexturesChanged();
+        }
+    }
 Q_SIGNALS:
     void availableModulesChanged();
     void editorModeChanged();
     void unsavedChanged();
+    void smoothTexturesChanged();
 
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
@@ -91,6 +106,7 @@ protected:
     bool m_editorMode;
     int m_uidCounter = 0;
     bool m_unsaved = false;
+    bool m_smoothTextures = false;
     std::map<QString, int> m_moduleTypeCounter;
 
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
