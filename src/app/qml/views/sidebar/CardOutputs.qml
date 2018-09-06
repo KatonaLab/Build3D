@@ -87,6 +87,8 @@ Repeater {
                     id: rangeSlider
                     Layout.fillWidth: true
                     value: details.value.lutParams
+                    from: details.value.lutLimits.x
+                    to: details.value.lutLimits.y
                     onValueChanged: {
                         details.value.lutParams = value;
                     }

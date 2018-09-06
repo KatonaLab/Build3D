@@ -5,7 +5,7 @@ TypedImageOutputInterfaceModule<T>::TypedImageOutputInterfaceModule(ComputePlatf
 {}
 
 template <typename T>
-void TypedImageOutputInterfaceModule<T>::execute()
+void TypedImageOutputInterfaceModule<T>::execute(ModuleContext&)
 {
     if (auto imPtr = m_inputs.template input<0>()->inputPtr().lock()) {
         m_result = std::make_shared<core::multidim_image_platform::MultiDimImage<float>>();

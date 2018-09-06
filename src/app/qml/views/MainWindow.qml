@@ -18,8 +18,8 @@ ApplicationWindow {
     id: appWindow
     font.pointSize: 11
 
-    width: 800
-    height: 600
+    width: 1024
+    height: 768
     title: "A3-DC - KatonaLab KOKI MTA (" + A3DCVersion.version() + ")"
 
     Material.theme: settings.darkTheme ? Material.Dark : Material.Light
@@ -420,8 +420,7 @@ ApplicationWindow {
         id: runBatchAction
         text: "Run Batch"
         onTriggered: {
-            // TODO:
-            // AppActions.writeJson({});
+            ModuleStore.model.evaluateBatch();
         }
     }
 

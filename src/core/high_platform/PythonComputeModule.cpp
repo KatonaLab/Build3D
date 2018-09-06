@@ -285,6 +285,22 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     .def("name", [](ModuleContext& obj)
     {
         return obj.name;
+    })
+    .def("run_id", [](ModuleContext& obj)
+    {
+        return obj.runId;
+    })
+    .def("set_require_next_run", [](ModuleContext& obj, bool req)
+    {
+        obj.hasNext = req;
+    })
+    .def("set_status_indicator_max", [](ModuleContext& obj, int max)
+    {
+        obj.statusIndicatorMax = max;
+    })
+    .def("set_status_indicator", [](ModuleContext& obj, int status)
+    {
+        obj.statusIndicator = status;
     });
 
     py::class_<CustomOutStream>(m, "CustomOutStream")
@@ -485,7 +501,7 @@ void PythonComputeModule::buildPorts()
     }
 }
 
-void PythonComputeModule::execute()
+void PythonComputeModule::execute(ModuleContext& ctx)
 {
     auto& env = PythonEnvironment::instance();
     env.reset();
@@ -507,8 +523,7 @@ void PythonComputeModule::execute()
         outputs.attr("__setitem__")(p.first, py::none());
     }
 
-    m_moduleContext.name = name();
-    m_func(m_moduleContext);
+    m_func(&ctx);
 
     // check for bad outputs
     std::vector<std::string> keys;

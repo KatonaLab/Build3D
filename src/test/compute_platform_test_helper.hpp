@@ -21,7 +21,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromSharedPtr(m_seed);
     }
@@ -42,7 +42,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_inputs.input<0>()->value() += 1;
         m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
@@ -59,7 +59,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_inputs.input<0>()->value() += m_inputs.input<1>()->value();
         m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
@@ -76,7 +76,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_store = m_inputs.input<0>()->value();
     }
@@ -127,7 +127,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromSharedPtr(m_seed);
     }
@@ -148,7 +148,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
     }
@@ -164,7 +164,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_outputs.output<0>()->forwardFromInput(m_inputs.input<0>());
     }
@@ -180,7 +180,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }
@@ -197,7 +197,7 @@ public:
         m_inputs(*this),
         m_outputs(*this)
     {}
-    void execute() override
+    void execute(cp::ModuleContext&) override
     {
         m_result = m_inputs.input<0>()->inputPtr().lock();
     }

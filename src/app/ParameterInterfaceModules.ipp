@@ -32,7 +32,7 @@ QVariant TypedParameterInterfaceModule<T>::data()
 }
 
 template <typename T>
-void TypedParameterInterfaceModule<T>::execute()
+void TypedParameterInterfaceModule<T>::execute(ModuleContext&)
 {
     m_outputs.template output<0>()->forwardFromSharedPtr(m_data);
 }

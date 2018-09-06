@@ -22,7 +22,8 @@ ComputeModule& TriggerNode::parent()
 void ComputeModule::evaluate()
 {
     m_inputs.fetch();
-    execute();
+    m_context.name = name();
+    execute(m_context);
 }
 
 size_t ComputeModule::numInputs() const
@@ -64,6 +65,16 @@ ComputeModule::~ComputeModule()
 ComputePlatform& ComputeModule::platform()
 {
     return m_parent;
+}
+
+void ComputeModule::setContext(ModuleContext ctx)
+{
+    m_context = ctx;
+}
+
+ModuleContext ComputeModule::context()
+{
+    return m_context;
 }
 
 NodePtr ComputeModule::node()

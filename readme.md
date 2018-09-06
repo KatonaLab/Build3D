@@ -18,6 +18,10 @@ TODO: how to use it with a toy example
 	
 `PYTHONHOME` is not a path to a Python base directory. Use `--python-path` program argument to set to a correct one.
 
+	LNK1181 linker error while compiling on Windows
+	
+Check your path to the project directory (e.g. `"c:\my projects\A3DC"`), if it contains spaces then probably that is the cause. Remove any spaces from the path. It seems to be an issue with jom.exe, we can not fix it right now.
+
 # Development Infos
 
 ## Requirements

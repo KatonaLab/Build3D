@@ -1,5 +1,6 @@
 #include "BackendOutput.h"
 
+#include <limits>
 #include <tuple>
 #include <string>
 #include <QMetaType>
@@ -145,6 +146,39 @@ void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>>
         }
         Q_EMIT textureChanged();
         Q_EMIT sizeChanged();
+    }
+}
+
+QVector2D ImageOutputValue::lutLimits() const
+{
+    return m_lutLimits;
+}
+
+void ImageOutputValue::calculateLutLimits()
+{
+    bool uninited = qFuzzyCompare(m_lutLimits, QVector2D(0, 0));
+    if (m_image) {
+        auto& d = m_image->unsafeData();
+        float minVal = numeric_limits<float>::infinity();
+        float maxVal = -numeric_limits<float>::infinity();
+        for (const auto& plane: d) {
+            for (float x: plane) {
+                if (x < minVal) {
+                    minVal = x;
+                }
+                if (x > maxVal) {
+                    maxVal = x;
+                }
+            }
+        }
+        m_lutLimits = QVector2D(minVal, maxVal);
+    } else {
+        m_lutLimits = QVector2D(0, 0);
+    }
+    Q_EMIT lutLimitsChanged();
+
+    if (uninited) {
+        setLutParams(m_lutLimits);
     }
 }
 
@@ -320,6 +354,7 @@ void BackendOutput::onExecuted()
         auto im = m_interfaceModule->getImage();
         m_internalValue.setTextureFromImage(im);
         if (m_internalValue.texture()) {
+            m_internalValue.calculateLutLimits();
             m_ready = true;
             Q_EMIT statusChanged();
         }
