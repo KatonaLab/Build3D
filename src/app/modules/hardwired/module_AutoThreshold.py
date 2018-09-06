@@ -92,7 +92,7 @@ def module_main(ctx):
     #Finalization
     tstop = time.clock()
     print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')
-    print('Autothresholding was run successfully!')
+    print('Autothresholding was successfully!')
     print(SEPARATOR)
     
 config = init_config()

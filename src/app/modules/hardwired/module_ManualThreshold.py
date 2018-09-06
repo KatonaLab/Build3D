@@ -2,7 +2,8 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_manual
 from modules.a3dc_modules.a3dc.imageclass import Image
 import numpy as np
-import time
+import time, traceback
+from modules.a3dc_modules.a3dc.utils import SEPARATOR
 
 def manual_threshold(image,  upper, lower):
     '''
@@ -15,28 +16,20 @@ def manual_threshold(image,  upper, lower):
     :return:
         LogText
     '''
-
-    # Start timing
-    tstart = time.clock()
-
     # Creatre LogText and start logging
-    logText = '\nThresholding: '+image.metadata['Name']
-    logText += '\n\tMethod: Manual'
-    logText += '\n\tSettings: \n\t\tUpper:%s \n\t\tLower:%s' % (str(upper),str(lower))
+    print('Thresholding: '+image.metadata['Name'])
+    print('Method: Manual')
+    print('Settings: \n\t\tUpper:%s \n\t\tLower:%s' % (str(upper),str(lower)))
    
-
     try:
         
         outputArray = threshold_manual(image.array, upper, lower)
 
     except Exception as e:
+        traceback.print_exc()
         raise Exception("Error occured while thresholding image!",e)
 
-    # Finish timing and add to logText
-    tstop = time.clock()
-    logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
-
-    return Image(outputArray, image.metadata), logText
+    return Image(outputArray, image.metadata)
 
 def init_config():
  
@@ -66,16 +59,27 @@ def init_config():
 
 def module_main(ctx):
     
+    #Inizialization
+    tstart = time.clock()
+    print(SEPARATOR)
+    print('Autothresholding started!')
+    
     #Create Image object
     img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
     
     #Run thresholding            
     output_img, logText=manual_threshold(img, a3.inputs['Upper'], a3.inputs['Lower'])
-    print(logText)
+
     
     #Set output
     a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
     a3.outputs['Output_Metadata']=output_img.metadata
+    
+    #Finalization
+    tstop = time.clock()
+    print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')
+    print('Manual thresholding was successfully!')
+    print(SEPARATOR)
     
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 

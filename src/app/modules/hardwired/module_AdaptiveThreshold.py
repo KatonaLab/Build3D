@@ -2,7 +2,9 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_adaptive
 from modules.a3dc_modules.a3dc.imageclass import Image
 import numpy as np
-import time
+import time, traceback
+from modules.a3dc_modules.a3dc.utils import SEPARATOR
+
 
 METHODS=['Mean', 'Gaussian']
 
@@ -21,14 +23,10 @@ def adaptive_threshold(image, method , blocksize=5, offset=0):
         LogText
     '''
 
-    # Start timing
-    tstart = time.clock()
-
-
     # Creatre LogText and start logging
-    logText = '\nThresholding: '+image.metadata['Name']
-    logText += '\n\tMethod: Adaptive' + method
-    logText += '\n\tSettings: \n\t\tBlocksize:%s \n\t\tOffset:%s' % (str(blocksize),str(offset))
+    print('Thresholding: '+image.metadata['Name'])
+    print('Method: Adaptive' + method)
+    print('Settings: \n\t\tBlocksize:%s \n\t\tOffset:%s' % (str(blocksize),str(offset)))
 
 
     # Run thresholding functions
@@ -37,13 +35,10 @@ def adaptive_threshold(image, method , blocksize=5, offset=0):
         outputArray = threshold_adaptive(image.array, method, blocksize, offset)
 
     except Exception as e:
+        traceback.print_exc()
         raise Exception("Error occured while thresholding image!",e)
 
-    # Finish timing and add to logText
-    tstop = time.clock()
-    logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
-
-    return Image(outputArray, image.metadata), logText
+    return Image(outputArray, image.metadata)
 
 def init_config(methods=METHODS):
  
@@ -76,6 +71,11 @@ def init_config(methods=METHODS):
 
 def module_main(ctx):
     
+    #Inizialization
+    tstart = time.clock()
+    print(SEPARATOR)
+    print('Adaptive thresholding started!')
+    
     #Create Image object
     img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
 
@@ -85,7 +85,6 @@ def module_main(ctx):
 
     #Run thresholding            
     output_img, logText=adaptive_threshold(img, method , blocksize=a3.inputs['BlockSize'], offset=a3.inputs['Offset'])
-    print(logText)
     
     #Change Name in metadata
     #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
@@ -93,7 +92,13 @@ def module_main(ctx):
     #Set output
     a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
     a3.outputs['Output_Metadata']=output_img.metadata
-        
+    
+    #Finalization
+    tstop = time.clock()
+    print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')
+    print('Adaptive thresholding was successfully!')
+    print(SEPARATOR)
+    
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
 config.append(a3.Output('Output_Metadata', a3.types.GeneralPyType))
