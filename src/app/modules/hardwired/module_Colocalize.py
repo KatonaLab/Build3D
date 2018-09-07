@@ -31,10 +31,10 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
         
         try:
 
-            print('Processing the follofing channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
+            print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
             
             # Add Filter settings
-            print('\n\tFilter settings: ' + str(ovl_settings).replace('{', ' ').replace('}', ' '))
+            print('Filter settings: ' + str(ovl_settings))
             ovl_img, _=colocalization(tagged_img_list, overlappingFilter=ovl_settings)
             
             ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)

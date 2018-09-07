@@ -20,7 +20,10 @@ FILTERS = ['voxelCount',
 #'volume', 
 
 def analyze_image(source, mask, settings, show=True, to_text=False):
-
+        
+        print('Processing the following channels: '+ str(source.metadata['Name']))
+        print('Filter settings: '+str(settings))
+        
         #Parameters to measure
         measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder']
         
@@ -35,18 +38,18 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
                 settings[str(key)+' in '+str(source.metadata['Name'])] = settings[key]
                 del settings[key]
 
-        #Channel 1:Tagging Image
-        taggedImage, logText = tagImage(mask)
-        print(logText)
-
-        # Channel 1:Analysis and Filtering of objects
-        taggedImage, logText = analyze(taggedImage, imageList=[source], measurementInput=measurementList)
-        print(logText)
+        #Tagging Image
+        print('Running connected components!')
+        taggedImage, _ = tagImage(mask)
         
-        taggedImage, logText = apply_filter(taggedImage, filterDict=settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
-        print(logText)
+        # Analysis and Filtering of objects
+        print('Analyzing tagged image!')
+        taggedImage, _ = analyze(taggedImage, imageList=[source], measurementInput=measurementList)
         
-        taggedImage.as_type(np.int64)#(taggedImage.metadata['Type'])
+        print('Filtering object database')
+        taggedImage, _ = apply_filter(taggedImage, filterDict=settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
+        
+        #taggedImage.as_type(np.int64)#(taggedImage.metadata['Type'])
         
         return taggedImage
 

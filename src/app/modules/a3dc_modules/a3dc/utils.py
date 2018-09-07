@@ -104,7 +104,7 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
 		"Michael Faraday, asked by a politician what good his electrical discoveries were, replied ""at present I do not know, but one day you will be able to tax them.""",
 		"A chemical physicist makes precise measurements on impure compounds. A theoretical physical chemist makes imprecise measurements on pure compounds. An experimental physical chemist makes imprecise measurements on impure compounds.\n     -Gaussian QC",
 		"KNOWING is a barrier which prevents learning.\n     -Teaching of the Bene Gesserit",
-       "You shall know the truth, and the truth shall set you free.\n     -Jesus of Nasareth (John 8:32)",
+       "You shall know the truth, and the truth shall set you free.\n     -John 8:32",
        "Scientific progress is the discovery of a more and more comprehensive simplicity... The previous successes give us confidence in the future of science: we become more and more conscious of the fact that the universe is cognizable.\n     -Monsignor Georges Lemaître",
        "The miracle of the appropriateness of the language of mathematics for the formulation of the laws of physics is a wonderful gift which we neither understand nor deserve.\n     -Wigner Eugene",
        "The eternal mystery of the world is its comprehensibility…The fact that it is comprehensible is a miracle.\n     -Albert Einstein",
@@ -118,10 +118,12 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
        "Failures, repeated failures, are finger posts on the road to achievement. One fails forward toward success.\n     -C.S. Lewis",
        "Yet trees are not 'trees', until so named and seen\n and never were so named, till those had been\n who speech's involuted breath unfurled,\n faint echo and dim picture of the world\n     -J.R.R. Tolkien",
        "The heart of Man is not compound of lies, but draws some wisdom from the only Wise.\n     -J.R.R. Tolkien",
-       "For surely “nothing” is every bit as physical as “something,” especially if it is to be defined as the “absence of something.\n     -Lorentz Krauss"
+       "For surely “nothing” is every bit as physical as “something,” especially if it is to be defined as the “absence of something.\n     -Lorentz Krauss",
        "Imagine a kettle boiling on a stove. The scientist can tell you much about it. What temperature the water will boil at, the interaction of atoms at different temperatures, the change in the nature of matter and many other interesting and important things.\n But what science can never discover is that that the kettle is on the stove so that you can have a cup of tea with a friend. That is the real reason the you are boiling the kettle and science can't, nor was it ever designed to, tell you that.\n     -Sir John Polkinghorne",
        "It is important to realize that in physics today, we have no knowledge of what energy “is”.\n     -Richard Feynman",
        "THE WORLD IS TOO COMPLICATED IN ALL ITS PARTS AND INTERCONNECTIONS TO BE DUE TO CHANCE ALONE.\n     -Alan Sandage",
+       "Logic is the most useful tool of all the arts. Without it no science can be fully known.\n     -William of Ockham",
+       "It is pointless to do with more what can be done with fewer.\n     -William of Ockham",
        "The reason man's best friend is a dog is because he wags his tail instead of his tongue.\n     -Anonymus"
 		]
     
