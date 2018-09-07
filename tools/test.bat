@@ -1,5 +1,6 @@
 call setenv.bat
 
+mkdir "%BUILD_DIR%\src\test\%BUILD_MODE%\assets\"
 pushd "%BUILD_DIR%\src\test\%BUILD_MODE%\assets\"
 set ABS_ASSET_DST=%cd%
 popd
