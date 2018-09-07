@@ -16,7 +16,6 @@ AppVersion={#APP_VERSION}
 DefaultDirName={pf}\A3-DC
 DefaultGroupName=A3-DC
 Compression=lzma2
-;Compression=none
 SolidCompression=yes
 OutputDir=.
 OutputBaseFilename=a3-dc-setup-{#APP_VERSION}-{#BUILD_ID}
