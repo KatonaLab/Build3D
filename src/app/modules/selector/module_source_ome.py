@@ -1,6 +1,5 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.external.PythImage import Image
-import numpy as np
 from modules.a3dc_modules.a3dc.utils import SEPARATOR
 import time
 
@@ -16,11 +15,11 @@ def module_main(_):
     #Load and reshape image
     img = Image.load(filename, file_type='ome')
     img.reorder('XYZCT')
-    
-    #Create Output
-    a3.outputs['Array'] = img.array
-    a3.outputs['MetaData']=img.metadata
 
+    #Create Output
+    a3.outputs['Array'] = img.image
+    a3.outputs['MetaData']=img.metadata
+    
     #Finalization
     tstop = time.clock()
     print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
