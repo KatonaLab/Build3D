@@ -124,7 +124,9 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
        "THE WORLD IS TOO COMPLICATED IN ALL ITS PARTS AND INTERCONNECTIONS TO BE DUE TO CHANCE ALONE.\n     -Alan Sandage",
        "Logic is the most useful tool of all the arts. Without it no science can be fully known.\n     -William of Ockham",
        "It is pointless to do with more what can be done with fewer.\n     -William of Ockham",
-       "The reason man's best friend is a dog is because he wags his tail instead of his tongue.\n     -Anonymus"
+       "The reason man's best friend is a dog is because he wags his tail instead of his tongue.\n     -Anonymus",
+       "Wonder is the desire of knowledge.\n    -Thomas Aquinas" ,
+       "Characteristics which define beauty are wholeness, harmony and radiance.\n    -Thomas Aquinas"
 		]
     
 

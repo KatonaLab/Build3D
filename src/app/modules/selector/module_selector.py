@@ -3,14 +3,17 @@ from modules.a3dc_modules.external.PythImage import Image
 import numpy as np
 from modules.a3dc_modules.a3dc.utils import SEPARATOR
 import time
+import copy
 
 def module_main(_):
+    print('PAssOver'+str(a3.inputs['MetaData']))
     #Load and reshape image
-    img = Image(a3.inputs['Image'], a3.inputs['MetaData'])
+    ##TempTempTemp##
+    img = Image(a3.inputs['Image'], copy.deepcopy(a3.inputs['MetaData']))
+    #img = Image(a3.inputs['Image'], a3.inputs['MetaData'])
     img.reorder('XYZCT')
     
-    
-    
+    print(a3.inputs['MetaData'])
     #Inizialization
     tstart = time.clock()
     print(SEPARATOR)
@@ -37,11 +40,12 @@ def module_main(_):
     img.metadata['SamplesPerPixel']=img.metadata['SamplesPerPixel'][ch]
     img.metadata['Name']=img.metadata['Name'][ch]   
     #img.metadata['Path']=filename
+    
     print(img.metadata)
     #Create Output
     a3.outputs['Channel'] = a3.MultiDimImageFloat_from_ndarray(array.astype(np.float))
-    a3.outputs['MetaData2']=img.metadata
-    print(a3.outputs['MetaData2'])
+    a3.outputs['MetaData']=img.metadata
+   
     #Finalization
     tstop = time.clock()
     print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
@@ -56,6 +60,6 @@ config = [a3.Parameter('Channel', a3.types.int8)
     a3.Input('Image', a3.types.GeneralPyType),
     a3.Input('MetaData', a3.types.GeneralPyType),
     a3.Output('Channel', a3.types.ImageFloat),
-    a3.Output('MetaData2', a3.types.GeneralPyType)]
+    a3.Output('MetaData', a3.types.GeneralPyType)]
 
 a3.def_process_module(config, module_main)

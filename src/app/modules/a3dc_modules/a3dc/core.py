@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import copy
 
+
 from .imageclass import Image
 from . import segmentation
 
@@ -13,6 +14,9 @@ from . import segmentation
 def colocalization_connectivity(image_list, raw_img_list=None):
     '''TODO what happens if tagged image was not previouslz analyzed
     '''
+    #Create list of names
+    name_list = [x.metadata['Name'] for x in image_list] 
+    
     
     # Create Overlapping Image
     ovl_array = image_list[0].array
@@ -21,17 +25,12 @@ def colocalization_connectivity(image_list, raw_img_list=None):
         temp_img=image_list[i].array
 
         ovl_array = np.multiply(ovl_array, temp_img)
-
-
-        
     ovl_array[ovl_array>0]=1
-      
+    
+     
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
-    name=''
-    for img in image_list:
-        name+=img.metadata['Name']
-    metadata['Name']=name
+    metadata['Name']=str.join('_', name_list)
     #TempTempTemp
     if 'NormFactor' in metadata.keys():
             del metadata['NormFactor']
@@ -49,7 +48,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
 
     
     # Generate array lists and name lists
-    name_list = [x.metadata['Name'] for x in image_list]
+    
 
     for i in range(len(image_list)):
         itk_image = sitk.GetImageFromArray(image_list[i].array)
@@ -100,6 +99,7 @@ def colocalization_analysis(image_list, ovl_img):
         position_list = [x for x in range(input_element_no) if x != i]
 
         for j in range(0, len(position_list)):
+            
             output_list[i]['object in '+name_list[position_list[j]]]=[[] for i in range(obj_no[i])]
 
     for j in range(len(ovl_database['tag'])):
