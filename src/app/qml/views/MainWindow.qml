@@ -1,6 +1,6 @@
 import QtQuick 2.9
-import QtQuick.Window 2.3
-import QtQuick.Controls 2.3
+import QtQuick.Window 2.7
+import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Scene3D 2.0
@@ -28,17 +28,31 @@ ApplicationWindow {
     MenuBar {
         Menu {
             title: "File"
-            MenuItem {
-                text: newWorkflowAction.text
-                onTriggered: newWorkflowAction.onTriggered();
+            Menu {
+                id: barMenuNew
+                title: newWorkflowAction.text
+                onAboutToShow: ModuleStore.model.refreshAvailableWorkflows()
+
+                Instantiator {
+                    model: ModuleStore.model.availableWorkflows
+                    MenuItem {
+                        property url pathUrl: modelData.path
+                        text: modelData.name
+                        onTriggered: {
+                            newWorkflowAction.startNewWorkflowProcess(modelData.path);
+                        }
+                    }
+                    onObjectAdded: barMenuNew.insertItem(index, object)
+                    onObjectRemoved: barMenuNew.removeItem(object)
+                }
             }
             MenuItem {
                 text: openWorkflowAction.text
-                onTriggered: openWorkflowAction.onTriggered();
+                onTriggered: openWorkflowAction.startOpenWorkflowProcess()
             }
             MenuItem {
                 text: saveWorkflowAction.text
-                onTriggered: saveWorkflowAction.onTriggered();
+                onTriggered: saveWorkflowAction.triggered()
             }
         }
 
@@ -46,7 +60,7 @@ ApplicationWindow {
             title: "View"
             MenuItem {
                 text: toggleSmoothTexturesAction.text
-                onTriggered: toggleSmoothTexturesAction.onTriggered();
+                onTriggered: toggleSmoothTexturesAction.triggered()
             }
         }
 
@@ -54,15 +68,15 @@ ApplicationWindow {
             title: "Workflow"
             MenuItem {
                 text: runAction.text
-                onTriggered: runAction.onTriggered();
+                onTriggered: runAction.triggered()
             }
             MenuItem {
                 text: runBatchAction.text
-                onTriggered: runBatchAction.onTriggered();
+                onTriggered: runBatchAction.triggered()
             }
             MenuItem {
                 text: stopAction.text
-                onTriggered: saveWorkflowAction.onTriggered();
+                onTriggered: saveWorkflowAction.triggered()
             }
         }
 
@@ -129,7 +143,7 @@ ApplicationWindow {
         property bool consoleStatus: false
         property bool darkTheme: false
         property bool smoothTextures: false
-        property url dialogFolder: "."
+        property url dialogFolder: ""
     }
 
     Component.onCompleted: {
@@ -158,9 +172,27 @@ ApplicationWindow {
             anchors.left: parent.left
             
             ToolButton {
-                action: newWorkflowAction
                 font.family: "fontello"
                 text: "\uE800"
+                onClicked: toolMenuNew.open()
+
+                Menu {
+                    id: toolMenuNew
+                    title: newWorkflowAction.text
+                    onAboutToShow: ModuleStore.model.refreshAvailableWorkflows()
+
+                    Instantiator {
+                        model: ModuleStore.model.availableWorkflows
+                        MenuItem {
+                            text: modelData.name
+                            onTriggered: {
+                                newWorkflowAction.startNewWorkflowProcess(modelData.path);
+                            }
+                        }
+                        onObjectAdded: toolMenuNew.insertItem(index, object)
+                        onObjectRemoved: toolMenuNew.removeItem(object)
+                    }
+                }
             }
 
             ToolSeparator {}
@@ -335,11 +367,8 @@ ApplicationWindow {
 
                         ScrollIndicator.vertical: ScrollIndicator {}
                     }
-
                 } // row layout
-
             }
-
         }
     }
 
@@ -350,32 +379,51 @@ ApplicationWindow {
         standardButtons: StandardButton.Yes | StandardButton.No
     }
 
+    Connections {
+        property var nextAction
+        id: messageBoxConnection
+        target: unsavedWorkflowMessageBox
+        onYes: function () {
+            if (nextAction) {
+                nextAction();
+            }
+        }
+    }
+
     Action {
         id: newWorkflowAction
         text: "New Workflow"
-        onTriggered: {
+        function startNewWorkflowProcess(path) {
             if (ModuleStore.model.unsaved) {
-                unsavedWorkflowMessageBox.yes.disconnect(openDialog.open);
-                unsavedWorkflowMessageBox.yes.connect(ModuleStore.model.newWorkflow);
+                messageBoxConnection.nextAction = function () {
+                    ModuleStore.model.readWorkflow(path);
+                }
                 unsavedWorkflowMessageBox.open();
             } else {
-                ModuleStore.model.newWorkflow();
+                ModuleStore.model.readWorkflow(path);
             }
+        }
+    }
+
+    Connections {
+        target: ModuleStore.model
+        onUnsavedChanged: {
+            console.log("ModuleStore.model.unsaved", ModuleStore.model.unsaved);
         }
     }
 
     Action {
         id: openWorkflowAction
         text: "Open Workflow"
-        onTriggered: {
+        function startOpenWorkflowProcess() {
             if (ModuleStore.model.unsaved) {
-                unsavedWorkflowMessageBox.yes.disconnect(ModuleStore.model.newWorkflow);
-                unsavedWorkflowMessageBox.yes.connect(openDialog.open);
+                messageBoxConnection.nextAction = openDialog.open;
                 unsavedWorkflowMessageBox.open();
             } else {
                 openDialog.open();
             }
         }
+        onTriggered: startOpenWorkflowProcess()
     }
 
     FileDialog {
@@ -384,17 +432,18 @@ ApplicationWindow {
         folder: ModuleStore.dialogFolder
         nameFilters: [ "A3-DC Workflow File (*.json)", "All files (*)" ]
         onAccepted: {
-            // TODO: check weather we would overwrite the existing work
             ModuleStore.model.readWorkflow(openDialog.fileUrl);
+            ModuleStore.dialogFolder = folder;
+        }
+        onRejected: {
+            ModuleStore.dialogFolder = folder;
         }
     }
 
     Action {
         id: saveWorkflowAction
         text: "Save Workflow"
-        onTriggered: {
-            saveDialog.open();
-        }
+        onTriggered: saveDialog.open()
     }
 
     FileDialog {
@@ -406,25 +455,24 @@ ApplicationWindow {
         selectFolder: false
         sidebarVisible: true
         onAccepted: {
-            // TODO: ask for 'sure to overwrite file'
             ModuleStore.model.writeWorkflow(saveDialog.fileUrl);
+            ModuleStore.dialogFolder = folder;
+        }
+        onRejected: {
+            ModuleStore.dialogFolder = folder;
         }
     }
 
     Action {
         id: runAction
         text: "Run"
-        onTriggered: {
-            ModuleStore.model.evaluate(-1);
-        }
+        onTriggered: ModuleStore.model.evaluate(-1);
     }
 
     Action {
         id: runBatchAction
         text: "Run Batch"
-        onTriggered: {
-            ModuleStore.model.evaluateBatch();
-        }
+        onTriggered: ModuleStore.model.evaluateBatch();
     }
 
     Action {
@@ -432,7 +480,6 @@ ApplicationWindow {
         text: "Stop"
         onTriggered: {
             // TODO:
-            // AppActions.writeJson({});
         }
     }
 

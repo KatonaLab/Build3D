@@ -10,6 +10,7 @@
 #include <QFontDatabase>
 #include <QStyleFactory>
 #include <QCommandLineParser>
+#include <QDir>
 
 #include "client/crashpad_client.h"
 #include "client/crash_report_database.h"
@@ -92,12 +93,6 @@ void setSurfaceFormat()
 
 int main(int argc, char* argv[])
 {
-#if defined(_WIN32) || defined(WIN32)
-	const QString envPathSep(";");
-#else 
-	const QString envPathSep(":");
-#endif
-
 	// ensure logging is alive from the first moment
 	LogCollector::instance();
 
@@ -156,6 +151,7 @@ int main(int argc, char* argv[])
 		pythonPath = d.absolutePath();
 	}
 	else {
+        const QString envPathSep(QDir::listSeparator());
         pythonPath = d.absolutePath() + envPathSep + pythonPath;
     }
     qputenv("PYTHONPATH", pythonPath.toLocal8Bit());

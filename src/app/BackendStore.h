@@ -28,8 +28,9 @@ class BackendStore: public QAbstractListModel {
     typedef core::compute_platform::ComputePlatform ComputePlatform;
     typedef core::compute_platform::PortBase PortBase;
     Q_PROPERTY(QVariantList availableModules READ availableModules NOTIFY availableModulesChanged)
+    Q_PROPERTY(QVariantList availableWorkflows READ availableWorkflows NOTIFY availableWorkflowsChanged)
     Q_PROPERTY(bool editorMode READ editorMode NOTIFY editorModeChanged)
-    Q_PROPERTY(bool unsaved READ unsaved NOTIFY unsavedChanged)
+    Q_PROPERTY(bool unsaved READ unsaved WRITE setUnsaved NOTIFY unsavedChanged)
     Q_PROPERTY(bool smoothTextures READ smoothTextures WRITE setSmoothTextures NOTIFY smoothTexturesChanged)
 
     friend class BackendStoreSerializer;
@@ -52,7 +53,9 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     QVariantList availableModules() const;
+    QVariantList availableWorkflows() const;
     Q_INVOKABLE void refreshAvailableModules();
+    Q_INVOKABLE void refreshAvailableWorkflows();
 
     Q_INVOKABLE void addModule(const QString& scriptPath);
     Q_INVOKABLE void removeModule(int uid);
@@ -95,6 +98,7 @@ public:
     }
 Q_SIGNALS:
     void availableModulesChanged();
+    void availableWorkflowsChanged();
     void editorModeChanged();
     void unsavedChanged();
     void smoothTexturesChanged();
@@ -103,6 +107,7 @@ protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
     ComputePlatform m_platform;
     QVariantList m_availableModules;
+    QVariantList m_availableWorkflows;
     bool m_editorMode;
     int m_uidCounter = 0;
     bool m_unsaved = false;
@@ -113,7 +118,7 @@ protected:
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);
     void addAvailableNativeModules();
     QString generateModuleName(const QString &type);
-    void dirty();
+    void setUnsaved(bool value = true);
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {

@@ -145,10 +145,10 @@ Repeater {
 
                     FileDialog {
                         id: dialog
-                        // TODO: value: details.value
                         title: "Select File"
                         folder: ModuleStore.dialogFolder
                         selectMultiple: details.hints.multipleFiles || false
+                        selectFolder: details.hints.folder || false
                         onAccepted: {
                             details.value = dialog.fileUrl;
                         }

@@ -125,10 +125,10 @@ QString pathToModuleName(const QString& path)
     return x;
 }
 
-void BackendStore::dirty()
+void BackendStore::setUnsaved(bool value)
 {
-    if (!m_unsaved) {
-        m_unsaved = true;
+    if (m_unsaved != value) {
+        m_unsaved = value;
         Q_EMIT unsavedChanged();
     }
 }
@@ -160,7 +160,12 @@ BackendStore::BackendStore(QObject* parent)
         PythonEnvironment::instance();
 
         refreshAvailableModules();
+        refreshAvailableWorkflows();
         m_editorMode = GlobalSettings::editorMode;
+
+        QObject::connect(this, &BackendStore::dataChanged, [this]() {
+            this->setUnsaved();
+        });
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -232,7 +237,6 @@ void BackendStore::addModule(const QString& scriptPath)
     static const QString nativePath("native://");
     try {
         shared_ptr<ComputeModule> module;
-        dirty();
 
         if (scriptPath.startsWith(nativePath)) {
             QString name = scriptPath.mid(nativePath.size());
@@ -280,6 +284,7 @@ void BackendStore::addModule(const QString& scriptPath)
         }
 
         endInsertRows();
+        this->setUnsaved();
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -316,7 +321,6 @@ void BackendStore::itemChanged(const BackendStoreItem* item, ModuleRoles role)
     if (it != m_items.end()) {
         int row = distance(m_items.begin(), it);
         QModelIndex ix = index(row, 0, QModelIndex());
-        dirty();
         Q_EMIT dataChanged(ix, ix, {role});
     }
 }
@@ -329,7 +333,6 @@ void BackendStore::removeModule(int uid)
     }
 
     try {
-        dirty();
         auto removable = [uid](const unique_ptr<BackendStoreItem>& item) {
             return (item->category() == "module" && item->uid() == uid)
                 || (item->category() != "module" && item->parentUid() == uid);
@@ -358,6 +361,8 @@ void BackendStore::removeModule(int uid)
                 Q_EMIT dataChanged(ix, ix, {BackendStore::ValueRole});
             }
         }
+
+        this->setUnsaved();
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -420,7 +425,6 @@ bool BackendStore::setData(const QModelIndex &index, const QVariant &value, int 
             return false;
         }
 
-        dirty();
         auto& item = m_items[index.row()];
         switch (role) {
             case NameRole: {
@@ -521,7 +525,7 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
 
         bool success = out->source().lock()->bind(in->source());
         if (success) {
-            dirty();
+            this->setUnsaved();
             Q_EMIT in->valueChanged();
         }
         return success;
@@ -569,6 +573,11 @@ QVariantList BackendStore::availableModules() const
     return m_availableModules;
 }
 
+QVariantList BackendStore::availableWorkflows() const
+{
+    return m_availableWorkflows;
+}
+
 void BackendStore::refreshAvailableModules()
 {
     try {
@@ -580,7 +589,6 @@ void BackendStore::refreshAvailableModules()
                 && f.suffix().toLower() == "py";
         };
 
-        // TODO: move magic string constants to highlighted section/file
         QDirIterator level1(GlobalSettings::modulePath.absolutePath());
         while (level1.hasNext()) {
             level1.next();
@@ -613,7 +621,38 @@ void BackendStore::refreshAvailableModules()
 
         addAvailableNativeModules();
 
-        Q_EMIT(availableModulesChanged());
+        Q_EMIT availableModulesChanged();
+    } catch (exception& e) {
+        qCritical() << e.what();
+    }
+}
+
+void BackendStore::refreshAvailableWorkflows()
+{
+    try {
+        QVariantList vlist;
+        QDir workflowsPath(GlobalSettings::modulePath.absolutePath() + "/workflows");
+        if (workflowsPath.exists()) {
+            QDirIterator dirIter(workflowsPath);
+            while (dirIter.hasNext()) {
+                dirIter.next();
+                auto fi = dirIter.fileInfo();
+                if (fi.suffix().toLower() == "json" && fi.isFile()) {
+                    QVariantMap vmap;
+                    vmap["name"] = dirIter.fileInfo().baseName();
+                    vmap["path"] = QUrl::fromLocalFile(fi.absoluteFilePath());
+                    vlist.append(vmap);
+                }
+            }
+
+            if (vlist.isEmpty()) {
+                qWarning() << "can not find any workflow templates at" << workflowsPath.absolutePath();
+            }
+        } else {
+            qWarning() << "missing workflow templates path" << workflowsPath.absolutePath();
+        }
+        m_availableWorkflows = vlist;
+        Q_EMIT availableWorkflowsChanged();
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -640,7 +679,7 @@ void BackendStore::newWorkflow()
         m_items.clear();
         ComputePlatform cleanPlatform;
         swap(m_platform, cleanPlatform);
-        m_unsaved = false;
+        this->setUnsaved(false);
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -653,7 +692,7 @@ void BackendStore::readWorkflow(const QUrl& url)
         newWorkflow();
         BackendStoreSerializer ser;
         ser.read(url.toLocalFile(), *this);
-        m_unsaved = false;
+        this->setUnsaved(false);
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -664,7 +703,7 @@ void BackendStore::writeWorkflow(const QUrl& url)
     try {
         BackendStoreSerializer ser;
         ser.write(url.toLocalFile(), *this);
-        m_unsaved = false;
+        this->setUnsaved(false);
     } catch (exception& e) {
         qCritical() << e.what();
     }
