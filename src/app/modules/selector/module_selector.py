@@ -37,8 +37,8 @@ def module_main(_):
         raise Exception('Can only read images with 3-5 dimensions!')
     
     #Modify metadata 
-    img.metadata['SamplesPerPixel']=[img.metadata['SamplesPerPixel'][ch]]
-    img.metadata['Name']=[img.metadata['Name'][ch]]   
+    img.metadata['SamplesPerPixel']=img.metadata['SamplesPerPixel'][ch]
+    img.metadata['Name']=img.metadata['Name'][ch]   
     #img.metadata['Path']=filename
     
     print(img.metadata)

@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.external.PythImage import Image
 from modules.a3dc_modules.a3dc.utils import SEPARATOR
-import time
+import time, os
 
 def module_main(_):
 
@@ -19,6 +19,10 @@ def module_main(_):
     #Create Output
     a3.outputs['Array'] = img.image
     a3.outputs['MetaData']=img.metadata
+    
+    #Add path and filename to metadata
+    a3.outputs['MetaData']['Path']=os.path.dirname(filename)
+    a3.outputs['MetaData']['FileName']=os.path.basename(filename)
     
     #Finalization
     tstop = time.clock()

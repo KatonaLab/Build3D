@@ -17,17 +17,11 @@ OVLFILTERS=[ 'voxelCount','pixelsOnBorder','ch1_overlappingRatio','ch2_overlappi
 #'volume',
 FILTERS = OVLFILTERS+CHFILTERS
 
-def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=None, show=True, to_text=False):
+def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False):
         
+        #Create list of images
         tagged_img_list=[ch1_img, ch2_img]
 
-        #Set path
-        if path==None:
-            outputPath="D:\Playground"
-        else:
-            outputPath=path
-        if not os.path.exists(outputPath):
-            os.makedirs(outputPath)
         
         try:
 
@@ -43,9 +37,22 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
             #Print number of objects to logText
             print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
 
+            
+            #Set path and filename
+            outputPath=os.path.join(path, 'Output')
+            if not os.path.exists(outputPath):
+                os.makedirs(outputPath)            
+            
+         
+            if ch1_img.metadata['FileName']!=ch2_img.metadata['FileName']:
+                
+                basename=os.path.splitext(ch1_img.metadata['FileName'])[0]+'_'+os.path.splitext(ch2_img.metadata['FileName'][0])
+            else:
+                basename=os.path.splitext(ch1_img.metadata['FileName'])[0]
+                
             #Save databases
             print('Saving object dataBases to xlsx or text!')
-            name=ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
+            name=basename+'_'+ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
             if to_text==True:
                 file_name=name+'.txt'    
             else:
@@ -54,13 +61,13 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path=
         
             #Save images
             print('Saving output images!')
-            name = ch1_img.metadata['Name']#+"_tagged"
+            name = basename+'_'+ch1_img.metadata['Name']#+"_tagged"
             save_image(ch1_img, outputPath, name)
             
-            name = ch2_img.metadata['Name']#+"_tagged"
+            name =basename+'_'+ch2_img.metadata['Name']#+"_tagged"
             save_image(ch2_img, outputPath, name)
             
-            name = ch1_img.metadata['Name']+ "_" +ch2_img.metadata['Name']+ "_overlap"
+            name =basename+'_'+ch1_img.metadata['Name']+ "_" +ch2_img.metadata['Name']+ "_overlap"
             save_image(ovl_img, outputPath, name)
                         
             #Show file
@@ -78,7 +85,7 @@ def read_params(filters=FILTERS):
     
     out_dict = {}
     out_dict['Path']=os.path.dirname(a3.inputs['Path'].path)
-    
+
     out_dict['Ch1_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1_Image']), a3.inputs['Ch1_MetaData'], a3.inputs['Ch1_DataBase'])
     out_dict['Ch2_Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2_Image']), a3.inputs['Ch2_MetaData'], a3.inputs['Ch2_DataBase'])
  
