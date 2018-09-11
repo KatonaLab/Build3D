@@ -3,7 +3,7 @@ set BUILD_MODE=release
 set WORK_DIR=%~dp0\..\
 set BUILD_DIR=%WORK_DIR%\build
 
-set QT_DIR=C:\Qt\5.10.1\msvc2017_64
+set QT_DIR=C:\Qt\5.11.1\msvc2017_64
 set QT_CREATOR_DIR=C:\Qt\Tools\QtCreator
 
 set PYTHON_DIR_NAME=python-3.6.5.amd64

@@ -405,13 +405,6 @@ ApplicationWindow {
         }
     }
 
-    Connections {
-        target: ModuleStore.model
-        onUnsavedChanged: {
-            console.log("ModuleStore.model.unsaved", ModuleStore.model.unsaved);
-        }
-    }
-
     Action {
         id: openWorkflowAction
         text: "Open Workflow"
