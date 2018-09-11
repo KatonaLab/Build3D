@@ -29,6 +29,7 @@ Source: "..\assets\icons\favicon.ico"; DestDir: "{app}"; CopyMode: alwaysoverwri
 
 [Icons]
 Name: "{group}\A3-DC"; Filename: "{app}\a3-dc.bat"; IconFilename: "{app}\favicon.ico"; Flags: runminimized
+Name: "{group}\A3-DC"; Filename: "{app}\a3-dc-editor.bat"; IconFilename: "{app}\favicon.ico"; Flags: runminimized
 Name: "{group}\Uninstall A3-DC"; Filename: "{uninstallexe}"
 
 [Code]

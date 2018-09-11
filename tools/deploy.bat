@@ -27,6 +27,7 @@ copy "%VCREDIST_PATH%" "%BUILD_DIR%\src\app\%BUILD_MODE%\"
 robocopy "%PYTHON_DIR_FULL_PATH%" "%ABS_PYTHON_DST%" /s /e /mt /nfl
 robocopy "%SCRIPT_DIR%" "%ABS_MODULES_DST%" /s /e /mt /nfl
 copy "%WORK_DIR%\a3-dc.bat" "%BUILD_DIR%\src\app\%BUILD_MODE%\"
+copy "%WORK_DIR%\a3-dc-editor.bat" "%BUILD_DIR%\src\app\%BUILD_MODE%\"
 
 echo %DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA%
 echo "%DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA%-%DEFINED_AT_COMPILATION_A3DC_BUILD_DATE%"
