@@ -136,8 +136,8 @@
             "value": {
                 "color": "#ff00ff",
                 "lutParams": {
-                    "x": 0.03261163830757141,
-                    "y": 0.03261163830757141
+                    "x": 0,
+                    "y": 0
                 },
                 "visible": false
             }
@@ -204,9 +204,9 @@
                 "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -310,9 +310,9 @@
                 "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 800
+                    "y": 0
                 },
-                "visible": true
+                "visible": false
             }
         },
         {
@@ -380,8 +380,8 @@
             "value": {
                 "color": "#00ff00",
                 "lutParams": {
-                    "x": 0.010019844397902489,
-                    "y": 0.010019844397902489
+                    "x": 0,
+                    "y": 0
                 },
                 "visible": false
             }
@@ -445,12 +445,12 @@
             "parentUid": 31,
             "uid": 0,
             "value": {
-                "color": "#00ffff",
+                "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -554,9 +554,9 @@
                 "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
-                    "y": 1268
+                    "y": 0
                 },
-                "visible": true
+                "visible": false
             }
         },
         {
@@ -760,7 +760,7 @@
                 "color": "#0000ff",
                 "lutParams": {
                     "x": 0,
-                    "y": 437
+                    "y": 0
                 },
                 "visible": true
             }
