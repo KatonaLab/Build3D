@@ -108,7 +108,8 @@ def module_main(ctx):
 
     #Change Name in metadata
     #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float))
+    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray((output.array).astype(np.float))
+
     a3.outputs['Analyzed_DataBase']=output.database
     a3.outputs['Analyzed_MetaData']=output.metadata
 
