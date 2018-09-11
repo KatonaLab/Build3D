@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Window 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Scene3D 2.0
