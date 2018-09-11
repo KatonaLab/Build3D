@@ -70,10 +70,10 @@ ApplicationWindow {
                 text: runAction.text
                 onTriggered: runAction.triggered()
             }
-            MenuItem {
-                text: runBatchAction.text
-                onTriggered: runBatchAction.triggered()
-            }
+            // MenuItem {
+            //     text: runBatchAction.text
+            //     onTriggered: runBatchAction.triggered()
+            // }
             // MenuItem {
             //     text: stopAction.text
             //     onTriggered: saveWorkflowAction.triggered()
@@ -217,11 +217,11 @@ ApplicationWindow {
                 text: "\uE809"
             }
 
-            ToolButton {
-                action: runBatchAction
-                font.family: "fontello"
-                text: "\uE80C"
-            }
+            // ToolButton {
+            //     action: runBatchAction
+            //     font.family: "fontello"
+            //     text: "\uE80C"
+            // }
 
             // ToolButton {
             //     action: stopAction
