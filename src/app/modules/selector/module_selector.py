@@ -4,21 +4,21 @@ import numpy as np
 from modules.a3dc_modules.a3dc.utils import SEPARATOR
 import time
 import copy
+import sys
 
 def module_main(_):
-    print('PAssOver'+str(a3.inputs['MetaData']))
+    
+    #Inizialization
+    tstart = time.clock()
+    print(SEPARATOR)
+    
     #Load and reshape image
     ##TempTempTemp##
     img = Image(a3.inputs['Image'], copy.deepcopy(a3.inputs['MetaData']))
     #img = Image(a3.inputs['Image'], a3.inputs['MetaData'])
     img.reorder('XYZCT')
     
-    print(a3.inputs['MetaData'])
-    #Inizialization
-    tstart = time.clock()
-    print(SEPARATOR)
-    
-    
+
     #Get channel from image. 
     ch=a3.inputs['Channel']
     print('Loading the following channel: ', img.metadata['Name'][ch])
@@ -27,7 +27,7 @@ def module_main(_):
         
     dims = len(img.image.shape)
     if dims == 5:
-        raise Warning("Image is a time series! Only the first time step will be extracted!")
+        print("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
         array = img.image[0, ch, :, :, :]
     elif dims == 4:
         array = img.image[ch, :, :, :]
@@ -41,7 +41,7 @@ def module_main(_):
     img.metadata['Name']=img.metadata['Name'][ch]   
     #img.metadata['Path']=filename
     
-    print(img.metadata)
+
     #Create Output
     a3.outputs['Channel'] = a3.MultiDimImageFloat_from_ndarray(array.astype(np.float))
     a3.outputs['MetaData']=img.metadata

@@ -13,16 +13,6 @@ import SimpleITK as sitk
 import numpy as np
 
 
-def multiply(img_list, sourceImageList=None):
-
-
-    # Create Overlapping Image
-    output_array = img_list[0].array
-    for i in range(1, len(img_list)):
-        output_array = np.multiply(output_array, img_list[i].array)
-
-    return output_array
-
 
 
 

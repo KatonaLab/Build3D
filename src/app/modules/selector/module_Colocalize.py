@@ -161,8 +161,8 @@ def module_main(ctx):
     print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
     print('Object analysis was run successfully!')
     print(SEPARATOR)
-    print(str(quote()))  
-
+    quote(verbose=True)  
+    print(SEPARATOR)
     
 def add_input_fields(config, filters=FILTERS):
     

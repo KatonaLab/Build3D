@@ -2,6 +2,7 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import copy
+import sys
 
 
 from .imageclass import Image
@@ -10,6 +11,23 @@ from . import segmentation
 '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
 	the workflows to process images.
 	'''
+def overlap_image(img_list):
+
+
+    # Create Overlapping Image
+    output_array = img_list[0].array
+    for i in range(1, len(img_list)):
+        output_array = np.multiply(output_array, img_list[i].array)
+
+    return output_array
+
+def convert_array_type(array, dtype):
+    
+    #print('Warning: Image type has been converted from '
+                 #+str(array.dtype)+' to '+str(dtype)+'!', file=sys.stderr) 
+    array=array.astype(dtype)
+    
+    return array
 
 def colocalization_connectivity(image_list, raw_img_list=None):
     '''TODO what happens if tagged image was not previouslz analyzed
@@ -19,15 +37,8 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     
     
     # Create Overlapping Image
-    ovl_array = image_list[0].array
-     
-    for i in range(1, len(image_list)):
-        temp_img=image_list[i].array
-
-        ovl_array = np.multiply(ovl_array, temp_img)
-    ovl_array[ovl_array>0]=1
-    
-     
+    ovl_array = overlap_image(image_list)
+  
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
     metadata['Name']=str.join('_', name_list)

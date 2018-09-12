@@ -5,12 +5,12 @@ import cv2
 import numpy as np
 import SimpleITK as sitk
 from .utils import round_up_to_odd
-
+from .core import convert_array_type
 
 def tag_image(ndarray):
 
     # Cast to 16-bit
-    ndarray = img_as_uint(ndarray/np.amax(ndarray))
+    ndarray = convert_array_type(ndarray, 'int16')
     
     #Convert ndarray to itk image
     itk_image = sitk.GetImageFromArray(ndarray)
@@ -46,7 +46,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
     
     
     # Cast to 16-bit
-    ndarray = img_as_uint(ndarray/np.amax(ndarray))
+    ndarray = convert_array_type(ndarray, 'int16')
 
     # Cast to 8-bit
     #ndarray = img_as_ubyte(ndarray)
@@ -115,7 +115,7 @@ def create_surfaceImage(ndarray):
 def threshold_manual(ndarray, upper=1, lower=0):
  
     # Cast to 16-bit
-    ndarray = img_as_uint(ndarray/np.amax(ndarray))
+    ndarray = convert_array_type(ndarray, 'int16')
     
     # Convert nd Image to ITK image
     itk_image = sitk.GetImageFromArray(ndarray)
@@ -134,6 +134,9 @@ def threshold_manual(ndarray, upper=1, lower=0):
 
 
 def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
+    
+    # Cast to 16-bit
+    ndarray = convert_array_type(ndarray, 'int16')
     
     #Inizialize
     method_list = ['Mean', 'Gaussian']

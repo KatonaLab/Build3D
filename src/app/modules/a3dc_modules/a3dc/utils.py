@@ -156,7 +156,7 @@ def os_open(path):
 
 
 
-def quote():
+def quote(verbose=False):
 	
     '''Generates a random quote (most of which are from Gaussian03).
     '''
@@ -166,4 +166,10 @@ def quote():
     #Get quote
     quote=QUOTE_LIST[index]
     
-    return '\n'+SEPARATOR+'\n'+quote+'\n'+SEPARATOR+'\n'
+    #Print if verbose is set to true
+    if verbose:
+        quote_list=quote.split("\n")
+        for i in quote_list:
+            print(i)
+    
+    return quote

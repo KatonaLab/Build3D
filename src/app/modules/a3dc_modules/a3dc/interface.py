@@ -65,9 +65,9 @@ def threshold(image, method="Otsu", **kwargs):
     tstart = time.clock()
 
     # Threshold methods
-    autothresholdList = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
+    auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
-    adaptiveThresholdList = ['Adaptive Mean', 'Adaptive Gaussian']
+    adaptive_list = ['Adaptive Mean', 'Adaptive Gaussian']
 
 
     # Creatre LogText and start logging
@@ -76,9 +76,9 @@ def threshold(image, method="Otsu", **kwargs):
 
     # Parse kwargs
     if kwargs != {}:
-        if method in autothresholdList:
+        if method in auto_list:
             keyList=['mode']
-        elif method in adaptiveThresholdList:
+        elif method in adaptive_list:
             keyList = ['blockSize', 'offSet']
         elif method == 'Manual':
             keyList =['lower', 'upper']
@@ -89,29 +89,34 @@ def threshold(image, method="Otsu", **kwargs):
         
     # Run thresholding functions
     try:
-        if method in autothresholdList:
-            outputArray, thresholdValue = segmentation.threshold_auto(image.array, method, **kwargs)
+        if method in auto_list:
+            output_array, thresholdValue = segmentation.threshold_auto(image.array, method, **kwargs)
             logText += '\n\tThreshold values: ' + str(thresholdValue)
 
-        elif method in adaptiveThresholdList:
+        elif method in adaptive_list:
             logText += '\n\tSettings: ' + str(kwargs)
-            outputArray = segmentation.threshold_adaptive(image.array, method, **kwargs)
+            output_array = segmentation.threshold_adaptive(image.array, method, **kwargs)
 
         elif method == 'Manual':
             logText += '\n\tSettings: ' + str(kwargs)
-            outputArray = segmentation.threshold_manual(image.array, **kwargs)
+            output_array = segmentation.threshold_manual(image.array, **kwargs)
 
         else:
             raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
+    
+        output_metadta=image.metadata
+        output_metadta['Type']=output_array.dtype
+    
     except Exception as e:
         raise Exception("Error occured while thresholding image!",e)
 
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
-
-    return Image(outputArray, image.metadata), logText
+    
+    
+    return Image(output_array, image.metadata), logText
 
 
 
