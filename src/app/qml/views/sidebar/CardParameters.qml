@@ -151,6 +151,7 @@ Repeater {
                         selectFolder: details.hints.folder || false
                         onAccepted: {
                             details.value = dialog.fileUrl;
+                            ModuleStore.dialogFolder = dialog.folder;
                         }
                     }
                 }

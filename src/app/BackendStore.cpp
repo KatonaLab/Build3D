@@ -676,10 +676,12 @@ void BackendStore::newWorkflow()
 {
     beginResetModel();
     try {
+        m_editorMode = true;
         m_items.clear();
         ComputePlatform cleanPlatform;
         swap(m_platform, cleanPlatform);
         this->setUnsaved(false);
+        m_editorMode = GlobalSettings::editorMode;
     } catch (exception& e) {
         qCritical() << e.what();
     }
@@ -690,9 +692,11 @@ void BackendStore::readWorkflow(const QUrl& url)
 {
     try {
         newWorkflow();
+        m_editorMode = true;
         BackendStoreSerializer ser;
         ser.read(url.toLocalFile(), *this);
         this->setUnsaved(false);
+        m_editorMode = GlobalSettings::editorMode;
     } catch (exception& e) {
         qCritical() << e.what();
     }

@@ -2,7 +2,7 @@
     "items": [
         {
             "category": "module",
-            "module": "selector/module_Path.py",
+            "module": "selector/module_File.py",
             "name": "Input_Path",
             "order": 0,
             "parentUid": -1,
@@ -12,7 +12,7 @@
             "category": "parameter",
             "parentUid": 22,
             "uid": 0,
-            "value": "file:///C:/Users/pongor.csaba/Desktop/Output/ometest_2.ome.tif"
+            "value": ""
         },
         {
             "category": "output",
@@ -29,7 +29,7 @@
         },
         {
             "category": "module",
-            "module": "selector/module_Path.py",
+            "module": "selector/module_Directory.py",
             "name": "Output_Path",
             "order": 3,
             "parentUid": -1,
@@ -39,7 +39,7 @@
             "category": "parameter",
             "parentUid": 23,
             "uid": 0,
-            "value": "file:///C:/Users/pongor.csaba/Desktop/Output/ometest_2.ome.tif"
+            "value": "."
         },
         {
             "category": "output",
