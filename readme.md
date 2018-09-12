@@ -25,11 +25,11 @@ Check your path to the project directory (e.g. `"c:\my projects\A3DC"`), if it c
 # Development Infos
 
 ## Requirements
-
+TODO
 ## Build
-
+TODO
 ## Contribute
-
+TODO
 
 # License
 
