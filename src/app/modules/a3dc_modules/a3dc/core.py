@@ -167,9 +167,8 @@ def colocalization_analysis(image_list, ovl_img):
 
 def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']):
 
-
     #Convert tagged image to ITK image
-    itk_img = sitk.GetImageFromArray(tagged_Img.array)
+    itk_img = image_to_itk(tagged_Img)
 
     # Instatiate ITK LabelIntensityStatisticsImageFilter()
     itk_filter = sitk.LabelIntensityStatisticsImageFilter()
@@ -240,7 +239,7 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
 
     for i in range(len(img_list)):
 
-        itk_raw = sitk.GetImageFromArray(img_list[i].array)
+        itk_raw = image_to_itk(img_list[i])
         
         for key in multi_img_meas_list:
             database[key+' in '+img_list[i].metadata['Name']] = []
@@ -258,6 +257,7 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
 
             for key in multi_img_meas_list:
                 database[key+' in '+img_list[i].metadata['Name']].append(multi_img_functions[key](label))
+    
     
     #Measure object surface
     if 'surface' in meas_list:
@@ -279,9 +279,6 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
     if 'onFaces' in meas_list:
      
         #Create and measure Surface Image
-        #☺faces=segmentation.create_surfaceImage()
-        #print([tagged_Img.array[0],tagged_Img.array[-0]])
-        #facesitk_img=sitk.GetImageFromArray([tagged_Img.array[0],tagged_Img.array[-1]])
         facesitk_img=sitk.GetImageFromArray([tagged_Img.array[0]])
        
       
@@ -299,7 +296,7 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
     return tagged_Img
 
 
-def filter_database(dictionary, filter_dict, overwrite=True, remove_filtered=False):
+def filter_database(dictionary, filter_dict, overwrite=True):
  
 
     df = pd.DataFrame(dictionary)
@@ -338,26 +335,59 @@ def filter_database(dictionary, filter_dict, overwrite=True, remove_filtered=Fal
     return dictionary
 
 
-def filter_image(tagged_Img):
-    
-    database=tagged_Img.database
+
+def remove_filtered(tagged_Img, database):
 
     change_dict={}
+
     if 'filter' in database.keys():
+
         for i in range(len(database['filter'])):#database should have a label key!!!
             if database['filter'][i]==False:
                 change_dict[int(database['tag'][i])]=0
-
-        itk_img = sitk.GetImageFromArray(tagged_Img.array)
+    
+        itk_img = sitk.GetImageFromArray(tagged_Img)
 
         sitk_filter = sitk.ChangeLabelImageFilter()
         sitk_filter.SetChangeMap(change_dict)
-
-        output=Image(sitk.GetArrayFromImage(sitk_filter.Execute(itk_img)),tagged_Img.metadata)
+        
+        output_image=sitk.GetArrayFromImage(sitk_filter.Execute(itk_img))
+        
+        #Remove filtered from dictionary
+        df = pd.DataFrame(database)
+        df.drop(df[df['filter'] == False].index, inplace=True)
+    
+        output_database = df.to_dict(orient='list')
+        
+        return output_image , output_database
+       
         
     else:
-        output=tagged_Img
+        return tagged_Img, database
     
-    return output
+def image_to_itk(image):
+     
+    itk_img = sitk.GetImageFromArray(image.array)
+    
+    #Check if physical size metadata is available if any is missing raise Exeption
+    size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
+    missing_size=[s for s in size_list if s not in image.metadata.keys()]
+    if len(missing_size)!=0:
+        print('Missing :'+str(missing_size)+'! Unable to carry out analysis!', file=sys.stderr)
+    else:
+        itk_img.SetSpacing((image.metadata['PhysicalSizeX'],image.metadata['PhysicalSizeY'],image.metadata['PhysicalSizeZ']))
+    
+    #Check if unit metadata is available
+    unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
+    missing_unit=[u for u in unit_list if u not in image.metadata.keys()]
+    if len(missing_size)!=0:
+        print('Warning: DEFAULT value (um or micron) used for :'
+             +str(missing_unit)+'!', file=sys.stderr)
 
-
+    return itk_img    
+        
+    
+    
+    
+    
+    

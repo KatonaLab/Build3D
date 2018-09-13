@@ -27,6 +27,7 @@ def module_main(ctx):
 
 
 config = [a3.Parameter('such string 🐕', a3.types.string),
+          a3.Parameter('wow NO CSUSZKA', a3.types.int8),
           a3.Parameter('so filename', a3.types.url),
           a3.Parameter('wow integer', a3.types.int8)
             .setIntHint('min', 2)
