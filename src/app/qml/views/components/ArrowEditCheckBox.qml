@@ -32,6 +32,7 @@ Item {
         RowLayout {
             TextField {
                 id: textField
+                selectByMouse: true
             }
 
             Label {

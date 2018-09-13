@@ -99,7 +99,7 @@ ApplicationWindow {
         visible: false
         width: layout.width + 32
         height: layout.height + 32
-        
+
         ColumnLayout {
             id: layout
             anchors.centerIn: parent
@@ -123,10 +123,15 @@ ApplicationWindow {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
-            Label {
+            TextField {
                 Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
                 font.pointSize: 11
                 text: A3DCVersion.version()
+                selectByMouse: true
+                readOnly: true
+                horizontalAlignment: TextInput.AlignHCenter
+                implicitWidth: 400
             }
         }
 
@@ -264,7 +269,8 @@ ApplicationWindow {
         Label {
             id: splitter
             text: "⋮"
-            Layout.alignment: Qt.AlignVCenter
+            verticalAlignment: Text.AlignVCenter
+            Layout.fillHeight: true
 
             x: settings.splitterX
 

@@ -15,15 +15,16 @@ Repeater {
     property int uid: -1
 
     delegate: Loader {
+        id: loader
         property int uid: root.uid
         property var details: model
         Layout.fillWidth: true
 
         sourceComponent: {
             switch (model.type) {
-                case "int": return intSliderDelegate;
+                case "int": return intInputDelegate;
                 case "enum": return enumDelegate;
-                case "float": return floatSliderDelegate;
+                case "float": return floatInputDelegate;
                 case "bool": return switchDelegate;
                 case "string": return stringDelegate;
                 case "url": return filenameDelegate;
@@ -41,18 +42,20 @@ Repeater {
         }
 
         Component {
-            id: intSliderDelegate
-            PreciseSlider {
-                id: intSlider
-                value: details.value
-                stepSize: details.hints.stepSize || 1
-                snapMode: Slider.SnapAlways
-                from: details.hints.min || 0
-                to: details.hints.max || 1000
-                text: details.name
-                onValueChanged: {
-                    details.value = value;
-                }
+            id: intInputDelegate
+            NumberInput {
+                validator: IntValidator {}
+                details: loader.details
+                intType: true
+            }
+        }
+
+        Component {
+            id: floatInputDelegate
+            NumberInput {
+                validator: DoubleValidator {}
+                details: loader.details
+                intType: false
             }
         }
 
@@ -78,20 +81,6 @@ Repeater {
                             currentIndex = 0;
                         }
                     }
-                }
-            }
-        }
-
-        Component {
-            id: floatSliderDelegate
-            PreciseSlider {
-                id: floatSlider
-                from: details.hints.min || 0.0
-                to: details.hints.max || 1.0
-                text: details.name
-                value: details.value
-                onValueChanged: {
-                    details.value = value;
                 }
             }
         }

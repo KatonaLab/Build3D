@@ -20,6 +20,7 @@
     <file>./qml/views/components/ArrowCheckBox.qml</file>
     <file>./qml/views/components/HorizontalDivider.qml</file>
     <file>./qml/views/components/DynamicComboBox.qml</file>
+    <file>./qml/views/components/NumberInput.qml</file>
     <file>./qml/views/display/SceneRenderSettings.qml</file>
     <file>./qml/views/display/SceneRootEntity.qml</file>
     <file>./qml/views/display/ScreenQuadEntity.qml</file>
