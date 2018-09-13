@@ -24,10 +24,15 @@ def module_main(_):
     print('Loading the following channel: ', img.metadata['Name'][ch])
     if ch>=img.metadata['SizeC']:
         raise Exception('Image has %s channels! Invalid channel %s' % (str(img.metadata['SizeC']), str(ch)))
-        
+    
+
+    #Check if image is time series
+    if img.metadata['SizeT']>1:
+        print("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
+    
+    #Extract channel from image array    
     dims = len(img.image.shape)
     if dims == 5:
-        print("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
         array = img.image[0, ch, :, :, :]
     elif dims == 4:
         array = img.image[ch, :, :, :]

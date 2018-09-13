@@ -168,8 +168,12 @@ def quote(verbose=False):
     
     #Print if verbose is set to true
     if verbose:
-        quote_list=quote.split("\n")
-        for i in quote_list:
-            print(i)
+        print_line_by_line(quote)
     
     return quote
+
+def print_line_by_line(string):
+    
+    string_list=string.split("\n")
+    for i in string_list:
+        print(i)

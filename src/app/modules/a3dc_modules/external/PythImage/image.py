@@ -1,14 +1,14 @@
 import numpy as np
 import copy
 
+
+#from .RoiClass import Roi 
+from . import imagej_tiff 
+from . import ome_tiff
+from .roi import roi_to_coordinates
 from . import utils
-from .RoiClass import Roi 
-from .error import PythImageError as PythImageError
-from .io import imagej_tiff, ome_tiff, tiff
-#from .io.imagej_tiff import load, convert_metadata #imagej_tiff, 
-#from .io.imagej import load_imagej, convert_imagej_metadata
-#from .io.ome import load_ome, convert_ome_metadata, metadata_to_ome, save_image  
-#from .io.tiff import load_tiff, convert_tiff_metadata
+
+
 
 ##Add channel, remove channel, extract channel etc.
 class Image(object):
@@ -19,64 +19,24 @@ class Image(object):
     
     __protected=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
     __dim_translate={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
-   
+
     #Translate ome type to numpy
     __bit_depth_lookup={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}
     
-    def __init__(self, image, metadata):
+    def __init__(self, ndarray, metadata):
+
+        #Reshape image so it contains all dimensions
+        ndarray=self.__expand_singleton_dimensions(ndarray, metadata)
         
         #Check if image and metadata is valid
-        self.__validate(image, metadata)
+        self.__validate(ndarray, metadata)
+        
+        #Set attributes
         self.__metadata=metadata
-        self.__image=image
-        #Reshape image so it contains all dimensions
-        #self.__image=self.__expand_singleton_dimensions(image, metadata)
-        
-    def __call__(self, T=None, C=None, Z=None):
-        
-        if not (isinstance(T, int) or isinstance(C, int) or isinstance(Z, int)):
-            raise PythImageError("T, C and Z can only be called with inteber values", TypeError)
-  
-        local_dict=locals()    
-        arg_list = [arg for arg in  ('T', 'C', 'Z') if arg in local_dict.keys() if local_dict[arg]!=None ]
-        
-        indexes=[slice(local_dict[arg],local_dict[arg]+1,1)  for arg in arg_list]
-        #indexes.append(slice(1,2,1))
+        self.__image=ndarray
 
-        dimensions=list(self.__metadata['DimensionOrder'])
-        dimension_order=[dim for dim in dimensions if dim not in arg_list]+arg_list
-   
-        self.reorder(dimension_order)
-        
-        shape=tuple(reversed(list(self.__image.shape)))
-        
-        metadata_new=copy.deepcopy(self.__metadata)
-        
-        for dim in dimension_order:
-            if dim in ('T', 'C', 'Z'):
-                if isinstance(local_dict[dim], int):
-                    metadata_new[self.__dim_translate[dim]]=1
-                if isinstance(local_dict[dim], list):    
-                    metadata_new[self.__dim_translate[dim]]=len(local_dict[dim])
-        
-        if 'C' in arg_list:
-            
-            metadata_new['Name']=metadata_new['Name'][C]
-            metadata_new['SamplesPerPixel']=metadata_new['SamplesPerPixel'][C]
-
-   
-        image_new=copy.deepcopy(self.__image.copy())
-      
-        image_new=image_new[indexes]
-  
-        a=self.__expand_singleton_dimensions(image_new, metadata_new)
-
-
-        return self.__init__(image=image_new,metadata=metadata_new)
-    
     
     def __getitem__(self, key):
-        
 
         shape=self.__image.shape
         metadata=copy.deepcopy(self.__metadata)
@@ -101,6 +61,7 @@ class Image(object):
         return Image(image=image ,metadata=metadata)
     
     def __repr__(self):
+     
         return utils.dict_to_string(self.__metadata)     
     
     def __getattr__(self, atr):
@@ -141,6 +102,7 @@ class Image(object):
         
             #Load image and create simplified metadata dictionary
             image, ome_metadata=ome_tiff.load_image(path)
+      
             metadata=ome_tiff.convert_metadata(ome_metadata)
              
         elif file_type=='imagej':
@@ -148,50 +110,27 @@ class Image(object):
             #Load image and create simplified metadata dictionary
             image, imagej_metadata=imagej_tiff.load_image(path)
             
-            metadata=imagej_tiff.convert_metadata(imagej_metadata)
-            
-            '''        
-            dim_order_final='XYZCT'
-            #Change dimension order to the one specified in dim_order_final
-            dim_order=metadata['DimensionOrder']
-            image=ImageClass.reorder(dim_order, 'SXYZCT')
-             
-            #Reshape image so output image has separate channels for S dimension
-            if metadata['SamplesPerPixel']>1:
-                image=ImageClass.merge_axes(image, 5, 1)
-            metadata['DimensionOrder']=dim_order_final
-            
-            #For hyperstacks remove S singleton dimension
-            if image.shape[-1]==1:
-                image=np.squeeze(image, axis=5)
-            '''    
+            metadata=imagej_tiff.convert_metadata(imagej_metadata)   
         
-        elif file_type=='tiff':
-             #Load image and create simplified metadata dictionary
-            image, metadata=tiff.load(path)
-            metadata=tiff.convert_metadata(metadata, order=kwargs['order'], shape=kwargs['shape'])
-        
+       
         #Return first timeframe
-        return cls(image=image, metadata=metadata)
+        return cls(ndarray=image, metadata=metadata)
     
               
-    def save(self, path, file_type='ome'):
+    def save(self, directory, file_name):
         '''
         Load image stack from path. RGB images are not supported currently and only first frame is returned.
         '''
         
-        
-        if file_type=='ome':
+        #Load image and create simplified metadata dictionary
+        #print(self.image.shape)
+        self.reorder('XYZCT')
+        #print(self.image.shape)
+        ome_tiff.save_image(self.image,self.metadata, directory, file_name)
+                 
 
-            #Load image and create simplified metadata dictionary
-            self.reorder('XYCZT')
-            ome_tiff.save_image(self.image,self.metadata, path)
-           
-             
-        elif file_type=='imagej':
-            ome_tiff.save_image(self.image,self.metadata, path)
-            
-            
+     
+    
     def __validate(self, image, metadata):
 
         #Check if image is numpy array and metadata is dict
@@ -209,16 +148,15 @@ class Image(object):
            
             if isinstance(metadata['SamplesPerPixel'], list):
                 sample_cnt=sum(metadata['SamplesPerPixel'])
+            
             elif isinstance(metadata['SamplesPerPixel'], int):
                 sample_cnt=metadata['SamplesPerPixel']
-      
-
-            
+          
             if sample_cnt!=metadata['SizeC']:
-                raise PythImageError('Invalid SamplesPerPixel list!','')  
+                raise Exception('Invalid SamplesPerPixel list!','')  
             
             if utils.length(metadata['Name'])!=metadata['SizeC']:
-                raise PythImageError('Length of Name list is invalid!','')
+                raise Exception('Length of Name list is invalid!','')
             
   
         #Check if image shape confers with the one in the metadata
@@ -227,27 +165,11 @@ class Image(object):
         available_keys=[self.__dim_translate[dim] for dim in reversed(metadata['DimensionOrder']) if self.__dim_translate[dim] in metadata.keys()]
  
         shape_metadata=[metadata[key] for key in available_keys if metadata[key]!=1]
-
+  
         if shape_image!=shape_metadata:
-            raise PythImageError('shape information in metadata is not compattible to the image shape!','')
+            raise Exception('shape information in metadata is not compattible to the image shape!','')
     
     
-    def __expand_singleton_dimensions(self, image, metadata):
-
-        dim_order_list=metadata['DimensionOrder']
-     
-        shape=[1]*len(dim_order_list)
-        for i, dim in enumerate(dim_order_list):
-            if dim in self.__dim_translate.keys() and dim!='S':
-                key=self.__dim_translate[dim]
-             
-                if key in metadata.keys():
-                    shape[i]=int(metadata[key])
-                else:
-                    shape[i]=1
-        shape.reverse()
-    
-        return np.reshape(image, tuple(shape))
     
     @staticmethod
     def __slice_length(slice_object, object_length):
@@ -292,8 +214,7 @@ class Image(object):
     
 
     def append_to_dimension(self, image, dim):
-        
-      
+
         #Append names
         self.__metadata['Name']=utils.concatenate(self.__metadata['Name'],image.get_metadata('Name'))
         self.__metadata['SamplesPerPixel']=utils.concatenate(self.__metadata['SamplesPerPixel'], image.get_metadata('SamplesPerPixel'))
@@ -318,7 +239,6 @@ class Image(object):
 
         if 'ROI' in self.__metadata.keys():
           
-            
             #Generate roi list. If image has multiple ROI-s, metadata['ROI'] is a list.
             if isinstance(self.__metadata['ROI'], dict):
                 roi_list=[self.__metadata['ROI']]
@@ -328,16 +248,10 @@ class Image(object):
             #Check if index is within possible range
             if index>=len(roi_list):
                 raise IndexError('Only '+str(len(roi_list))+' ROI(s) available!')
-            
-            #Get reversed dimension order
-            order=self.__metadata['DimensionOrder'][::-1]
 
-            #create metadata dictionary for roi and set channel to 1
-            roi_metadata=self.__metadata.copy()
-            roi_metadata['SizeC']=1
-            roi_metadata['Name']=roi_list[index]['ID']
-            roi_metadata['SamplesPerPixel']=1
-            del roi_metadata['ROI']
+            #Get reversed dimension order
+            order=self.__metadata['DimensionOrder'][::-1]            
+            
             
             #Create shape tuple
             shape=[1]*len(order)
@@ -346,36 +260,41 @@ class Image(object):
                     shape[idx]=self.__metadata[self.__dim_translate[dim]]
                 if dim=='C':
                     shape[idx]=1
-            
+                       
             shape=tuple(shape)
 
-            img=np.zeros(shape, dtype=self.__metadata['Type'])
-            
-            rr, cc = RoiClass(roi_list[index]).coordinates
-            
-            #Create slice object to set value of ROI pixels
-            slice_object_list=[1]*len(order)
-            for idx, dim in enumerate(order):
-                if dim=='X':
-                    slice_object_list[idx]=rr
-                elif dim=='Y':
-                    slice_object_list[idx]=cc
-                else:    
-                    slice_object_list[idx]=slice(None,None,None)
-       
-            #Set roi pixel values
-            img[slice_object_list] = value
-            #img[:,:,:,cc,rr] = value
 
+            
+            #create metadata dictionary for roi and set channel to 1
+            roi_metadata=self.__metadata.copy()
+            roi_metadata['SizeC']=1
+            roi_metadata['Name']=roi_list[index]['ID']
+            roi_metadata['SamplesPerPixel']=1
+            del roi_metadata['ROI']
+            
+            #Set roi pixel values
+            img=np.zeros(shape, dtype=self.__metadata['Type'])
+            rr, cc = roi_to_coordinates(roi_list[index])            
+            
+            cc_mod=[]
+            rr_mod=[]
+            for idx in range(len(cc)):
+                if  rr[idx]<roi_metadata['SizeY'] and cc[idx]<roi_metadata['SizeX']:
+                    rr_mod.append(rr[idx])
+                    cc_mod.append(cc[idx])
+            
+            img[:,:,:, cc_mod,rr_mod] = value
+            
+            #print(img)
             #Create new ImageClass object
             roi=Image(img, roi_metadata )
-
-            
+            #print(roi.image)
+            #print(np.amax(roi.image))
             self.append_to_dimension(roi, dim='C')
 
             
         else:
-            raise PythImageError('No ROI available!', '')
+            raise Exception('No ROI available!', '')
                 
     def reorder(self, order):
         '''
@@ -383,19 +302,12 @@ class Image(object):
         be the same length and confer with number of axes in ndarray!
         Reshape array so it has all the axes
         '''
-     
+   
         order=list(order)
+
         dim_order_list=list(self.__metadata['DimensionOrder'])
         order_final=order.copy()
 
-        #Remove singleton dimensions
-        dim_translate={'T':self.__metadata['SizeT'], 'C':self.__metadata['SizeC'], 'Z':self.__metadata['SizeZ'], 'X':self.__metadata['SizeX'], 'Y': self.__metadata['SizeY']}
-        singleton_dim=[key for key in dim_translate if int(dim_translate[key])<=1]
-        
-        for dim in singleton_dim:
-            order.remove(dim)
-            dim_order_list.remove(dim)
-      
         #Cycle through image dimension order, check for differences in final order and replace
         axis_number=len(order)-1
         for i in range(len(dim_order_list)):
@@ -405,10 +317,10 @@ class Image(object):
                 axis_index_final=order.index(dim_order_list[i])
                 self.__image=self.__image.swapaxes(axis_number-axis_index_current, axis_number-axis_index_final)
                 dim_order_list[axis_index_current], dim_order_list[axis_index_final] = dim_order_list[axis_index_final], dim_order_list[axis_index_current]
-           
-      
+
         #Set final dimension order
         self.__metadata['DimensionOrder']=''.join(order_final)
+
     
     def merge_axes(ndarray, axis1, axis2):
         '''
@@ -455,16 +367,35 @@ class Image(object):
         return np.reshape(ndarray.ravel(), shape)        
 
 
-    
-
-    
     def z_projection (self):
         '''Needs to be implemented
         '''
         pass
-      
+    
+    def change_type(self):
+        pass
+    
 
-      
-    
-    
+    def __expand_singleton_dimensions(self, ndarray, metadata):
+
+        dim_order_list=metadata['DimensionOrder']
+
+     
+        shape=[1]*len(dim_order_list)
+
+        for i, dim in enumerate(dim_order_list):
+            if dim in Image.__dim_translate.keys() and dim!='S':
+                
+                key=Image.__dim_translate[dim]
+             
+                if key in metadata.keys():
+                    shape[i]=int(metadata[key])
+                else:
+                    shape[i]=1
+        
+        shape.reverse()
+        output=np.reshape(ndarray, tuple(shape))
+        
+        return output
+       
     

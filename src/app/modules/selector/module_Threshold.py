@@ -24,11 +24,9 @@ def module_threshold(image, method="Otsu", kwargs={}):
     try:
         
         #Threshold image
-        output, threshold_value = threshold(image, method, **kwargs)
-        print('Threshold value(s): ' + str(threshold_value))
-        raise Warning('Hell broke loose')
+        output, logText = threshold(image, method, **kwargs)
+        print('Threshold value(s): ' + str(logText.split('\n')[-2].split(':')[-1]))
     
-   
     except Exception as e:
         
         if isinstance(e, Warning):
@@ -37,9 +35,6 @@ def module_threshold(image, method="Otsu", kwargs={}):
             traceback.print_exc()
             raise Exception("Error occured while thresholding image!",e)
 
-
-
-        
     return output
 
 
@@ -69,7 +64,7 @@ def module_main(ctx):
     #Inizialization
     tstart = time.clock()
     print(SEPARATOR)
-    print('Autothresholding started!')
+    print('Thresholding started!')
     
     
     #Create Image object
@@ -91,9 +86,7 @@ def module_main(ctx):
             kwargs['mode']='Slice'
         print('Mode: ' +kwargs['mode'])
         
-
-    
-           
+      
     #Run thresholding            
     output_img=module_threshold(img, method,kwargs)
 

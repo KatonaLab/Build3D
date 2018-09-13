@@ -164,7 +164,7 @@ def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanInt
     return tagged_img, logText
 
 
-def apply_filter(image, filterDict=None, removeFiltered=False, overWrite=True):
+def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True):
     '''
     Filters dictionary stored in the 'database' key of the inputDisctionary to be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['database']
     and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
@@ -180,31 +180,28 @@ def apply_filter(image, filterDict=None, removeFiltered=False, overWrite=True):
     :param removeFiltered: If True objects that are filtered out are removed
     :return:
     '''
+    
     # Start timing
     tstart = time.clock()
 
     # Creatre LogText and start logging
     logText = '\nFiltering: ' + str(image.metadata['Name'])
-    logText += '\n\tFilter settings: '+str(filterDict).replace('{', ' ').replace('}', ' ')
-    logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
-    logText += '\n\t\toverwrite=' + str(overWrite)
+    logText += '\n\tFilter settings: '+str(filter_dict).replace('{', ' ').replace('}', ' ')
+    logText += '\n\t\tremoveFiltered=' + str(remove_filtered)
+    logText += '\n\t\toverwrite=' + str(overwrite)
 
     try:
-        if filterDict==None:
-            filterDict={}
+        if filter_dict==None:
+            filter_dict={}
 
         # Filter dictionary
-        output_database=core.filter_database(image.database, filterDict, overWrite, removeFiltered)
-
-        # Create/Filter image
-        if removeFiltered == True:
-            output_image = core.filter_image(image)
-        else:
-            output_image=Image(image.array, image.metadata)
-
-        #Add database to image
-        output_image.database=output_database
-    
+        output_database=core.filter_database(image.database, filter_dict, overwrite)
+        output_image=image.array
+        
+        # Remove Filtered objects from database and image
+        if remove_filtered == True:
+            output_image , output_database = core.remove_filtered(image.array, output_database)
+            
     except Exception as e:
         raise Exception("Error occured while filtering database!",  e)
 
@@ -213,7 +210,7 @@ def apply_filter(image, filterDict=None, removeFiltered=False, overWrite=True):
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
     
     
-    return output_image , logText
+    return Image(output_image, image.metadata, output_database) , logText
 
 
 def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None,

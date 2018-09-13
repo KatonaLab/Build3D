@@ -10,16 +10,18 @@ from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
 from modules.a3dc_modules.a3dc.utils import SEPARATOR
 import time
+import math
+import sys
 
 
 import numpy as np
 
 
-FILTERS = ['voxelCount',
-           'pixelsOnBorder', 'meanIntensity']
+FILTERS = ['volume', 'meanIntensity']
+          
 #'volume', 
 
-def analyze_image(source, mask, settings, show=True, to_text=False):
+def analyze_image(source, mask, settings, removeFiltered=False):
         
         print('Processing the following channels: '+ str(source.metadata['Name']))
         print('Filter settings: '+str(settings))
@@ -46,8 +48,8 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
         print('Analyzing tagged image!')
         taggedImage, _ = analyze(taggedImage, imageList=[source], measurementInput=measurementList)
         
-        print('Filtering object database')
-        taggedImage, _ = apply_filter(taggedImage, filterDict=settings, removeFiltered=False)#{'tag':{'min': 2, 'max': 40}}
+        print('Filtering object database!')
+        taggedImage, _ = apply_filter(taggedImage, filter_dict=settings, remove_filtered=removeFiltered)#{'tag':{'min': 2, 'max': 40}}
         
         #taggedImage.as_type(np.int64)#(taggedImage.metadata['Type'])
         
@@ -57,35 +59,73 @@ def analyze_image(source, mask, settings, show=True, to_text=False):
 def read_params(filters=FILTERS):
     
     out_dict = {}
-    out_dict = {'Source': Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Source_Image']),a3.inputs['Source_MetaData'] ),
-                    'Mask':Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Mask_Image']),a3.inputs['Mask_MetaData'] )}
+    out_dict = {'Source': Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Source image']),a3.inputs['Source metadata'] ),
+                    'Mask':Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Mask image']),a3.inputs['Mask metadata'] )}
 
     settings = {}
     for f in filters:
         settings[f] = {}
         for m in ['min', 'max']:
             settings[f][m] = a3.inputs['{} {}'.format( f, m)]
+    
+    if a3.inputs['Exclude bordering objects']:       
+        settings['pixelsOnBorder']={'min': 1, 'max':float(math.inf)}
 
+    if a3.inputs['Use physical dimensions'] and ('volume' in settings.keys()):
+        
+        #Check if physical size metadata is available  if any is missing raise Exeption
+        size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
+        missing_size=[s for s in size_list if s not in out_dict['Source'].metadata.keys()]
+        if len(missing_size)!=0:
+            raise Exception('Missing :'+str(missing_size)+'! Unable to carry out analysis!')
+
+        #Check if unit metadata is available, default Unit is um!!!!!!!!
+        unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
+        missing_unit=[u for u in unit_list if u not in out_dict['Source'].metadata.keys()]
+        if len(missing_size)!=0:
+            print('Warning: DEFAULT value (um or micron) used for :'
+                 +str(missing_unit)+'!', file=sys.stderr)        
+        
+        #Set default Unit values is not in metadata
+        #Remember that if unit value is missing an exception is raised
+        for un in missing_unit:
+            out_dict['Source'].metadata[un]='um'
+            out_dict['Mask'].metadata[un]='um'
+        
+        print('Physical voxel volume is : '
+              +str(out_dict['Source'].metadata['PhysicalSizeX']*out_dict['Source'].metadata['PhysicalSizeY']*out_dict['Source'].metadata['PhysicalSizeZ'])
+              +' '+out_dict['Source'].metadata['PhysicalSizeXUnit']+'*'+out_dict['Source'].metadata['PhysicalSizeYUnit']+'*'+out_dict['Source'].metadata['PhysicalSizeZUnit'])
+        
+  
+    else:
+        settings['voxelCount'] = settings.pop('volume')
+    
     out_dict['Settings'] = settings
-     
+    
+    out_dict['removeFiltered']=a3.inputs['Remove filtered objects']
+
     return out_dict    
     
 
 def add_input_fields( filters=FILTERS):
     
-    config = [a3.Input('Source_Image', a3.types.ImageFloat),
-             a3.Input('Source_MetaData',  a3.types.GeneralPyType),
-             a3.Input('Mask_Image', a3.types.ImageFloat),
-             a3.Input('Mask_MetaData',  a3.types.GeneralPyType)]
+    config = [a3.Input('Source image', a3.types.ImageFloat),
+             a3.Input('Source metadata',  a3.types.GeneralPyType),
+             a3.Input('Mask image', a3.types.ImageFloat),
+             a3.Input('Mask metadata',  a3.types.GeneralPyType)]
 
     for f in filters:
         for m in ['min', 'max']:
             config.append(
                 a3.Parameter('{} {}'.format(f, m), a3.types.float)
-                .setIntHint('min', 0)
-                .setIntHint('max', 10000000)
-                .setIntHint('default', 0 if m == 'min' else 10000000))
-
+                .setFloatHint('min', 0)
+                .setFloatHint('max', 1e+19)
+                .setFloatHint('default', 0 if m == 'min' else 1e+19))
+    
+    config.append(a3.Parameter('Remove filtered objects', a3.types.bool))        
+    config.append(a3.Parameter('Exclude bordering objects', a3.types.bool))
+    config.append(a3.Parameter('Use physical dimensions', a3.types.bool))
+    
     return config
 
 def module_main(ctx):
@@ -100,18 +140,17 @@ def module_main(ctx):
     print('Reading input parameters!')
     params = read_params()
     
-    params = read_params()
-    
     output=analyze_image(params['Source'],
                params['Mask'],
-               params['Settings'])
+               params['Settings'],
+               params['removeFiltered'])
 
     #Change Name in metadata
     #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-    a3.outputs['Analyzed_Image'] = a3.MultiDimImageFloat_from_ndarray((output.array).astype(np.float))
+    a3.outputs['Analyzed image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float))
 
-    a3.outputs['Analyzed_DataBase']=output.database
-    a3.outputs['Analyzed_MetaData']=output.metadata
+    a3.outputs['Analyzed database']=output.database
+    a3.outputs['Analyzed metadata']=output.metadata
 
     #Finalization
     tstop = time.clock()
@@ -120,7 +159,7 @@ def module_main(ctx):
     print(SEPARATOR)
 
     
-config = [a3.Output('Analyzed_Image', a3.types.ImageFloat),  a3.Output('Analyzed_DataBase', a3.types.GeneralPyType), a3.Output('Analyzed_MetaData', a3.types.GeneralPyType)]
+config = [a3.Output('Analyzed image', a3.types.ImageFloat),  a3.Output('Analyzed database', a3.types.GeneralPyType), a3.Output('Analyzed metadata', a3.types.GeneralPyType)]
 config.extend(add_input_fields())
 
 a3.def_process_module(config, module_main)
