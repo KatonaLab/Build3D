@@ -25,7 +25,30 @@ Check your path to the project directory (e.g. `"c:\my projects\A3DC"`), if it c
 # Development Infos
 
 ## Requirements
-
+TODO
 ## Build
-
+TODO
 ## Contribute
+TODO
+
+# License
+
+See [LICENSE.txt](LICENSE.txt)
+
+## Dependencies
+
+* Qt
+	* https://www.qt.io
+	* http://doc.qt.io/qt-5/opensourcelicense.html
+* pybind11
+	* https://github.com/pybind/pybind11
+	* https://github.com/pybind/pybind11/blob/stable/LICENSE
+* libics
+	* https://svi-opensource.github.io/libics/
+	* https://svi-opensource.github.io/libics/#license
+* catch2
+	* https://github.com/catchorg/Catch2
+	* https://github.com/catchorg/Catch2/blob/master/LICENSE.txt
+* benchpress
+	* https://github.com/cjgdev/benchpress
+	* https://github.com/cjgdev/benchpress/blob/master/LICENSE
