@@ -31,10 +31,6 @@ RowLayout {
             }
         }
 
-        Component.onCompleted: {
-            console.log(isLocked);
-        }
-
         MouseArea {
             anchors.fill: parent
             enabled: isLocked
