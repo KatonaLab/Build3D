@@ -12,6 +12,7 @@ import collections
 from . import segmentation
 from . import core
 from .imageclass import Image
+#from .utils import VividException
    
         
         
@@ -39,7 +40,9 @@ def tagImage(image):
         image.metadata['Type']=str(output_array.dtype)
     
     except Exception as e:
+        traceback.print_exc()
         raise Exception("Error occured while tagging image!",e)
+        
 
     # Finish timing and add to logText
     tstop = time.clock()

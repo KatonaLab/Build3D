@@ -1,8 +1,4 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.external.PythImage import Image
-import numpy as np
-from modules.a3dc_modules.a3dc.utils import SEPARATOR
-import time
 
 def module_main(_):
 

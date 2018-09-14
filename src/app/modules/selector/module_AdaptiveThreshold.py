@@ -3,7 +3,7 @@ from modules.a3dc_modules.a3dc.segmentation import threshold_adaptive
 from modules.a3dc_modules.a3dc.imageclass import Image
 import numpy as np
 import time, traceback
-from modules.a3dc_modules.a3dc.utils import SEPARATOR
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, VividException
 
 
 METHODS=['Mean', 'Gaussian']
@@ -11,32 +11,12 @@ METHODS=['Mean', 'Gaussian']
 
 
 def adaptive_threshold(image, method , blocksize=5, offset=0):
-    '''
 
-    :param image:
-    :param imageDictionary:
-    :param method:
-    :param kwargs:
-        lowerThreshold, upperThreshold, mode,blockSize=5, offSet=0
-
-    :return:
-        LogText
-    '''
-
-    # Creatre LogText and start logging
     print('Thresholding: '+image.metadata['Name'])
     print('Method: Adaptive' + method)
     print('Settings: \n\t\tBlocksize:%s \n\t\tOffset:%s' % (str(blocksize),str(offset)))
-
-
-    # Run thresholding functions
-    try:
-
-        outputArray = threshold_adaptive(image.array, method, blocksize, offset)
-
-    except Exception as e:
-        traceback.print_exc()
-        raise Exception("Error occured while thresholding image!",e)
+    
+    outputArray = threshold_adaptive(image.array, method, blocksize, offset)
 
     return Image(outputArray, image.metadata)
 
@@ -70,35 +50,38 @@ def init_config(methods=METHODS):
 
 
 def module_main(ctx):
+    try:
+        #Inizialization
+        tstart = time.clock()
+        print(SEPARATOR)
+        print('Adaptive thresholding started!')
+        
+        #Create Image object
+        img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
     
-    #Inizialization
-    tstart = time.clock()
-    print(SEPARATOR)
-    print('Adaptive thresholding started!')
+        
+        #Get method and mode
+        method=METHODS[a3.inputs['Method'][-1]]
     
-    #Create Image object
-    img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
-
+        #Run thresholding            
+        output_img, logText=adaptive_threshold(img, method , blocksize=a3.inputs['BlockSize'], offset=a3.inputs['Offset'])
+        
+        #Change Name in metadata
+        #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
     
-    #Get method and mode
-    method=METHODS[a3.inputs['Method'][-1]]
-
-    #Run thresholding            
-    output_img, logText=adaptive_threshold(img, method , blocksize=a3.inputs['BlockSize'], offset=a3.inputs['Offset'])
+        #Set output
+        a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
+        a3.outputs['Output_Metadata']=output_img.metadata
+        
+        #Finalization
+        tstop = time.clock()
+        print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')
+        print('Adaptive thresholding was successfully!')
+        print(SEPARATOR)
     
-    #Change Name in metadata
-    #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
-
-    #Set output
-    a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
-    a3.outputs['Output_Metadata']=output_img.metadata
-    
-    #Finalization
-    tstop = time.clock()
-    print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')
-    print('Adaptive thresholding was successfully!')
-    print(SEPARATOR)
-    
+    except Exception as e:
+        raise VividException("Error occured while executing"+str(ctx.name)+" !",e)
+        
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
 config.append(a3.Output('Output_Metadata', a3.types.GeneralPyType))

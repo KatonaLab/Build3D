@@ -6,7 +6,7 @@ Created on Tue Aug 21 08:52:58 2018
 """
 import os, sys, subprocess
 #import warnings
-import random
+import random, traceback
 import numpy as np
 
 SEPARATOR='#####################################################################################################################'
@@ -172,8 +172,23 @@ def quote(verbose=False):
     
     return quote
 
-def print_line_by_line(string):
+def print_line_by_line(string, file=sys.stdout):
     
     string_list=string.split("\n")
     for i in string_list:
-        print(i)
+        print(i, file)
+        
+        
+#Class for error handling
+class VividException(Exception):
+    def __init__(self, message, errors):
+			
+        super(VividException, self).__init__(message)
+        self.errors = errors
+    
+        print(traceback.format_exc(10), file=sys.stderr)	
+        
+    def __str__(self):
+        
+        return repr(self.errors)
+    
