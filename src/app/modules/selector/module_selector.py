@@ -18,14 +18,12 @@ def module_main(ctx):
         #img = Image(a3.inputs['Image'], a3.inputs['MetaData'])
         img.reorder('XYZCT')
         
-    
         #Get channel from image. 
         ch=a3.inputs['Channel']
         print('Loading the following channel: ', img.metadata['Name'][ch])
         if ch>=img.metadata['SizeC']:
             raise Exception('Image has %s channels! Invalid channel %s' % (str(img.metadata['SizeC']), str(ch)))
         
-    
         #Check if image is time series
         if img.metadata['SizeT']>1:
             print("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
@@ -46,7 +44,6 @@ def module_main(ctx):
         img.metadata['Name']=img.metadata['Name'][ch]   
         #img.metadata['Path']=filename
         
-    
         #Create Output
         a3.outputs['Channel'] = a3.MultiDimImageFloat_from_ndarray(array.astype(np.float))
         a3.outputs['MetaData']=img.metadata
@@ -61,9 +58,8 @@ def module_main(ctx):
         raise VividException("Error occured while executing "+str(ctx.name)+" !",e)
 
 config = [a3.Parameter('Channel', a3.types.int8)
-            .setIntHint('min', 0)
-            .setIntHint('max', 8)
-            .setIntHint('stepSize', 1),
+                .setFloatHint('default', 0)
+                .setFloatHint('unusedValue',0),
     a3.Input('Image', a3.types.GeneralPyType),
     a3.Input('MetaData', a3.types.GeneralPyType),
     a3.Output('Channel', a3.types.ImageFloat),

@@ -145,7 +145,7 @@ def module_main(ctx):
                    params['Ovl'], 
                    params['Path'])
         
-        a3.outputs['Overlapping Image'] = a3.MultiDimImageFloat_from_ndarray((output.array>0).astype(float))
+        a3.outputs['Overlapping Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(float))
         a3.outputs['Overlapping MetaData'] =output.metadata
         a3.outputs['Overlapping DataBase']=output.database
           

@@ -53,7 +53,7 @@ def module_main(ctx):
         
         
         #Create Image object
-        img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
+        img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input Image']), a3.inputs['Input Metadata'])
         print('Thresholding: '+img.metadata['Name'])
         
         #Get method and mode
@@ -79,8 +79,8 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(float))
-        a3.outputs['Output_Metadata']=output_img.metadata
+        a3.outputs['Output Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(float))
+        a3.outputs['Output Metadata']=output_img.metadata
         
         #Finalization
         tstop = time.clock()
