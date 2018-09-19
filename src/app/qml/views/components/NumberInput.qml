@@ -25,6 +25,7 @@ RowLayout {
         value: details.value
         stepSize: details.hints.stepSize || 1
         snapMode: numberInput.intType ? Slider.SnapAlways : Slider.NoSnap
+        Layout.fillWidth: true
         onValueChanged: {
             if (!isLocked && details.value != value) {
                 details.value = value;
@@ -74,6 +75,13 @@ RowLayout {
                 if (details.value != v) {
                     details.value = v;
                 }
+            }
+        }
+        onActiveFocusChanged: {
+            if (!activeFocus) {
+                // trick to refresh text and slider value
+                slider.value = Qt.binding(function() { return details.value; });
+                textField.text = Qt.binding(function() { return details.value; });
             }
         }
     }
