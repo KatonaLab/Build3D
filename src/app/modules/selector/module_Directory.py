@@ -1,8 +1,13 @@
 import a3dc_module_interface as a3
+from modules.a3dc_modules.a3dc.utils import error
+import os
 
-def module_main(_):
+def module_main(ctx):
 
-    a3.outputs['Directory']=a3.inputs['Directory']
+    if os.path.isfile(a3.inputs['Directory'].path):
+        a3.outputs['Directory']=a3.inputs['Directory']
+    else:
+        error("Error occured while executing "+str(ctx.name)+" ! Invalid Directory!!")
 
 config = [
     a3.Parameter('Directory', a3.types.url).setBoolHint('folder', True),

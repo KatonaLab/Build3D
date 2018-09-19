@@ -156,6 +156,7 @@ def os_open(path):
 
 
 
+
 def quote(verbose=False):
 	
     '''Generates a random quote (most of which are from Gaussian03).
@@ -177,8 +178,20 @@ def print_line_by_line(string, file=sys.stdout):
     string_list=string.split("\n")
     for i in string_list:
         print(i, file)
+
+def warning(string):
+    
+    print(string, file=sys.stderr)
         
-        
+
+def error(message, exception=None):
+
+    print("Traceback:",file=sys.stderr)
+    print(traceback.format_exc(10), file=sys.stderr)
+
+    raise Exception(message, exception)
+ 
+
 #Class for error handling
 class VividException(Exception):
     def __init__(self, message, errors):

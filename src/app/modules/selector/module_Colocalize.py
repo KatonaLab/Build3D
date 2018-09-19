@@ -9,9 +9,10 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image
 from modules.a3dc_modules.a3dc.core import filter_database
-from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, VividException
+from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error
 import os
 import math
+import sys
 
 CHFILTERS=['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
 OVLFILTERS=[ 'volume','Ch1 overlappingRatio','Ch2 overlappingRatio']
@@ -30,17 +31,17 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Run filtering steps
     ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
     ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
-
+    
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
-
+    
     
     #Set path and filename
     outputPath=os.path.join(path, 'Output')
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)            
     
- 
+     
     if ch1_img.metadata['FileName']!=ch2_img.metadata['FileName']:
         
         basename=os.path.splitext(ch1_img.metadata['FileName'])[0]+'_'+os.path.splitext(ch2_img.metadata['FileName'][0])
@@ -50,28 +51,29 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Save databases
     print('Saving object dataBases to xlsx or text!')
     name=basename+'_'+ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
-    if to_text==True:
-        file_name=name+'.txt'    
-    else:
-        file_name=name+'.xlsx'
-    save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
 
+    save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=name, to_text=to_text)
+    
+  
+    if to_text==True:
+        file_name=name+".txt"    
+    else:
+        file_name=name+".xlsx"
+    output_path=os.path.join(outputPath, file_name)
+    
     #Save images
     print('Saving output images!')
-    name = basename+'_'+ch1_img.metadata['Name']#+"_tagged"
-    save_image(ch1_img, outputPath, name)
+    name_img = basename+'_'+ch1_img.metadata['Name']#+"_tagged"
+    save_image(ch1_img, outputPath, name_img)
     
-    name =basename+'_'+ch2_img.metadata['Name']#+"_tagged"
-    save_image(ch2_img, outputPath, name)
+    name_img =basename+'_'+ch2_img.metadata['Name']#+"_tagged"
+    save_image(ch2_img, outputPath, name_img)
     
-    name =basename+'_'+ch1_img.metadata['Name']+ "_" +ch2_img.metadata['Name']+ "_overlap"
-    save_image(ovl_img, outputPath, name)
-                
-    #Show file
-    #if show==True:    
-        #os_open(os.path.join(outputPath, file_name))
+    name_img =basename+'_'+ch1_img.metadata['Name']+ "_" +ch2_img.metadata['Name']+ "_overlap"
+    save_image(ovl_img, outputPath, name_img)            
     
-    return ovl_img
+    return ovl_img,  output_path  
+
 
 
 def read_params(filters=FILTERS):
@@ -81,7 +83,9 @@ def read_params(filters=FILTERS):
 
     out_dict['Ch1 Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1 Image']), a3.inputs['Ch1 MetaData'], a3.inputs['Ch1 DataBase'])
     out_dict['Ch2 Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2 Image']), a3.inputs['Ch2 MetaData'], a3.inputs['Ch2 DataBase'])
- 
+    
+    out_dict['to_text']=a3.inputs['Save to text']
+    
     settings = {}
     for f in filters:
         settings[f] = {}
@@ -143,12 +147,17 @@ def module_main(ctx):
                    params['Ch1'],
                    params['Ch2'],
                    params['Ovl'], 
-                   params['Path'])
+                   params['Path'],
+                   to_text=params['to_text'])
         
-        a3.outputs['Overlapping Image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(float))
-        a3.outputs['Overlapping MetaData'] =output.metadata
-        a3.outputs['Overlapping DataBase']=output.database
-          
+        a3.outputs['Overlapping Image'] = a3.MultiDimImageFloat_from_ndarray(output[0].array.astype(float))
+        a3.outputs['Overlapping MetaData'] =output[0].metadata
+        a3.outputs['Overlapping DataBase'] =output[0].database
+        
+        path=a3.Url()
+        path.path=output[1]
+        a3.outputs['Overlapping Path'] = path
+
         #Finalization
         tstop = time.clock()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
@@ -157,12 +166,14 @@ def module_main(ctx):
         quote(verbose=True)  
         print(SEPARATOR)
     
+    except IOError as e:
+        print("Warning: Failed to write to file!!", file=sys.stderr)
+        print(str(e), file=sys.stderr)
     
     except Exception as e:
-        raise VividException("Error occured while executing "+str(ctx.name)+" !",e)
+        error("Error occured while executing "+str(ctx.name)+" !", exception=e)
 
-
-    
+ 
 def generate_config(filters=FILTERS):
 
     #Set Outputs and inputs
@@ -172,12 +183,11 @@ def generate_config(filters=FILTERS):
         a3.Input('Ch1 DataBase', a3.types.GeneralPyType), 
         a3.Input('Ch2 Image', a3.types.ImageFloat),
         a3.Input('Ch2 MetaData', a3.types.GeneralPyType), 
-        a3.Input('Ch2 DataBase', a3.types.GeneralPyType),
-        
+        a3.Input('Ch2 DataBase', a3.types.GeneralPyType),              
         a3.Output('Overlapping Image', a3.types.ImageFloat),
         a3.Output('Overlapping MetaData', a3.types.GeneralPyType),
-        a3.Output('Overlapping DataBase', a3.types.GeneralPyType)]    
-    
+        a3.Output('Overlapping DataBase', a3.types.GeneralPyType),
+        a3.Output('Overlapping Path', a3.types.url)]    
     
     #Set parameters
     for f in filters:
@@ -187,6 +197,8 @@ def generate_config(filters=FILTERS):
                 .setIntHint('default', 0 if m == 'min' else 10000000)
                 .setFloatHint('default', 0 if m == 'min' else float(math.inf))
                 .setFloatHint('unusedValue',0 if m == 'min' else float(math.inf)))
+    
+    config.append(a3.Parameter('Save to text', a3.types.bool)) 
     
     return config
 

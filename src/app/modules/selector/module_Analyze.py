@@ -8,7 +8,7 @@ Created on Tue Aug 21 15:21:27 2018
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, VividException
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time
 import math
 import sys
@@ -165,7 +165,7 @@ def module_main(ctx):
         print(SEPARATOR)
 
     except Exception as e:
-        raise VividException("Error occured while executing "+str(ctx.name)+" !",e)
+        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
     
 
 

@@ -2,8 +2,8 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_adaptive
 from modules.a3dc_modules.a3dc.imageclass import Image
 import numpy as np
-import time, traceback
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, VividException
+import time
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 
 
 METHODS=['Mean', 'Gaussian']
@@ -80,7 +80,7 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise VividException("Error occured while executing"+str(ctx.name)+" !",e)
+        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
         
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
