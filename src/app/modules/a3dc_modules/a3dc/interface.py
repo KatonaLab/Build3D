@@ -4,7 +4,6 @@ Created on Sun Mar 25 23:17:33 2018
 
 @author: Nerberus
 """
-import traceback
 import time
 import numpy as np
 import collections
@@ -30,19 +29,13 @@ def tagImage(image):
     # Creatre LogText and start logging
     logText = '\nRunning connected components on : ' + str(image.metadata['Name'])
 
-    try:
-
-        #Tag image
-        output_array=segmentation.tag_image(image.array)
-        
-        #Create metadata ditionary and set type to match tagged image
-        output_metadata=image.metadata
-        image.metadata['Type']=str(output_array.dtype)
+    #Tag image
+    output_array=segmentation.tag_image(image.array)
     
-    except Exception as e:
-        traceback.print_exc()
-        raise Exception("Error occured while tagging image!",e)
-        
+    #Create metadata ditionary and set type to match tagged image
+    output_metadata=image.metadata
+    image.metadata['Type']=str(output_array.dtype)
+    
 
     # Finish timing and add to logText
     tstop = time.clock()
@@ -91,29 +84,25 @@ def threshold(image, method="Otsu", **kwargs):
         kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
         
     # Run thresholding functions
-    try:
-        if method in auto_list:
-            output_array, thresholdValue = segmentation.threshold_auto(image.array, method, **kwargs)
-            logText += '\n\tThreshold values: ' + str(thresholdValue)
+    if method in auto_list:
+        output_array, thresholdValue = segmentation.threshold_auto(image.array, method, **kwargs)
+        logText += '\n\tThreshold values: ' + str(thresholdValue)
 
-        elif method in adaptive_list:
-            logText += '\n\tSettings: ' + str(kwargs)
-            output_array = segmentation.threshold_adaptive(image.array, method, **kwargs)
+    elif method in adaptive_list:
+        logText += '\n\tSettings: ' + str(kwargs)
+        output_array = segmentation.threshold_adaptive(image.array, method, **kwargs)
 
-        elif method == 'Manual':
-            logText += '\n\tSettings: ' + str(kwargs)
-            output_array = segmentation.threshold_manual(image.array, **kwargs)
+    elif method == 'Manual':
+        logText += '\n\tSettings: ' + str(kwargs)
+        output_array = segmentation.threshold_manual(image.array, **kwargs)
 
-        else:
-            raise LookupError("'" + str(method) + "' is Not a valid mode!")
+    else:
+        raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
+
+    output_metadta=image.metadata
+    output_metadta['Type']=output_array.dtype
     
-        output_metadta=image.metadata
-        output_metadta['Type']=output_array.dtype
-    
-    except Exception as e:
-        raise Exception("Error occured while thresholding image!",e)
-
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
@@ -142,23 +131,18 @@ def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanInt
     # Creatre LogText and start logging
     logText = '\nAnalyzing: ' + str(tagged_img.metadata['Name'])
 
-    try:
-        #Print list of images in Imagelist to log text
-        if imageList != None:
-            logText += '\n\tMeasuring intensity in: '
-            for img in imageList:
-                logText += img.metadata['Name']
 
-        #Analyze image
-        tagged_img=core.analyze(tagged_img, imageList, measurementInput)
+    #Print list of images in Imagelist to log text
+    if imageList != None:
+        logText += '\n\tMeasuring intensity in: '
+        for img in imageList:
+            logText += img.metadata['Name']
 
-        #Add number of objects to logText
-        logText += '\n\tNumber of objects: '+str(len(tagged_img.database['tag']))
-        
-        
+    #Analyze image
+    tagged_img=core.analyze(tagged_img, imageList, measurementInput)
 
-    except Exception as e:
-        raise Exception("Error occured while analyzing image!",e)
+    #Add number of objects to logText
+    logText += '\n\tNumber of objects: '+str(len(tagged_img.database['tag']))
 
     # Finish timing and add to logText
     tstop = time.clock()
@@ -193,20 +177,18 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     logText += '\n\t\tremoveFiltered=' + str(remove_filtered)
     logText += '\n\t\toverwrite=' + str(overwrite)
 
-    try:
-        if filter_dict==None:
-            filter_dict={}
 
-        # Filter dictionary
-        output_database=core.filter_database(image.database, filter_dict, overwrite)
-        output_image=image.array
-        
-        # Remove Filtered objects from database and image
-        if remove_filtered == True:
-            output_image , output_database = core.remove_filtered(image.array, output_database)
+    if filter_dict==None:
+        filter_dict={}
+
+    # Filter dictionary
+    output_database=core.filter_database(image.database, filter_dict, overwrite)
+    output_image=image.array
+    
+    # Remove Filtered objects from database and image
+    if remove_filtered == True:
+        output_image , output_database = core.remove_filtered(image.array, output_database)
             
-    except Exception as e:
-        raise Exception("Error occured while filtering database!",  e)
 
     # Finish timing and add to logText
     tstop = time.clock()
@@ -230,36 +212,30 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
     # Start timingsourceDictionayList
     tstart = time.clock()
 
-    try:
+    # Creatre LogText
+    logText = '\nColocalization analysis started using: '
+    for img in tagged_img_list:
+        logText += '\t ' + str(img.metadata['Name'])
 
-        # Creatre LogText
-        logText = '\nColocalization analysis started using: '
-        for img in tagged_img_list:
-            logText += '\t ' + str(img.metadata['Name'])
+    # Add Filter settings
+    logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
+    logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
+    logText += '\n\t\toverwrite=' + str(overWrite)
 
-        # Add Filter settings
-        logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
-        logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
-        logText += '\n\t\toverwrite=' + str(overWrite)
-
-        # Determine connectivity data
-        overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
-        
-        # Filter database and image
-        overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
-        
-        # Analyze colocalization
-        overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
+    # Determine connectivity data
+    overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
+    
+    # Filter database and image
+    overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
+    
+    # Analyze colocalization
+    overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
 
 
-        #Print number of objects to logText
-        logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))
+    #Print number of objects to logText
+    logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))
 
-    except Exception as e:
-        traceback.print_exc()
-        raise Exception("Error occured durig colocalization!",e)
-
-        # Finish timing and add to logText
+    # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
@@ -294,12 +270,9 @@ def save_data(image_list, path, file_name='output', to_text=True):
     elif to_text==False:logText += '.xlsx'
     
 
-    try:
 
-        Image.save_data(image_list, path, file_name, to_text)
+    Image.save_data(image_list, path, file_name, to_text)
 
-    except Exception as e:
-        raise Exception("Error occured while filtering database!",e)
 
 
 
@@ -312,7 +285,6 @@ def save_data(image_list, path, file_name='output', to_text=True):
 
 def save_image(img, path, file_name):
     
-    
     # Start timing
     tstart = time.clock()
     
@@ -324,15 +296,8 @@ def save_image(img, path, file_name):
     #Add settings to logText
     # Add filter settings to logText
     logText += '\n\tPath: '+str(path)
-
-    try:
-        #Save image using tifffile save
-        Image.save_image(img, path, file_name) 
-        
-    except Exception as e:
-        raise Exception("Error occured while filtering database!",e)
-
-
+    #Save image using tifffile save
+    Image.save_image(img, path, file_name) 
 
     # Finish timing and add to logText
     tstop = time.clock()

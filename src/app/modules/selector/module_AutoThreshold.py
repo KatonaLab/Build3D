@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_auto
 from modules.a3dc_modules.a3dc.imageclass import Image
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, VividException
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time, traceback
 
 
@@ -79,7 +79,7 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise VividException("Error occured while executing "+str(ctx.name)+" !",e)
+        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
         
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 

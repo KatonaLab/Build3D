@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.interface import threshold
 from modules.a3dc_modules.a3dc.imageclass import Image
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, VividException
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time, traceback, math
 
 
@@ -89,6 +89,6 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise VividException("Error occured while executing "+str(ctx.name)+" !",e)
+        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
     
 a3.def_process_module(generate_config(), module_main)

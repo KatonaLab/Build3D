@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.external.PythImage import Image
 import numpy as np
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, VividException
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time
 import copy
 import sys
@@ -55,7 +55,7 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise VividException("Error occured while executing "+str(ctx.name)+" !",e)
+        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
 
 config = [a3.Parameter('Channel', a3.types.int8)
                 .setFloatHint('default', 0)
