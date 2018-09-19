@@ -127,14 +127,14 @@ Repeater {
                 }
                 Button {
                     Layout.fillWidth: true
-                    text: "select file"
+                    text: details.hints.folder ? "select folder" : "select file"
                     onClicked: {
                         dialog.open();
                     }
 
                     FileDialog {
                         id: dialog
-                        title: "Select File"
+                        title: details.hints.folder ? "Select Folder" : "Select File"
                         folder: ModuleStore.dialogFolder
                         selectMultiple: details.hints.multipleFiles || false
                         selectFolder: details.hints.folder || false
