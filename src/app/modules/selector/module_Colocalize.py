@@ -9,7 +9,7 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image
 from modules.a3dc_modules.a3dc.core import filter_database
-from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error
+from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning
 import os
 import math
 import sys
@@ -49,17 +49,28 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
         basename=os.path.splitext(ch1_img.metadata['FileName'])[0]
         
     #Save databases
-    print('Saving object dataBases to xlsx or text!')
-    name=basename+'_'+ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
-
-    save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=name, to_text=to_text)
+    print('Saving object dataBases!')
+    file_name=basename+'_'+ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
     
-  
+    #Get extension
     if to_text==True:
-        file_name=name+".txt"    
+        extension=".txt"    
     else:
-        file_name=name+".xlsx"
-    output_path=os.path.join(outputPath, file_name)
+        extension=".xlsx"
+    
+    #If filename exists generate a neme that is not used
+    i=1
+    final_name=file_name
+    while os.path.exists(os.path.join(outputPath, final_name+extension)):
+        final_name=file_name+'_'+str('{:03d}'.format(i))
+        i += 1
+    if i!=0:
+        file_name=final_name
+        warning('Warning: Trying to save to file that already exist!! Data will be saved to '+file_name+extension)
+
+    #Save data and give output path
+    save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
+    output_path=os.path.join(outputPath, file_name+extension)
     
     #Save images
     print('Saving output images!')
@@ -171,7 +182,7 @@ def module_main(ctx):
         print(str(e), file=sys.stderr)
     
     except Exception as e:
-        error("Error occured while executing "+str(ctx.name)+" !", exception=e)
+        error("Error occured while executing "+str(ctx.name())+" !", exception=e)
 
  
 def generate_config(filters=FILTERS):

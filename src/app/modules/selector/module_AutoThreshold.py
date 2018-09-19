@@ -79,7 +79,7 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
+        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
         
 config = init_config()
 config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 

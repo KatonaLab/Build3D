@@ -7,7 +7,7 @@ def module_main(ctx):
     if os.path.isfile(a3.inputs['File'].path):
         a3.outputs['File']=a3.inputs['File']
     else:
-        error("Error occured while executing "+str(ctx.name)+" ! Invalid file path!!")
+        error("Error occured while executing "+str(ctx.name())+" ! Invalid file path!!")
 
 
 config = [a3.Parameter('File', a3.types.url).setBoolHint('folder', False),

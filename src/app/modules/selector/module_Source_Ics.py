@@ -16,7 +16,7 @@ def module_main(ctx):
         print(str(a3.inputs['Image'].meta.get('IcsGetPosition:units:x')))
     
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
+        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
 
 config = [a3.Input('Image', a3.types.ImageFloat)]
 

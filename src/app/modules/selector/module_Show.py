@@ -20,7 +20,7 @@ def module_main(ctx):
             os_open(path)
         
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
+        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
 
 
 

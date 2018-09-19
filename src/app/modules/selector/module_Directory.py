@@ -7,7 +7,7 @@ def module_main(ctx):
     if os.path.isfile(a3.inputs['Directory'].path):
         a3.outputs['Directory']=a3.inputs['Directory']
     else:
-        error("Error occured while executing "+str(ctx.name)+" ! Invalid Directory!!")
+        error("Error occured while executing "+str(ctx.name())+" ! Invalid Directory!!")
 
 config = [
     a3.Parameter('Directory', a3.types.url).setBoolHint('folder', True),
