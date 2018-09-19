@@ -21,6 +21,7 @@ RowLayout {
 
     TextField {
         id: lowField
+        text: { return Number(firstValue.toFixed(decimals)).toLocaleString(); }
         horizontalAlignment: TextInput.AlignRight
         validator: DoubleValidator {}
         implicitWidth: editWidth
@@ -36,9 +37,11 @@ RowLayout {
         second.value: secondValue
 
         function update() {
-            lowField.text = Number(first.value.toFixed(decimals)).toLocaleString();
-            highField.text = Number(second.value.toFixed(decimals)).toLocaleString();
-            rangeChanged(first.value, second.value);
+            // lowField.text = Number(first.value.toFixed(decimals)).toLocaleString();
+            // highField.text = Number(second.value.toFixed(decimals)).toLocaleString();
+            if (first.value != firstValue || second.value != secondValue) {
+                rangeChanged(first.value, second.value);
+            }
         }
 
         Component.onCompleted: update()
@@ -48,6 +51,7 @@ RowLayout {
 
     TextField {
         id: highField
+        text: { return Number(secondValue.toFixed(decimals)).toLocaleString(); }
         horizontalAlignment: TextInput.AlignRight
         validator: DoubleValidator {}
         implicitWidth: editWidth
