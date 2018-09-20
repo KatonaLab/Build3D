@@ -157,7 +157,7 @@ public:
     void write(const std::string& str)
     {
         m_buffer += str;
-        if (m_buffer[m_buffer.size() - 1] == '\n') {
+        if (!m_buffer.empty() && m_buffer[m_buffer.size() - 1] == '\n') {
             flush();
         }
     }
