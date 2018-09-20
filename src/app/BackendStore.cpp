@@ -242,6 +242,8 @@ void BackendStore::addModule(const QString& scriptPath)
             QString name = scriptPath.mid(nativePath.size());
             if (name == QString("ics reader")) {
                 module = make_shared<IcsDataSourceModule>(m_platform);
+            } else if (name == QString("two channels from ics")) {
+                module = make_shared<TwoChannelIcsModule>(m_platform);
             }
         } else {
             std::string script = GlobalSettings::modulePath.filePath(scriptPath).toStdString();
@@ -663,9 +665,15 @@ void BackendStore::addAvailableNativeModules()
     QVariantMap groupMap;
     QVariantMap fileMap;
     QVariantList fileList;
+
     fileMap["name"] = QString("ics reader");
     fileMap["path"] = QString("native://ics reader");
     fileList.append(fileMap);
+
+    fileMap["name"] = QString("two channels from ics");
+    fileMap["path"] = QString("native://two channels from ics");
+    fileList.append(fileMap);
+
     groupMap["name"] = QString("general");
     groupMap["files"] = fileList;
 

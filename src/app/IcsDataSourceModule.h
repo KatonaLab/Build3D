@@ -37,5 +37,30 @@ protected:
         MultiDimImage<float>> m_outputs;
 };
 
+// TODO: split into separate files -------------------------------
+
+class TwoChannelIcsModule : public core::compute_platform::ComputeModule {
+    typedef core::compute_platform::ComputePlatform ComputePlatform;
+    template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
+    template <typename T, typename ...Ts> using TypedInputPortCollection = core::compute_platform::TypedInputPortCollection<T, Ts...>;
+    template <typename T, typename ...Ts> using TypedOutputPortCollection = core::compute_platform::TypedOutputPortCollection<T, Ts...>;
+    typedef core::compute_platform::ModuleContext ModuleContext;
+public:
+    TwoChannelIcsModule(ComputePlatform& parent);
+    void execute(ModuleContext&) override;
+    std::string moduleTypeName() const override
+    {
+        return "two channel ics data source";
+    }
+protected:
+    bool modifiedParameters();
+    Url m_lastPathValue;
+    std::vector<std::shared_ptr<MultiDimImage<float>>> m_cache;
+    TypedInputPortCollection<Url, uint32_t, uint32_t> m_inputs;
+    TypedOutputPortCollection<
+        MultiDimImage<float>,
+        MultiDimImage<float>> m_outputs;
+};
+
 
 #endif

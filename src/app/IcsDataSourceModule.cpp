@@ -1,6 +1,7 @@
 #include "IcsDataSourceModule.h"
 
 #include <core/io_utils/IcsAdapter.h>
+#include <QDebug>
 
 using namespace std;
 using namespace core::compute_platform;
@@ -80,11 +81,11 @@ void IcsDataSourceModule::execute(ModuleContext&)
                 }
                 break;
             }
-        // TODO: support XY images too
-        default:
-        // TODO: proper error message to GUI
-        throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
-        };
+            // TODO: support XY images too
+            default:
+                // TODO: proper error message to GUI
+                throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
+        }
 
         int n = min((size_t)4, m_cache.size());
         for (int i = 0; i < n; ++i) {
@@ -111,6 +112,114 @@ void IcsDataSourceModule::execute(ModuleContext&)
     OUT(1)
     OUT(2)
     OUT(3)
+
+    #undef OUT
+}
+
+// -------------------------------
+
+bool TwoChannelIcsModule::modifiedParameters()
+{
+    // TODO: caching mechanism should be done on a higher level -> ComputeModule
+    bool r = false;
+    if (m_lastPathValue.path != m_inputs.input<0>()->value().path) {
+        m_lastPathValue = m_inputs.input<0>()->value();
+        r = true;
+    }
+
+    return r;
+}
+
+TwoChannelIcsModule::TwoChannelIcsModule(ComputePlatform& parent)
+    : ComputeModule(parent, m_inputs, m_outputs, "IcsDataSource"),
+    m_inputs(*this),
+    m_outputs(*this)
+{
+    m_inputs.input<0>()->setName("file");
+
+    m_inputs.input<1>()->setName("first channel");
+    PropertyMap& ch1 = m_inputs.input<1>()->properties();
+    ch1.setBool("parameter", true);
+    ch1.setInt("min", 1);
+    ch1.setInt("max", 8);
+
+    m_inputs.input<2>()->setName("second channel");
+    PropertyMap& ch2 = m_inputs.input<2>()->properties();
+    ch2.setBool("parameter", true);
+    ch2.setInt("min", 1);
+    ch2.setInt("max", 8);
+
+    m_outputs.output<0>()->setName("selected first channel");
+    m_outputs.output<1>()->setName("selected second channel");
+}
+
+void TwoChannelIcsModule::execute(ModuleContext&)
+{
+    // TODO: raise exception on error!
+    if (modifiedParameters()) {
+
+        IcsAdapter ics;
+        string filePath = m_lastPathValue.path;
+
+        ics.open(filePath);
+
+        MultiDimImage<float> image;
+        Meta meta = ics.getMeta();
+
+        image = ics.readConvert<float>(true);
+        m_cache.clear();
+
+        switch (image.dims()) {
+            case 3: // xyz
+                m_cache.push_back(make_shared<MultiDimImage<float>>(image));
+                break;
+            case 5: // xyztc
+                // removing dimension 't'
+                image.removeDims({3});
+                // no break - let it flow
+            case 4: { // xyzc or xyzt
+                auto volumes = image.splitDim(3);
+                int n = min((size_t)4, volumes.size());
+                for (int i = 0; i < n; ++i) {
+                    m_cache.push_back(make_shared<MultiDimImage<float>>(move(volumes[i])));
+                }
+                break;
+            }
+            // TODO: support XY images too
+            default:
+                // TODO: proper error message to GUI
+                throw std::runtime_error("ICS files with dimensions XYZ or XYZC are supported only");
+        }
+
+        int n = min((size_t)8, m_cache.size());
+        for (int i = 0; i < n; ++i) {
+            if (m_cache[i]) {
+                m_cache[i]->meta = meta;
+                m_cache[i]->meta.add("channel", to_string(i));
+                string wlKey = "IcsGetSensorEmissionWavelength:" + to_string(i);
+                if (meta.has(wlKey)) {
+                    m_cache[i]->meta.add("wavelength", meta.get(wlKey));
+                }
+            }
+        }
+    }
+
+    int chs[2];
+    chs[0] = (int)m_inputs.input<1>()->value() - 1;
+    chs[1] = (int)m_inputs.input<2>()->value() - 1;
+
+    #define OUT(i) \
+        if (0 <= chs[(i)] && chs[(i)] < (int)m_cache.size()) { \
+            m_outputs.output<(i)>()->forwardFromSharedPtr(m_cache[chs[(i)]]); \
+        } else { \
+            shared_ptr<MultiDimImage<float>> empty; \
+            m_outputs.output<(i)>()->forwardFromSharedPtr(empty); \
+            qWarning() << "channel" << (chs[(i)] + 1) << "for" \
+                << QString::fromStdString(m_lastPathValue.path) << "is empty"; \
+        }
+
+    OUT(0)
+    OUT(1)
 
     #undef OUT
 }
