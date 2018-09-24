@@ -162,6 +162,7 @@ def module_main(ctx):
                    to_text=params['to_text'])
         
         a3.outputs['Overlapping Image'] = a3.MultiDimImageFloat_from_ndarray(output[0].array.astype(float))
+        a3.outputs['Overlapping Binary Image'] = a3.MultiDimImageFloat_from_ndarray((0 < output[0].array).astype(float))
         a3.outputs['Overlapping MetaData'] =output[0].metadata
         a3.outputs['Overlapping DataBase'] =output[0].database
         
@@ -196,6 +197,7 @@ def generate_config(filters=FILTERS):
         a3.Input('Ch2 MetaData', a3.types.GeneralPyType), 
         a3.Input('Ch2 DataBase', a3.types.GeneralPyType),              
         a3.Output('Overlapping Image', a3.types.ImageFloat),
+        a3.Output('Overlapping Binary Image', a3.types.ImageFloat),
         a3.Output('Overlapping MetaData', a3.types.GeneralPyType),
         a3.Output('Overlapping DataBase', a3.types.GeneralPyType),
         a3.Output('Overlapping Path', a3.types.url)]    

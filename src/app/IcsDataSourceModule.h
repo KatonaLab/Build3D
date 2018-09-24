@@ -50,7 +50,7 @@ public:
     void execute(ModuleContext&) override;
     std::string moduleTypeName() const override
     {
-        return "two channel ics data source";
+        return "ics source";
     }
 protected:
     bool modifiedParameters();

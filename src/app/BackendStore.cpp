@@ -242,7 +242,7 @@ void BackendStore::addModule(const QString& scriptPath)
             QString name = scriptPath.mid(nativePath.size());
             if (name == QString("ics reader")) {
                 module = make_shared<IcsDataSourceModule>(m_platform);
-            } else if (name == QString("two channels from ics")) {
+            } else if (name == QString("ics source")) {
                 module = make_shared<TwoChannelIcsModule>(m_platform);
             }
         } else {
@@ -670,8 +670,8 @@ void BackendStore::addAvailableNativeModules()
     fileMap["path"] = QString("native://ics reader");
     fileList.append(fileMap);
 
-    fileMap["name"] = QString("two channels from ics");
-    fileMap["path"] = QString("native://two channels from ics");
+    fileMap["name"] = QString("ics source");
+    fileMap["path"] = QString("native://ics source");
     fileList.append(fileMap);
 
     groupMap["name"] = QString("general");
