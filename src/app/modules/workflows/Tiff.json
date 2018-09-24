@@ -2,21 +2,21 @@
     "items": [
         {
             "category": "module",
-            "module": "selector/module_path.py",
-            "name": "Image path",
+            "module": "selector/module_Directory_Batch.py",
+            "name": "File Path",
             "order": 0,
             "parentUid": -1,
-            "uid": 7
+            "uid": 31
         },
         {
             "category": "parameter",
-            "parentUid": 7,
+            "parentUid": 31,
             "uid": 0,
-            "value": "file:///C:/Users/pongor.csaba/Desktop/Output/ometest_2.ome.tif"
+            "value": ""
         },
         {
             "category": "output",
-            "parentUid": 7,
+            "parentUid": 31,
             "uid": 0,
             "value": {
                 "color": "#00ffff",
@@ -29,25 +29,63 @@
         },
         {
             "category": "module",
-            "module": "selector/module_Source_Ome.py",
-            "name": "Image Source",
+            "module": "selector/module_Source.py",
+            "name": "Select Channel",
             "order": 3,
             "parentUid": -1,
-            "uid": 22
+            "uid": 32
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 7,
+                "parentUid": 31,
                 "uid": 0
             },
-            "parentUid": 22,
+            "parentUid": 32,
             "uid": 0
         },
         {
+            "category": "parameter",
+            "parentUid": 32,
+            "uid": 1,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 32,
+            "uid": 2,
+            "value": 1
+        },
+        {
             "category": "output",
-            "parentUid": 22,
+            "parentUid": 32,
             "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 32,
+            "uid": 1,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 32,
+            "uid": 2,
             "value": {
                 "color": "#ff0000",
                 "lutParams": {
@@ -59,7 +97,80 @@
         },
         {
             "category": "output",
-            "parentUid": 22,
+            "parentUid": 32,
+            "uid": 3,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "selector/module_Threshold.py",
+            "name": "Ch1 Threshold",
+            "order": 11,
+            "parentUid": -1,
+            "uid": 34
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 32,
+                "uid": 0
+            },
+            "parentUid": 34,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 32,
+                "uid": 2
+            },
+            "parentUid": 34,
+            "uid": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 34,
+            "uid": 2,
+            "value": {
+                "first": 7,
+                "second": 11
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 34,
+            "uid": 3,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 34,
+            "uid": 4,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 34,
+            "uid": 0,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 34,
             "uid": 1,
             "value": {
                 "color": "#00ff00",
@@ -72,52 +183,67 @@
         },
         {
             "category": "module",
-            "module": "selector/module_Selector.py",
-            "name": "Select Ch1",
-            "order": 7,
+            "module": "selector/module_Threshold.py",
+            "name": "Ch2 Threshold",
+            "order": 19,
             "parentUid": -1,
-            "uid": 23
-        },
-        {
-            "category": "parameter",
-            "parentUid": 23,
-            "uid": 0,
-            "value": 0
+            "uid": 35
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 22,
-                "uid": 0
+                "parentUid": 32,
+                "uid": 1
             },
-            "parentUid": 23,
+            "parentUid": 35,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 32,
+                "uid": 3
+            },
+            "parentUid": 35,
             "uid": 1
         },
         {
-            "category": "input",
-            "connection": {
-                "parentUid": 22,
-                "uid": 1
-            },
-            "parentUid": 23,
-            "uid": 2
+            "category": "parameter",
+            "parentUid": 35,
+            "uid": 2,
+            "value": {
+                "first": 7,
+                "second": 11
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 35,
+            "uid": 3,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 35,
+            "uid": 4,
+            "value": false
         },
         {
             "category": "output",
-            "parentUid": 23,
+            "parentUid": 35,
             "uid": 0,
             "value": {
                 "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 255
+                    "y": 0
                 },
                 "visible": false
             }
         },
         {
             "category": "output",
-            "parentUid": 23,
+            "parentUid": 35,
             "uid": 1,
             "value": {
                 "color": "#0000ff",
@@ -130,125 +256,231 @@
         },
         {
             "category": "module",
-            "module": "selector/module_Selector.py",
-            "name": "Select Ch2",
-            "order": 13,
+            "module": "selector/module_Analyze.py",
+            "name": "Ch1 Analyze",
+            "order": 27,
             "parentUid": -1,
-            "uid": 24
-        },
-        {
-            "category": "parameter",
-            "parentUid": 24,
-            "uid": 0,
-            "value": 1
+            "uid": 36
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 22,
+                "parentUid": 32,
                 "uid": 0
             },
-            "parentUid": 24,
+            "parentUid": 36,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 32,
+                "uid": 2
+            },
+            "parentUid": 36,
             "uid": 1
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 22,
-                "uid": 1
+                "parentUid": 34,
+                "uid": 0
             },
-            "parentUid": 24,
+            "parentUid": 36,
             "uid": 2
         },
         {
+            "category": "input",
+            "connection": {
+                "parentUid": 34,
+                "uid": 1
+            },
+            "parentUid": 36,
+            "uid": 3
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 4,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 5,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 6,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 7,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 8,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 9,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 36,
+            "uid": 10,
+            "value": false
+        },
+        {
             "category": "output",
-            "parentUid": 24,
+            "parentUid": 36,
+            "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": true
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 36,
+            "uid": 1,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 36,
+            "uid": 2,
+            "value": {
+                "color": "#ff00ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "selector/module_Analyze.py",
+            "name": "Ch2 Analyze",
+            "order": 42,
+            "parentUid": -1,
+            "uid": 37
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 32,
+                "uid": 1
+            },
+            "parentUid": 37,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 32,
+                "uid": 3
+            },
+            "parentUid": 37,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 35,
+                "uid": 0
+            },
+            "parentUid": 37,
+            "uid": 2
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 35,
+                "uid": 1
+            },
+            "parentUid": 37,
+            "uid": 3
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 4,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 5,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 6,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 7,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 8,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 9,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 37,
+            "uid": 10,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 37,
             "uid": 0,
             "value": {
                 "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
-                    "y": 255
+                    "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
             "category": "output",
-            "parentUid": 24,
-            "uid": 1,
-            "value": {
-                "color": "#00ffff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
-            "module": "selector/module_Threshold.py",
-            "name": "Threshold Ch1",
-            "order": 19,
-            "parentUid": -1,
-            "uid": 25
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 23,
-                "uid": 0
-            },
-            "parentUid": 25,
-            "uid": 0
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 23,
-                "uid": 1
-            },
-            "parentUid": 25,
-            "uid": 1
-        },
-        {
-            "category": "parameter",
-            "parentUid": 25,
-            "uid": 2,
-            "value": {
-                "first": 7,
-                "second": 11
-            }
-        },
-        {
-            "category": "parameter",
-            "parentUid": 25,
-            "uid": 3,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 25,
-            "uid": 4,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 25,
-            "uid": 0,
-            "value": {
-                "color": "#00ffff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 25,
+            "parentUid": 37,
             "uid": 1,
             "value": {
                 "color": "#ff00ff",
@@ -260,69 +492,9 @@
             }
         },
         {
-            "category": "module",
-            "module": "selector/module_Threshold.py",
-            "name": "Threshold Ch2",
-            "order": 27,
-            "parentUid": -1,
-            "uid": 26
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 24,
-                "uid": 0
-            },
-            "parentUid": 26,
-            "uid": 0
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 24,
-                "uid": 1
-            },
-            "parentUid": 26,
-            "uid": 1
-        },
-        {
-            "category": "parameter",
-            "parentUid": 26,
+            "category": "output",
+            "parentUid": 37,
             "uid": 2,
-            "value": {
-                "first": 7,
-                "second": 11
-            }
-        },
-        {
-            "category": "parameter",
-            "parentUid": 26,
-            "uid": 3,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 26,
-            "uid": 4,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 26,
-            "uid": 0,
-            "value": {
-                "color": "#ff00ff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 26,
-            "uid": 1,
             "value": {
                 "color": "#ffff00",
                 "lutParams": {
@@ -334,428 +506,184 @@
         },
         {
             "category": "module",
-            "module": "selector/module_Analyze.py",
-            "name": "Analyze Ch1",
-            "order": 35,
-            "parentUid": -1,
-            "uid": 27
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 23,
-                "uid": 0
-            },
-            "parentUid": 27,
-            "uid": 0
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 23,
-                "uid": 1
-            },
-            "parentUid": 27,
-            "uid": 1
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 25,
-                "uid": 0
-            },
-            "parentUid": 27,
-            "uid": 2
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 25,
-                "uid": 1
-            },
-            "parentUid": 27,
-            "uid": 3
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 4,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 5,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 6,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 7,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 8,
-            "value": false
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 9,
-            "value": false
-        },
-        {
-            "category": "parameter",
-            "parentUid": 27,
-            "uid": 10,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 27,
-            "uid": 0,
-            "value": {
-                "color": "#00ff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1358
-                },
-                "visible": true
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 27,
-            "uid": 1,
-            "value": {
-                "color": "#ff0000",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 27,
-            "uid": 2,
-            "value": {
-                "color": "#00ff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
-            "module": "selector/module_Analyze.py",
-            "name": "Analyze Ch2",
-            "order": 50,
-            "parentUid": -1,
-            "uid": 28
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 24,
-                "uid": 0
-            },
-            "parentUid": 28,
-            "uid": 0
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 24,
-                "uid": 1
-            },
-            "parentUid": 28,
-            "uid": 1
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 26,
-                "uid": 0
-            },
-            "parentUid": 28,
-            "uid": 2
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 26,
-                "uid": 1
-            },
-            "parentUid": 28,
-            "uid": 3
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 4,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 5,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 6,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 7,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 8,
-            "value": false
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 9,
-            "value": false
-        },
-        {
-            "category": "parameter",
-            "parentUid": 28,
-            "uid": 10,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 28,
-            "uid": 0,
-            "value": {
-                "color": "#ff0000",
-                "lutParams": {
-                    "x": 0,
-                    "y": 802
-                },
-                "visible": true
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 28,
-            "uid": 1,
-            "value": {
-                "color": "#00ff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 28,
-            "uid": 2,
-            "value": {
-                "color": "#0000ff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
             "module": "selector/module_Colocalize.py",
-            "name": "Colocalization",
-            "order": 65,
+            "name": "Colocalize 1",
+            "order": 57,
             "parentUid": -1,
-            "uid": 30
+            "uid": 38
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 7,
+                "parentUid": 31,
                 "uid": 0
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 0
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 27,
+                "parentUid": 36,
                 "uid": 0
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 1
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 27,
+                "parentUid": 36,
                 "uid": 2
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 2
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 27,
+                "parentUid": 36,
                 "uid": 1
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 3
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 28,
+                "parentUid": 37,
                 "uid": 0
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 4
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 28,
+                "parentUid": 37,
                 "uid": 2
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 5
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 28,
+                "parentUid": 37,
                 "uid": 1
             },
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 6
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 7,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 8,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 9,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 10,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 11,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 12,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 13,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 14,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 15,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 16,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 17,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 18,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 19,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 20,
             "value": null
         },
         {
+            "category": "parameter",
+            "parentUid": 38,
+            "uid": 21,
+            "value": false
+        },
+        {
             "category": "output",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 0,
             "value": {
-                "color": "#0000ff",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 477
+                    "y": 0
                 },
                 "visible": true
             }
         },
         {
             "category": "output",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 1,
             "value": {
-                "color": "#00ffff",
+                "color": "#ffff00",
                 "lutParams": {
                     "x": 0,
                     "y": 1
@@ -765,10 +693,23 @@
         },
         {
             "category": "output",
-            "parentUid": 30,
+            "parentUid": 38,
             "uid": 2,
             "value": {
-                "color": "#ff00ff",
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 38,
+            "uid": 3,
+            "value": {
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
                     "y": 1
@@ -777,5 +718,5 @@
             }
         }
     ],
-    "uidCounter": 31
+    "uidCounter": 39
 }
