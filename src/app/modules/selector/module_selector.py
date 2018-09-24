@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.external.PythImage import Image
 import numpy as np
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, warning
 import time
 import copy
 import sys
@@ -26,7 +26,7 @@ def module_main(ctx):
         
         #Check if image is time series
         if img.metadata['SizeT']>1:
-            print("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
+            warning("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
         
         #Extract channel from image array    
         dims = len(img.image.shape)

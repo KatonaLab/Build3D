@@ -184,10 +184,15 @@ def warning(string):
     print(string, file=sys.stderr)
         
 
-def error(message, exception=None):
+def error(message, exception=None, verbose=True):
 
+    if verbose==False:
+        len=1
+    else:
+        len=10
+        
     print("Traceback:",file=sys.stderr)
-    print(traceback.format_exc(10), file=sys.stderr)
+    print(traceback.format_exc(len), file=sys.stderr)
 
     raise Exception(message, exception)
  
