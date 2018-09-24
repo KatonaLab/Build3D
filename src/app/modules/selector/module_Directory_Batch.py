@@ -5,17 +5,21 @@ import os
 
 
 def module_main(ctx):
-    path = a3.inputs['path'].path
+    path = os.path.abspath(a3.inputs['path'].path)
     # getting the file extension like '.tif'
     ext = os.path.splitext(a3.inputs['path'].path)[1]
+    print('input path', path)
+    print('extension', ext)
 
     if os.path.isfile(path):
         base_dir = os.path.dirname(path)
     else:
         base_dir = path
 
+    print('base dir', base_dir)
+
     # globbing all the files with matching extensions
-    file_list = glob(base_dir + '/*' + ext)
+    file_list = [os.path.abspath(x) for x in glob(base_dir + '/*' + ext)]
 
     if os.path.isfile(path):
         file_list.remove(path)
@@ -34,7 +38,7 @@ def module_main(ctx):
 
     url = a3.Url()
     url.path = file_list[index]
-    print('current:', url.path)
+    print('current', url.path)
     a3.outputs['file'] = url
 
 
