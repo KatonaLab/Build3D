@@ -137,20 +137,22 @@ TwoChannelIcsModule::TwoChannelIcsModule(ComputePlatform& parent)
 {
     m_inputs.input<0>()->setName("file");
 
-    m_inputs.input<1>()->setName("first channel");
+    m_inputs.input<1>()->setName("channel 1");
     PropertyMap& ch1 = m_inputs.input<1>()->properties();
     ch1.setBool("parameter", true);
-    ch1.setInt("min", 1);
-    ch1.setInt("max", 8);
+    ch1.setInt("min", 0);
+    ch1.setInt("default", 0);
+    // ch1.setInt("max", 8);
 
-    m_inputs.input<2>()->setName("second channel");
+    m_inputs.input<2>()->setName("channel 2");
     PropertyMap& ch2 = m_inputs.input<2>()->properties();
     ch2.setBool("parameter", true);
-    ch2.setInt("min", 1);
-    ch2.setInt("max", 8);
+    ch2.setInt("min", 0);
+    ch2.setInt("default", 1);
+    // ch2.setInt("max", 8);
 
-    m_outputs.output<0>()->setName("selected first channel");
-    m_outputs.output<1>()->setName("selected second channel");
+    m_outputs.output<0>()->setName("channel 1");
+    m_outputs.output<1>()->setName("channel 2");
 }
 
 void TwoChannelIcsModule::execute(ModuleContext&)
@@ -205,8 +207,8 @@ void TwoChannelIcsModule::execute(ModuleContext&)
     }
 
     int chs[2];
-    chs[0] = (int)m_inputs.input<1>()->value() - 1;
-    chs[1] = (int)m_inputs.input<2>()->value() - 1;
+    chs[0] = (int)m_inputs.input<1>()->value();
+    chs[1] = (int)m_inputs.input<2>()->value();
 
     #define OUT(i) \
         if (0 <= chs[(i)] && chs[(i)] < (int)m_cache.size()) { \
