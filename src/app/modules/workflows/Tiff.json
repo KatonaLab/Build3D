@@ -686,7 +686,7 @@
                 "color": "#ffff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
                 "visible": false
             }
@@ -716,7 +716,43 @@
                 },
                 "visible": false
             }
+        },
+        {
+            "category": "output",
+            "parentUid": 38,
+            "uid": 4,
+            "value": {
+                "color": "#0000ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "selector/module_Show.py",
+            "name": "Show 1",
+            "order": 85,
+            "parentUid": -1,
+            "uid": 39
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 38,
+                "uid": 4
+            },
+            "parentUid": 39,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 39,
+            "uid": 1,
+            "value": false
         }
     ],
-    "uidCounter": 39
+    "uidCounter": 40
 }
