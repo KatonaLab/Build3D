@@ -3,7 +3,7 @@
 <qresource>
     <file>../../assets/fonts/fontello.ttf</file>
     <file>../../assets/icons/favicon.ico</file>
-    <file>../../assets/imgs/Swiss Contribution V1.JPG</file>
+    <file>../../assets/imgs/contr.png</file>
     
     <file>./qml/stores/qmldir</file>
     <file>./qml/stores/ModuleStore.qml</file>
