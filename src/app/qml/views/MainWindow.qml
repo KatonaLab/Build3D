@@ -123,6 +123,15 @@ ApplicationWindow {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
+            Label {
+                Layout.alignment: Qt.AlignHCenter
+                text: "This project was partly funded by the Swiss-Hungarian Cooperation Program"
+            }
+            Image {
+                Layout.alignment: Qt.AlignHCenter
+                source: "../../assets/imgs/Swiss Contribution V1.JPG"
+                horizontalAlignment: Image.AlignHCenter
+            }
             TextField {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
