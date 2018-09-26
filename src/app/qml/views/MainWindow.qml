@@ -123,6 +123,23 @@ ApplicationWindow {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
+            Label {
+                Layout.alignment: Qt.AlignHCenter
+                text: "The project was supported by a grant from Switzerland through the Swiss Contribution (SH 7/2/18). Additionally, the project was supported by the Hungarian Academy of Sciences, Momentum Program (LP-54/2013), the National Research, Development and Innovation Office of Hungary (VKSZ-14-1-2015-0155) and the Ministry of National Economy of Hungary (VEKOP-2.3.3-15-2016-00013)"
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignJustify
+                Layout.preferredWidth: 400
+            }
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                color: "white"
+                width: im.width
+                height: im.height
+                Image {
+                    id: im
+                    source: "../../assets/imgs/contr.png"
+                }
+            }
             TextField {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
