@@ -1,10 +1,9 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_adaptive
 from modules.a3dc_modules.a3dc.imageclass import Image
-import numpy as np
 import time
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-
+from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
 
 METHODS=['Mean', 'Gaussian']
 
@@ -22,8 +21,7 @@ def adaptive_threshold(image, method , blocksize=5, offset=0):
 
 def init_config(methods=METHODS):
  
-    config = [ a3.Input('Input_Image', a3.types.ImageFloat),
-               a3.Input('Input_Metadata', a3.types.GeneralPyType)]
+    config = [ a3.Input('Input Image', a3.types.ImageFloat)]
 
     method_param=a3.Parameter('Method', a3.types.enum)
     for idx, m in enumerate(methods):
@@ -45,6 +43,8 @@ def init_config(methods=METHODS):
     param_offset.setIntHint('stepSize', 1),
     config.append(param_offset)
     
+    config.append(a3.Output('Output Image', a3.types.ImageFloat)) 
+    
     return config
 
 
@@ -57,21 +57,21 @@ def module_main(ctx):
         print('Adaptive thresholding started!')
         
         #Create Image object
-        img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
+        img =a3image_to_image(a3.inputs['Input Image'])
     
         
         #Get method and mode
         method=METHODS[a3.inputs['Method'][-1]]
     
         #Run thresholding            
-        output_img, logText=adaptive_threshold(img, method , blocksize=a3.inputs['BlockSize'], offset=a3.inputs['Offset'])
+        output_img=adaptive_threshold(img, method , blocksize=a3.inputs['BlockSize'], offset=a3.inputs['Offset'])
         
         #Change Name in metadata
         #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
     
         #Set output
-        a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(np.float)/np.amax(output_img.array).astype(np.float))
-        a3.outputs['Output_Metadata']=output_img.metadata
+        a3.outputs['Output Image']=image_to_a3image(output_img)
+
         
         #Finalization
         tstop = time.clock()
@@ -83,7 +83,7 @@ def module_main(ctx):
         raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
         
 config = init_config()
-config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
-config.append(a3.Output('Output_Metadata', a3.types.GeneralPyType))
+
+
 
 a3.def_process_module(config, module_main)

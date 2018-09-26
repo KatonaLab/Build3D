@@ -145,16 +145,14 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
         raise Exception('Mode has to be amond the following:\n'+str(method_list))
     
     blocksize=round_up_to_odd(blocksize)
-    
-    #Cast to 8-bit
-    converted_image = img_as_ubyte(ndarray)
-
+    converted_image=img_as_ubyte(ndarray)
     #Cycle through image
     outputImage = []
-    for i in range(len(converted_image)):
+    for i in range(len(ndarray)):
         
         if method == 'Mean':
-            outputImage.append(threshold_local(converted_image[i], blocksize, offset))
+    
+            outputImage.append(threshold_local(ndarray[i], blocksize, 'mean', float(offset)))
 
         elif method == 'Gaussian':
             outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,

@@ -4,8 +4,11 @@ Created on Wed Sep 26 07:11:59 2018
 
 @author: pongor.csaba
 
-This file contains functions needed to work with A3-DC a3dc_module_interface
-image types and the ICS reading module. The ics loading module reads ics
+This file contains functions needed to work with A3-DC MultiDimImageFloat 
+(through the a3dc_module_interface) image types and the ICS reading module. 
+
+If the MultiDimImageFloat is from an ics module the image metadata are 
+converted: The ics loading module reads ics
 metadata and gives it a name based on the function that reads the metadata with 
 subelements divided by ':'. ICS files have required keys (see Dean P, Mascio L,
 Ow D, Sudar D, Mullikin J.,Proposed standard for image cytometry data files., 
@@ -16,14 +19,41 @@ an image. The channel number is added as the 'channel' key along with data type
 as the 'type key', the source file path as the 'path' key, the probe emission 
 wavelength as 'wavelength'. The 'normalized' key is True if the image has been 
 normalized between 0 and 1  and False otherwise. These later keys are not ics 
-compatible metadata keys!!! Dimension order of the reader is XYZ
+compatible metadata keys!!! Dimension order of the reader is XYZ. Samples per 
+pixel daa not read from ics header so it is set to 1 default.
 """
 import a3dc_module_interface as a3
 from .imageclass import Image
 import numpy as np
 from ast import literal_eval
 
-required_ics_keys=['IcsGetCoordinateSystem','IcsGetSignificantBits'] 
+required_ics_keys=['IcsGetCoordinateSystem','IcsGetSignificantBits']
+
+ 
+def a3image_to_image(a3image):
+        
+    #get image array
+    array=a3.MultiDimImageFloat_to_ndarray(a3image)
+    
+    #Get image metadata and convert database if the metadata is ICS style
+    metadata=metadata_to_dict(a3image)     
+    if is_ics(a3image):
+        metadata=ics_to_metadata(array, metadata)
+        
+    return Image(array, metadata)
+        
+def image_to_a3image(image):
+    
+    a3image=a3.MultiDimImageFloat_from_ndarray(image.array.astype(np.float))    
+    
+    #Clear metadata
+    a3image.meta.clear()
+    
+    #Add metadata key
+    for key in image.metadata.keys():
+        a3image.meta.add(key, str(image.metadata[key]))        
+        
+    return a3image 
 
 def metadata_to_dict(a3image):
 
@@ -55,8 +85,6 @@ def is_ics(a3_image):
     return (a3_image.meta.has(required_ics_keys[0]) or a3_image.meta.has(required_ics_keys[1]))
 
 
-  
-
 def ics_to_metadata(array, ics_metadata):
         
         #Get Shape information
@@ -68,6 +96,8 @@ def ics_to_metadata(array, ics_metadata):
         #Add Type and path
         ome_metadata['Type']=ics_metadata['type']
         ome_metadata['Path']=ics_metadata['path']
+        #!!!!!!!!!Not read from header by ics loder module!!!!!!!
+        ome_metadata['SamplesPerPixel']=1
         
         #Generate channel name
         if str('IcsGetSensorExcitationWavelength:'+str(channel)) in ics_metadata.keys(): 
@@ -92,30 +122,7 @@ def ics_to_metadata(array, ics_metadata):
         return ome_metadata
     
     
-def a3image_to_image(a3image):
-        
-    #get image array
-    array=a3.MultiDimImageFloat_to_ndarray(a3image)
-    
-    #Get image metadata and convert database if the metadata is ICS style
-    metadata=metadata_to_dict(a3image)     
-    if is_ics(a3image):
-        metadata=ics_to_metadata(array, metadata)
-        
-    return Image(array, metadata)
-        
-def image_to_a3image(image):
-    
-    a3image=a3.MultiDimImageFloat_from_ndarray(image.array.astype(np.float))    
-    
-    #Clear metadata
-    a3image.meta.clear()
-    
-    #Add metadata key
-    for key in image.metadata.keys():
-        a3image.meta.add(key, str(image.metadata[key]))        
-        
-    return a3image 
+
    
     
 

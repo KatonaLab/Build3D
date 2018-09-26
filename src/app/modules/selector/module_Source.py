@@ -5,6 +5,7 @@ from modules.a3dc_modules.a3dc.imageclass import Image as Im
 import time, os, copy
 import numpy as np
 
+from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
 
 def get_channel(img, ch):
     
@@ -61,17 +62,16 @@ def module_main(ctx):
    
         #Create Output 1
         ch_1=get_channel(img, a3.inputs['Channel 1'])
-        a3.outputs['Channel 1'] = a3.MultiDimImageFloat_from_ndarray(ch_1.array.astype(np.float))
-        a3.outputs['MetaData 1']=ch_1.metadata
-        a3.outputs['MetaData 1']['Path']=os.path.dirname(filename)
-        a3.outputs['MetaData 1']['FileName']=os.path.basename(filename)
+        ch_1.metadata['Path']=os.path.dirname(filename)
+        a3.outputs['Channel 1'] = image_to_a3image(ch_1)
+
+        
 
         #Create Output 2
         ch_2=get_channel(img, a3.inputs['Channel 2'])
-        a3.outputs['Channel 2'] = a3.MultiDimImageFloat_from_ndarray(ch_2.array.astype(np.float))
-        a3.outputs['MetaData 2']=ch_2.metadata
-        a3.outputs['MetaData 2']['Path']=os.path.dirname(filename)
-        a3.outputs['MetaData 2']['FileName']=os.path.basename(filename)
+        ch_2.metadata['Path']=os.path.dirname(filename)
+        a3.outputs['Channel 2'] = image_to_a3image(ch_2)
+
      
         #Finalization
         tstop = time.clock()
@@ -96,9 +96,7 @@ config = [a3.Input('FileName', a3.types.url),
                 #.setIntHint('min', 0)
                 #.setIntHint('unusedValue', 1),
           a3.Output('Channel 1', a3.types.ImageFloat),
-          a3.Output('Channel 2', a3.types.ImageFloat),
-          a3.Output('MetaData 1', a3.types.GeneralPyType),
-          a3.Output('MetaData 2', a3.types.GeneralPyType)]
+          a3.Output('Channel 2', a3.types.ImageFloat)]
     
 
 a3.def_process_module(config, module_main)
