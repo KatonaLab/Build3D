@@ -91,31 +91,52 @@ class Image(object):
         self.__metadata=value
   
     @classmethod              
-    def load(cls, path, file_type='imageJ', **kwargs):
+    def load(cls, path, file_type=None):
         '''
         Load image stack from path. RGB images are not supported currently and only first frame is returned.
         '''
-        
-        kwargs=dict(**kwargs)
-        
-        if file_type=='ome':
+        #Define functions to load different filetypes
+        def imagej(path):
         
             #Load image and create simplified metadata dictionary
             image, ome_metadata=ome_tiff.load_image(path)
-      
+    
             metadata=ome_tiff.convert_metadata(ome_metadata)
-             
-        elif file_type=='imagej':
             
+            return image, metadata
+    
+  
+        def ome(path):
             #Load image and create simplified metadata dictionary
             image, imagej_metadata=imagej_tiff.load_image(path)
             
-            metadata=imagej_tiff.convert_metadata(imagej_metadata)   
+            metadata=imagej_tiff.convert_metadata(imagej_metadata) 
+            
+            return image, metadata
         
+        #Define dictionary of loader functions
+        loader_dict={'ome':ome,'imagej':imagej}
+
+        #Open Image
+        if file_type==None:
+            
+            for loader in loader_dict.values():
+                try:
+                    image, metadata=loader(path)
+                except:
+                    pass
+       
+        elif file_type in loader_dict.keys():
+            loader_dict[file_type](path)    
+        
+        else:
+            raise Exception('Currently only {} files are supported!'.format(loader_dict.keys()))
        
         #Return first timeframe
         return cls(ndarray=image, metadata=metadata)
     
+
+
               
     def save(self, directory, file_name):
         '''

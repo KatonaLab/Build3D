@@ -33,7 +33,6 @@ def load_image(path):
     
     with TiffFile(path, is_ome=True) as tif:
                 
-
         #Check if image is OME-Tiff
         if not tif.is_ome:
             raise TypeError('The file is corrupt or not an OME-tiff file!')

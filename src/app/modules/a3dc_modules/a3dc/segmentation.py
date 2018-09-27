@@ -115,7 +115,7 @@ def create_surfaceImage(ndarray):
 def threshold_manual(ndarray, upper=1, lower=0):
  
     # Cast to 16-bit
-    ndarray = convert_array_type(ndarray, 'int16')
+    #ndarray = convert_array_type(ndarray, 'int16')
     
     # Convert nd Image to ITK image
     itk_image = sitk.GetImageFromArray(ndarray)

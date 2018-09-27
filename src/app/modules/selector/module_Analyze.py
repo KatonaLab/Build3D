@@ -13,9 +13,8 @@ import time
 import math
 import sys
 
+from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
 
-
-import numpy as np
 
 
 FILTERS = ['volume', 'meanIntensity']
@@ -59,8 +58,8 @@ def analyze_image(source, mask, settings, removeFiltered=False):
 
 def read_params(filters=FILTERS):
     
-    out_dict = {'Source': Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Source image']),a3.inputs['Source metadata'] ),
-                    'Mask':Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Mask image']),a3.inputs['Mask metadata'] )}
+    params = {'Source': a3image_to_image(a3.inputs['Source Image']),
+                    'Mask':a3image_to_image(a3.inputs['Mask Image'])}
 
     settings = {}
     for f in filters:
@@ -75,13 +74,13 @@ def read_params(filters=FILTERS):
         
         #Check if physical size metadata is available  if any is missing raise Exeption
         size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
-        missing_size=[s for s in size_list if s not in out_dict['Source'].metadata.keys()]
+        missing_size=[s for s in size_list if s not in params['Source'].metadata.keys()]
         if len(missing_size)!=0:
             raise Exception('Missing :'+str(missing_size)+'! Unable to carry out analysis!')
 
         #Check if unit metadata is available, default Unit is um!!!!!!!!
         unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
-        missing_unit=[u for u in unit_list if u not in out_dict['Source'].metadata.keys()]
+        missing_unit=[u for u in unit_list if u not in params['Source'].metadata.keys()]
         if len(missing_size)!=0:
             print('Warning: DEFAULT value (um or micron) used for :'
                  +str(missing_unit)+'!', file=sys.stderr)        
@@ -89,34 +88,32 @@ def read_params(filters=FILTERS):
         #Set default Unit values is not in metadata
         #Remember that if unit value is missing an exception is raised
         for un in missing_unit:
-            out_dict['Source'].metadata[un]='um'
-            out_dict['Mask'].metadata[un]='um'
+            params['Source'].metadata[un]='um'
+            params['Mask'].metadata[un]='um'
         
         print('Physical voxel volume is : '
-              +str(out_dict['Source'].metadata['PhysicalSizeX']*out_dict['Source'].metadata['PhysicalSizeY']*out_dict['Source'].metadata['PhysicalSizeZ'])
-              +' '+out_dict['Source'].metadata['PhysicalSizeXUnit']+'*'+out_dict['Source'].metadata['PhysicalSizeYUnit']+'*'+out_dict['Source'].metadata['PhysicalSizeZUnit'])
+              +str(params['Source'].metadata['PhysicalSizeX']*params['Source'].metadata['PhysicalSizeY']*params['Source'].metadata['PhysicalSizeZ'])
+              +' '+params['Source'].metadata['PhysicalSizeXUnit']+'*'+params['Source'].metadata['PhysicalSizeYUnit']+'*'+params['Source'].metadata['PhysicalSizeZUnit'])
         
   
     else:
         settings['voxelCount'] = settings.pop('volume')
     
-    out_dict['Settings'] = settings
+    params['Settings'] = settings
     
-    out_dict['removeFiltered']=a3.inputs['Remove filtered objects']
+    params['removeFiltered']=a3.inputs['Remove filtered objects']
 
-    return out_dict    
+    return params    
     
 
 def generate_config(filters=FILTERS):
     
     #Set Outputs and inputs
-    config = [a3.Output('Analyzed image', a3.types.ImageFloat),  
-              a3.Output('Analyzed database', a3.types.GeneralPyType), 
-              a3.Output('Analyzed metadata', a3.types.GeneralPyType),
-              a3.Input('Source image', a3.types.ImageFloat),
-             a3.Input('Source metadata',  a3.types.GeneralPyType),
-             a3.Input('Mask image', a3.types.ImageFloat),
-             a3.Input('Mask metadata',  a3.types.GeneralPyType)]
+    config = [a3.Input('Source Image', a3.types.ImageFloat),
+             a3.Input('Mask Image', a3.types.ImageFloat),
+             a3.Output('Analyzed Image', a3.types.ImageFloat),
+             a3.Output('Analyzed Binary', a3.types.ImageFloat),  
+             a3.Output('Analyzed Database', a3.types.GeneralPyType)]
 
     #Set parameters 
     for f in filters:
@@ -130,14 +127,12 @@ def generate_config(filters=FILTERS):
                  a3.Parameter('Exclude bordering objects', a3.types.bool).setBoolHint("default", False),
                  a3.Parameter('Use physical dimensions', a3.types.bool).setBoolHint("default", False)]
     config.extend(switch_list)
-
-    
+ 
     return config
 
 def module_main(ctx):
     try:
         #Inizialization
-        #print(ctx.name())
         tstart = time.clock()
         print(SEPARATOR)
         print('Object analysis started!')
@@ -153,10 +148,11 @@ def module_main(ctx):
         
         #Change Name in metadata
         #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-        a3.outputs['Analyzed image'] = a3.MultiDimImageFloat_from_ndarray(output.array.astype(np.float))
         
-        a3.outputs['Analyzed database']=output.database
-        a3.outputs['Analyzed metadata']=output.metadata
+        #Create Output
+        a3.outputs['Analyzed Image'] = image_to_a3image(output)
+        a3.outputs['Analyzed Binary'] = image_to_a3image(Image(output.array>0,output.metadata))
+        a3.outputs['Analyzed Database']=output.database
         
         #Finalization
         tstop = time.clock()

@@ -2,8 +2,9 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_auto
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-import time, traceback
+import time
 
+from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
 
 METHODS=['Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu']
 
@@ -25,10 +26,10 @@ def auto_threshold(image, method="Otsu", mode="Slice"):
     return Image(output_array, output_metadta)
 
 
-def init_config(methods=METHODS):
+def generate_config(methods=METHODS):
  
-    config = [ a3.Input('Input_Image', a3.types.ImageFloat),
-               a3.Input('Input_Metadata', a3.types.GeneralPyType)]
+    config = [ a3.Input('Input Image', a3.types.ImageFloat),
+              a3.Output('Output Image', a3.types.ImageFloat)]
 
     param=a3.Parameter('Method', a3.types.enum)
     for idx, m in enumerate(methods):
@@ -36,7 +37,7 @@ def init_config(methods=METHODS):
     
     config.append(param)
     
-    config.append(a3.Parameter('Stack', a3.types.bool))
+    config.append(a3.Parameter('Stack Histogram', a3.types.bool))
     
     return config
 
@@ -51,13 +52,13 @@ def module_main(ctx):
         print('Autothresholding started!')
         
         #Create Image object
-        img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input_Image']), a3.inputs['Input_Metadata'])
+        img = a3image_to_image(a3.inputs['Input Image'])
         
         
         #Get method and mode
         method=METHODS[a3.inputs['Method'][-1]]
           
-        if a3.inputs['Stack']:
+        if a3.inputs['Stack Histogram']:
             mode='Stack'
         else:
             mode='Slice'
@@ -69,8 +70,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Output_Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(float))
-        a3.outputs['Output_Metadata']=output_img.metadata
+        a3.outputs['Output Image']=image_to_a3image(output_img)
         
         #Finalization
         tstop = time.clock()
@@ -81,8 +81,8 @@ def module_main(ctx):
     except Exception as e:
         raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
         
-config = init_config()
-config.append(a3.Output('Output_Image', a3.types.ImageFloat)) 
-config.append(a3.Output('Output_Metadata', a3.types.GeneralPyType))
 
-a3.def_process_module(config, module_main)
+ 
+
+
+a3.def_process_module(generate_config(), module_main)

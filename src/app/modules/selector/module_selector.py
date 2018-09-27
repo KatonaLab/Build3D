@@ -6,6 +6,10 @@ import time
 import copy
 import sys
 
+
+from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
+
+
 def module_main(ctx):
     try:
         #Inizialization
@@ -45,8 +49,7 @@ def module_main(ctx):
         #img.metadata['Path']=filename
         
         #Create Output
-        a3.outputs['Channel'] = a3.MultiDimImageFloat_from_ndarray(array.astype(np.float))
-        a3.outputs['MetaData']=img.metadata
+        image_to_a3image(Image(array.astype(np.float),copy.deepcopy(img.metadata)))
        
         #Finalization
         tstop = time.clock()
@@ -62,7 +65,7 @@ config = [a3.Parameter('Channel', a3.types.int8)
                 .setFloatHint('unusedValue',0),
     a3.Input('Image', a3.types.GeneralPyType),
     a3.Input('MetaData', a3.types.GeneralPyType),
-    a3.Output('Channel', a3.types.ImageFloat),
-    a3.Output('MetaData', a3.types.GeneralPyType)]
+    a3.Output('Channel', a3.types.ImageFloat)
+    ]
 
 a3.def_process_module(config, module_main)

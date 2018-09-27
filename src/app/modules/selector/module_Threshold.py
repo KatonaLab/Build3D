@@ -35,7 +35,7 @@ def generate_config(methods=METHODS):
             .setFloatHint('default', float(math.inf))
             .setFloatHint('unusedValue', float(math.inf))
             .setFloatHint('stepSize', 1))
-    config.append(a3.Parameter('Stack', a3.types.bool))
+    config.append(a3.Parameter('Stack Histogram', a3.types.bool))
     
 
     return config
@@ -65,7 +65,7 @@ def module_main(ctx):
             kwargs={'lower':0, 'upper':a3.inputs['Threshold']}
         else:
             kwargs={}
-            if a3.inputs['Stack']:
+            if a3.inputs['Stack Histogram']:
                 kwargs['mode']='Stack'
             else:
                 kwargs['mode']='Slice'

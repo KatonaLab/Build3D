@@ -14,13 +14,17 @@ import os
 import math
 import sys
 
+from modules.a3dc_modules.a3dc.a3image import  a3image_to_image, image_to_a3image
+
+
 CHFILTERS=['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
 OVLFILTERS=[ 'volume','Ch1 overlappingRatio','Ch2 overlappingRatio']
 
 FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
 
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False):
-
+    
+    
     tagged_img_list=[ch1_img, ch2_img]
     print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
     print('Filter settings: ' + str(ovl_settings))
@@ -41,12 +45,14 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)            
     
-     
-    if ch1_img.metadata['FileName']!=ch2_img.metadata['FileName']:
+    #Generate output filename
+    filename_1=os.path.basename(ch1_img.metadata['Path'])
+    filename_2=os.path.basename(ch1_img.metadata['Path'])
+    if filename_1!=filename_2:
         
-        basename=os.path.splitext(ch1_img.metadata['FileName'])[0]+'_'+os.path.splitext(ch2_img.metadata['FileName'][0])
+        basename=os.path.splitext(filename_1)[0]+'_'+os.path.splitext(filename_2)[0]
     else:
-        basename=os.path.splitext(ch1_img.metadata['FileName'])[0]
+        basename=os.path.splitext(filename_1)[0]
         
     #Save databases
     print('Saving object dataBases!')
@@ -92,8 +98,8 @@ def read_params(filters=FILTERS):
     out_dict = {}
     out_dict['Path']=os.path.dirname(a3.inputs['Path'].path)
 
-    out_dict['Ch1 Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch1 Image']), a3.inputs['Ch1 MetaData'], a3.inputs['Ch1 DataBase'])
-    out_dict['Ch2 Image']=Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Ch2 Image']), a3.inputs['Ch2 MetaData'], a3.inputs['Ch2 DataBase'])
+    out_dict['Ch1 Image']=a3image_to_image(a3.inputs['Ch1 Image'],a3.inputs['Ch1 DataBase'])
+    out_dict['Ch2 Image']=a3image_to_image(a3.inputs['Ch2 Image'],a3.inputs['Ch2 DataBase'])
     
     out_dict['to_text']=a3.inputs['Save to text']
     
@@ -161,9 +167,8 @@ def module_main(ctx):
                    params['Path'],
                    to_text=params['to_text'])
         
-        a3.outputs['Overlapping Image'] = a3.MultiDimImageFloat_from_ndarray(output[0].array.astype(float))
-        a3.outputs['Overlapping Binary Image'] = a3.MultiDimImageFloat_from_ndarray((0 < output[0].array).astype(float))
-        a3.outputs['Overlapping MetaData'] =output[0].metadata
+        a3.outputs['Overlapping Image'] = image_to_a3image(output[0])
+        a3.outputs['Overlapping Binary'] = image_to_a3image(Image(output[0].array>0,output[0].metadata))
         a3.outputs['Overlapping DataBase'] =output[0].database
         
         path=a3.Url()
@@ -191,14 +196,11 @@ def generate_config(filters=FILTERS):
     #Set Outputs and inputs
     config=[a3.Input('Path', a3.types.url),
         a3.Input('Ch1 Image', a3.types.ImageFloat), 
-        a3.Input('Ch1 MetaData', a3.types.GeneralPyType),
         a3.Input('Ch1 DataBase', a3.types.GeneralPyType), 
         a3.Input('Ch2 Image', a3.types.ImageFloat),
-        a3.Input('Ch2 MetaData', a3.types.GeneralPyType), 
         a3.Input('Ch2 DataBase', a3.types.GeneralPyType),              
         a3.Output('Overlapping Image', a3.types.ImageFloat),
-        a3.Output('Overlapping Binary Image', a3.types.ImageFloat),
-        a3.Output('Overlapping MetaData', a3.types.GeneralPyType),
+        a3.Output('Overlapping Binary', a3.types.ImageFloat),
         a3.Output('Overlapping DataBase', a3.types.GeneralPyType),
         a3.Output('Overlapping Path', a3.types.url)]    
     

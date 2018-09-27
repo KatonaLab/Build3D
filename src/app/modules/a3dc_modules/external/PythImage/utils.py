@@ -1,3 +1,4 @@
+from skimage.external.tifffile import TiffFile
 import collections
 from xml.etree import cElementTree as etree 
 import traceback
@@ -39,6 +40,20 @@ class lazyattr(object):
         return value 
              
 
+def get_image_source(path):
+    '''
+    Return the image type. Currently only imageJ and ome Tiff files are supported.
+    '''
+          
+    with TiffFile(path) as tif:
+             
+        if tif.is_imagej:
+            output='imagej'
+        
+        if tif.is_imagej:
+            output='ome'
+            
+    return output
 
 def length(a):
     '''
