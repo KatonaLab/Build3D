@@ -46,7 +46,7 @@ class Image(object):
         if metadata['Type']!=array.dtype:
              #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
              array=array.astype(metadata['Type'])
-             
+    
         return array
     
     @classmethod

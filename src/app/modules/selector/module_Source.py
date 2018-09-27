@@ -3,7 +3,7 @@ from modules.a3dc_modules.external.PythImage import Image
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line, warning
 from modules.a3dc_modules.a3dc.imageclass import Image as Im
 import time, os, copy
-import numpy as np
+
 
 from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
 
@@ -50,8 +50,8 @@ def module_main(ctx):
         print('Loading the following image: ', filename)
         
         #Load and reshape image
-        img_raw=Image.load(filename, file_type='ome')
-        print(str(type(img_raw)))
+        img_raw=Image.load(filename)
+       
         img_raw.reorder('XYZCT')
         img = Image(img_raw.image, img_raw.metadata)
        
@@ -62,14 +62,14 @@ def module_main(ctx):
    
         #Create Output 1
         ch_1=get_channel(img, a3.inputs['Channel 1'])
-        ch_1.metadata['Path']=os.path.dirname(filename)
+        ch_1.metadata['Path']=filename
         a3.outputs['Channel 1'] = image_to_a3image(ch_1)
 
         
 
         #Create Output 2
         ch_2=get_channel(img, a3.inputs['Channel 2'])
-        ch_2.metadata['Path']=os.path.dirname(filename)
+        ch_2.metadata['Path']=filename
         a3.outputs['Channel 2'] = image_to_a3image(ch_2)
 
      

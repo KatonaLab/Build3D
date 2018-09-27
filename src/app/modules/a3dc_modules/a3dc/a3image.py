@@ -30,7 +30,7 @@ from ast import literal_eval
 required_ics_keys=['IcsGetCoordinateSystem','IcsGetSignificantBits']
 
  
-def a3image_to_image(a3image):
+def a3image_to_image(a3image, database=None):
         
     #get image array
     array=a3.MultiDimImageFloat_to_ndarray(a3image)
@@ -39,8 +39,15 @@ def a3image_to_image(a3image):
     metadata=metadata_to_dict(a3image)     
     if is_ics(a3image):
         metadata=ics_to_metadata(array, metadata)
+    
+    #Create output image    
+    output=Image(array, metadata)
+
+    #Add database if available
+    if database!=None and isinstance(database, dict):
+        output.database=database
         
-    return Image(array, metadata)
+    return output
         
 def image_to_a3image(image):
     
@@ -62,9 +69,9 @@ def metadata_to_dict(a3image):
     for idx, line in enumerate(str(a3image.meta).split('\n')[1:-1]):
             line_list=line.split(':')
             
-            #for the 'path' key the path is separated as well
-            if line_list[0].lstrip()=='path':
-                metadata['path']=':'.join(line_list[1:])
+            #for the 'path' key the path is separated as well.
+            if line_list[0].lstrip().lower()=='path':
+                metadata[line_list[0].lstrip()]=':'.join(line_list[1:])
 
             else:
                 try:
