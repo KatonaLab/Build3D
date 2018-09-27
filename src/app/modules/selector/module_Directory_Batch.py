@@ -2,23 +2,28 @@ import a3dc_module_interface as a3
 from a3dc_module_interface import def_process_module
 from glob import glob
 import os
-
+from modules.a3dc_modules.a3dc.utils import SEPARATOR
 
 def module_main(ctx):
+    
+    print(SEPARATOR)
+    print('Retrieving file!')
+    
+    #Absolute path
     path = os.path.abspath(a3.inputs['path'].path)
-    # getting the file extension like '.tif'
-    ext = os.path.splitext(a3.inputs['path'].path)[1]
-    print('input path', path)
-    print('extension', ext)
-
+    
+    #Get file extension and directory
     if os.path.isfile(path):
         base_dir = os.path.dirname(path)
     else:
-        base_dir = path
+        base_dir = path    
+    
+    ext = os.path.splitext(a3.inputs['path'].path)[1]
 
-    print('base dir', base_dir)
+    print('Input directory:', base_dir)
 
-    # globbing all the files with matching extensions
+
+    # Gett all the files with matching extensions
     file_list = [os.path.abspath(x) for x in glob(base_dir + '/*' + ext)]
 
     if os.path.isfile(path):
@@ -34,13 +39,18 @@ def module_main(ctx):
     else:
         ctx.set_require_next_run(False)
 
-    print(file_list, index)
-
     url = a3.Url()
     url.path = file_list[index]
-    print('current', url.path)
+    
+    #Print current filename and index
+    _, curr_filename = os.path.split(url.path)
+    print('Currently processing:', curr_filename)
+    #print('Current index:', index)
+    
+    #Set output
     a3.outputs['file'] = url
 
+    print(SEPARATOR)
 
 config = [
     a3.Parameter('path', a3.types.url),
