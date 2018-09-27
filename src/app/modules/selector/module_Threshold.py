@@ -2,7 +2,9 @@ import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.interface import threshold
 from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-import time, traceback, math
+import time, math
+
+from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
 
 
 
@@ -21,9 +23,7 @@ def generate_config(methods=METHODS):
     
     #Set Outputs and inputs
     config = [a3.Input('Input Image', a3.types.ImageFloat),
-               a3.Input('Input Metadata', a3.types.GeneralPyType),
-               a3.Output('Output Image', a3.types.ImageFloat),
-               a3.Output('Output Metadata', a3.types.GeneralPyType)]
+               a3.Output('Output Image', a3.types.ImageFloat)]
 
     #Set parameters
     param=a3.Parameter('Method', a3.types.enum)
@@ -53,7 +53,7 @@ def module_main(ctx):
         
         
         #Create Image object
-        img = Image(a3.MultiDimImageFloat_to_ndarray(a3.inputs['Input Image']), a3.inputs['Input Metadata'])
+        img =a3image_to_image(a3.inputs['Input Image'])
         print('Thresholding: '+img.metadata['Name'])
         
         #Get method and mode
@@ -79,8 +79,8 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Output Image']=a3.MultiDimImageFloat_from_ndarray(output_img.array.astype(float))
-        a3.outputs['Output Metadata']=output_img.metadata
+        a3.outputs['Output Image']=image_to_a3image(output_img)
+      
         
         #Finalization
         tstop = time.clock()
