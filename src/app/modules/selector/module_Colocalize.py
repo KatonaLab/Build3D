@@ -70,7 +70,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     while os.path.exists(os.path.join(outputPath, final_name+extension)):
         final_name=file_name+'_'+str('{:03d}'.format(i))
         i += 1
-    if i!=0:
+    if i!=1:
         file_name=final_name
         warning('Warning: Trying to save to file that already exist!! Data will be saved to '+file_name+extension)
 

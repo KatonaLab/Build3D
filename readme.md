@@ -3,7 +3,7 @@ TODO: description
 
 # Requirements
 
-* OpenGL >=3.2
+* OpenGL >= 3.2 (because we use geometry shader)
 * TODO
 
 # Getting Started
