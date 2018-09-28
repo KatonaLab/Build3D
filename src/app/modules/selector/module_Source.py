@@ -1,5 +1,5 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.external.PythImage import Image
+from modules.a3dc_modules.external.PythImage.ImageClass import ImageClass as PythImage
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line, warning
 from modules.a3dc_modules.a3dc.imageclass import Image as Im
 import time, copy
@@ -55,10 +55,10 @@ def module_main(ctx):
         print('Loading the following image: ', filename)
         
         #Load and reshape image
-        img_raw=Image.load(filename)
-       
+        img_raw=PythImage.load(filename)
         img_raw.reorder('XYZCT')
-        img = Image(img_raw.image, img_raw.metadata)
+        
+        img = PythImage(img_raw.image, img_raw.metadata)
        
 
         
