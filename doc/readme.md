@@ -109,3 +109,7 @@ TODO
 ## Introducing a New Port Type
 
 TODO
+
+## Type System
+
+TODO

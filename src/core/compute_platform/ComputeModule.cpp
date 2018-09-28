@@ -23,6 +23,7 @@ void ComputeModule::evaluate()
 {
     m_inputs.fetch();
     m_context.name = name();
+    m_context.type = moduleTypeName();
     execute(m_context);
 }
 
