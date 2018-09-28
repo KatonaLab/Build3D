@@ -10,6 +10,8 @@ from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
 
 def get_channel(img, ch):
     
+    img.reorder('ZXYCT')
+    
     #Get channel from image. 
     print('Loading the following channel: ', img.metadata['Name'][ch])
     if ch>=img.metadata['SizeC']:
@@ -36,8 +38,8 @@ def get_channel(img, ch):
         raise Exception('Can only read images with 3-5 dimensions!')
     print(array.shape)
     #array=np.flip(np.swapaxes(array,0,2), axis=2),axis=1)
-    array=np.swapaxes(array,0,2)[::-1,::-1,::]
-    
+    #array=np.swapaxes(array,0,2)[::-1,::-1,::]
+    array=array[::-1,::-1,::]
     print(array.shape)
     
     return Im(array, metadata)
@@ -55,12 +57,7 @@ def module_main(ctx):
         print('Loading the following image: ', filename)
         
         #Load and reshape image
-        img_raw=PythImage.load(filename)
-        img_raw.reorder('XYZCT')
-        
-        img = PythImage(img_raw.image, img_raw.metadata)
-       
-
+        img=PythImage.load(filename)
         
         #Print important image parameters
         print_line_by_line(str(img))
@@ -70,7 +67,6 @@ def module_main(ctx):
         ch_1.metadata['Path']=filename
         a3.outputs['Channel 1'] = image_to_a3image(ch_1)
 
-        
 
         #Create Output 2
         ch_2=get_channel(img, a3.inputs['Channel 2'])

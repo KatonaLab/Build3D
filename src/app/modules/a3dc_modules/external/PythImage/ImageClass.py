@@ -96,7 +96,7 @@ class ImageClass(object):
         Load image stack from path. RGB images are not supported currently and only first frame is returned.
         '''
         #Define functions to load different filetypes
-        def imagej(path):
+        def ome(path):
         
             #Load image and create simplified metadata dictionary
             image, ome_metadata=ome_tiff.load_image(path)
@@ -106,7 +106,7 @@ class ImageClass(object):
             return image, metadata
     
   
-        def ome(path):
+        def imagej(path):
             #Load image and create simplified metadata dictionary
             image, imagej_metadata=imagej_tiff.load_image(path)
             
@@ -127,7 +127,7 @@ class ImageClass(object):
                     pass
        
         elif file_type in loader_dict.keys():
-            loader_dict[file_type](path)    
+            image, metadata=loader_dict[file_type](path)    
         
         else:
             raise Exception('Currently only {} files are supported!'.format(loader_dict.keys()))
@@ -178,7 +178,18 @@ class ImageClass(object):
             
             if utils.length(metadata['Name'])!=metadata['SizeC']:
                 raise Exception('Length of Name list is invalid!','')
-            
+        
+        #Check if dimension order is acceptable;
+        dimensions=self.__dim_translate.keys()
+        if len(metadata['DimensionOrder'])!=len(dimensions):
+            raise Exception('Dimension orders have to be a permutation of accepted dimensions: '+str(dimensions))
+        #Check if all letters are in the dimension and only once:
+        for dim in dimensions :
+            cnt=metadata['DimensionOrder'].count(dim)
+            if cnt!=1:
+                raise Exception('Dimension orders have to be a permutation of accepted dimensions! Number of occurrences of '+str(dim)+' is '+str(cnt))
+                
+        
   
         #Check if image shape confers with the one in the metadata
         #Remove singleton dimensions
@@ -323,24 +334,24 @@ class ImageClass(object):
         be the same length and confer with number of axes in ndarray!
         Reshape array so it has all the axes
         '''
-   
-        order=list(order)
-
-        dim_order_list=list(self.__metadata['DimensionOrder'])
-        order_final=order.copy()
-
+        order_current=list(reversed(list(self.__metadata['DimensionOrder'])))
+        order_final=list(reversed(list(order)))
+        
         #Cycle through image dimension order, check for differences in final order and replace
-        axis_number=len(order)-1
-        for i in range(len(dim_order_list)):
-           
-            if dim_order_list[i]!=order[i] :
-                axis_index_current=i
-                axis_index_final=order.index(dim_order_list[i])
-                self.__image=self.__image.swapaxes(axis_number-axis_index_current, axis_number-axis_index_final)
-                dim_order_list[axis_index_current], dim_order_list[axis_index_final] = dim_order_list[axis_index_final], dim_order_list[axis_index_current]
+        for idx, dim in enumerate(order_current):
+            #print(order_current)
+            print(idx, dim, order_final[idx])
+            if dim!=order_final[idx] :
+                
+                index_current=idx
+                index_final=order_final.index(dim)
 
+                self.__image=self.__image.swapaxes(index_final,index_current)
+                
+                order_current[index_current], order_current[index_final] = order_current[index_final], order_current[index_current]
+                
         #Set final dimension order
-        self.__metadata['DimensionOrder']=''.join(order_final)
+        self.__metadata['DimensionOrder']=''.join(reversed(order_current))
 
     def __merge_axes(ndarray, dim_order='SXYCZT', axis1='S', axis2='C'):
         '''

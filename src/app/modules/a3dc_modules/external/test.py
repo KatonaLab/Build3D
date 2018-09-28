@@ -5,16 +5,25 @@ Created on Tue May 15 11:28:54 2018
 """
 import PythImage
 
-def load_ome(path='2048_2048_50_4.ome.tif'):
+def load(path='aaaaaaaaaaaaaaaa.ome.tif'):
 
-    output = PythImage.Image.load(path, file_type='ome')
+    output = PythImage.ImageClass.load(path, file_type='ome')
     
     
-    return output.image
+    return output
  
 
 
 if __name__ == "__main__":
     
-    print(type(load_ome()))
-    print(load_ome().shape)
+
+    img=load()
+    dim_order='ZXYTC'
+    print('Start',img.image.shape)
+    print('Start',img.metadata['DimensionOrder'])
+    
+    print('Aim: ', dim_order)
+    img.reorder(dim_order)
+    
+    print('End',img.metadata['DimensionOrder'])
+    print('Start',img.image.shape)

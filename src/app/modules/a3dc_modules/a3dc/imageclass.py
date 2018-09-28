@@ -54,11 +54,7 @@ class Image(object):
         #Load image using scikit/image im read
         return Image(imread(str(file_path)), metadata)
     
-    @classmethod
-    def image_from_a3(cls, file_path, metadata=None):
-        #Load image using scikit/image im read
-        #return Image(imread(str(file_path)), metadata)
-        pass
+
     
     @staticmethod
     def save_image(img, path, file_name='output'):
