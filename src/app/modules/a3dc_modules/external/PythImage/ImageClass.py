@@ -339,8 +339,7 @@ class ImageClass(object):
         
         #Cycle through image dimension order, check for differences in final order and replace
         for idx, dim in enumerate(order_current):
-            #print(order_current)
-            print(idx, dim, order_final[idx])
+            
             if dim!=order_final[idx] :
                 
                 index_current=idx

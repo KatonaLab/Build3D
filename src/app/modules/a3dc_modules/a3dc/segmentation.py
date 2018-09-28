@@ -47,8 +47,6 @@ def threshold_auto(ndarray, method, mode='Slice'):
     
     # Cast to 16-bit
     ndarray = convert_array_type(ndarray, 'int16')
-
-    # Cast to 8-bit
     #ndarray = img_as_ubyte(ndarray)
     
 
@@ -68,7 +66,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
         threshold_val = threshold_filter.GetThreshold()
 
     elif mode=="Slice":
-
+        #Remember taht the first dimension axis is taken as 
         threshold_val=[]
         output=[]
         for i in range(len(ndarray)):
