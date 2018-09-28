@@ -34,12 +34,14 @@ def a3image_to_image(a3image, database=None):
         
     #get image array
     array=a3.MultiDimImageFloat_to_ndarray(a3image)
-    
+
     #Get image metadata and convert database if the metadata is ICS style
     metadata=metadata_to_dict(a3image)     
     if is_ics(a3image):
+           
         metadata=ics_to_metadata(array, metadata)
-    
+        
+
     #Create output image    
     output=Image(array, metadata)
 

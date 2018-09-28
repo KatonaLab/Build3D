@@ -55,13 +55,6 @@ class Image(object):
         return Image(imread(str(file_path)), metadata)
     
     @classmethod
-    def image_from_a3_image():
-        pass
-    
-    def image_to_a3_image(self):
-        pass
-    
-    @classmethod
     def image_from_a3(cls, file_path, metadata=None):
         #Load image using scikit/image im read
         #return Image(imread(str(file_path)), metadata)
