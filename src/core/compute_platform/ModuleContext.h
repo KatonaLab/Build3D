@@ -8,6 +8,7 @@ namespace compute_platform {
 
 struct ModuleContext {
     std::string name;
+    std::string type;
     int runId = 0;
     bool hasNext = false;
     int statusIndicator = -1;

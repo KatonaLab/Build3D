@@ -286,6 +286,10 @@ PYBIND11_EMBEDDED_MODULE(a3dc_module_interface, m)
     {
         return obj.name;
     })
+    .def("type", [](ModuleContext& obj)
+    {
+        return obj.type;
+    })
     .def("run_id", [](ModuleContext& obj)
     {
         return obj.runId;

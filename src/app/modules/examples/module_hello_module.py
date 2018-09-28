@@ -3,7 +3,8 @@ import sys
 
 
 def module_main(ctx):
-    print('Hello Module! Module name: {}'.format(ctx.name()))
+    print('Hello Module! Module name: {}, type: {}'
+          .format(ctx.name(), ctx.type()))
     print('your Python interpreter is {}'.format(sys.executable))
     print('of version {}'.format(sys.version))
     print('using search paths for modules {}'.format(sys.path))
