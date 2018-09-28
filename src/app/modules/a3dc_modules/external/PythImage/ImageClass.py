@@ -156,13 +156,13 @@ class ImageClass(object):
 
         #Check if image is numpy array and metadata is dict
         if not isinstance(metadata, dict):
-            raise TypeError('metadata must be a dictionary!')
+            raise TypeError('Metadata must be a dictionary!')
         if not isinstance(image, np.ndarray):
-            raise TypeError('image must be a a NumPy array!')
+            raise TypeError('Image must be a a NumPy array!')
         
         #Check if metadata 'Type' field matches the type of the image
         if self.__bit_depth_lookup[metadata['Type']]!=image.dtype:
-             raise TypeError('image data type does not mach the one specified in the metadata!')
+             raise TypeError('Image data type does not mach the one specified in the metadata!')
              
         #Check if number of channels and length of the name list is the same
         if 'SizeC' in metadata.keys():
@@ -189,8 +189,6 @@ class ImageClass(object):
             if cnt!=1:
                 raise Exception('Dimension orders have to be a permutation of accepted dimensions! Number of occurrences of '+str(dim)+' is '+str(cnt))
                 
-        
-  
         #Check if image shape confers with the one in the metadata
         #Remove singleton dimensions
         shape_image=[val for val in image.shape if val!=1]

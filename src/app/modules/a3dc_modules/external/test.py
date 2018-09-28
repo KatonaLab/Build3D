@@ -3,20 +3,192 @@
 Created on Tue May 15 11:28:54 2018
 @author: pongor.csaba
 """
-import PythImage
+import PythImage.ImageClass as PythImage
+#from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line, warning
 import numpy as np
+import os
+import copy
+import pandas as pd
 
-def load(path='C:\\Users\\pongor.csaba\\Desktop\\aaaaaaaaaaaaaaaa.ome.tif'):
+def load(path='C:\\Users\\Nerberus\\Desktop\\aaa.ome.tif'):
 
-    output = PythImage.ImageClass.load(path, file_type='ome')
+    output = PythImage.load(path, file_type='ome')
     
     
     return output
- 
 
-
-if __name__ == "__main__":
+class VividImage(PythImage):
     
+    def __init__(self, image, metadata, database=None):
+     
+        #Check if compulsory keys are missing
+        key_list=['Type']# 'Name', 'SizeC', 'SizeT', 'SizeX', 'SizeY', 'SizeZ', 'DimensionOrder']
+        missing_keys=[]
+        for key in key_list:
+            if key not in metadata:
+                missing_keys.append(key)
+        if len(missing_keys)>0:
+            raise Exception('Invalid Metadata! Missing the following keys: '+str(missing_keys))
+        
+        
+        #Check if metadata 'Type' field matches the type of the image
+        if metadata['Type']!=image.dtype:
+             #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
+             image=image.astype(metadata['Type'])
+        
+        #Call parent __init__
+        super(VividImage, self).__init__(image, metadata)
+        
+        #Set database if supplied
+        if database!=None:
+            self.database=database
+
+    def get_channel(self, ch):
+        
+        #Get channel from image. 
+        print('Loading the following channel: ', self.metadata['Name'][ch])
+        if ch>=self.metadata['SizeC']:
+            raise Exception('Image has %s channels! Invalid channel %s' % (str(self.metadata['SizeC']), str(ch)))
+        
+        #Check if image is time series
+        if self.metadata['SizeT']>1:
+            ###############################
+            ###############################
+            ###########!!!!!!!!!###########
+            #change back to a3dc warning
+            raise Warning("Image is a time series! Only the first time step will be extracted!")
+                
+        #Create metadata
+        metadata=copy.deepcopy(self.metadata)
+        metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][ch]
+        metadata['Name']=metadata['Name'][ch]  
+        metadata['SizeC']=1
+        
+        #Extract channel from image array
+        self.reorder('ZXYCT')    
+        dims = len(self.image.shape)
+        if dims == 5:
+            array = self.image[0, ch, :, :, :]
+        elif dims == 4:
+            array = self.image[ch, :, :, :]
+        elif dims == 3:
+            array = self.image[:, :, :]
+        else:
+            raise Exception('Can only read images with 3-5 dimensions!')
+       
+        #array=array[::-1,::-1,::]
+
+        
+        return VividImage(array, metadata)
+   
+    def save_data(self, img_list, path, file_name='output', to_text=True):
+        '''
+        :param dict_list: Save dictionaries in inputdict_list
+        :param path: path where file is saved
+        :param to_text: if True data are saved to text
+        :param fileName: fileneme WITHOUT extension
+        :return:
+        '''
+    
+        dataframe_list=[]
+        key_order_list=[]
+        col_width_list=[]
+                    
+        dict_list=[x.database for x in img_list]
+        name_list = [x.metadata['Name'] for x in img_list]
+    
+    
+        for dic in  dict_list:
+    
+            # Convert to Pandas dataframe
+            df=pd.DataFrame(dic)
+            
+            dataframe_list.append(df)
+    
+            # Sort dictionary with numerical types first (tag, volume, voxelCount,  first) and all others after (centroid, center of mass, bounding box first)
+            numeric_keys = []
+            other_keys = []
+    
+            for key in list(dic.keys()):
+    
+                if str(df[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
+                    'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
+                    numeric_keys.append(key)
+    
+                else:
+                    other_keys.append(key)
+    
+            #Rearange keylist
+            preset_order=['tag', 'volume', 'voxelCount', 'filter']
+            numeric_keys=self.__reorderList(numeric_keys,preset_order)
+            preset_order = ['centroid']
+            other_keys=self.__reorderList(other_keys,preset_order)
+            key_order_list.append(numeric_keys+other_keys)
+    
+            # Measure the column widths based on header
+            col_width=0
+            for i in range(len(key_order_list)):
+                for j in range(len(key_order_list[i])):
+                    w=len(key_order_list[i][j])
+                    if w>col_width:
+                        col_width=w
+            col_width_list.append(col_width)
+    
+        if to_text==False:
+            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            writer = pd.ExcelWriter(os.path.join(path, file_name+'.xlsx'), engine='xlsxwriter')
+            
+            for i in range(len(dataframe_list)):
+                
+                #If no names are given ore name_list is shorter generate worksheet name
+                if name_list==None or i>len(name_list):
+                    name='Data_'+str(i)
+                else:
+                   name =str(name_list[i]) 
+    
+                # Convert the dataframe to an XlsxWriter Excel object. Crop worksheet name if too long
+                if len(name) > 30:
+                    name=(str(name)[:30] + '_')
+                
+                dataframe_list[i].to_excel(writer, sheet_name=name, columns=key_order_list[i], header=True)
+    
+                #Get workbook, worksheet and format
+                workbook = writer.book
+                format=workbook.add_format()
+                format.set_shrink('auto')
+                format.set_align('center')
+                format.set_text_wrap()
+    
+                worksheet=writer.sheets[name]
+                worksheet.set_zoom(90)
+                worksheet.set_column(j, 1, col_width_list[i]*0.6, format)
+    
+            # Close the Pandas Excel writer and save Excel file.
+            writer.save()
+    
+        elif to_text==True:
+    
+            with open(os.path.join(path, file_name + '.txt'), 'w') as outputFile:
+    
+                for i in range(len(dataframe_list)):
+                    #if dataframe_list[i] != None:
+                    outputFile.write('name= '+name_list[i]+'\n')
+                    outputFile.write(dataframe_list[i].to_csv(sep='\t', columns=key_order_list[i], index=False, header=True))
+    
+   
+
+    def __reorderList(self, lst, val_list):
+    
+        for element in reversed(val_list):
+            if element in lst:
+                lst.remove(element)
+                lst.insert(0, element)
+    
+        return lst
+        
+if __name__ == "__main__":
+   
+
 
     img=load()
     dim_order='ZXYTC'
@@ -29,13 +201,15 @@ if __name__ == "__main__":
     print('End',img.metadata['DimensionOrder'])
     print('Start',img.image.shape)
     
-    print(axis)
-    
-    index=1
-    axis=len(img.image.shape)-img.metadata['DimensionOrder'].index('Z')
+    img2=VividImage(copy.deepcopy(img.image), copy.deepcopy(img.metadata), {})
+    print(img2.image.shape)
+    print(str(img2.get_channel(1)))
+    '''
+    axis=len(img.image.shape)-img.metadata['DimensionOrder'].index('Z')-1
     slices=img.metadata['SizeZ']
     i=1
     for i in range(slices):
-        a=np.take(img.image, i, axis=index):
+        a=np.take(img.image, i, axis=axis)
         i+=1
     print(i)
+    '''
