@@ -1,8 +1,9 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.external.PythImage import Image
+from modules.a3dc_modules.external.PythImage.ImageClass import ImageClass as PythImage
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line, warning
 from modules.a3dc_modules.a3dc.imageclass import Image as Im
-import time, os, copy
+import time, copy
+import numpy as np
 
 
 from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
@@ -33,7 +34,11 @@ def get_channel(img, ch):
         array = img.image[:, :, :]
     else:
         raise Exception('Can only read images with 3-5 dimensions!')
+    print(array.shape)
+    #array=np.flip(np.swapaxes(array,0,2), axis=2),axis=1)
+    array=np.swapaxes(array,0,2)[::-1,::-1,::]
     
+    print(array.shape)
     
     return Im(array, metadata)
 
@@ -50,10 +55,10 @@ def module_main(ctx):
         print('Loading the following image: ', filename)
         
         #Load and reshape image
-        img_raw=Image.load(filename)
-       
+        img_raw=PythImage.load(filename)
         img_raw.reorder('XYZCT')
-        img = Image(img_raw.image, img_raw.metadata)
+        
+        img = PythImage(img_raw.image, img_raw.metadata)
        
 
         

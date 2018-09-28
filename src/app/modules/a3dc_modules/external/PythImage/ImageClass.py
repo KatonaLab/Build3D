@@ -11,7 +11,7 @@ from . import utils
 
 
 ##Add channel, remove channel, extract channel etc.
-class Image(object):
+class ImageClass(object):
     
     '''TOBE FIXED return objects cpy or deepcopy etc.
     
@@ -50,7 +50,7 @@ class Image(object):
      
         for i in range(len(key)):
             
-            length=Image.__slice_length(key[i], shape[i])
+            length=ImageClass.__slice_length(key[i], shape[i])
             dim_current=order[i]
             
             if dim_current=='C':
@@ -58,7 +58,7 @@ class Image(object):
                 metadata['SamplesPerPixel']=np.squeeze(metadata['SamplesPerPixel'][key[i]]).tolist()
             metadata[self.__dim_translate[dim_current]]=length
         
-        return Image(image=image ,metadata=metadata)
+        return ImageClass(image=image ,metadata=metadata)
     
     def __repr__(self):
      
@@ -308,7 +308,7 @@ class Image(object):
             
             #print(img)
             #Create new ImageClass object
-            roi=Image(img, roi_metadata )
+            roi=ImageClass(img, roi_metadata )
             #print(roi.image)
             #print(np.amax(roi.image))
             self.append_to_dimension(roi, dim='C')
@@ -342,30 +342,7 @@ class Image(object):
         #Set final dimension order
         self.__metadata['DimensionOrder']=''.join(order_final)
 
-    
-    def merge_axes(ndarray, axis1, axis2):
-        '''
-        Merge two axes. First the axes are swaped so the two axes are besides each other
-        then the ndarray is linearized and reshaped.
-        '''
-        #Determine which axes is larger
-        largest_axis=max(axis1, axis2)
-        smallest_axis=min((axis1, axis2))
-        
-        #Generate final shape
-        shape=list(ndarray.shape)
-        shape[smallest_axis]=shape[smallest_axis]*shape[largest_axis]
-        del shape[largest_axis]
-        
-        #Swap axes so the two axes are besides each other
-        ax=largest_axis
-        while ax>smallest_axis:
-            ndarray=ndarray.swapaxes(ax,ax-1)
-            ax-=1
-        #Ravel, reshape and return result
-        return np.reshape(ndarray.ravel(), shape)
-    
-    def merge_axes2(ndarray, dim_order='SXYCZT', axis1='S', axis2='C'):
+    def __merge_axes(ndarray, dim_order='SXYCZT', axis1='S', axis2='C'):
         '''
         Merge two axes. First the axes are swaped so the two axes are besides each other
         then the ndarray is linearized and reshaped.
@@ -391,10 +368,15 @@ class Image(object):
     def z_projection (self):
         '''Needs to be implemented
         '''
+        #numpy.dstack(tup)[source]¶
         pass
     
-    def change_type(self):
-        pass
+    def as_type(self, dtype):
+        
+        if dtype!=self.metadata['Type']:
+            self.__image=self.array.astype(dtype)
+            self.__metadata['Type']=dtype
+
     
 
     def __expand_singleton_dimensions(self, ndarray, metadata):
@@ -405,9 +387,9 @@ class Image(object):
         shape=[1]*len(dim_order_list)
 
         for i, dim in enumerate(dim_order_list):
-            if dim in Image.__dim_translate.keys() and dim!='S':
+            if dim in ImageClass.__dim_translate.keys() and dim!='S':
                 
-                key=Image.__dim_translate[dim]
+                key=ImageClass.__dim_translate[dim]
              
                 if key in metadata.keys():
                     shape[i]=int(metadata[key])
