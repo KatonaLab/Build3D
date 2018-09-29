@@ -19,6 +19,11 @@ def load(path='C:\\Users\\Nerberus\\Desktop\\aaa.ome.tif'):
 
 class VividImage(PythImage):
     
+    #__protected=PythImage.__protected#=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
+    #__dim_translate=PythImage.__dim_translate#={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
+
+    #__bit_depth_lookup=PythImage.__bit_depth_lookup#={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}
+    
     def __init__(self, image, metadata, database=None):
      
         #Check if compulsory keys are missing
@@ -43,43 +48,7 @@ class VividImage(PythImage):
         if database!=None:
             self.database=database
 
-    def get_channel(self, ch):
-        
-        #Get channel from image. 
-        print('Loading the following channel: ', self.metadata['Name'][ch])
-        if ch>=self.metadata['SizeC']:
-            raise Exception('Image has %s channels! Invalid channel %s' % (str(self.metadata['SizeC']), str(ch)))
-        
-        #Check if image is time series
-        if self.metadata['SizeT']>1:
-            ###############################
-            ###############################
-            ###########!!!!!!!!!###########
-            #change back to a3dc warning
-            raise Warning("Image is a time series! Only the first time step will be extracted!")
-                
-        #Create metadata
-        metadata=copy.deepcopy(self.metadata)
-        metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][ch]
-        metadata['Name']=metadata['Name'][ch]  
-        metadata['SizeC']=1
-        
-        #Extract channel from image array
-        self.reorder('ZXYCT')    
-        dims = len(self.image.shape)
-        if dims == 5:
-            array = self.image[0, ch, :, :, :]
-        elif dims == 4:
-            array = self.image[ch, :, :, :]
-        elif dims == 3:
-            array = self.image[:, :, :]
-        else:
-            raise Exception('Can only read images with 3-5 dimensions!')
-       
-        #array=array[::-1,::-1,::]
 
-        
-        return VividImage(array, metadata)
    
     def save_data(self, img_list, path, file_name='output', to_text=True):
         '''
@@ -191,19 +160,21 @@ if __name__ == "__main__":
 
 
     img=load()
-    dim_order='ZXYTC'
-    print('Start',img.image.shape)
-    print('Start',img.metadata['DimensionOrder'])
+    #dim_order='ZXYTC'
+    #print('Start',img.image.shape)
+    #print('Start',img.metadata['DimensionOrder'])
     
-    print('Aim: ', dim_order)
-    img.reorder(dim_order)
+    #print('Aim: ', dim_order)
+    # img.reorder(dim_order)
     
-    print('End',img.metadata['DimensionOrder'])
-    print('Start',img.image.shape)
+    #print('End',img.metadata['DimensionOrder'])
+    #print('Start',img.image.shape)
     
     img2=VividImage(copy.deepcopy(img.image), copy.deepcopy(img.metadata), {})
-    print(img2.image.shape)
-    print(str(img2.get_channel(1)))
+    #print(img2.image.shape)
+    #print(str(img2.get_channel(1)))
+    print(str(img2.get_dimension(1, 'T')))
+    print(img2.get_dimension(1, 'T').image.shape)
     '''
     axis=len(img.image.shape)-img.metadata['DimensionOrder'].index('Z')-1
     slices=img.metadata['SizeZ']

@@ -20,7 +20,6 @@ class ImageClass(object):
     __protected=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
     __dim_translate={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
 
-    #Translate ome type to numpy
     __bit_depth_lookup={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}
     
     def __init__(self, ndarray, metadata):
@@ -135,7 +134,29 @@ class ImageClass(object):
         #Return first timeframe
         return cls(ndarray=image, metadata=metadata)
     
+    def get_dimension(self, index, dimension='C'):
 
+        #Get channel from image. 
+        if dimension not in self.__dim_translate.keys():
+            raise Exception('Invalid dimension %s! Value must be in %s' % (str(dimension), str(self.__dim_translate.keys())))
+            
+        
+        if index>=self.metadata[self.__dim_translate[dimension]] or 0>index:
+            raise Exception('Image has %s channels! Invalid channel %s' % (str(self.metadata['SizeC']), str(index)))
+        
+        #Create metadata
+        metadata=copy.deepcopy(self.metadata)
+        metadata[self.__dim_translate[dimension]]=1
+        if dimension=='C':
+            metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][index]
+            metadata['Name']=metadata['Name'][index]  
+        
+        #Extract axis from image array from image array
+        order=self.metadata['DimensionOrder']
+
+        array=np.take(self.image, index, len(order)-order.index(dimension)-1)
+
+        return ImageClass(array, metadata)
 
               
     def save(self, directory, file_name):
@@ -405,6 +426,8 @@ class ImageClass(object):
                     shape[i]=1
         
         shape.reverse()
+        print(shape)
+        print(ndarray.shape)
         output=np.reshape(ndarray, tuple(shape))
         
         return output
