@@ -15,9 +15,9 @@ def overlap_image(img_list):
 
 
     # Create Overlapping Image
-    output_array = img_list[0].array
+    output_array = img_list[0].image
     for i in range(1, len(img_list)):
-        output_array = np.multiply(output_array, img_list[i].array)
+        output_array = np.multiply(output_array, img_list[i].image)
 
     return output_array
 
@@ -62,7 +62,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     
 
     for i in range(len(image_list)):
-        itk_image = sitk.GetImageFromArray(image_list[i].array)
+        itk_image = sitk.GetImageFromArray(image_list[i].image)
 
         #Get pixel from database
         ovl_pixels=ovl_image.database['maximumPixel in '+ovl_image.metadata['Name']]
@@ -279,14 +279,14 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
     if 'onFaces' in meas_list:
      
         #Create and measure Surface Image
-        facesitk_img=sitk.GetImageFromArray([tagged_Img.array[0]])
+        facesitk_img=sitk.GetImageFromArray([tagged_Img.image[0]])
        
       
         itk_filter=sitk.LabelShapeStatisticsImageFilter()
         itk_filter.Execute(facesitk_img)
         faces_data=itk_filter.GetLabels()
         
-        database['onFaces']=[False]*np.amax(tagged_Img.array)
+        database['onFaces']=[False]*np.amax(tagged_Img.image)
         for label in faces_data:
             database['onFaces'][label-1]=True
     
@@ -367,7 +367,7 @@ def remove_filtered(tagged_Img, database):
     
 def image_to_itk(image):
      
-    itk_img = sitk.GetImageFromArray(image.array)
+    itk_img = sitk.GetImageFromArray(image.image)
     
     #Check if physical size metadata is available if any is missing raise Exeption
     size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']

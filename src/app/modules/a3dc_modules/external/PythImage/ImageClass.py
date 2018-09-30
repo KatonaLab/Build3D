@@ -132,7 +132,7 @@ class ImageClass(object):
             raise Exception('Currently only {} files are supported!'.format(loader_dict.keys()))
        
         #Return first timeframe
-        return cls(ndarray=image, metadata=metadata)
+        return cls(image, metadata)
     
     def get_dimension(self, index, dimension='C'):
 

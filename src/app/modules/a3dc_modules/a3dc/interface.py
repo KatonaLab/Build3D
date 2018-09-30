@@ -30,7 +30,7 @@ def tagImage(image):
     logText = '\nRunning connected components on : ' + str(image.metadata['Name'])
 
     #Tag image
-    output_array=segmentation.tag_image(image.array)
+    output_array=segmentation.tag_image(image.image)
     
     #Create metadata ditionary and set type to match tagged image
     output_metadata=image.metadata
@@ -85,16 +85,16 @@ def threshold(image, method="Otsu", **kwargs):
         
     # Run thresholding functions
     if method in auto_list:
-        output_array, thresholdValue = segmentation.threshold_auto(image.array, method, **kwargs)
+        output_array, thresholdValue = segmentation.threshold_auto(np.squeeze(image.image), method, **kwargs)
         logText += '\n\tThreshold values: ' + str(thresholdValue)
 
     elif method in adaptive_list:
         logText += '\n\tSettings: ' + str(kwargs)
-        output_array = segmentation.threshold_adaptive(image.array, method, **kwargs)
+        output_array = segmentation.threshold_adaptive(image.image, method, **kwargs)
 
     elif method == 'Manual':
         logText += '\n\tSettings: ' + str(kwargs)
-        output_array = segmentation.threshold_manual(image.array, **kwargs)
+        output_array = segmentation.threshold_manual(image.image, **kwargs)
 
     else:
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
@@ -183,11 +183,11 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
 
     # Filter dictionary
     output_database=core.filter_database(image.database, filter_dict, overwrite)
-    output_image=image.array
+    output_image=image.image
     
     # Remove Filtered objects from database and image
     if remove_filtered == True:
-        output_image , output_database = core.remove_filtered(image.array, output_database)
+        output_image , output_database = core.remove_filtered(image.image, output_database)
             
 
     # Finish timing and add to logText

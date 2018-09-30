@@ -4,8 +4,9 @@ from modules.a3dc_modules.a3dc.imageclass import Image
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time, math
 
-from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
 
+from modules.a3dc_modules.a3dc.imageclass import VividImage
+from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 
 METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu']
@@ -53,7 +54,10 @@ def module_main(ctx):
         
         
         #Create Image object
-        img =a3image_to_image(a3.inputs['Input Image'])
+        img =from_multidimimage(a3.inputs['Input Image'])
+        print(img)
+        print(img.image.dtype)
+        print(img.image.shape)
         print('Thresholding: '+img.metadata['Name'])
         
         #Get method and mode
@@ -79,7 +83,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Output Image']=image_to_a3image(output_img)
+        a3.outputs['Output Image']=to_multidimimage(output_img)
       
         
         #Finalization
