@@ -1,6 +1,6 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.interface import threshold
-from modules.a3dc_modules.a3dc.imageclass import Image
+
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time, math
 
@@ -38,10 +38,7 @@ def generate_config(methods=METHODS):
             .setFloatHint('stepSize', 1))
     config.append(a3.Parameter('Stack Histogram', a3.types.bool))
     
-
     return config
-
-
 
 
 def module_main(ctx):
@@ -52,12 +49,8 @@ def module_main(ctx):
         print(SEPARATOR)
         print('Thresholding started!')
         
-        
         #Create Image object
         img =from_multidimimage(a3.inputs['Input Image'])
-        print(img)
-        print(img.image.dtype)
-        print(img.image.shape)
         print('Thresholding: '+img.metadata['Name'])
         
         #Get method and mode
@@ -75,7 +68,6 @@ def module_main(ctx):
                 kwargs['mode']='Slice'
             print('Mode: ' +kwargs['mode'])
             
-          
         #Run thresholding            
         output_img=module_threshold(img, method,kwargs)
         
@@ -85,7 +77,6 @@ def module_main(ctx):
         #Set output
         a3.outputs['Output Image']=to_multidimimage(output_img)
       
-        
         #Finalization
         tstop = time.clock()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')

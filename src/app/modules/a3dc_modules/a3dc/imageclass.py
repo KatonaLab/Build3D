@@ -11,7 +11,7 @@ import numpy as np
 from skimage.external.tifffile import imread, imsave
 #import PythImage.ImageClass as PythImage
 from modules.a3dc_modules.external.PythImage.ImageClass import ImageClass as PythImage
-import pandas as pd
+
 
 class VividImage(PythImage):
     
@@ -32,7 +32,7 @@ class VividImage(PythImage):
         if metadata['Type']!=image.dtype:
              #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
              image=image.astype(metadata['Type'])
-        
+
         #Call parent __init__
         super(VividImage, self).__init__(image, metadata)
         

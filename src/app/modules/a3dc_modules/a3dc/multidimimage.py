@@ -31,7 +31,7 @@ from modules.a3dc_modules.a3dc.imageclass import VividImage
 
 
 required_ics_keys=['IcsGetCoordinateSystem','IcsGetSignificantBits']
-
+'''
 def a3image_to_image(a3image, database=None):
         
     #get image array
@@ -65,6 +65,7 @@ def image_to_a3image(image):
         a3image.meta.add(key, str(image.metadata[key]))        
         
     return a3image 
+'''
 
 def metadata_to_dict(a3image):
 
@@ -141,10 +142,10 @@ def from_multidimimage(multidimimage, database=None):
     array=md.MultiDimImageFloat_to_ndarray(multidimimage)
 
     #Get image metadata and convert database if the metadata is ICS style
-    metadata=metadata_to_dict(multidimimage)     
+    metadata=metadata_to_dict(multidimimage)
+  
     if is_ics(multidimimage):
         metadata=ics_to_metadata(array, metadata)
-    else:
         array=array[::-1,::-1,::]
         
     #Create output image    
@@ -158,7 +159,7 @@ def from_multidimimage(multidimimage, database=None):
         
 def to_multidimimage(image):
     
-    print(image)
+
     #Check if image is time series
     if image.metadata['SizeT']>1:
         warning("Image is a time series! Only the first time step will be extracted!")
@@ -167,12 +168,12 @@ def to_multidimimage(image):
     #Create output MultiDimImageFloat
     image.reorder('ZXYCT')
     #output=md.MultiDimImageFloat_from_ndarray(np.squeeze((image.image[0,0, ::-1,::-1,::]).astype(np.float)))
-    output=md.MultiDimImageFloat_from_ndarray(np.squeeze((image.image[0,0, ::-1,::-1,::]).astype(np.float)))    
+    output=md.MultiDimImageFloat_from_ndarray(np.squeeze(image.image).astype(np.float))    
     
     #Clear metadata
     output.meta.clear()
     
-    #Add metadata key
+
     for key in image.metadata.keys():
         output.meta.add(key, str(image.metadata[key]))        
         

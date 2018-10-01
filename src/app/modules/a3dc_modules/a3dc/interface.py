@@ -10,7 +10,7 @@ import collections
 
 from . import segmentation
 from . import core
-from .imageclass import Image
+from .imageclass import VividImage
 #from .utils import VividException
    
         
@@ -41,7 +41,7 @@ def tagImage(image):
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return Image(output_array, output_metadata), logText
+    return VividImage(output_array, output_metadata), logText
 
 
 def threshold(image, method="Otsu", **kwargs):
@@ -56,7 +56,7 @@ def threshold(image, method="Otsu", **kwargs):
     :return:
         LogText
     '''
-
+    
     # Start timing
     tstart = time.clock()
 
@@ -99,18 +99,15 @@ def threshold(image, method="Otsu", **kwargs):
     else:
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
-
-    output_metadta=image.metadata
-    output_metadta['Type']=output_array.dtype
     
+    output_metadta=image.metadata
+    output_metadta['Type']=str(output_array.dtype)
+
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
     
-    
-    return Image(output_array, image.metadata), logText
-
-
+    return VividImage(output_array, image.metadata), logText
 
 
 def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanIntensity']):
@@ -195,7 +192,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
     
     
-    return Image(output_image, image.metadata, output_database) , logText
+    return VividImage(output_image, image.metadata, output_database) , logText
 
 
 def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None,
@@ -268,10 +265,8 @@ def save_data(image_list, path, file_name='output', to_text=True):
     logText += '\n\tFilename: '+str(file_name)
     if to_text==True: logText += '.txt'
     elif to_text==False:logText += '.xlsx'
-    
 
-
-    Image.save_data(image_list, path, file_name, to_text)
+    VividImage.save_data(image_list, path, file_name, to_text)
 
 
 
@@ -297,7 +292,7 @@ def save_image(img, path, file_name):
     # Add filter settings to logText
     logText += '\n\tPath: '+str(path)
     #Save image using tifffile save
-    Image.save_image(img, path, file_name) 
+    VividImage.save_image(img, path, file_name) 
 
     # Finish timing and add to logText
     tstop = time.clock()

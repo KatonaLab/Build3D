@@ -124,14 +124,15 @@ class ImageClass(object):
                     image, metadata=loader(path)
                 except:
                     pass
+                    
        
         elif file_type in loader_dict.keys():
             image, metadata=loader_dict[file_type](path)    
         
-        else:
+        if 'image' not in locals():
             raise Exception('Currently only {} files are supported!'.format(loader_dict.keys()))
        
-        #Return first timeframe
+
         return cls(image, metadata)
     
     def get_dimension(self, index, dimension='C'):
@@ -165,9 +166,7 @@ class ImageClass(object):
         '''
         
         #Load image and create simplified metadata dictionary
-        #print(self.image.shape)
         self.reorder('XYZCT')
-        #print(self.image.shape)
         ome_tiff.save_image(self.image,self.metadata, directory, file_name)
                  
 
@@ -287,7 +286,6 @@ class ImageClass(object):
         
     def roi_to_channel(self, index, value=1):
       
-
         if 'ROI' in self.__metadata.keys():
           
             #Generate roi list. If image has multiple ROI-s, metadata['ROI'] is a list.
@@ -302,8 +300,7 @@ class ImageClass(object):
 
             #Get reversed dimension order
             order=self.__metadata['DimensionOrder'][::-1]            
-            
-            
+                        
             #Create shape tuple
             shape=[1]*len(order)
             for idx, dim in enumerate(order):
@@ -314,8 +311,6 @@ class ImageClass(object):
                        
             shape=tuple(shape)
 
-
-            
             #create metadata dictionary for roi and set channel to 1
             roi_metadata=self.__metadata.copy()
             roi_metadata['SizeC']=1
@@ -336,14 +331,11 @@ class ImageClass(object):
             
             img[:,:,:, cc_mod,rr_mod] = value
             
-            #print(img)
             #Create new ImageClass object
             roi=ImageClass(img, roi_metadata )
-            #print(roi.image)
-            #print(np.amax(roi.image))
-            self.append_to_dimension(roi, dim='C')
 
-            
+            self.append_to_dimension(roi, dim='C')
+        
         else:
             raise Exception('No ROI available!', '')
                 
@@ -426,8 +418,7 @@ class ImageClass(object):
                     shape[i]=1
         
         shape.reverse()
-        print(shape)
-        print(ndarray.shape)
+
         output=np.reshape(ndarray, tuple(shape))
         
         return output

@@ -1,12 +1,12 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.external.PythImage.ImageClass import ImageClass as PythImage
+
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line, warning
 from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 import time, copy
 import numpy as np
 
-
+'''
 def get_channel(img, ch):
     
     img.reorder('ZXYCT')
@@ -42,12 +42,10 @@ def get_channel(img, ch):
     print(array.shape)
     
     return Im(array, metadata)
-
+'''
 def module_main(ctx):
 
     try:
-        
-        print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD')
         filename = a3.inputs['FileName'].path
 
         #Inizialization
@@ -61,18 +59,15 @@ def module_main(ctx):
         #Print important image parameters
         print_line_by_line(str(img))
         
-
         #Create Output 1
         ch_1=img.get_dimension(a3.inputs['Channel 1'], 'C')
         ch_1.set_metadata('Path', filename)
         a3.outputs['Channel 1'] = to_multidimimage(ch_1)
 
-
         #Create Output 2
         ch_2=img.get_dimension(a3.inputs['Channel 2'], 'C')
         ch_2.metadata['Path']=filename
         a3.outputs['Channel 2'] = to_multidimimage(ch_2)
-
      
         #Finalization
         tstop = time.clock()
