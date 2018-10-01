@@ -6,7 +6,7 @@ Created on Tue Aug 21 15:21:27 2018
 """
 import time
 import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import Image
+from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image
 from modules.a3dc_modules.a3dc.core import filter_database
 from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning
@@ -14,7 +14,7 @@ import os
 import math
 import sys
 
-from modules.a3dc_modules.a3dc.a3image import  a3image_to_image, image_to_a3image
+from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 
 CHFILTERS=['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
@@ -98,8 +98,8 @@ def read_params(filters=FILTERS):
     out_dict = {}
     out_dict['Path']=os.path.dirname(a3.inputs['Path'].path)
 
-    out_dict['Ch1 Image']=a3image_to_image(a3.inputs['Ch1 Image'],a3.inputs['Ch1 DataBase'])
-    out_dict['Ch2 Image']=a3image_to_image(a3.inputs['Ch2 Image'],a3.inputs['Ch2 DataBase'])
+    out_dict['Ch1 Image']=from_multidimimage(a3.inputs['Ch1 Image'],a3.inputs['Ch1 DataBase'])
+    out_dict['Ch2 Image']=from_multidimimage(a3.inputs['Ch2 Image'],a3.inputs['Ch2 DataBase'])
     
     out_dict['to_text']=a3.inputs['Save to text']
     
@@ -167,8 +167,8 @@ def module_main(ctx):
                    params['Path'],
                    to_text=params['to_text'])
         
-        a3.outputs['Overlapping Image'] = image_to_a3image(output[0])
-        a3.outputs['Overlapping Binary'] = image_to_a3image(Image(output[0].array>0,output[0].metadata))
+        a3.outputs['Overlapping Image'] = to_multidimimage(output[0])
+        a3.outputs['Overlapping Binary'] = to_multidimimage(VividImage(output[0].array>0,output[0].metadata))
         a3.outputs['Overlapping DataBase'] =output[0].database
         
         path=a3.Url()

@@ -5,7 +5,7 @@ import copy
 import sys
 
 
-from .imageclass import Image
+from .imageclass import VividImage
 from . import segmentation
 
 '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
@@ -47,7 +47,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
             del metadata['NormFactor']
     
     #Create overlapping image
-    ovl_image=Image(segmentation.tag_image(ovl_array), metadata)
+    ovl_image=VividImage(segmentation.tag_image(ovl_array), metadata)
     
     if raw_img_list==None:
         raw_img_list=[ovl_image]
@@ -165,10 +165,10 @@ def colocalization_analysis(image_list, ovl_img):
 
 
 
-def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']):
+def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']):
 
     #Convert tagged image to ITK image
-    itk_img = image_to_itk(tagged_Img)
+    itk_img = image_to_itk(tagged_img)
 
     # Instatiate ITK LabelIntensityStatisticsImageFilter()
     itk_filter = sitk.LabelIntensityStatisticsImageFilter()
@@ -235,7 +235,7 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
     #Cycle through images to measure parameters
     if img_list == None:
         img_list = []
-        img_list.append(tagged_Img)
+        img_list.append(tagged_img)
 
     for i in range(len(img_list)):
 
@@ -262,7 +262,7 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
     #Measure object surface
     if 'surface' in meas_list:
         #Create and measure Surface Image
-        surface=segmentation.create_surfaceImage(tagged_Img)
+        surface=segmentation.create_surfaceImage(tagged_img)
       
         surfaceitk_img=sitk.GetImageFromArray(surface)
         
@@ -279,21 +279,21 @@ def analyze(tagged_Img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
     if 'onFaces' in meas_list:
      
         #Create and measure Surface Image
-        facesitk_img=sitk.GetImageFromArray([tagged_Img.image[0]])
+        facesitk_img=sitk.GetImageFromArray([tagged_img.image[0]])
        
       
         itk_filter=sitk.LabelShapeStatisticsImageFilter()
         itk_filter.Execute(facesitk_img)
         faces_data=itk_filter.GetLabels()
         
-        database['onFaces']=[False]*np.amax(tagged_Img.image)
+        database['onFaces']=[False]*np.amax(tagged_img.image)
         for label in faces_data:
             database['onFaces'][label-1]=True
     
     #Add results to input image
-    tagged_Img.database=database
+    tagged_img.database=database
 
-    return tagged_Img
+    return tagged_img
 
 
 def filter_database(dictionary, filter_dict, overwrite=True):
@@ -366,8 +366,9 @@ def remove_filtered(tagged_Img, database):
         return tagged_Img, database
     
 def image_to_itk(image):
-     
-    itk_img = sitk.GetImageFromArray(image.image)
+    #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!######### 
+    image.reorder('ZXYCT')
+    itk_img = sitk.GetImageFromArray(image.image[0,0])
     
     #Check if physical size metadata is available if any is missing raise Exeption
     size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']

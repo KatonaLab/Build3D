@@ -30,7 +30,10 @@ def tagImage(image):
     logText = '\nRunning connected components on : ' + str(image.metadata['Name'])
 
     #Tag image
-    output_array=segmentation.tag_image(image.image)
+    ###################!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##############
+
+    image.reorder('ZXYCT')
+    output_array=segmentation.tag_image(image.image[0,0])
     
     #Create metadata ditionary and set type to match tagged image
     output_metadata=image.metadata
@@ -82,19 +85,21 @@ def threshold(image, method="Otsu", **kwargs):
             raise KeyError('Thresholding method '+str(method)+' not available or valid!')
 
         kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
-        
+    
+
     # Run thresholding functions
+    #######!!!!!!!!!!!!!!!!!!!!!!!!!!#############
     if method in auto_list:
         output_array, thresholdValue = segmentation.threshold_auto(np.squeeze(image.image), method, **kwargs)
         logText += '\n\tThreshold values: ' + str(thresholdValue)
 
     elif method in adaptive_list:
         logText += '\n\tSettings: ' + str(kwargs)
-        output_array = segmentation.threshold_adaptive(image.image, method, **kwargs)
+        output_array = segmentation.threshold_adaptive(np.squeeze(image.image), method, **kwargs)
 
     elif method == 'Manual':
         logText += '\n\tSettings: ' + str(kwargs)
-        output_array = segmentation.threshold_manual(image.image, **kwargs)
+        output_array = segmentation.threshold_manual(np.squeeze(image.image), **kwargs)
 
     else:
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
@@ -102,7 +107,7 @@ def threshold(image, method="Otsu", **kwargs):
     
     output_metadta=image.metadata
     output_metadta['Type']=str(output_array.dtype)
-
+ 
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
@@ -110,7 +115,7 @@ def threshold(image, method="Otsu", **kwargs):
     return VividImage(output_array, image.metadata), logText
 
 
-def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanIntensity']):
+def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'meanIntensity']):
     '''
     Analyzes tagedImage and appends 'database' to its dictionary that contain measured values.
     :param tagged_img: tagged image
@@ -126,17 +131,17 @@ def analyze(tagged_img, imageList=None, measurementInput=['voxelCount', 'meanInt
     tstart = time.clock()
 
     # Creatre LogText and start logging
-    logText = '\nAnalyzing: ' + str(tagged_img.metadata['Name'])
+    logText = '\nAnalyzing: ' + str(tagged_image.metadata['Name'])
 
 
     #Print list of images in Imagelist to log text
-    if imageList != None:
+    if image_list != None:
         logText += '\n\tMeasuring intensity in: '
-        for img in imageList:
+        for img in image_list:
             logText += img.metadata['Name']
 
     #Analyze image
-    tagged_img=core.analyze(tagged_img, imageList, measurementInput)
+    tagged_img=core.analyze(tagged_image, image_list, measurementInput)
 
     #Add number of objects to logText
     logText += '\n\tNumber of objects: '+str(len(tagged_img.database['tag']))

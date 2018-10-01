@@ -124,8 +124,7 @@ class ImageClass(object):
                     image, metadata=loader(path)
                 except:
                     pass
-                    
-       
+                      
         elif file_type in loader_dict.keys():
             image, metadata=loader_dict[file_type](path)    
         
@@ -168,9 +167,7 @@ class ImageClass(object):
         #Load image and create simplified metadata dictionary
         self.reorder('XYZCT')
         ome_tiff.save_image(self.image,self.metadata, directory, file_name)
-                 
-
-     
+                  
     
     def __validate(self, image, metadata):
 

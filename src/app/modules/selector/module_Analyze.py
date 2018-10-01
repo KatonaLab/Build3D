@@ -6,14 +6,14 @@ Created on Tue Aug 21 15:21:27 2018
 """
 
 import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import Image
+from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 import time
 import math
 import sys
 
-from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
+from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 
 
@@ -46,7 +46,7 @@ def analyze_image(source, mask, settings, removeFiltered=False):
     
     # Analysis and Filtering of objects
     print('Analyzing tagged image!')
-    taggedImage, _ = analyze(taggedImage, imageList=[source], measurementInput=measurementList)
+    taggedImage, _ = analyze(taggedImage, image_list=[source], measurementInput=measurementList)
     
     print('Filtering object database!')
     taggedImage, _ = apply_filter(taggedImage, filter_dict=settings, remove_filtered=removeFiltered)#{'tag':{'min': 2, 'max': 40}}
@@ -58,8 +58,8 @@ def analyze_image(source, mask, settings, removeFiltered=False):
 
 def read_params(filters=FILTERS):
     
-    params = {'Source': a3image_to_image(a3.inputs['Source Image']),
-                    'Mask':a3image_to_image(a3.inputs['Mask Image'])}
+    params = {'Source': from_multidimimage(a3.inputs['Source Image']),
+                    'Mask':from_multidimimage(a3.inputs['Mask Image'])}
 
     settings = {}
     for f in filters:
@@ -150,8 +150,8 @@ def module_main(ctx):
         #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
         
         #Create Output
-        a3.outputs['Analyzed Image'] = image_to_a3image(output)
-        a3.outputs['Analyzed Binary'] = image_to_a3image(Image(output.array>0,output.metadata))
+        a3.outputs['Analyzed Image'] = to_multidimimage(output)
+        a3.outputs['Analyzed Binary'] = to_multidimimage(VividImage(output.image>0,output.metadata))
         a3.outputs['Analyzed Database']=output.database
         
         #Finalization
@@ -161,7 +161,7 @@ def module_main(ctx):
         print(SEPARATOR)
 
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name)+" !",exception=e)
+        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
     
 
 

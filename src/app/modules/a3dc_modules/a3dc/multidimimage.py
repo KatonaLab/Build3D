@@ -23,11 +23,11 @@ compatible metadata keys!!! Dimension order of the reader is XYZ. Samples per
 pixel daa not read from ics header so it is set to 1 default.
 """
 import a3dc_module_interface as md
-from .imageclass import Image
+from .imageclass import VividImage
 import numpy as np
 from ast import literal_eval
 from modules.a3dc_modules.a3dc.utils import warning
-from modules.a3dc_modules.a3dc.imageclass import VividImage
+
 
 
 required_ics_keys=['IcsGetCoordinateSystem','IcsGetSignificantBits']
@@ -166,14 +166,14 @@ def to_multidimimage(image):
         image.metadata['SizeT']=1
     
     #Create output MultiDimImageFloat
-    image.reorder('ZXYCT')
     #output=md.MultiDimImageFloat_from_ndarray(np.squeeze((image.image[0,0, ::-1,::-1,::]).astype(np.float)))
-    output=md.MultiDimImageFloat_from_ndarray(np.squeeze(image.image).astype(np.float))    
+    #output=md.MultiDimImageFloat_from_ndarray(image.get_3d_array().astype(np.float))
+    image.reorder('ZXYCT')
+    output=md.MultiDimImageFloat_from_ndarray(image.image[0,0].astype(np.float))    
     
     #Clear metadata
     output.meta.clear()
     
-
     for key in image.metadata.keys():
         output.meta.add(key, str(image.metadata[key]))        
         
