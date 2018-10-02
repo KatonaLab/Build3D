@@ -1,48 +1,11 @@
 import a3dc_module_interface as a3
-
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line, warning
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line
 from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
-import time, copy
-import numpy as np
+from modules.a3dc_modules.a3dc.multidimimage import to_multidimimage
 
-'''
-def get_channel(img, ch):
-    
-    img.reorder('ZXYCT')
-    
-    #Get channel from image. 
-    print('Loading the following channel: ', img.metadata['Name'][ch])
-    if ch>=img.metadata['SizeC']:
-        raise Exception('Image has %s channels! Invalid channel %s' % (str(img.metadata['SizeC']), str(ch)))
-    
-    #Check if image is time series
-    if img.metadata['SizeT']>1:
-        warning("Image is a time series! Only the first time step will be extracted!")
-            
-    #Create metadata
-    metadata=copy.deepcopy(img.metadata)
-    metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][ch]
-    metadata['Name']=metadata['Name'][ch]  
-    
-    #Extract channel from image array    
-    dims = len(img.image.shape)
-    if dims == 5:
-        array = img.image[0, ch, :, :, :]
-    elif dims == 4:
-        array = img.image[ch, :, :, :]
-    elif dims == 3:
-        array = img.image[:, :, :]
-    else:
-        raise Exception('Can only read images with 3-5 dimensions!')
-    print(array.shape)
-    #array=np.flip(np.swapaxes(array,0,2), axis=2),axis=1)
-    #array=np.swapaxes(array,0,2)[::-1,::-1,::]
-    array=array[::-1,::-1,::]
-    print(array.shape)
-    
-    return Im(array, metadata)
-'''
+import time
+
+
 def module_main(ctx):
 
     try:
@@ -61,13 +24,14 @@ def module_main(ctx):
         
         #Create Output 1
         ch_1=img.get_dimension(a3.inputs['Channel 1'], 'C')
-        ch_1.set_metadata('Path', filename)
+        ch_1.metadata['Path']=filename
         a3.outputs['Channel 1'] = to_multidimimage(ch_1)
 
         #Create Output 2
         ch_2=img.get_dimension(a3.inputs['Channel 2'], 'C')
         ch_2.metadata['Path']=filename
         a3.outputs['Channel 2'] = to_multidimimage(ch_2)
+        ch_2.metadata={}
      
         #Finalization
         tstop = time.clock()

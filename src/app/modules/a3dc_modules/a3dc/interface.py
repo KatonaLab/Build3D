@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 25 23:17:33 2018
-
-@author: Nerberus
-"""
 import time
 import numpy as np
 import collections
@@ -11,7 +5,7 @@ import collections
 from . import segmentation
 from . import core
 from .imageclass import VividImage
-#from .utils import VividException
+
    
         
         
@@ -30,10 +24,7 @@ def tagImage(image):
     logText = '\nRunning connected components on : ' + str(image.metadata['Name'])
 
     #Tag image
-    ###################!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##############
-
-    image.reorder('ZXYCT')
-    output_array=segmentation.tag_image(image.image[0,0])
+    output_array=segmentation.tag_image(image.get_3d_array())
     
     #Create metadata ditionary and set type to match tagged image
     output_metadata=image.metadata
@@ -63,6 +54,8 @@ def threshold(image, method="Otsu", **kwargs):
     # Start timing
     tstart = time.clock()
 
+        
+
     # Threshold methods
     auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
@@ -87,19 +80,18 @@ def threshold(image, method="Otsu", **kwargs):
         kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
     
 
-    # Run thresholding functions
-    #######!!!!!!!!!!!!!!!!!!!!!!!!!!#############
+    # Run thresholding functions    
     if method in auto_list:
-        output_array, thresholdValue = segmentation.threshold_auto(np.squeeze(image.image), method, **kwargs)
+        output_array, thresholdValue = segmentation.threshold_auto(image.get_3d_array(), method, **kwargs)
         logText += '\n\tThreshold values: ' + str(thresholdValue)
 
     elif method in adaptive_list:
         logText += '\n\tSettings: ' + str(kwargs)
-        output_array = segmentation.threshold_adaptive(np.squeeze(image.image), method, **kwargs)
+        output_array = segmentation.threshold_adaptive(image.get_3d_array(), method, **kwargs)
 
     elif method == 'Manual':
         logText += '\n\tSettings: ' + str(kwargs)
-        output_array = segmentation.threshold_manual(np.squeeze(image.image), **kwargs)
+        output_array = segmentation.threshold_manual(image.get_3d_array(), **kwargs)
 
     else:
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
@@ -264,6 +256,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
     # Add names of dictionary sources to logText
     for img in image_list:
         logText += '\t' + str(img.metadata['Name'])
+    
     #Add settings to logText
     # Add filter settings to logText
     logText += '\n\tPath: '+str(path)
@@ -271,10 +264,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
     if to_text==True: logText += '.txt'
     elif to_text==False:logText += '.xlsx'
 
-    VividImage.save_data(image_list, path, file_name, to_text)
-
-
-
+    core.save_data(image_list, path, file_name, to_text)
 
     # Finish timing and add to logText
     tstop = time.clock()

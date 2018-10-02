@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 21 08:52:58 2018
-
-@author: pongor.csaba
-"""
 import os, sys, subprocess
-#import warnings
 import random, traceback
 import numpy as np
 
@@ -130,6 +123,15 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
        "Characteristics which define beauty are wholeness, harmony and radiance.\n    -Thomas Aquinas"
 		]
     
+def reorder_list(lst, val_list):
+
+    for element in reversed(val_list):
+        if element in lst:
+            lst.remove(element)
+            lst.insert(0, element)
+
+    return lst
+
 
 def round_up_to_odd(f):
     #Round to add as blocksize has to be odd

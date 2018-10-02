@@ -1,18 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 21 15:21:27 2018
-
-@author: pongor.csaba
-"""
-import time
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image
 from modules.a3dc_modules.a3dc.core import filter_database
 from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning
+
 import os
 import math
 import sys
+import time
 
 from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
@@ -72,7 +67,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
         i += 1
     if i!=1:
         file_name=final_name
-        warning('Warning: Trying to save to file that already exist!! Data will be saved to '+file_name+extension)
+        warning('Warning: Filename already exists!! Data will be saved to '+file_name+extension)
 
     #Save data and give output path
     save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
@@ -149,6 +144,7 @@ def read_params(filters=FILTERS):
     return out_dict    
     
 def module_main(ctx):
+    
     try:   
         #Inizialization
         tstart = time.clock()

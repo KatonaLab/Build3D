@@ -7,16 +7,16 @@ from . import imagej_tiff
 from . import ome_tiff
 from .roi import roi_to_coordinates
 from . import utils
-
+from inspect import isfunction
 
 
 ##Add channel, remove channel, extract channel etc.
 class ImageClass(object):
     
-    '''TOBE FIXED return objects cpy or deepcopy etc.
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TOBE FIXED return objects cpy or deepcopy etc.
     
     '''
-    
+    '''
     __protected=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
     __dim_translate={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
 
@@ -60,11 +60,12 @@ class ImageClass(object):
         return ImageClass(image=image ,metadata=metadata)
     
     def __repr__(self):
-     
-        return utils.dict_to_string(self.__metadata)     
+        rep=utils.dict_to_string(self.__metadata)+'/nShape:'+str(self.image.shape)
+        return rep      
     
     def __getattr__(self, atr):
-        raise AttributeError("Attribute: "+str(atr)+" is not available!")           
+        raise AttributeError("Attribute: "+str(atr)+" is not available!")
+         
    
     @property
     def image(self):
@@ -148,9 +149,17 @@ class ImageClass(object):
         metadata=copy.deepcopy(self.metadata)
         metadata[self.__dim_translate[dimension]]=1
         if dimension=='C':
-            metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][index]
-            metadata['Name']=metadata['Name'][index]  
-        
+            
+            if isinstance(metadata['SamplesPerPixel'], list):
+                metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][index]
+                metadata['Name']=metadata['Name'][index] 
+            elif index==0:
+                metadata['SamplesPerPixel']=metadata['SamplesPerPixel']
+                metadata['Name']=metadata['Name']
+            else:
+                raise IndexError('Invalid Index {} ! the "Name" and "SamplesPerPixel" metadata keys are lists for multichannel images.'.format(str(index)))
+                
+             
         #Extract axis from image array from image array
         order=self.metadata['DimensionOrder']
 

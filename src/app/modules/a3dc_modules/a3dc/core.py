@@ -2,22 +2,22 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import copy
-import sys
+import os
 
 
 from .imageclass import VividImage
 from . import segmentation
+from .utils import reorder_list
 
 '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
 	the workflows to process images.
 	'''
-def overlap_image(img_list):
-
+def overlap_image(array_list):
 
     # Create Overlapping Image
-    output_array = img_list[0].image
-    for i in range(1, len(img_list)):
-        output_array = np.multiply(output_array, img_list[i].image)
+    output_array = array_list[0]
+    for i in range(1, len(array_list)):
+        output_array = np.multiply(output_array, array_list[i])
 
     return output_array
 
@@ -37,7 +37,8 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     
     
     # Create Overlapping Image
-    ovl_array = overlap_image(image_list)
+    array_list=[x.get_3d_array() for x in image_list]
+    ovl_array = overlap_image(array_list)
   
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
@@ -62,7 +63,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     
 
     for i in range(len(image_list)):
-        itk_image = sitk.GetImageFromArray(image_list[i].image)
+        itk_image = sitk.GetImageFromArray(image_list[i].get_3d_array())
 
         #Get pixel from database
         ovl_pixels=ovl_image.database['maximumPixel in '+ovl_image.metadata['Name']]
@@ -168,7 +169,7 @@ def colocalization_analysis(image_list, ovl_img):
 def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']):
 
     #Convert tagged image to ITK image
-    itk_img = image_to_itk(tagged_img)
+    itk_img = tagged_img.to_itk()
 
     # Instatiate ITK LabelIntensityStatisticsImageFilter()
     itk_filter = sitk.LabelIntensityStatisticsImageFilter()
@@ -239,7 +240,7 @@ def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
 
     for i in range(len(img_list)):
 
-        itk_raw = image_to_itk(img_list[i])
+        itk_raw = img_list[i].to_itk()
         
         for key in multi_img_meas_list:
             database[key+' in '+img_list[i].metadata['Name']] = []
@@ -365,29 +366,100 @@ def remove_filtered(tagged_Img, database):
     else:
         return tagged_Img, database
     
-def image_to_itk(image):
-    #####!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!######### 
-    image.reorder('ZXYCT')
-    itk_img = sitk.GetImageFromArray(image.image[0,0])
     
-    #Check if physical size metadata is available if any is missing raise Exeption
-    size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
-    missing_size=[s for s in size_list if s not in image.metadata.keys()]
-    if len(missing_size)!=0:
-        print('Missing :'+str(missing_size)+'! Unable to carry out analysis!', file=sys.stderr)
-    else:
-        itk_img.SetSpacing((image.metadata['PhysicalSizeX'],image.metadata['PhysicalSizeY'],image.metadata['PhysicalSizeZ']))
-    
-    #Check if unit metadata is available
-    unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
-    missing_unit=[u for u in unit_list if u not in image.metadata.keys()]
-    if len(missing_size)!=0:
-        print('Warning: DEFAULT value (um or micron) used for :'
-             +str(missing_unit)+'!', file=sys.stderr)
-
-    return itk_img    
         
-    
+def save_data(img_list, path, file_name='output', to_text=True):
+    '''
+    :param dict_list: Save dictionaries in inputdict_list
+    :param path: path where file is saved
+    :param to_text: if True data are saved to text
+    :param fileName: fileneme WITHOUT extension
+    :return:
+    '''
+
+    dataframe_list=[]
+    key_order_list=[]
+    col_width_list=[]
+                
+    dict_list=[x.database for x in img_list]
+    name_list = [x.metadata['Name'] for x in img_list]
+
+    for dic in  dict_list:
+
+        # Convert to Pandas dataframe
+        df=pd.DataFrame(dic)
+        
+        dataframe_list.append(df)
+
+        # Sort dictionary with numerical types first (tag, volume, voxelCount,  first) and all others after (centroid, center of mass, bounding box first)
+        numeric_keys = []
+        other_keys = []
+
+        for key in list(dic.keys()):
+
+            if str(df[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
+                'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
+                numeric_keys.append(key)
+
+            else:
+                other_keys.append(key)
+
+        #Rearange keylist
+        preset_order=['tag', 'volume', 'voxelCount', 'filter']
+        numeric_keys=reorder_list(numeric_keys,preset_order)
+        preset_order = ['centroid']
+        other_keys=reorder_list(other_keys,preset_order)
+        key_order_list.append(numeric_keys+other_keys)
+
+        # Measure the column widths based on header
+        col_width=0
+        for i in range(len(key_order_list)):
+            for j in range(len(key_order_list[i])):
+                w=len(key_order_list[i][j])
+                if w>col_width:
+                    col_width=w
+        col_width_list.append(col_width)
+
+    if to_text==False:
+        # Create a Pandas Excel writer using XlsxWriter as the engine.
+        writer = pd.ExcelWriter(os.path.join(path, file_name+'.xlsx'), engine='xlsxwriter')
+        
+        for i in range(len(dataframe_list)):
+            
+            #If no names are given ore name_list is shorter generate worksheet name
+            if name_list==None or i>len(name_list):
+                name='Data_'+str(i)
+            else:
+               name =str(name_list[i]) 
+
+            # Convert the dataframe to an XlsxWriter Excel object. Crop worksheet name if too long
+            if len(name) > 30:
+                name=(str(name)[:30] + '_')
+            
+            dataframe_list[i].to_excel(writer, sheet_name=name, columns=key_order_list[i], header=True)
+
+            #Get workbook, worksheet and format
+            workbook = writer.book
+            format=workbook.add_format()
+            format.set_shrink('auto')
+            format.set_align('center')
+            format.set_text_wrap()
+
+            worksheet=writer.sheets[name]
+            worksheet.set_zoom(90)
+            worksheet.set_column(j, 1, col_width_list[i]*0.6, format)
+
+        # Close the Pandas Excel writer and save Excel file.
+        writer.save()
+
+    elif to_text==True:
+
+        with open(os.path.join(path, file_name + '.txt'), 'w') as outputFile:
+
+            for i in range(len(dataframe_list)):
+                #if dataframe_list[i] != None:
+                outputFile.write('name= '+name_list[i]+'\n')
+                outputFile.write(dataframe_list[i].to_csv(sep='\t', columns=key_order_list[i], index=False, header=True))    
     
     
     

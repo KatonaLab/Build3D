@@ -1,19 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 25 22:51:43 2018
-
-@author: Nerberus
-"""
-
-###############################################Class that contain main functions for A3DC####################################################
-
-
-
 import SimpleITK as sitk
 import numpy as np
-
-
-
 
 
 def smoothingGaussianFilter(image, sigma):

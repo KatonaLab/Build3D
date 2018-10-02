@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 21 15:21:27 2018
-
-@author: pongor.csaba
-"""
-
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
+
 import time
 import math
 import sys
@@ -51,8 +45,6 @@ def analyze_image(source, mask, settings, removeFiltered=False):
     print('Filtering object database!')
     taggedImage, _ = apply_filter(taggedImage, filter_dict=settings, remove_filtered=removeFiltered)#{'tag':{'min': 2, 'max': 40}}
         
-
-    
     return taggedImage
 
 
