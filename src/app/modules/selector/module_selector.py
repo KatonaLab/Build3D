@@ -1,13 +1,12 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.external.PythImage import Image
+from modules.a3dc_modules.a3dc.imageclass import VividImage
 import numpy as np
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, warning
 import time
 import copy
 import sys
 
-
-from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
+from modules.a3dc_modules.a3dc.multidimimage import to_multidimimage
 
 
 def module_main(ctx):
@@ -18,7 +17,7 @@ def module_main(ctx):
         
         #Load and reshape image
         ##TempTempTemp##
-        img = Image(a3.inputs['Image'], copy.deepcopy(a3.inputs['MetaData']))
+        img = VividImage(a3.inputs['Image'], copy.deepcopy(a3.inputs['MetaData']))
         #img = Image(a3.inputs['Image'], a3.inputs['MetaData'])
         img.reorder('XYZCT')
         
@@ -33,15 +32,7 @@ def module_main(ctx):
             warning("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
         
         #Extract channel from image array    
-        dims = len(img.image.shape)
-        if dims == 5:
-            array = img.image[0, ch, :, :, :]
-        elif dims == 4:
-            array = img.image[ch, :, :, :]
-        elif dims == 3:
-            array = img.image[:, :, :]
-        else:
-            raise Exception('Can only read images with 3-5 dimensions!')
+        a3.outputs['Channel 1'] = to_multidimimage(img.get_dimension(a3.inputs['Channel'], 'C'))
         
         #Modify metadata 
         img.metadata['SamplesPerPixel']=img.metadata['SamplesPerPixel'][ch]

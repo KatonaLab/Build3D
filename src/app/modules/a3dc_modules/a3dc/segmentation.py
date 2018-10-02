@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from skimage import img_as_ubyte, img_as_uint
 from skimage.filters import threshold_local
 import cv2
@@ -8,8 +7,6 @@ from .utils import round_up_to_odd
 from .core import convert_array_type
 
 def tag_image(ndarray):
-    
-    print('Szopo roller',ndarray.shape)
 
     # Cast to 16-bit
     ndarray = convert_array_type(ndarray, 'int16')

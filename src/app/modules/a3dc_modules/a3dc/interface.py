@@ -245,12 +245,15 @@ def save_data(image_list, path, file_name='output', to_text=True):
     :return:
     '''
     
-    if not isinstance(image_list, collections.Iterable):
-            image_list=[image_list]
+
     
     # Start timing
     tstart = time.clock()
     
+    #If input is not list create list
+    if not isinstance(image_list, collections.Iterable):
+        image_list=[image_list]
+        
     # Creatre LogText and start logging
     logText = '\nSaving database: '
     # Add names of dictionary sources to logText
@@ -273,21 +276,23 @@ def save_data(image_list, path, file_name='output', to_text=True):
     return logText
 
 
-def save_image(img, path, file_name):
+def save_image(image_list, path, file_name):
     
     # Start timing
     tstart = time.clock()
     
+    #If input is not list create list
+    if not isinstance(image_list, collections.Iterable):
+        image_list=[image_list]
+    
     # Creatre LogText and start logging
     logText = '\nSaving image: '
-    # Add names of dictionary sources to logText
-
-    logText += '\t' + str(img.metadata['Name'])
-    #Add settings to logText
-    # Add filter settings to logText
+    logText += '\t' + str([x.metadata['Name'] for x in image_list])
     logText += '\n\tPath: '+str(path)
-    #Save image using tifffile save
-    VividImage.save_image(img, path, file_name) 
+    logText += '\n\tFile Name: '+str(file_name)
+    
+    #Save image
+    core.save_image(image_list, path, file_name) 
 
     # Finish timing and add to logText
     tstop = time.clock()

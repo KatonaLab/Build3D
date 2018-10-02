@@ -57,10 +57,10 @@ class ImageClass(object):
                 metadata['SamplesPerPixel']=np.squeeze(metadata['SamplesPerPixel'][key[i]]).tolist()
             metadata[self.__dim_translate[dim_current]]=length
         
-        return ImageClass(image=image ,metadata=metadata)
+        return ImageClass(image , metadata)
     
     def __repr__(self):
-        rep=utils.dict_to_string(self.__metadata)+'/nShape:'+str(self.image.shape)
+        rep=utils.dict_to_string(self.__metadata)+'\nShape:'+str(self.image.shape)
         return rep      
     
     def __getattr__(self, atr):
@@ -269,24 +269,24 @@ class ImageClass(object):
 
     
 
-    def append_to_dimension(self, image, dim):
+    def append_to_dimension(self, img, dim='C'):
 
         #Append names
-        self.__metadata['Name']=utils.concatenate(self.__metadata['Name'],image.get_metadata('Name'))
-        self.__metadata['SamplesPerPixel']=utils.concatenate(self.__metadata['SamplesPerPixel'], image.get_metadata('SamplesPerPixel'))
+        self.__metadata['Name']=utils.concatenate(self.__metadata['Name'],img.get_metadata('Name'))
+        self.__metadata['SamplesPerPixel']=utils.concatenate(self.__metadata['SamplesPerPixel'], img.get_metadata('SamplesPerPixel'))
  
         #Get original dimension order
         original_order=self.__metadata['DimensionOrder']
     
         #reshape image so the two confer
-        image.reorder(original_order)
+        img.reorder(original_order)
         
         #Get the index of the given dimension in the shape of the image
-        ind=len(original_order)-original_order.index('C')-1
+        ind=len(original_order)-original_order.index(dim)-1
         
-        self.__metadata[self.__dim_translate[dim]]=self.__metadata[self.__dim_translate[dim]]+image.get_metadata(self.__dim_translate[dim])
+        self.__metadata[self.__dim_translate[dim]]=self.__metadata[self.__dim_translate[dim]]+img.get_metadata(self.__dim_translate[dim])
 
-        self.image=np.concatenate((self.image,image.image), axis=ind)
+        self.image=np.concatenate((self.image,img.image), axis=ind)
        
        
         
@@ -401,7 +401,7 @@ class ImageClass(object):
     def as_type(self, dtype):
         
         if dtype!=self.metadata['Type']:
-            self.__image=self.array.astype(dtype)
+            self.__image=self.image.astype(dtype)
             self.__metadata['Type']=dtype
 
     

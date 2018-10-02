@@ -71,18 +71,16 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
 
     #Save data and give output path
     save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
-    output_path=os.path.join(outputPath, file_name+extension)
     
     #Save images
     print('Saving output images!')
-    name_img = basename+'_'+ch1_img.metadata['Name']#+"_tagged"
-    save_image(ch1_img, outputPath, name_img)
+    image_list=[ch1_img, ch2_img, ovl_img]
+    name_img = basename+'{}_{}.ome.tiff'.format(ch1_img.metadata['Name'],ch2_img.metadata['Name'])
     
-    name_img =basename+'_'+ch2_img.metadata['Name']#+"_tagged"
-    save_image(ch2_img, outputPath, name_img)
+    save_image(image_list, outputPath, name_img)
     
-    name_img =basename+'_'+ch1_img.metadata['Name']+ "_" +ch2_img.metadata['Name']+ "_overlap"
-    save_image(ovl_img, outputPath, name_img)            
+    #Create outputpath ox data
+    output_path=os.path.join(outputPath, file_name+extension)
     
     return ovl_img,  output_path  
 
@@ -164,7 +162,7 @@ def module_main(ctx):
                    to_text=params['to_text'])
         
         a3.outputs['Overlapping Image'] = to_multidimimage(output[0])
-        a3.outputs['Overlapping Binary'] = to_multidimimage(VividImage(output[0].array>0,output[0].metadata))
+        a3.outputs['Overlapping Binary'] = to_multidimimage(VividImage(output[0].image>0,output[0].metadata))
         a3.outputs['Overlapping DataBase'] =output[0].database
         
         path=a3.Url()

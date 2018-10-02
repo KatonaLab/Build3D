@@ -368,7 +368,7 @@ def remove_filtered(tagged_Img, database):
     
     
         
-def save_data(img_list, path, file_name='output', to_text=True):
+def save_data(img_list, path, file_name, to_text=True):
     '''
     :param dict_list: Save dictionaries in inputdict_list
     :param path: path where file is saved
@@ -463,4 +463,15 @@ def save_data(img_list, path, file_name='output', to_text=True):
     
     
     
+def save_image(img_list, path, file_name):
+    '''
+    '''
+    #Combine images
+    for idx, img in  enumerate(img_list):
+        if idx==0:
+            output=copy.deepcopy(img)
+        else:
+            output.append_to_dimension(img)
     
+    #save image
+    output.save(path, file_name)

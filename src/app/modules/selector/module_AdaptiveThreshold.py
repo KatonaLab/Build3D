@@ -3,7 +3,7 @@ from modules.a3dc_modules.a3dc.segmentation import threshold_adaptive
 from modules.a3dc_modules.a3dc.imageclass import Image
 import time
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
+from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 METHODS=['Mean', 'Gaussian']
 
@@ -70,8 +70,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
     
         #Set output
-        a3.outputs['Output Image']=image_to_a3image(output_img)
-
+        a3.outputs['Output Image']=to_multidimimage(output_img)
         
         #Finalization
         tstop = time.clock()

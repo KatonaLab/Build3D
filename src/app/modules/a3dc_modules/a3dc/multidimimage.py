@@ -56,11 +56,15 @@ def from_multidimimage(multidimimage, database=None):
         
 def to_multidimimage(image):
     
-
     #Check if image is time series
     if image.metadata['SizeT']>1:
         warning("Image is a time series! Only the first time step will be extracted!")
         image.metadata['SizeT']=1
+        
+    #Check if image has multiple channels
+    if image.metadata['SizeC']>1:
+        warning("Image is a multichannel image! Only the first channel will be extracted!")
+        image.metadata['SizeC']=1
     
     #Create output MultiDimImageFloat
     #output=md.MultiDimImageFloat_from_ndarray(np.squeeze((image.image[0,0, ::-1,::-1,::]).astype(np.float)))

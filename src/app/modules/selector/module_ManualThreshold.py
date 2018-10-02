@@ -4,8 +4,9 @@ from modules.a3dc_modules.a3dc.imageclass import Image
 import numpy as np
 import time
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
+from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
-from modules.a3dc_modules.a3dc.a3image import a3image_to_image, image_to_a3image
+
 
 
 def generate_config():
@@ -27,9 +28,6 @@ def generate_config():
     param_lower.setIntHint('stepSize', 1),
     config.append(param_lower)
     
-    
-
-    
     return config
 
 
@@ -40,7 +38,7 @@ def module_main(ctx):
         print(SEPARATOR)
         
         #Create Image object
-        img = a3image_to_image(a3.inputs['Input Image'])
+        img =from_multidimimage(a3.inputs['Input Image'])
         
         # Creatre LogText and start logging
         print('Thresholding: '+img.metadata['Name'])
@@ -54,10 +52,9 @@ def module_main(ctx):
         #Run thresholding
         print('Autothresholding started!')
         output_img=Image(threshold_manual(img.array, upper, lower), img.metadata)
-    
-    
+
         #Set output
-        a3.outputs['Output Image']=image_to_a3image(output_img)
+        a3.outputs['Output Image']=to_multidimimage(output_img)
     
         #Finalization
         tstop = time.clock()

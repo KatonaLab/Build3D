@@ -1,9 +1,7 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.external.PythImage import Image
+from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line
 import time, os
-
-from modules.a3dc_modules.a3dc.a3image import  image_to_a3image
 
 def module_main(ctx):
     
@@ -16,7 +14,7 @@ def module_main(ctx):
         print('Loading the following image: ', filename)
         
         #Load and reshape image
-        img = Image.load(filename, file_type='ome')
+        img = VividImage.load(filename, file_type='ome')
         img.reorder('XYZCT')
         
         #Print important image parameters

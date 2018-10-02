@@ -31,7 +31,6 @@ def module_main(ctx):
         ch_2=img.get_dimension(a3.inputs['Channel 2'], 'C')
         ch_2.metadata['Path']=filename
         a3.outputs['Channel 2'] = to_multidimimage(ch_2)
-        ch_2.metadata={}
      
         #Finalization
         tstop = time.clock()
