@@ -27,6 +27,7 @@ from .imageclass import VividImage
 import numpy as np
 from ast import literal_eval
 from modules.a3dc_modules.a3dc.utils import warning
+import copy
 
 
 
@@ -40,6 +41,7 @@ def from_multidimimage(multidimimage, database=None):
 
     #Get image metadata and convert database if the metadata is ICS style
     metadata=metadata_to_dict(multidimimage)
+    print(metadata.keys())
   
     if is_ics(multidimimage):
         metadata=ics_to_metadata(array, metadata)
@@ -87,17 +89,32 @@ def metadata_to_dict(multidimimage):
     metadata={}
     for idx, line in enumerate(str(multidimimage.meta).split('\n')[1:-1]):
             line_list=line.split(':')
-            
+            print(line_list[0])
+
             #for the 'path' key the path is separated as well.
             if line_list[0].lstrip().lower()=='path':
                 metadata[line_list[0].lstrip()]=':'.join(line_list[1:])
+            
+            if line_list[0].lstrip().lower()=='roi':
+                print('ROROROROR')
+               
+                
+                roi_str=''.join(copy.copy(line_list[1:]))
+                print(roi_str)
+                print(roi_str.replace(' ', ''))
+                print(roi_str.replace(' ', '', 1))
+                metadata[line_list[0].lstrip()]=literal_eval(roi_str.replace(' ', '', 1))
 
             else:
+                
                 try:
-                    metadata[':'.join(line_list[:-1])]=literal_eval(line_list[-1].lstrip())
+                    metadata[line_list[0].lstrip()]=literal_eval(line_list[-1].lstrip())
+                    #metadata[line_list[0]]=literal_eval(line_list[1:-1].lstrip())
+                
                 except:
-                    metadata[':'.join(line_list[:-1])]=line_list[-1].lstrip()
-    
+                    metadata[line_list[0].lstrip()]=line_list[-1].lstrip()
+                    #metadata[line_list[0]]=line_list[1:-1].lstrip()
+    print(metadata)
     return metadata
 
 

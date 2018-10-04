@@ -72,6 +72,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Save data and give output path
     save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
     
+
     #Save images
     print('Saving output images!')
     image_list=[ch1_img, ch2_img, ovl_img]

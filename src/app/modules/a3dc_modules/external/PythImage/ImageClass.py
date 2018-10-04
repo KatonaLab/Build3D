@@ -17,10 +17,10 @@ class ImageClass(object):
     
     '''
     '''
-    __protected=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
-    __dim_translate={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
+    __PROTECTED=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
+    __DIM_TRANSLATE={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
 
-    __bit_depth_lookup={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}
+    __BIT_DEPTH_LOOKUP=ome_tiff.BIT_DEPTH_LOOKUP
     
     def __init__(self, ndarray, metadata):
 
@@ -55,7 +55,7 @@ class ImageClass(object):
             if dim_current=='C':
                 metadata['Name']=np.squeeze(metadata['Name'][key[i]]).tolist()
                 metadata['SamplesPerPixel']=np.squeeze(metadata['SamplesPerPixel'][key[i]]).tolist()
-            metadata[self.__dim_translate[dim_current]]=length
+            metadata[self.__DIM_TRANSLATE[dim_current]]=length
         
         return ImageClass(image , metadata)
     
@@ -138,16 +138,15 @@ class ImageClass(object):
     def get_dimension(self, index, dimension='C'):
 
         #Get channel from image. 
-        if dimension not in self.__dim_translate.keys():
-            raise Exception('Invalid dimension %s! Value must be in %s' % (str(dimension), str(self.__dim_translate.keys())))
+        if dimension not in self.__DIM_TRANSLATE.keys():
+            raise Exception('Invalid dimension %s! Value must be in %s' % (str(dimension), str(self.__DIM_TRANSLATE.keys())))
             
-        
-        if index>=self.metadata[self.__dim_translate[dimension]] or 0>index:
-            raise Exception('Image has %s channels! Invalid channel %s' % (str(self.metadata['SizeC']), str(index)))
+        if index>=self.metadata[self.__DIM_TRANSLATE[dimension]] or 0>index:
+            raise Exception('Image dimension %s has a length of %s ! Index %s is invalid!' % (str(dimension) ,str(self.metadata[self.__DIM_TRANSLATE[dimension]]),str(index)))
         
         #Create metadata
         metadata=copy.deepcopy(self.metadata)
-        metadata[self.__dim_translate[dimension]]=1
+        metadata[self.__DIM_TRANSLATE[dimension]]=1
         if dimension=='C':
             
             if isinstance(metadata['SamplesPerPixel'], list):
@@ -171,10 +170,10 @@ class ImageClass(object):
     def save(self, directory, file_name):
         '''
         Load image stack from path. RGB images are not supported currently and only first frame is returned.
-        '''
-        
+        '''        
         #Load image and create simplified metadata dictionary
         self.reorder('XYZCT')
+
         ome_tiff.save_image(self.image,self.metadata, directory, file_name)
                   
     
@@ -187,8 +186,9 @@ class ImageClass(object):
             raise TypeError('Image must be a a NumPy array!')
         
         #Check if metadata 'Type' field matches the type of the image
-        if self.__bit_depth_lookup[metadata['Type']]!=image.dtype:
-             raise TypeError('Image data type does not mach the one specified in the metadata!')
+        if self.__BIT_DEPTH_LOOKUP[metadata['Type']]!=image.dtype:
+             metadata['Type']=utils.value_to_key(self.__BIT_DEPTH_LOOKUP, image.dtype)
+             #raise TypeError('Image data type does not mach the one specified in the metadata!')
              
         #Check if number of channels and length of the name list is the same
         if 'SizeC' in metadata.keys():
@@ -206,7 +206,7 @@ class ImageClass(object):
                 raise Exception('Length of Name list is invalid!','')
         
         #Check if dimension order is acceptable;
-        dimensions=self.__dim_translate.keys()
+        dimensions=self.__DIM_TRANSLATE.keys()
         if len(metadata['DimensionOrder'])!=len(dimensions):
             raise Exception('Dimension orders have to be a permutation of accepted dimensions: '+str(dimensions))
         #Check if all letters are in the dimension and only once:
@@ -218,7 +218,7 @@ class ImageClass(object):
         #Check if image shape confers with the one in the metadata
         #Remove singleton dimensions
         shape_image=[val for val in image.shape if val!=1]
-        available_keys=[self.__dim_translate[dim] for dim in reversed(metadata['DimensionOrder']) if self.__dim_translate[dim] in metadata.keys()]
+        available_keys=[self.__DIM_TRANSLATE[dim] for dim in reversed(metadata['DimensionOrder']) if self.__DIM_TRANSLATE[dim] in metadata.keys()]
  
         shape_metadata=[metadata[key] for key in available_keys if metadata[key]!=1]
   
@@ -245,7 +245,7 @@ class ImageClass(object):
     
     def set_metadata(self, key, value):
 
-        if key not in self.__protected:
+        if key not in self.__PROTECTED:
 
             if key in self.__metadata:
                 
@@ -284,7 +284,7 @@ class ImageClass(object):
         #Get the index of the given dimension in the shape of the image
         ind=len(original_order)-original_order.index(dim)-1
         
-        self.__metadata[self.__dim_translate[dim]]=self.__metadata[self.__dim_translate[dim]]+img.get_metadata(self.__dim_translate[dim])
+        self.__metadata[self.__DIM_TRANSLATE[dim]]=self.__metadata[self.__DIM_TRANSLATE[dim]]+img.get_metadata(self.__DIM_TRANSLATE[dim])
 
         self.image=np.concatenate((self.image,img.image), axis=ind)
        
@@ -311,7 +311,7 @@ class ImageClass(object):
             shape=[1]*len(order)
             for idx, dim in enumerate(order):
                 if dim!='C':
-                    shape[idx]=self.__metadata[self.__dim_translate[dim]]
+                    shape[idx]=self.__metadata[self.__DIM_TRANSLATE[dim]]
                 if dim=='C':
                     shape[idx]=1
                        
@@ -414,9 +414,9 @@ class ImageClass(object):
         shape=[1]*len(dim_order_list)
 
         for i, dim in enumerate(dim_order_list):
-            if dim in ImageClass.__dim_translate.keys() and dim!='S':
+            if dim in ImageClass.__DIM_TRANSLATE.keys() and dim!='S':
                 
-                key=ImageClass.__dim_translate[dim]
+                key=ImageClass.__DIM_TRANSLATE[dim]
              
                 if key in metadata.keys():
                     shape[i]=int(metadata[key])

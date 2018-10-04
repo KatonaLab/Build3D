@@ -1,7 +1,11 @@
+
 from modules.a3dc_modules.external.PythImage.ImageClass import ImageClass as PythImage
+from skimage.external.tifffile import TiffWriter
 
 import SimpleITK as sitk
-import sys
+import sys, os, copy
+from skimage.external.tifffile import imsave
+from itertools import product
 
 class VividImage(PythImage):
     
@@ -88,11 +92,4 @@ class VividImage(PythImage):
                  +str(missing_unit)+'!', file=sys.stderr)
     
         return itk_img
-   
-
     
-   
-
-
-
-

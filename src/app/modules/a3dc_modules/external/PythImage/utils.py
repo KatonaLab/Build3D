@@ -179,3 +179,22 @@ def concatenate(a,b):
 
 def list_of(lst, object_type):
     return any((isinstance(x, object_type) for x in lst))
+
+
+def value_to_key(dictionary, val):
+    
+    #Get the ocurrences of val among dictionary values
+    count=sum(value == val for value in dictionary.values())
+    #version 2: count=sum(map((val).__eq__, dictionary.values()))
+    
+    #If value is not in dictionary.values raise exception
+    if count==0:
+        raise LookupError('Value %s is not in dictionary'.forma(str(val)))
+    if count>1:
+        raise LookupError('More than one key has value %s!'.forma(str(val)))
+    
+    #get value
+    #version 2: list(dictionary.keys())[list(dictionary.values()).index(val)]
+    for key, value in dictionary.items():
+        if value == val:
+            return key
