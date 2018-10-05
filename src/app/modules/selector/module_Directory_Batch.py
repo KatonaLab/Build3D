@@ -2,7 +2,7 @@ import a3dc_module_interface as a3
 from a3dc_module_interface import def_process_module
 from glob import glob
 import os
-from modules.a3dc_modules.a3dc.utils import SEPARATOR
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
 
 def module_main(ctx):
     
@@ -14,14 +14,14 @@ def module_main(ctx):
     
     #Get file extension and directory
     if os.path.isfile(path):
+        
         base_dir = os.path.dirname(path)
+        ext = os.path.splitext(path)[1]
+        print('Input directory:', base_dir)   
+   
     else:
-        base_dir = path    
-    
-    ext = os.path.splitext(a3.inputs['path'].path)[1]
-
-    print('Input directory:', base_dir)
-
+        error('Path is not a file!', OSError('Path is not a file!'))
+  
 
     # Gett all the files with matching extensions
     file_list = [os.path.abspath(x) for x in glob(base_dir + '/*' + ext)]
@@ -45,7 +45,6 @@ def module_main(ctx):
     #Print current filename and index
     _, curr_filename = os.path.split(url.path)
     print('Currently processing:', curr_filename)
-    #print('Current index:', index)
     
     #Set output
     a3.outputs['file'] = url

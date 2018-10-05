@@ -43,8 +43,6 @@ def load_image(path):
         images = tif.asarray()
         
         #Load metadata
-        print(tif[0].tags['image_description'].value)
-        print((tif[0].tags['image_description'].value)[570:590])
         ome_metadata=utils.xml2dict(tif[0].tags['image_description'].value, sanitize=True, prefix=None)
 
     return images, ome_metadata

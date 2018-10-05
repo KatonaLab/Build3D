@@ -466,13 +466,10 @@ def save_data(img_list, path, file_name, to_text=True):
 def save_image(img_list, path, file_name):
     '''
     '''
-    print('A3DCA3DCA3DCA3DCA3DC:CoreCoreCoreCoreCoreCoreCore')
+
     #Combine images
     for idx, img in  enumerate(img_list):
-        #if 'Path' in img.metadata.keys():
-           #del img.metadata['Path']
-        #if 'ROI' in img.metadata.keys():
-           #del img.metadata['ROI'] 
+
         if idx==0:
             output=copy.deepcopy(img)
         else:

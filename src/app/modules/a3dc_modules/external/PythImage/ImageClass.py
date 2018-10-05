@@ -7,7 +7,7 @@ from . import imagej_tiff
 from . import ome_tiff
 from .roi import roi_to_coordinates
 from . import utils
-from inspect import isfunction
+
 
 
 ##Add channel, remove channel, extract channel etc.

@@ -27,7 +27,7 @@ from .imageclass import VividImage
 import numpy as np
 from ast import literal_eval
 from modules.a3dc_modules.a3dc.utils import warning
-import copy
+
 
 
 
@@ -41,12 +41,12 @@ def from_multidimimage(multidimimage, database=None):
 
     #Get image metadata and convert database if the metadata is ICS style
     metadata=metadata_to_dict(multidimimage)
-    print(metadata.keys())
-  
+
     if is_ics(multidimimage):
         metadata=ics_to_metadata(array, metadata)
-        array=array[::-1,::-1,::]
-        
+    #else:
+       #array=array[::,::-1,::] 
+    
     #Create output image    
     output=VividImage(array, metadata)
 
@@ -69,10 +69,10 @@ def to_multidimimage(image):
         image.metadata['SizeC']=1
     
     #Create output MultiDimImageFloat
-    #output=md.MultiDimImageFloat_from_ndarray(np.squeeze((image.image[0,0, ::-1,::-1,::]).astype(np.float)))
-    #output=md.MultiDimImageFloat_from_ndarray(image.get_3d_array().astype(np.float))
-    image.reorder('ZXYCT')
-    output=md.MultiDimImageFloat_from_ndarray(image.image[0,0].astype(np.float))    
+    print('1', image.metadata['DimensionOrder'])
+    image.reorder('ZYXCT')
+    output=md.MultiDimImageFloat_from_ndarray(image.image[0,0].astype(np.float))
+    print('2', image.metadata['DimensionOrder'])
     
     #Clear metadata
     output.meta.clear()
@@ -82,40 +82,59 @@ def to_multidimimage(image):
         
     return output 
 
-
-def metadata_to_dict(multidimimage):
+def metadata_to_dict2(multidimimage):
 
 
     metadata={}
     for idx, line in enumerate(str(multidimimage.meta).split('\n')[1:-1]):
             line_list=line.split(':')
-            print(line_list[0])
-
+            
             #for the 'path' key the path is separated as well.
             if line_list[0].lstrip().lower()=='path':
-                metadata[line_list[0].lstrip()]=':'.join(line_list[1:])
-            
-            if line_list[0].lstrip().lower()=='roi':
-                print('ROROROROR')
-               
-                
-                roi_str=''.join(copy.copy(line_list[1:]))
-                print(roi_str)
-                print(roi_str.replace(' ', ''))
-                print(roi_str.replace(' ', '', 1))
-                metadata[line_list[0].lstrip()]=literal_eval(roi_str.replace(' ', '', 1))
+                metadata[line_list[0].lstrip()]=':'.join(line_list[1:])         
 
             else:
-                
                 try:
-                    metadata[line_list[0].lstrip()]=literal_eval(line_list[-1].lstrip())
-                    #metadata[line_list[0]]=literal_eval(line_list[1:-1].lstrip())
-                
+                    metadata[':'.join(line_list[:-1])]=literal_eval(line_list[-1].lstrip())
+
                 except:
-                    metadata[line_list[0].lstrip()]=line_list[-1].lstrip()
-                    #metadata[line_list[0]]=line_list[1:-1].lstrip()
-    print(metadata)
+                    metadata[':'.join(line_list[:-1])]=line_list[-1].lstrip()
+    
     return metadata
+
+
+def metadata_to_dict(multidimimage):
+
+    metadata={}
+    for idx, line in enumerate(str(multidimimage.meta).split('\n')[1:-1]):
+            
+            line_list=line.split(':')
+            
+            #Get key and value. Ics metadata keys have : as separator
+            #for the 'path' key the path is separated as well.
+            if line_list[0].lstrip().lower()=='path':
+                key=line_list[0].lstrip()
+                value=':'.join(line_list[1:])
+            else:
+                key=':'.join(line_list[:-1])
+                value=multidimimage.meta.get(key)
+            
+            #ad metadata key value to outpit dictionary
+            try:
+                metadata[key]=literal_eval(value)
+
+            except:
+                metadata[key]=value
+    
+    return metadata
+
+def is_ics_dict(dictionary): 
+    
+    flag=False
+    for key in required_ics_keys:
+        if key in dictionary:
+            flag=True
+    return flag
 
 
 def is_ics(multidimimage):
@@ -128,11 +147,12 @@ def is_ics(multidimimage):
     return (multidimimage.meta.has(required_ics_keys[0]) or multidimimage.meta.has(required_ics_keys[1]))
 
 
+
 def ics_to_metadata(array, ics_metadata):
         
         #Get Shape information
         ome_metadata={'SizeT': 1, 'SizeC':1, 'SizeZ':array.shape[-1], 'SizeX':array.shape[0], 'SizeY':array.shape[1]}
-        ome_metadata['DimensionOrder']='XYZCT'
+        ome_metadata['DimensionOrder']='ZYXCT'
         
         channel=int(ics_metadata['channel'])
         

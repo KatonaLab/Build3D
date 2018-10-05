@@ -193,9 +193,15 @@ def error(message, exception=None, verbose=True):
         len=1
     else:
         len=10
-        
+    
+    print(SEPARATOR, file=sys.stderr)
+    
     print("Traceback:",file=sys.stderr)
     print(traceback.format_exc(len), file=sys.stderr)
+    
+    print(SEPARATOR, file=sys.stderr)
+    print(message, file=sys.stderr) 
+    print(SEPARATOR, file=sys.stderr) 
 
     raise Exception(message, exception)
  

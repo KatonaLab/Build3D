@@ -54,8 +54,6 @@ def threshold(image, method="Otsu", **kwargs):
     # Start timing
     tstart = time.clock()
 
-        
-
     # Threshold methods
     auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
@@ -124,7 +122,6 @@ def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'mean
 
     # Creatre LogText and start logging
     logText = '\nAnalyzing: ' + str(tagged_image.metadata['Name'])
-
 
     #Print list of images in Imagelist to log text
     if image_list != None:
@@ -224,7 +221,6 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
     
     # Analyze colocalization
     overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
-
 
     #Print number of objects to logText
     logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))

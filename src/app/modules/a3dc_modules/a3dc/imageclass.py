@@ -52,7 +52,6 @@ class VividImage(PythImage):
             if self.metadata['SizeT']>T+1 or self.metadata['SizeT']<0:
                 raise Exception('Invalid time index {}. Image has {} time points!'.format( T, self.metadata['SizeT']))
             else:
-                print(T)
                 output=output.get_dimension( T, dimension='T')
         
         if C!=None:
