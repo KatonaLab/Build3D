@@ -69,10 +69,9 @@ def to_multidimimage(image):
         image.metadata['SizeC']=1
     
     #Create output MultiDimImageFloat
-    print('1', image.metadata['DimensionOrder'])
     image.reorder('ZYXCT')
-    output=md.MultiDimImageFloat_from_ndarray(image.image[0,0].astype(np.float))
-    print('2', image.metadata['DimensionOrder'])
+    output=md.MultiDimImageFloat_from_ndarray(image.image[0][0].astype(np.float))
+
     
     #Clear metadata
     output.meta.clear()

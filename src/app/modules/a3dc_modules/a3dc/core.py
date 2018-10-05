@@ -337,7 +337,7 @@ def filter_database(dictionary, filter_dict, overwrite=True):
 
 
 
-def remove_filtered(tagged_Img, database):
+def remove_filtered(tagged_img, database):
 
     change_dict={}
 
@@ -347,7 +347,7 @@ def remove_filtered(tagged_Img, database):
             if database['filter'][i]==False:
                 change_dict[int(database['tag'][i])]=0
     
-        itk_img = sitk.GetImageFromArray(tagged_Img)
+        itk_img = tagged_img.to_itk()
 
         sitk_filter = sitk.ChangeLabelImageFilter()
         sitk_filter.SetChangeMap(change_dict)

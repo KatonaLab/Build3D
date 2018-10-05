@@ -77,10 +77,6 @@ def threshold(image, method="Otsu", **kwargs):
 
         kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
     
-    #image.reorder('XYCTZ')
-    print('dsgffffffffrghkfslskfs;prgkjorepj;pj;ph;h;')
-    print(str(image))
-    
     # Run thresholding functions    
     if method in auto_list:
         output_array, thresholdValue = segmentation.threshold_auto(image.get_3d_array(), method, **kwargs)
@@ -181,7 +177,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     
     # Remove Filtered objects from database and image
     if remove_filtered == True:
-        output_image , output_database = core.remove_filtered(image.image, output_database)
+        output_image , output_database = core.remove_filtered(image, output_database)
             
 
     # Finish timing and add to logText
