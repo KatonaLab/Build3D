@@ -61,7 +61,7 @@ class VividImage(PythImage):
                 output=output.get_dimension( C, dimension='C')
         
         if output.metadata['SizeT']==1 and output.metadata['SizeC']==1 :
-            self.reorder('ZXYCT')
+            self.reorder('XYZCT')
             array=output.image[0][0]
             
         else:

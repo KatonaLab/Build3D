@@ -60,7 +60,7 @@ class ImageClass(object):
         return ImageClass(image , metadata)
     
     def __repr__(self):
-        rep=utils.dict_to_string(self.__metadata)+'\nShape:'+str(self.image.shape)
+        rep='Shape:'+str(self.image.shape)+'\n'+utils.dict_to_string(self.__metadata)
         return rep      
     
     def __getattr__(self, atr):
