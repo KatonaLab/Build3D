@@ -188,10 +188,9 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     return VividImage(output_image, image.metadata, output_database) , logText
 
 
-def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None,
-                   removeFiltered=False, overWrite=True):
+def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=None,
+                   remove_filtered=False, overWrite=True):
     '''
-
     :param tagged_img_list:
     :param taggedDictList:
     :param sourceImageList:
@@ -208,15 +207,15 @@ def colocalization(tagged_img_list, sourceImageList=None, overlappingFilter=None
         logText += '\t ' + str(img.metadata['Name'])
 
     # Add Filter settings
-    logText += '\n\tFilter settings: ' + str(overlappingFilter).replace('{', ' ').replace('}', ' ')
-    logText += '\n\t\tremoveFiltered=' + str(removeFiltered)
+    logText += '\n\tFilter settings: ' + str(overlapping_filter).replace('{', ' ').replace('}', ' ')
+    logText += '\n\t\tremoveFiltered=' + str(remove_filtered)
     logText += '\n\t\toverwrite=' + str(overWrite)
 
     # Determine connectivity data
-    overlappingImage = core.colocalization_connectivity(tagged_img_list, sourceImageList)
+    overlappingImage = core.colocalization_connectivity(tagged_img_list, source_image_list)
     
     # Filter database and image
-    overlappingImage, _ = apply_filter(overlappingImage, overlappingFilter, removeFiltered)
+    overlappingImage, _ = apply_filter(overlappingImage, overlapping_filter, remove_filtered)
     
     # Analyze colocalization
     overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)

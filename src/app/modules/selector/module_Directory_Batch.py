@@ -20,7 +20,7 @@ def module_main(ctx):
         print('Input directory:', base_dir)   
    
     else:
-        error('Path is not a file!', OSError('Path is not a file!'))
+        error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' ! Path is not a file!", OSError('Path is not a file!'))
   
 
     # Gett all the files with matching extensions

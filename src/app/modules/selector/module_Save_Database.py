@@ -76,7 +76,7 @@ def module_main(ctx):
         print(str(e), file=sys.stderr)
     
     except Exception as e:
-        error("Error occured while executing "+str(ctx.name())+" !", exception=e)
+        error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !", exception=e)
 
 
 #Set Outputs and inputs

@@ -35,7 +35,7 @@ def module_main(ctx):
         print(SEPARATOR)
 
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
+        raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
 
 config = [a3.Input('FileName', a3.types.url),
     a3.Output('Array', a3.types.GeneralPyType),

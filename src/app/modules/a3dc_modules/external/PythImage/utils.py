@@ -191,7 +191,7 @@ def value_to_key(dictionary, val):
     if count==0:
         raise LookupError('Value %s is not in dictionary'.forma(str(val)))
     if count>1:
-        raise LookupError('More than one key has value %s!'.forma(str(val)))
+        raise LookupError('More than one key have value %s!'.forma(str(val)))
     
     #get value
     #version 2: list(dictionary.keys())[list(dictionary.values()).index(val)]

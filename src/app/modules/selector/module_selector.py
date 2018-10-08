@@ -31,8 +31,7 @@ def module_main(ctx):
         if img.metadata['SizeT']>1:
             warning("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
         
-        #Extract channel from image array    
-        a3.outputs['Channel 1'] = to_multidimimage(img.get_dimension(a3.inputs['Channel'], 'C'))
+
         
         #Modify metadata 
         img.metadata['SamplesPerPixel']=img.metadata['SamplesPerPixel'][ch]
@@ -40,7 +39,9 @@ def module_main(ctx):
         #img.metadata['Path']=filename
         
         #Create Output
-        image_to_a3image(Image(array.astype(np.float),copy.deepcopy(img.metadata)))
+        #Extract channel from image array    
+        a3.outputs['Channel 1'] = to_multidimimage(img.get_dimension(a3.inputs['Channel'], 'C'))
+        #to_multidimimage(Image(array.astype(np.float),copy.deepcopy(img.metadata)))
        
         #Finalization
         tstop = time.clock()
@@ -49,7 +50,7 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
+        raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
 
 config = [a3.Parameter('Channel', a3.types.int8)
                 .setFloatHint('default', 0)

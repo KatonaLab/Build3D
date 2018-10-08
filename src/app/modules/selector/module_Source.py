@@ -23,14 +23,14 @@ def module_main(ctx):
         print_line_by_line(str(img))
         
         #Create Output 1
-        ch_1=img.get_dimension(a3.inputs['Channel 1'], 'C')
+        ch_1=img.get_dimension(a3.inputs['Channel A'], 'C')
         ch_1.metadata['Path']=filename
-        a3.outputs['Channel 1'] = to_multidimimage(ch_1)
+        a3.outputs['Channel A'] = to_multidimimage(ch_1)
 
         #Create Output 2
-        ch_2=img.get_dimension(a3.inputs['Channel 2'], 'C')
+        ch_2=img.get_dimension(a3.inputs['Channel B'], 'C')
         ch_2.metadata['Path']=filename
-        a3.outputs['Channel 2'] = to_multidimimage(ch_2)
+        a3.outputs['Channel B'] = to_multidimimage(ch_2)
      
         #Finalization
         tstop = time.clock()
@@ -39,23 +39,23 @@ def module_main(ctx):
         print(SEPARATOR)
 
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
+        raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
 
 
     
 config = [a3.Input('FileName', a3.types.url),
-          a3.Parameter('Channel 1', a3.types.int8)
+          a3.Parameter('Channel A', a3.types.int8)
                 .setIntHint('default', 0),
                 #.setIntHint('max', 8)
                 #.setIntHint('min', 0)
                 #.setIntHint('unusedValue', 1),  
-          a3.Parameter('Channel 2', a3.types.int8)
+          a3.Parameter('Channel B', a3.types.int8)
                 .setIntHint('default', 1),
                 #.setIntHint('max', 8)
                 #.setIntHint('min', 0)
                 #.setIntHint('unusedValue', 1),
-          a3.Output('Channel 1', a3.types.ImageFloat),
-          a3.Output('Channel 2', a3.types.ImageFloat)]
+          a3.Output('Channel A', a3.types.ImageFloat),
+          a3.Output('Channel B', a3.types.ImageFloat)]
     
 
 a3.def_process_module(config, module_main)

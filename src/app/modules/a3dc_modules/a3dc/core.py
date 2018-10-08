@@ -364,7 +364,7 @@ def remove_filtered(tagged_img, database):
        
         
     else:
-        return tagged_Img, database
+        return tagged_img, database
     
     
         

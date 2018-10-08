@@ -1,7 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import VividImage
 from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
+from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, value_to_key
 
 import time
 import math
@@ -12,9 +12,8 @@ from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multi
 
 
 FILTERS = ['volume', 'meanIntensity']
+TRANSLATE={'volume':'Volume', 'meanIntensity':'Mean intensity' }
           
-#'volume', 
-
 def analyze_image(source, mask, settings, removeFiltered=False):
 
     print('Processing the following channels: '+ str(source.metadata['Name']))
@@ -48,21 +47,21 @@ def analyze_image(source, mask, settings, removeFiltered=False):
     return taggedImage
 
 
-def read_params(filters=FILTERS):
+def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
     
     params = {'Source': from_multidimimage(a3.inputs['Source Image']),
                     'Mask':from_multidimimage(a3.inputs['Mask Image'])}
 
     settings = {}
     for f in filters:
-        settings[f] = {}
+        settings[value_to_key(TRANSLATE,f)] = {}
         for m in ['min', 'max']:
-            settings[f][m] = a3.inputs['{} {}'.format( f, m)]
+            settings[value_to_key(TRANSLATE,f)][m] = a3.inputs['{} {}'.format( f, m)]
     
-    if a3.inputs['Exclude bordering objects']:       
+    if a3.inputs['Filter objects on border']:       
         settings['pixelsOnBorder']={'min': 1, 'max':float(math.inf)}
 
-    if a3.inputs['Use physical dimensions'] and ('volume' in settings.keys()):
+    if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
         
         #Check if physical size metadata is available  if any is missing raise Exeption
         size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
@@ -77,7 +76,7 @@ def read_params(filters=FILTERS):
             print('Warning: DEFAULT value (um or micron) used for :'
                  +str(missing_unit)+'!', file=sys.stderr)        
         
-        #Set default Unit values is not in metadata
+        #Set default Unit values if not in metadata
         #Remember that if unit value is missing an exception is raised
         for un in missing_unit:
             params['Source'].metadata[un]='um'
@@ -93,12 +92,12 @@ def read_params(filters=FILTERS):
     
     params['Settings'] = settings
     
-    params['removeFiltered']=a3.inputs['Remove filtered objects']
+    params['removeFiltered']=a3.inputs['Keep/Remove filtered objects']
 
     return params    
     
 
-def generate_config(filters=FILTERS):
+def generate_config(filters=[TRANSLATE[key] for key in FILTERS]):
     
     #Set Outputs and inputs
     config = [a3.Input('Source Image', a3.types.ImageFloat),
@@ -115,9 +114,9 @@ def generate_config(filters=FILTERS):
                 .setFloatHint('default', 0 if m == 'min' else float(math.inf))
                 .setFloatHint('unusedValue',0 if m == 'min' else float(math.inf)))
     
-    switch_list=[a3.Parameter('Remove filtered objects', a3.types.bool).setBoolHint("default", False),
-                 a3.Parameter('Exclude bordering objects', a3.types.bool).setBoolHint("default", False),
-                 a3.Parameter('Use physical dimensions', a3.types.bool).setBoolHint("default", False)]
+    switch_list=[a3.Parameter('Keep/Remove filtered objects', a3.types.bool).setBoolHint("default", False),
+                 a3.Parameter('Filter objects on border', a3.types.bool).setBoolHint("default", False),
+                 a3.Parameter('Volume in pixels/um\u00B3', a3.types.bool).setBoolHint("default", False)]
     config.extend(switch_list)
  
     return config
@@ -153,7 +152,7 @@ def module_main(ctx):
         print(SEPARATOR)
 
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
+        raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
     
 
 

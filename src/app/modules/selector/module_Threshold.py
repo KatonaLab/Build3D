@@ -20,7 +20,7 @@ def generate_config(methods=METHODS):
     
     #Set Outputs and inputs
     config = [a3.Input('Input Image', a3.types.ImageFloat),
-               a3.Output('Output Image', a3.types.ImageFloat)]
+               a3.Output('Thresholded Image', a3.types.ImageFloat)]
 
     #Set parameters
     param=a3.Parameter('Method', a3.types.enum)
@@ -28,11 +28,11 @@ def generate_config(methods=METHODS):
         param.setIntHint(str(m), idx)
     
     config.append(param)
-    config.append(a3.Parameter('Threshold', a3.types.float)
-            .setFloatHint('default', float(math.inf))
-            .setFloatHint('unusedValue', float(math.inf))
-            .setFloatHint('stepSize', 1))
-    config.append(a3.Parameter('Stack Histogram', a3.types.bool))
+    config.append(a3.Parameter('Manual threshold value', a3.types.float)
+            .setFloatHint('default', float(math.inf)))
+            #.setFloatHint('unusedValue', float(math.inf))
+            #.setFloatHint('stepSize', 1))
+    config.append(a3.Parameter('Slice/Stack histogram', a3.types.bool))
     
     return config
 
@@ -55,10 +55,10 @@ def module_main(ctx):
         
         #Get kwargs if method is manual
         if method=='Manual':
-            kwargs={'lower':0, 'upper':a3.inputs['Threshold']}
+            kwargs={'lower':0, 'upper':a3.inputs['Manual threshold value']}
         else:
             kwargs={}
-            if a3.inputs['Stack Histogram']:
+            if a3.inputs['Slice/Stack histogram']:
                 kwargs['mode']='Stack'
             else:
                 kwargs['mode']='Slice'
@@ -71,7 +71,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Output Image']=to_multidimimage(output_img)
+        a3.outputs['Thresholded Image']=to_multidimimage(output_img)
       
         #Finalization
         tstop = time.clock()
@@ -80,6 +80,6 @@ def module_main(ctx):
         print(SEPARATOR)
     
     except Exception as e:
-        raise error("Error occured while executing "+str(ctx.name())+" !",exception=e)
+        raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
     
 a3.def_process_module(generate_config(), module_main)
