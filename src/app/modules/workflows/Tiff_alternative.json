@@ -12,7 +12,7 @@
             "category": "parameter",
             "parentUid": 0,
             "uid": 0,
-            "value": "file:///C:/Users/pongor.csaba/Desktop/TestImages/ometest.ome.tif"
+            "value": ""
         },
         {
             "category": "output",
@@ -39,7 +39,7 @@
             "category": "parameter",
             "parentUid": 1,
             "uid": 0,
-            "value": "file:///C:/Users/pongor.csaba/Desktop/TestImages/Output"
+            "value": ""
         },
         {
             "category": "output",
@@ -56,7 +56,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Source.py",
+            "module": "alternative_tiff/module_Source.py",
             "name": "Load Channels",
             "order": 6,
             "parentUid": -1,
@@ -111,7 +111,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Threshold.py",
+            "module": "alternative_tiff/module_Threshold.py",
             "name": "Channel A",
             "order": 12,
             "parentUid": -1,
@@ -162,7 +162,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Threshold.py",
+            "module": "alternative_tiff/module_Threshold.py",
             "name": "Channel B",
             "order": 18,
             "parentUid": -1,
@@ -213,7 +213,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Analyze.py",
+            "module": "alternative_tiff/module_Analyze.py",
             "name": "Channel A",
             "order": 24,
             "parentUid": -1,
@@ -320,7 +320,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Analyze.py",
+            "module": "alternative_tiff/module_Analyze.py",
             "name": "Channel B",
             "order": 37,
             "parentUid": -1,
@@ -427,7 +427,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Colocalize.py",
+            "module": "alternative_tiff/module_Colocalize.py",
             "name": "Colocalize A/B",
             "order": 50,
             "parentUid": -1,
@@ -595,7 +595,7 @@
         },
         {
             "category": "module",
-            "module": "alternative/module_Results.py",
+            "module": "alternative_tiff/module_Results.py",
             "name": "Results",
             "order": 70,
             "parentUid": -1,

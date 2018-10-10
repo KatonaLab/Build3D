@@ -1,7 +1,6 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.interface import threshold
 from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 import time, math
 
