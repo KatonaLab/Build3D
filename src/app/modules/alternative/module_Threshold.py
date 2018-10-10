@@ -19,8 +19,8 @@ def module_threshold(image, method="Otsu", kwargs={}):
 def generate_config(methods=METHODS):
     
     #Set Outputs and inputs
-    config = [a3.Input('Input Image', a3.types.ImageFloat),
-               a3.Output('Thresholded Image', a3.types.ImageFloat)]
+    config = [a3.Input('Input Image', a3.types.GeneralPyType),
+               a3.Output('Thresholded Image', a3.types.GeneralPyType)]
 
     #Set parameters
     param=a3.Parameter('Method', a3.types.enum)
@@ -46,7 +46,7 @@ def module_main(ctx):
         print('Thresholding started!')
         
         #Create Image object
-        img =from_multidimimage(a3.inputs['Input Image'])
+        img =a3.inputs['Input Image']
         print('Thresholding: '+img.metadata['Name'])
         
         #Get method and mode
@@ -71,7 +71,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Thresholded Image']=to_multidimimage(output_img)
+        a3.outputs['Thresholded Image']=output_img
       
         #Finalization
         tstop = time.clock()

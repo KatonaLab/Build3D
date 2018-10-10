@@ -9,7 +9,7 @@ import math
 import sys
 import time
 
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
+#from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 
 CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
@@ -96,8 +96,8 @@ def read_params(filters=FILTERS):
     out_dict = {}
     out_dict['Path']=os.path.dirname(a3.inputs['Path'].path)
 
-    out_dict['ChA Image']=from_multidimimage(a3.inputs['ChA Image'],a3.inputs['ChA DataBase'])
-    out_dict['ChB Image']=from_multidimimage(a3.inputs['ChB Image'],a3.inputs['ChB DataBase'])
+    out_dict['ChA Image']=VividImage(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChA DataBase'])
+    out_dict['ChB Image']=VividImage(a3.inputs['ChB Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChB DataBase'])
     
     out_dict['to_text']=a3.inputs['Save to xlsx/text']
     out_dict['remove_filtered']=a3.inputs['Keep/Remove filtered objects']
@@ -216,8 +216,8 @@ def module_main(ctx):
                    params['Path'],
                    to_text=params['to_text'], remove_filtered=params['remove_filtered'])
             
-        a3.outputs['Overlapping Image'] = to_multidimimage(output[0])
-        a3.outputs['Overlapping Binary'] = to_multidimimage(VividImage(output[0].image>0,output[0].metadata))
+        a3.outputs['Overlapping Image'] = output[0]
+        a3.outputs['Overlapping Binary'] = VividImage(output[0].image>0,output[0].metadata)
         a3.outputs['Overlapping DataBase'] =output[0].database
         #a3.outputs['Channel A Image']=to_multidimimage(VividImage(output[1].image>0,output[1].metadata))
         #a3.outputs['Channel B Image']=to_multidimimage(VividImage(output[2].image>0,output[2].metadata))        
@@ -246,14 +246,14 @@ def generate_config(filters=FILTERS):
 
     #Set Outputs and inputs
     config=[a3.Input('Path', a3.types.url),
-        a3.Input('ChA Image', a3.types.ImageFloat), 
+        a3.Input('ChA Image', a3.types.GeneralPyType), 
         a3.Input('ChA DataBase', a3.types.GeneralPyType), 
-        a3.Input('ChB Image', a3.types.ImageFloat),
+        a3.Input('ChB Image', a3.types.GeneralPyType),
         a3.Input('ChB DataBase', a3.types.GeneralPyType),
         #a3.Output('Channel A Image', a3.types.ImageFloat),
         #a3.Output('Channel B Image', a3.types.ImageFloat),
-        a3.Output('Overlapping Image', a3.types.ImageFloat),
-        a3.Output('Overlapping Binary', a3.types.ImageFloat),
+        a3.Output('Overlapping Image', a3.types.GeneralPyType),
+        a3.Output('Overlapping Binary', a3.types.GeneralPyType),
         a3.Output('Overlapping DataBase', a3.types.GeneralPyType),
         a3.Output('Overlapping Path', a3.types.url)] 
     

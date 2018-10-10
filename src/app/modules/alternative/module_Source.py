@@ -25,12 +25,12 @@ def module_main(ctx):
         #Create Output 1
         ch_1=img.get_dimension(a3.inputs['Channel A'], 'C')
         ch_1.metadata['Path']=filename
-        a3.outputs['Channel A'] = to_multidimimage(ch_1)
+        a3.outputs['Channel A'] = ch_1
 
         #Create Output 2
         ch_2=img.get_dimension(a3.inputs['Channel B'], 'C')
         ch_2.metadata['Path']=filename
-        a3.outputs['Channel B'] = to_multidimimage(ch_2)
+        a3.outputs['Channel B'] = ch_2
      
         #Finalization
         tstop = time.clock()
@@ -54,8 +54,8 @@ config = [a3.Input('FileName', a3.types.url),
                 #.setIntHint('max', 8)
                 #.setIntHint('min', 0)
                 #.setIntHint('unusedValue', 1),
-          a3.Output('Channel A', a3.types.ImageFloat),
-          a3.Output('Channel B', a3.types.ImageFloat)]
+          a3.Output('Channel A', a3.types.GeneralPyType),
+          a3.Output('Channel B', a3.types.GeneralPyType)]
     
 
 a3.def_process_module(config, module_main)

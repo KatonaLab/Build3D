@@ -7,7 +7,7 @@ import time
 import math
 import sys
 
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
+#from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
 
 
 
@@ -49,8 +49,8 @@ def analyze_image(source, mask, settings, removeFiltered=False):
 
 def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
     
-    params = {'Source': from_multidimimage(a3.inputs['Source Image']),
-                    'Mask':from_multidimimage(a3.inputs['Mask Image'])}
+    params = {'Source':a3.inputs['Source Image'],
+                    'Mask':a3.inputs['Mask Image']}
 
     settings = {}
     for f in filters:
@@ -100,10 +100,10 @@ def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
 def generate_config(filters=[TRANSLATE[key] for key in FILTERS]):
     
     #Set Outputs and inputs
-    config = [a3.Input('Source Image', a3.types.ImageFloat),
-             a3.Input('Mask Image', a3.types.ImageFloat),
-             a3.Output('Analyzed Image', a3.types.ImageFloat),
-             a3.Output('Analyzed Binary', a3.types.ImageFloat),  
+    config = [a3.Input('Source Image', a3.types.GeneralPyType),
+             a3.Input('Mask Image', a3.types.GeneralPyType),
+             a3.Output('Analyzed Image', a3.types.GeneralPyType),
+             a3.Output('Analyzed Binary', a3.types.GeneralPyType),  
              a3.Output('Analyzed Database', a3.types.GeneralPyType)]
 
     #Set parameters 
@@ -141,8 +141,8 @@ def module_main(ctx):
         #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
         
         #Create Output
-        a3.outputs['Analyzed Image'] = to_multidimimage(output)
-        a3.outputs['Analyzed Binary'] = to_multidimimage(VividImage(output.image>0,output.metadata))
+        a3.outputs['Analyzed Image'] = output
+        a3.outputs['Analyzed Binary'] = VividImage(output.image>0,output.metadata)
         a3.outputs['Analyzed Database']=output.database
         
         #Finalization
