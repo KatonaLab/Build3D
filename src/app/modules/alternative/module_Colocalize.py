@@ -94,7 +94,12 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
 def read_params(filters=FILTERS):
     
     out_dict = {}
-    out_dict['Path']=os.path.dirname(a3.inputs['Path'].path)
+    
+    #Get Path. If "Output Path" is not set or does not exist use "File Path".
+    if  os.path.isdir(a3.inputs['Output Path'].path):
+        out_dict['Path']=a3.inputs['Output Path'].path
+    else:
+        out_dict['Path']=os.path.dirname(a3.inputs['File Path'].path)
 
     out_dict['ChA Image']=VividImage(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChA DataBase'])
     out_dict['ChB Image']=VividImage(a3.inputs['ChB Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChB DataBase'])
@@ -245,7 +250,8 @@ def module_main(ctx):
 def generate_config(filters=FILTERS):
 
     #Set Outputs and inputs
-    config=[a3.Input('Path', a3.types.url),
+    config=[a3.Input('File Path', a3.types.url),
+        a3.Input('Output Path', a3.types.url),
         a3.Input('ChA Image', a3.types.GeneralPyType), 
         a3.Input('ChA DataBase', a3.types.GeneralPyType), 
         a3.Input('ChB Image', a3.types.GeneralPyType),

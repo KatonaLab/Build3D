@@ -47,7 +47,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     
     #Generate output filename
     filename_1=os.path.basename(ch1_img.metadata['Path'])
-    filename_2=os.path.basename(ch1_img.metadata['Path'])
+    filename_2=os.path.basename(ch2_img.metadata['Path'])
     if filename_1!=filename_2:
         
         basename=os.path.splitext(filename_1)[0]+'_'+os.path.splitext(filename_2)[0]
@@ -94,7 +94,12 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
 def read_params(filters=FILTERS):
     
     out_dict = {}
-    out_dict['Path']=os.path.dirname(a3.inputs['Path'].path)
+    
+    #Get Path. If "Output Path" is not set or does not exist use "File Path".
+    if  os.path.isdir(a3.inputs['Output Path'].path):
+        out_dict['Path']=a3.inputs['Output Path'].path
+    else:
+        out_dict['Path']=os.path.dirname(a3.inputs['File Path'].path)
 
     out_dict['ChA Image']=from_multidimimage(a3.inputs['ChA Image'],a3.inputs['ChA DataBase'])
     out_dict['ChB Image']=from_multidimimage(a3.inputs['ChB Image'],a3.inputs['ChB DataBase'])
@@ -207,7 +212,7 @@ def module_main(ctx):
         #Read Parameters
         print('Reading input parameters!')
         params = read_params()
-        
+            
         output=colocalize(params['ChA Image'],
                    params['ChB Image'],
                    params['ChA'],
@@ -245,7 +250,8 @@ def module_main(ctx):
 def generate_config(filters=FILTERS):
 
     #Set Outputs and inputs
-    config=[a3.Input('Path', a3.types.url),
+    config=[a3.Input('File Path', a3.types.url),
+        a3.Input('Output Path', a3.types.url),
         a3.Input('ChA Image', a3.types.ImageFloat), 
         a3.Input('ChA DataBase', a3.types.GeneralPyType), 
         a3.Input('ChB Image', a3.types.ImageFloat),
