@@ -60,8 +60,6 @@ def colocalization_connectivity(image_list, raw_img_list=None):
 
     
     # Generate array lists and name lists
-    
-
     for i in range(len(image_list)):
         itk_image = sitk.GetImageFromArray(image_list[i].get_3d_array())
 
@@ -92,7 +90,6 @@ def colocalization_analysis(image_list, ovl_img):
     ovl_database=ovl_img.database
 
     name_list = [x.metadata['Name'] for x in  image_list]
-
 
     obj_no = [len(x.database['tag']) for x in image_list]
     input_element_no=len(database_list)
@@ -135,7 +132,6 @@ def colocalization_analysis(image_list, ovl_img):
             curr_pos_list.append(currentPosition)
 
 
-
             if dict_is_filtered[i]==True :#and 'filter' in database_list[i].keys() :
 
                     flag*=database_list[i]['filter'][currentPosition]
@@ -154,7 +150,6 @@ def colocalization_analysis(image_list, ovl_img):
                 position_list = [x for x in range(input_element_no) if x != i]
                 for k in range(len(position_list)):
                     output_list[i]['object in ' + name_list[position_list[k]]][curr_pos_list[i]].append(curr_tag_list[position_list[k]])
-
 
     for i in range(input_element_no):
         for key in output_list[i]:
@@ -259,7 +254,6 @@ def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
             for key in multi_img_meas_list:
                 database[key+' in '+img_list[i].metadata['Name']].append(multi_img_functions[key](label))
     
-    
     #Measure object surface
     if 'surface' in meas_list:
         #Create and measure Surface Image
@@ -267,7 +261,6 @@ def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
       
         surfaceitk_img=sitk.GetImageFromArray(surface)
         
-
         itk_filter=sitk.LabelShapeStatisticsImageFilter()
         itk_filter.Execute(surfaceitk_img)
         surface_data=itk_filter.GetLabels()
@@ -282,7 +275,6 @@ def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']
         #Create and measure Surface Image
         facesitk_img=sitk.GetImageFromArray([tagged_img.image[0]])
        
-      
         itk_filter=sitk.LabelShapeStatisticsImageFilter()
         itk_filter.Execute(facesitk_img)
         faces_data=itk_filter.GetLabels()
@@ -315,13 +307,10 @@ def filter_database(dictionary, filter_dict, overwrite=True):
     for key in filter_dict:
         
 
-  
         if df[key].dtype in typeList:
          
-
             curr_filter = (df[key] >= filter_dict[key]['min']) & (df[key] <= filter_dict[key]['max']).values
                 
-
             final_filter = np.multiply(final_filter, curr_filter)
 
     df['filter'] = final_filter     
@@ -329,8 +318,7 @@ def filter_database(dictionary, filter_dict, overwrite=True):
     if remove_filtered==True and 'filter' in df.keys() :
         df.drop(df[df['filter'] == False].index, inplace=True)
 
-    
-    
+
     dictionary = df.to_dict(orient='list')
    
     return dictionary
@@ -461,8 +449,7 @@ def save_data(img_list, path, file_name, to_text=True):
                 outputFile.write('name= '+name_list[i]+'\n')
                 outputFile.write(dataframe_list[i].to_csv(sep='\t', columns=key_order_list[i], index=False, header=True))    
     
-    
-    
+       
 def save_image(img_list, path, file_name):
     '''
     '''

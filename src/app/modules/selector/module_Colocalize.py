@@ -1,8 +1,8 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image#, apply_filter
+from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image, apply_filter
 from modules.a3dc_modules.a3dc.core import filter_database
-from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key
+from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
 
 import os
 import math
@@ -31,10 +31,10 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     ovl_img, _=colocalization(tagged_img_list, overlapping_filter=ovl_settings, remove_filtered=remove_filtered)
     
     #Run filtering steps
-    ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
-    ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
-    #ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=remove_filtered)
-    #ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=remove_filtered)
+    #ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
+    #ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
+    ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
+    ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
     
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
@@ -87,7 +87,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Create outputpath ox data
     output_path=os.path.join(outputPath, file_name+extension)
     
-    return ovl_img,  output_path  
+    return ovl_img, ch1_img, ch2_img,  output_path  
 
 
 
@@ -108,20 +108,20 @@ def read_params(filters=FILTERS):
         settings[value_to_key(TRANSLATE,f)] = {}
         for m in ['min', 'max']:
             settings[value_to_key(TRANSLATE,f)][m] = a3.inputs['{} {}'.format( f, m)]
-            
+ 
     #Generate channel 1 and channel 2 settings dictionary
     ch1_settings={}
     ch2_settings={}
     for key in CHFILTERS:
         if key in settings:
-            prefix=key.split('_', 1)[0]
-            filter_key=key.split('_', 1)[-1]
+            prefix=key.split(' ', 1)[0]
+            filter_key=key.split(' ', 1)[-1]
             
             if prefix=='ChA':
                 ch1_settings[filter_key] = settings[key]
             if prefix=='ChB':
                 ch2_settings[filter_key] = settings[key]
-    
+
     out_dict['ChA'] = ch1_settings
     out_dict['ChB'] = ch2_settings
             
@@ -131,8 +131,8 @@ def read_params(filters=FILTERS):
 
         if key in settings:
             
-            prefix=key.split('_', 1)[0]
-            filter_key=key.split('_', 1)[-1]
+            prefix=key.split(' ', 1)[0]
+            filter_key=key.split(' ', 1)[-1]
             
             if prefix=='ChA':
                 ovl_settings[filter_key+' in '+str(a3.inputs['ChA MetaData']['Name'])] = settings[key]
@@ -143,38 +143,53 @@ def read_params(filters=FILTERS):
         else:
             ovl_settings[key] = settings[key]
     
-    if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in ovl_settings.keys()):
+    if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
+        #Get size and unit metadata and check if the two channels have the same 
+        #metadata and raise error if not available         
         
-        #Check if physical size metadata is available  if any is missing raise Exeption
+        
+        #Create a dictionary of pixel sizes for the two cahnnels
         size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
-        missing_size=[s for s in size_list if s not in out_dict['ChA Image'].metadata.keys()]
-        if len(missing_size)!=0:
-            raise Exception('Missing :'+str(missing_size)+'! Unable to carry out analysis!')
-
-        #Check if unit metadata is available, default Unit is um!!!!!!!!
+        ch1_size={key:out_dict['ChA Image'].metadata[key] for key in size_list if key in out_dict['ChA Image'].metadata.keys()}
+        ch2_size={key:out_dict['ChB Image'].metadata[key] for key in size_list if key in out_dict['ChB Image'].metadata.keys()}
+        #Add defaul unit if not available
+        for key in size_list:
+            if key not in ch1_size:
+                ch1_size[key]=1.0
+                warning('Channel 1 '+key+' unavailable! The default value of 1.0 will be used!')
+            if key not in ch1_size:
+                ch2_size[key]=1.0
+                warning('Channel 2 '+key+' unavailable! The default value of 1.0 will be used!')
+        #Check if the two channels have the same unit dictionary
+        if not dictinary_equal(ch1_size,ch2_size): #or len(ch1_size.keys())!=3 or len(ch1_size.keys())!=3:
+            raise Exception('Two channels have to have the same size metadata! Channel 1: {}  and Channel 2: {}'.format(ch1_size, ch2_size))                
+                
+                
+        #Create a dictionary of units for the two cahnnels
         unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
-        missing_unit=[u for u in unit_list if u not in out_dict['ChA Image'].metadata.keys()]
-        if len(missing_size)!=0:
-            print('Warning: DEFAULT value (um or micron) used for :'
-                 +str(missing_unit)+'!', file=sys.stderr)        
-        
-        #Set default Unit values if not in metadata
-        #Remember that if unit value is missing an exception is raised
-        for un in missing_unit:
-            out_dict['ChA Image'].metadata[un]='um'
-            out_dict['ChB Image'].metadata[un]='um'
-        
+        ch1_unit={key:out_dict['ChA Image'].metadata[key] for key in unit_list if key in out_dict['ChA Image'].metadata.keys()}
+        ch2_unit={key:out_dict['ChB Image'].metadata[key] for key in unit_list if key in out_dict['ChB Image'].metadata.keys()}
+        #Add defaul unit if not available
+        for key in unit_list:
+            if key not in ch1_unit:
+                ch1_unit[key]='um'
+                warning('Channel 1 '+key+' unavailable! The default unit um will be used!')
+            if key not in ch1_unit:
+                ch2_unit[key]='um'
+                warning('Channel 2 '+key+' unavailable! The default unit um will be used!')
+        #Check if the two channels have the same unit dictionary
+        if not dictinary_equal(ch1_unit, ch2_unit):
+            raise Exception('Two channels have to have the same unit metadata! Channel 1: {}  and Channel 2: {}'.format(ch1_unit, ch2_unit))
+               
         print('Physical voxel volume is : '
               +str(out_dict['ChA Image'].metadata['PhysicalSizeX']*out_dict['ChA Image'].metadata['PhysicalSizeY']*out_dict['ChA Image'].metadata['PhysicalSizeZ'])
               +' '+out_dict['ChA Image'].metadata['PhysicalSizeXUnit']+'*'+out_dict['ChA Image'].metadata['PhysicalSizeYUnit']+'*'+out_dict['ChA Image'].metadata['PhysicalSizeZUnit'])
+                
+        ovl_settings['volume']= settings.pop('volume')
         
-  
     else:
         ovl_settings['voxelCount'] = settings.pop('volume')
     
-    
-    
-    print(ovl_settings)
     out_dict['Ovl'] = ovl_settings    
     
     #out_dict['FileName']=a3.inputs['FileName']
@@ -200,13 +215,15 @@ def module_main(ctx):
                    params['Ovl'], 
                    params['Path'],
                    to_text=params['to_text'], remove_filtered=params['remove_filtered'])
-        
+            
         a3.outputs['Overlapping Image'] = to_multidimimage(output[0])
         a3.outputs['Overlapping Binary'] = to_multidimimage(VividImage(output[0].image>0,output[0].metadata))
         a3.outputs['Overlapping DataBase'] =output[0].database
+        #a3.outputs['Channel A Image']=to_multidimimage(VividImage(output[1].image>0,output[1].metadata))
+        #a3.outputs['Channel B Image']=to_multidimimage(VividImage(output[2].image>0,output[2].metadata))        
         
         path=a3.Url()
-        path.path=output[1]
+        path.path=output[3]
         a3.outputs['Overlapping Path'] = path
 
         #Finalization
@@ -232,16 +249,18 @@ def generate_config(filters=FILTERS):
         a3.Input('ChA Image', a3.types.ImageFloat), 
         a3.Input('ChA DataBase', a3.types.GeneralPyType), 
         a3.Input('ChB Image', a3.types.ImageFloat),
-        a3.Input('ChB DataBase', a3.types.GeneralPyType),              
+        a3.Input('ChB DataBase', a3.types.GeneralPyType),
+        #a3.Output('Channel A Image', a3.types.ImageFloat),
+        #a3.Output('Channel B Image', a3.types.ImageFloat),
         a3.Output('Overlapping Image', a3.types.ImageFloat),
         a3.Output('Overlapping Binary', a3.types.ImageFloat),
         a3.Output('Overlapping DataBase', a3.types.GeneralPyType),
-        a3.Output('Overlapping Path', a3.types.url)]    
+        a3.Output('Overlapping Path', a3.types.url)] 
+    
     
     #Set parameters
     for f in filters:
         for m in ['min', 'max']:
-            print(DEFAULT_VALUE[f])
             config.append(
                 a3.Parameter('{} {}'.format(TRANSLATE[f], m), a3.types.float)
                 .setFloatHint('default', 0 if m == 'min' else DEFAULT_VALUE[f])

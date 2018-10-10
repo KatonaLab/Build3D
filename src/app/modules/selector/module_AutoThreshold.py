@@ -52,7 +52,7 @@ def module_main(ctx):
         print('Autothresholding started!')
         
         #Create Image object
-        img = a3image_to_image(a3.inputs['Input Image'])
+        img = from_multidimimage(a3.inputs['Input Image'])
         
         
         #Get method and mode

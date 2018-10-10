@@ -26,9 +26,7 @@ def tag_image(ndarray):
 def threshold_auto(ndarray, method, mode='Slice'):
     '''The first dimension of the array has to start with z (shape of (z,x,y) or (z,y,x)) 
     '''
-    print(ndarray.shape)
-    print(ndarray.shape[-1])
-    print(ndarray[:,:,0].shape)
+
     #Initialization
     threshold_dict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                             'Huang': sitk.HuangThresholdImageFilter(),

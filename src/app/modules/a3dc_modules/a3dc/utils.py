@@ -26,7 +26,7 @@ QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n   
 		"The human brain, then, is the most complicated organization of matter that we know.\n     -Isaac Asimov",
 		"The brain struggling to understand the brain is society trying to explain itself.\n     -Colin Blakemore",
 		"Whatever happens in the mind of man is represented in the actions and interactions of brain cells.\n     -Geschwind and A.M. Galaburda",
-		"Brain: an apparatus with which we think that we think.\n     -Ambrose Bierce)",
+		"Brain: an apparatus with which we think that we think.\n     -Ambrose Bierce",
 		"Mind: A mysterious form of matter secreted by the brain.\n     -Ambrose Bierce",
 		"Ah! My poor brain is racked and crazed,\nMy spirit and senses amazed!\n     -Johann Wolfgang Von Goethe:Faust, 1808",
 		"I am a brain, Watson. The rest of me is a mere appendix.\n     -Arthur Conan Doyle:Sherlock Holmes",
@@ -222,6 +222,20 @@ def value_to_key(dictionary, val):
     for key, value in dictionary.items():
         if value == val:
             return key 
+
+def dictinary_equal(dict_1,dict_2):
+    '''Compares two dictionaries and returns true is dictionaries have the same
+    keys and values are equal (key and value objects have to be comparable)
+    '''
+    flag=True
+    for key, value in dict_1.items():
+        if key in dict_2.keys():
+            if dict_2[key]!=value:
+                flag=False
+        else:
+            flag=False
+            
+    return flag
 
 #Class for error handling
 class VividException(Exception):
