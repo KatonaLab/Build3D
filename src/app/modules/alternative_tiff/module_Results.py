@@ -6,13 +6,13 @@ def module_main(ctx):
     
     try: 
         
-        a3.inputs['ChA Image']=to_multidimimage(a3.inputs['ChA Image'])
-        a3.inputs['ChB Image']=to_multidimimage(a3.inputs['ChB Image'])
-        a3.inputs['ChA Thresholded']=to_multidimimage(a3.inputs['ChA Thresholded'])
-        a3.inputs['ChB Thresholded']=to_multidimimage(a3.inputs['ChB Thresholded'])
-        a3.inputs['ChA Analyzed']=to_multidimimage(a3.inputs['ChA Analyzed'])
-        a3.inputs['ChB Analyzed']=to_multidimimage(a3.inputs['ChB Analyzed'])
-        a3.inputs['Overlapping Image']=to_multidimimage(a3.inputs['Overlapping Image'])
+        a3.outputs['ChA Image']=to_multidimimage(a3.inputs['ChA Image'])
+        a3.outputs['ChB Image']=to_multidimimage(a3.inputs['ChB Image'])
+        a3.outputs['ChA Thresholded']=to_multidimimage(a3.inputs['ChA Thresholded'])
+        a3.outputs['ChB Thresholded']=to_multidimimage(a3.inputs['ChB Thresholded'])
+        a3.outputs['ChA Analyzed']=to_multidimimage(a3.inputs['ChA Analyzed'])
+        a3.outputs['ChB Analyzed']=to_multidimimage(a3.inputs['ChB Analyzed'])
+        a3.outputs['Overlapping Image']=to_multidimimage(a3.inputs['Overlapping Image'])
 
 
     except Exception as e:

@@ -1,13 +1,14 @@
-
 from modules.a3dc_modules.external.PythImage.ImageClass import ImageClass as PythImage
 from skimage.external.tifffile import TiffWriter
-
+import numpy as np
 import SimpleITK as sitk
 import sys, os, copy
 from skimage.external.tifffile import imsave
 from itertools import product
 
 class VividImage(PythImage):
+   
+    __DIM_TRANSLATE=PythImage._ImageClass__DIM_TRANSLATE#{'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}    
     
     def __init__(self, image, metadata, database=None):
      
@@ -41,8 +42,39 @@ class VividImage(PythImage):
             flag=False
         else:
             flag=True
-        
+            
         return flag
+    
+    def get_dimension(self, index, dimension='C'):
+
+        #Get channel from image. 
+        if dimension not in self.__DIM_TRANSLATE.keys():
+            raise Exception('Invalid dimension %s! Value must be in %s' % (str(dimension), str(self.__DIM_TRANSLATE.keys())))
+            
+        if index>=self.metadata[self.__DIM_TRANSLATE[dimension]] or 0>index:
+            raise Exception('Image dimension %s has a length of %s ! Index %s is invalid!' % (str(dimension) ,str(self.metadata[self.__DIM_TRANSLATE[dimension]]),str(index)))
+        
+        #Create metadata
+        metadata=copy.deepcopy(self.metadata)
+        metadata[self.__DIM_TRANSLATE[dimension]]=1
+        if dimension=='C':
+            
+            if isinstance(metadata['SamplesPerPixel'], list):
+                metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][index]
+                metadata['Name']=metadata['Name'][index] 
+            elif index==0:
+                metadata['SamplesPerPixel']=metadata['SamplesPerPixel']
+                metadata['Name']=metadata['Name']
+            else:
+                raise IndexError('Invalid Index {} ! the "Name" and "SamplesPerPixel" metadata keys are lists for multichannel images.'.format(str(index)))
+                
+             
+        #Extract axis from image array from image array
+        order=self.metadata['DimensionOrder']
+
+        array=np.take(self.image, index, len(order)-order.index(dimension)-1)
+
+        return VividImage(array, metadata)
     
     def get_3d_array(self, T=None, C=None):
         

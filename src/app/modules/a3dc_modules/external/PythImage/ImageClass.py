@@ -1,7 +1,5 @@
 import numpy as np
 import copy
-
-
 #from .RoiClass import Roi 
 from . import imagej_tiff 
 from . import ome_tiff
@@ -19,8 +17,8 @@ class ImageClass(object):
     '''
     __PROTECTED=['SizeT', 'SizeC','SizeZ', 'SizeX','SizeY', 'SamplesPerPixel', 'Type', 'DimensionOrder']
     __DIM_TRANSLATE={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
-
     __BIT_DEPTH_LOOKUP=ome_tiff.BIT_DEPTH_LOOKUP
+    
     
     def __init__(self, ndarray, metadata):
 
@@ -130,41 +128,12 @@ class ImageClass(object):
             image, metadata=loader_dict[file_type](path)    
         
         if 'image' not in locals():
-            raise Exception('Currently only {} files are supported!'.format(loader_dict.keys()))
+            raise Exception('Currently only {} files are supported!'.format(list(loader_dict.keys())))
        
 
         return cls(image, metadata)
     
-    def get_dimension(self, index, dimension='C'):
 
-        #Get channel from image. 
-        if dimension not in self.__DIM_TRANSLATE.keys():
-            raise Exception('Invalid dimension %s! Value must be in %s' % (str(dimension), str(self.__DIM_TRANSLATE.keys())))
-            
-        if index>=self.metadata[self.__DIM_TRANSLATE[dimension]] or 0>index:
-            raise Exception('Image dimension %s has a length of %s ! Index %s is invalid!' % (str(dimension) ,str(self.metadata[self.__DIM_TRANSLATE[dimension]]),str(index)))
-        
-        #Create metadata
-        metadata=copy.deepcopy(self.metadata)
-        metadata[self.__DIM_TRANSLATE[dimension]]=1
-        if dimension=='C':
-            
-            if isinstance(metadata['SamplesPerPixel'], list):
-                metadata['SamplesPerPixel']=metadata['SamplesPerPixel'][index]
-                metadata['Name']=metadata['Name'][index] 
-            elif index==0:
-                metadata['SamplesPerPixel']=metadata['SamplesPerPixel']
-                metadata['Name']=metadata['Name']
-            else:
-                raise IndexError('Invalid Index {} ! the "Name" and "SamplesPerPixel" metadata keys are lists for multichannel images.'.format(str(index)))
-                
-             
-        #Extract axis from image array from image array
-        order=self.metadata['DimensionOrder']
-
-        array=np.take(self.image, index, len(order)-order.index(dimension)-1)
-
-        return ImageClass(array, metadata)
 
               
     def save(self, directory, file_name):
@@ -205,6 +174,13 @@ class ImageClass(object):
             if utils.length(metadata['Name'])!=metadata['SizeC']:
                 raise Exception('Length of Name list is invalid!','')
         
+        #Rename duplicate names in the 'Name' field of the metadata
+        if isinstance(metadata['Name'], list):
+            metadata['Name']=utils.rename_duplicates(metadata['Name'])
+        else:
+            metadata['Name']=utils.rename_duplicates([metadata['Name']])[0]
+    
+        
         #Check if dimension order is acceptable;
         dimensions=self.__DIM_TRANSLATE.keys()
         if len(metadata['DimensionOrder'])!=len(dimensions):
@@ -224,8 +200,6 @@ class ImageClass(object):
   
         if shape_image!=shape_metadata:
             raise Exception('shape information in metadata is not compattible to the image shape!','')
-    
-    
     
     @staticmethod
     def __slice_length(slice_object, object_length):
@@ -272,8 +246,9 @@ class ImageClass(object):
     def append_to_dimension(self, img, dim='C'):
 
         #Append names
-        self.__metadata['Name']=utils.concatenate(self.__metadata['Name'],img.get_metadata('Name'))
-        self.__metadata['SamplesPerPixel']=utils.concatenate(self.__metadata['SamplesPerPixel'], img.get_metadata('SamplesPerPixel'))
+        if dim=='C':
+            self.__metadata['Name']=utils.concatenate(self.__metadata['Name'],img.get_metadata('Name'))
+            self.__metadata['SamplesPerPixel']=utils.concatenate(self.__metadata['SamplesPerPixel'], img.get_metadata('SamplesPerPixel'))
  
         #Get original dimension order
         original_order=self.__metadata['DimensionOrder']

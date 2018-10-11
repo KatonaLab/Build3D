@@ -17,13 +17,15 @@ OVLFILTERS=[ 'volume']#,'Ch1 overlappingRatio','Ch2 overlappingRatio']
 
 TRANSLATE={'volume':'Overlapping volume', 'ChA totalOverlappingRatio':'ChA Overlapping ratio', 'ChB totalOverlappingRatio':'ChB Overlapping ratio'}
 DEFAULT_VALUE={'volume':float(math.inf), 'ChA totalOverlappingRatio':1.0, 'ChB totalOverlappingRatio':1.0}
-#Generate filter list. 
-#Sort so the input fields come in the appropriate order
+
+#Generate filter list. Sort so the input fields come in the appropriate order
 FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
 
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
     
     tagged_img_list=[ch1_img, ch2_img]
+    print(str(ch1_img))
+    print(str(ch2_img))
     print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
     print('Filter settings: ' + str(ovl_settings))
     

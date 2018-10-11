@@ -63,7 +63,8 @@ def module_main(ctx):
                 kwargs['mode']='Slice'
             print('Mode: ' +kwargs['mode'])
             
-        #Run thresholding            
+        #Run thresholding
+        print(type(img).__name__)            
         output_img=module_threshold(img, method,kwargs)
         
         #Change Name in metadata

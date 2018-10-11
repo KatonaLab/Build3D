@@ -198,3 +198,17 @@ def value_to_key(dictionary, val):
     for key, value in dictionary.items():
         if value == val:
             return key
+        
+def rename_duplicates(string_list):
+    '''Processes a list of strings. If list has duplicate elements an index is added to it.
+    '''
+    if isinstance(string_list, str) or not isinstance(string_list, list):
+        raise Exception('Object must be list of strings!')
+    
+    output = []
+    for idx, val in enumerate(string_list):
+        totalcount = string_list.count(val)
+        count = string_list[:idx].count(val)
+        output.append(val +'_'+ str(count + 1) if totalcount > 1 else val)
+    
+    return output

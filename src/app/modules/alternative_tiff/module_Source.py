@@ -18,7 +18,6 @@ def module_main(ctx):
         
         #Load and reshape image
         img=VividImage.load(filename)
-        
         #Print important image parameters
         print_line_by_line(str(img))
         
@@ -31,7 +30,7 @@ def module_main(ctx):
         ch_2=img.get_dimension(a3.inputs['Channel B'], 'C')
         ch_2.metadata['Path']=filename
         a3.outputs['Channel B'] = ch_2
-     
+
         #Finalization
         tstop = time.clock()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')

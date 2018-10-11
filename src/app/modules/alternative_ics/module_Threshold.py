@@ -20,7 +20,8 @@ def generate_config(methods=METHODS):
     
     #Set Outputs and inputs
     config = [a3.Input('Input Image', a3.types.ImageFloat),
-               a3.Output('Thresholded Image', a3.types.GeneralPyType)]
+              a3.Output('Image', a3.types.GeneralPyType),
+              a3.Output('Thresholded Image', a3.types.GeneralPyType)]
 
     #Set parameters
     param=a3.Parameter('Method', a3.types.enum)
@@ -72,6 +73,7 @@ def module_main(ctx):
         
         #Set output
         a3.outputs['Thresholded Image']=output_img
+        a3.outputs['Image']=img
       
         #Finalization
         tstop = time.clock()

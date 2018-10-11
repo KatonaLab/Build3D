@@ -94,7 +94,8 @@ def convert_metadata(metadata_dict):
         else: 
             for n in range(metadata_dict_out['SamplesPerPixel']):
                metadata_dict_out['Name'].append(name+'_S'+str(n))
-
+    
+    
     #Get ROI-s if present
     if 'ROI' in metadata_dict['OME'].keys():
        metadata_dict_out['ROI']=metadata_dict['OME']['ROI']
