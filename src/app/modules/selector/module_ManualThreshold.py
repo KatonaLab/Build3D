@@ -1,12 +1,9 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.segmentation import threshold_manual
-from modules.a3dc_modules.a3dc.imageclass import Image
+from modules.packages.a3dc.segmentation import threshold_manual
 import numpy as np
 import time
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
-
-
+from modules.packages.a3dc.utils import SEPARATOR, error
+from modules.packages.a3dc.utils import VividImage
 
 
 def generate_config():
@@ -38,7 +35,7 @@ def module_main(ctx):
         print(SEPARATOR)
         
         #Create Image object
-        img =from_multidimimage(a3.inputs['Input Image'])
+        img =VividImage.from_multidimimage(a3.inputs['Input Image'])
         
         # Creatre LogText and start logging
         print('Thresholding: '+img.metadata['Name'])
@@ -51,10 +48,10 @@ def module_main(ctx):
         
         #Run thresholding
         print('Autothresholding started!')
-        output_img=Image(threshold_manual(img.array, upper, lower), img.metadata)
+        output_img=VividImage(threshold_manual(img.array, upper, lower), img.metadata)
 
         #Set output
-        a3.outputs['Output Image']=to_multidimimage(output_img)
+        a3.outputs['Output Image']=output_img.to_multidimimage()
     
         #Finalization
         tstop = time.clock()

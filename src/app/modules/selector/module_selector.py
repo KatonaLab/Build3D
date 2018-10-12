@@ -1,12 +1,9 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-import numpy as np
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, warning
 import time
 import copy
 import sys
-
-from modules.a3dc_modules.a3dc.multidimimage import to_multidimimage
+import a3dc_module_interface as a3
+from modules.packages.a3dc.utils import SEPARATOR, error, warning
+from modules.packages.a3dc.utils import VividImage
 
 
 def module_main(ctx):
@@ -31,8 +28,6 @@ def module_main(ctx):
         if img.metadata['SizeT']>1:
             warning("Image is a time series! Only the first time step will be extracted!", file=sys.stderr)
         
-
-        
         #Modify metadata 
         img.metadata['SamplesPerPixel']=img.metadata['SamplesPerPixel'][ch]
         img.metadata['Name']=img.metadata['Name'][ch]   
@@ -40,7 +35,7 @@ def module_main(ctx):
         
         #Create Output
         #Extract channel from image array    
-        a3.outputs['Channel 1'] = to_multidimimage(img.get_dimension(a3.inputs['Channel'], 'C'))
+        a3.outputs['Channel 1'] = img.get_dimension(a3.inputs['Channel'], 'C').to_multidimimage()
         #to_multidimimage(Image(array.astype(np.float),copy.deepcopy(img.metadata)))
        
         #Finalization

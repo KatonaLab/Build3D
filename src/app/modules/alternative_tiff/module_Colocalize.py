@@ -1,15 +1,12 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image, apply_filter
-from modules.a3dc_modules.a3dc.core import filter_database
-from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
-
 import os
 import math
 import sys
 import time
-
-#from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
+import a3dc_module_interface as a3
+from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
+#from modules.packages.a3dc.core import filter_database
+from modules.packages.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
+from modules.packages.a3dc.utils import VividImage
 
 
 CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']

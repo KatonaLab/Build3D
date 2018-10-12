@@ -1,16 +1,10 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, value_to_key
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage
-
 import time
 import math
 import sys
-
-#from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
-
-
+import a3dc_module_interface as a3
+from modules.packages.a3dc.interface import tagImage, analyze, apply_filter
+from modules.packages.a3dc.utils import SEPARATOR, error, value_to_key
+from modules.packages.a3dc.utils import VividImage
 
 FILTERS = ['volume', 'meanIntensity']
 TRANSLATE={'volume':'Volume', 'meanIntensity':'Mean intensity' }
@@ -50,7 +44,7 @@ def analyze_image(source, mask, settings, removeFiltered=False):
 
 def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
     
-    params = {'Source':from_multidimimage(a3.inputs['Source Image']),
+    params = {'Source':VividImage.from_multidimimage(a3.inputs['Source Image']),
                     'Mask':a3.inputs['Mask Image']}
 
     settings = {}

@@ -21,6 +21,7 @@ def overlap_image(array_list):
 
     return output_array
 
+
 def convert_array_type(array, dtype):
     
     #print('Warning: Image type has been converted from '
@@ -28,6 +29,7 @@ def convert_array_type(array, dtype):
     array=array.astype(dtype)
     
     return array
+
 
 def colocalization_connectivity(image_list, raw_img_list=None):
     '''TODO what happens if tagged image was not previouslz analyzed
@@ -158,7 +160,6 @@ def colocalization_analysis(image_list, ovl_img):
     
     
     return ovl_img, image_list 
-
 
 
 def analyze(tagged_img, img_list=None, meas_list=['voxelCount', 'meanIntensity']):

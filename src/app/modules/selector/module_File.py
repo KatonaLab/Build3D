@@ -2,7 +2,7 @@ import a3dc_module_interface as a3
 from a3dc_module_interface import def_process_module
 from glob import glob
 import os
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
+from modules.packages.a3dc.utils import SEPARATOR, error
 
 def module_main(ctx):
     

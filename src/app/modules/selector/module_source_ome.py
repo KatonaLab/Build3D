@@ -1,6 +1,6 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line
+from modules.packages.a3dc.utils import VividImage
+from modules.packages.a3dc.utils import SEPARATOR, error, print_line_by_line
 import time, os
 
 def module_main(ctx):

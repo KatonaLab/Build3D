@@ -1,19 +1,18 @@
 import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.utils import error
-from modules.a3dc_modules.a3dc.multidimimage import to_multidimimage
+from modules.packages.a3dc.utils import error
+from modules.packages.a3dc.utils import VividImage
  
+
 def module_main(ctx):
     
     try: 
-        
-        a3.outputs['ChA Image']=to_multidimimage(a3.inputs['ChA Image'])
-        a3.outputs['ChB Image']=to_multidimimage(a3.inputs['ChB Image'])
-        a3.outputs['ChA Thresholded']=to_multidimimage(a3.inputs['ChA Thresholded'])
-        a3.outputs['ChB Thresholded']=to_multidimimage(a3.inputs['ChB Thresholded'])
-        a3.outputs['ChA Analyzed']=to_multidimimage(a3.inputs['ChA Analyzed'])
-        a3.outputs['ChB Analyzed']=to_multidimimage(a3.inputs['ChB Analyzed'])
-        a3.outputs['Overlapping Image']=to_multidimimage(a3.inputs['Overlapping Image'])
-
+        a3.outputs['ChA Image']=VividImage(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata).to_multidimimage()
+        a3.outputs['ChB Image']=VividImage(a3.inputs['ChB Image'].image, a3.inputs['ChB Image'].metadata).to_multidimimage()
+        a3.outputs['ChA Thresholded']=VividImage(a3.inputs['ChA Thresholded'].image, a3.inputs['ChA Thresholded'].metadata).to_multidimimage()
+        a3.outputs['ChB Thresholded']=VividImage(a3.inputs['ChB Thresholded'].image, a3.inputs['ChB Thresholded'].metadata).to_multidimimage()
+        a3.outputs['ChA Analyzed']=VividImage(a3.inputs['ChA Analyzed'].image, a3.inputs['ChA Analyzed'].metadata).to_multidimimage()
+        a3.outputs['ChB Analyzed']=VividImage(a3.inputs['ChB Analyzed'].image, a3.inputs['ChB Analyzed'].metadata).to_multidimimage()
+        a3.outputs['Overlapping Image']=VividImage(a3.inputs['Overlapping Image'].image, a3.inputs['Overlapping Image'].metadata).to_multidimimage()
 
     except Exception as e:
         error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !", exception=e)

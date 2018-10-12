@@ -1,10 +1,7 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, print_line_by_line
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.multidimimage import to_multidimimage
-
 import time
-
+import a3dc_module_interface as a3
+from modules.packages.a3dc.utils import SEPARATOR, error, print_line_by_line
+from modules.packages.a3dc.utils import VividImage
 
 def module_main(ctx):
 
@@ -25,12 +22,12 @@ def module_main(ctx):
         #Create Output 1
         ch_1=img.get_dimension(a3.inputs['Channel A'], 'C')
         ch_1.metadata['Path']=filename
-        a3.outputs['Channel A'] = to_multidimimage(ch_1)
+        a3.outputs['Channel A'] = ch_1.to_multidimimage()
 
         #Create Output 2
         ch_2=img.get_dimension(a3.inputs['Channel B'], 'C')
         ch_2.metadata['Path']=filename
-        a3.outputs['Channel B'] = to_multidimimage(ch_2)
+        a3.outputs['Channel B'] = ch_2.to_multidimimage()
      
         #Finalization
         tstop = time.clock()

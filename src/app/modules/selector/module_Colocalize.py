@@ -1,25 +1,22 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image, apply_filter
-from modules.a3dc_modules.a3dc.core import filter_database
-from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
-
 import os
 import math
 import sys
 import time
-
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
+import a3dc_module_interface as a3
+from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
+#from modules.packages.a3dc.core import filter_database
+from modules.packages.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
+from modules.packages.a3dc.utils import VividImage
 
 
 CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
 OVLFILTERS=[ 'volume']#,'Ch1 overlappingRatio','Ch2 overlappingRatio']
 
+#Generate filter list. Sort so the input fields come in the appropriate order.
 TRANSLATE={'volume':'Overlapping volume', 'ChA totalOverlappingRatio':'ChA Overlapping ratio', 'ChB totalOverlappingRatio':'ChB Overlapping ratio'}
 DEFAULT_VALUE={'volume':float(math.inf), 'ChA totalOverlappingRatio':1.0, 'ChB totalOverlappingRatio':1.0}
-#Generate filter list. 
-#Sort so the input fields come in the appropriate order
 FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
+
 
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
     
@@ -90,7 +87,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     return ovl_img, ch1_img, ch2_img,  output_path  
 
 
-
 def read_params(filters=FILTERS):
     
     out_dict = {}
@@ -101,8 +97,8 @@ def read_params(filters=FILTERS):
     else:
         out_dict['Path']=os.path.dirname(a3.inputs['File Path'].path)
 
-    out_dict['ChA Image']=from_multidimimage(a3.inputs['ChA Image'],a3.inputs['ChA DataBase'])
-    out_dict['ChB Image']=from_multidimimage(a3.inputs['ChB Image'],a3.inputs['ChB DataBase'])
+    out_dict['ChA Image']=VividImage.from_multidimimage(a3.inputs['ChA Image'],a3.inputs['ChA DataBase'])
+    out_dict['ChB Image']=VividImage.from_multidimimage(a3.inputs['ChB Image'],a3.inputs['ChB DataBase'])
     
     out_dict['to_text']=a3.inputs['Save to xlsx/text']
     out_dict['remove_filtered']=a3.inputs['Keep/Remove filtered objects']
@@ -152,7 +148,6 @@ def read_params(filters=FILTERS):
         #Get size and unit metadata and check if the two channels have the same 
         #metadata and raise error if not available         
         
-        
         #Create a dictionary of pixel sizes for the two cahnnels
         size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
         ch1_size={key:out_dict['ChA Image'].metadata[key] for key in size_list if key in out_dict['ChA Image'].metadata.keys()}
@@ -168,8 +163,7 @@ def read_params(filters=FILTERS):
         #Check if the two channels have the same unit dictionary
         if not dictinary_equal(ch1_size,ch2_size): #or len(ch1_size.keys())!=3 or len(ch1_size.keys())!=3:
             raise Exception('Two channels have to have the same size metadata! Channel 1: {}  and Channel 2: {}'.format(ch1_size, ch2_size))                
-                
-                
+                             
         #Create a dictionary of units for the two cahnnels
         unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
         ch1_unit={key:out_dict['ChA Image'].metadata[key] for key in unit_list if key in out_dict['ChA Image'].metadata.keys()}
@@ -201,6 +195,7 @@ def read_params(filters=FILTERS):
 
     return out_dict    
     
+
 def module_main(ctx):
     
     try:   
@@ -221,11 +216,11 @@ def module_main(ctx):
                    params['Path'],
                    to_text=params['to_text'], remove_filtered=params['remove_filtered'])
             
-        a3.outputs['Overlapping Image'] = to_multidimimage(output[0])
-        a3.outputs['Overlapping Binary'] = to_multidimimage(VividImage(output[0].image>0,output[0].metadata))
+        a3.outputs['Overlapping Image'] = output[0].to_multidimimage()
+        a3.outputs['Overlapping Binary'] = VividImage(output[0].image>0,output[0].metadata).to_multidimimage()
         a3.outputs['Overlapping DataBase'] =output[0].database
-        #a3.outputs['Channel A Image']=to_multidimimage(VividImage(output[1].image>0,output[1].metadata))
-        #a3.outputs['Channel B Image']=to_multidimimage(VividImage(output[2].image>0,output[2].metadata))        
+        #a3.outputs['Channel A Image']=VividImage(output[1].image>0,output[1].metadata).to_multidimimage()
+        #a3.outputs['Channel B Image']=VividImage(output[2].image>0,output[2].metadata).to_multidimimage()        
         
         path=a3.Url()
         path.path=output[3]
@@ -281,9 +276,6 @@ def generate_config(filters=FILTERS):
  
     
     return config
-
-
-
 
 
 a3.def_process_module(generate_config(), module_main)

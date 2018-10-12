@@ -1,13 +1,10 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.segmentation import threshold_adaptive
-from modules.a3dc_modules.a3dc.imageclass import Image
 import time
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
+import a3dc_module_interface as a3
+from modules.packages.a3dc.segmentation import threshold_adaptive
+from modules.packages.a3dc.utils import SEPARATOR, error, VividImage
+
 
 METHODS=['Mean', 'Gaussian']
-
-
 
 def adaptive_threshold(image, method , blocksize=5, offset=0):
 
@@ -17,7 +14,7 @@ def adaptive_threshold(image, method , blocksize=5, offset=0):
     
     outputArray = threshold_adaptive(image.array, method, blocksize, offset)
 
-    return Image(outputArray, image.metadata)
+    return VividImage(outputArray, image.metadata)
 
 def init_config(methods=METHODS):
  
@@ -57,7 +54,7 @@ def module_main(ctx):
         print('Adaptive thresholding started!')
         
         #Create Image object
-        img =from_multidimimage(a3.inputs['Input Image'])
+        img =VividImage.from_multidimimage(a3.inputs['Input Image'])
     
         
         #Get method and mode
@@ -70,7 +67,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_adaptive_thr'
     
         #Set output
-        a3.outputs['Output Image']=to_multidimimage(output_img)
+        a3.outputs['Output Image']=output_img.to_multidimimage()
         
         #Finalization
         tstop = time.clock()

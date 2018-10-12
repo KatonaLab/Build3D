@@ -1,18 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 21 15:21:27 2018
-
-@author: pongor.csaba
-"""
-import time
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import Image
-from modules.a3dc_modules.a3dc.interface import colocalization, save_data, save_image
-from modules.a3dc_modules.a3dc.core import filter_database
-from modules.a3dc_modules.a3dc.utils import quote, SEPARATOR, error, warning
 import os
-import math
 import sys
+import a3dc_module_interface as a3
+from modules.packages.a3dc.interface import  save_data
+from modules.packages.a3dc.utils import SEPARATOR, error, warning
+
 
 CHFILTERS=['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
 OVLFILTERS=[ 'volume','Ch1 overlappingRatio','Ch2 overlappingRatio']

@@ -1,15 +1,9 @@
-import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.imageclass import VividImage
-from modules.a3dc_modules.a3dc.interface import tagImage, analyze, apply_filter
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, value_to_key
-
 import time
 import math
 import sys
-
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
-
-
+import a3dc_module_interface as a3
+from modules.packages.a3dc.interface import tagImage, analyze, apply_filter
+from modules.packages.a3dc.utils import SEPARATOR, error, value_to_key, VividImage
 
 FILTERS = ['volume', 'meanIntensity']
 TRANSLATE={'volume':'Volume', 'meanIntensity':'Mean intensity' }
@@ -49,8 +43,8 @@ def analyze_image(source, mask, settings, removeFiltered=False):
 
 def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
     
-    params = {'Source': from_multidimimage(a3.inputs['Source Image']),
-                    'Mask':from_multidimimage(a3.inputs['Mask Image'])}
+    params = {'Source': VividImage.from_multidimimage(a3.inputs['Source Image']),
+                    'Mask':VividImage.from_multidimimage(a3.inputs['Mask Image'])}
 
     settings = {}
     for f in filters:
@@ -141,8 +135,8 @@ def module_main(ctx):
         #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
         
         #Create Output
-        a3.outputs['Analyzed Image'] = to_multidimimage(output)
-        a3.outputs['Analyzed Binary'] = to_multidimimage(VividImage(output.image>0,output.metadata))
+        a3.outputs['Analyzed Image'] = output.to_multidimimage()
+        a3.outputs['Analyzed Binary'] = VividImage(output.image>0,output.metadata).to_multidimimage()
         a3.outputs['Analyzed Database']=output.database
         
         #Finalization

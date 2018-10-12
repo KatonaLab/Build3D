@@ -1,9 +1,9 @@
+import time
+import math
 import a3dc_module_interface as a3
-from modules.a3dc_modules.a3dc.interface import threshold
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error
-from modules.a3dc_modules.a3dc.multidimimage import from_multidimimage, to_multidimimage
-
-import time, math
+from modules.packages.a3dc.interface import threshold
+from modules.packages.a3dc.utils import SEPARATOR, error
+from modules.packages.a3dc.utils import VividImage
 
 METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu']
 
@@ -46,7 +46,7 @@ def module_main(ctx):
         print('Thresholding started!')
         
         #Create Image object
-        img =from_multidimimage(a3.inputs['Input Image'])
+        img =VividImage.from_multidimimage(a3.inputs['Input Image'])
         print('Thresholding: '+img.metadata['Name'])
         
         #Get method and mode
@@ -71,7 +71,7 @@ def module_main(ctx):
         #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
         
         #Set output
-        a3.outputs['Thresholded Image']=to_multidimimage(output_img)
+        a3.outputs['Thresholded Image']=output_img.to_multidimimage()
       
         #Finalization
         tstop = time.clock()
