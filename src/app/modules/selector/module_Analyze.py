@@ -7,6 +7,7 @@ from modules.packages.a3dc.utils import SEPARATOR, error, value_to_key, VividIma
 
 FILTERS = ['volume', 'meanIntensity']
 TRANSLATE={'volume':'Volume', 'meanIntensity':'Mean intensity' }
+
           
 def analyze_image(source, mask, settings, removeFiltered=False):
 
