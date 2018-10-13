@@ -93,7 +93,7 @@
                     "x": 0,
                     "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -106,7 +106,7 @@
                     "x": 0,
                     "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -131,8 +131,8 @@
             "parentUid": 43,
             "uid": 1,
             "value": {
-                "first": -1,
-                "second": -1
+                "first": 7,
+                "second": 11
             }
         },
         {
@@ -152,7 +152,7 @@
             "parentUid": 43,
             "uid": 0,
             "value": {
-                "color": "#00ffff",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
                     "y": 0
@@ -182,8 +182,8 @@
             "parentUid": 44,
             "uid": 1,
             "value": {
-                "first": -1,
-                "second": -1
+                "first": 7,
+                "second": 11
             }
         },
         {
@@ -203,7 +203,7 @@
             "parentUid": 44,
             "uid": 0,
             "value": {
-                "color": "#ff00ff",
+                "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
                     "y": 0
@@ -284,7 +284,7 @@
             "parentUid": 45,
             "uid": 0,
             "value": {
-                "color": "#ffff00",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
                     "y": 0
@@ -297,12 +297,12 @@
             "parentUid": 45,
             "uid": 1,
             "value": {
-                "color": "#ff0000",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
                     "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -404,12 +404,12 @@
             "parentUid": 46,
             "uid": 1,
             "value": {
-                "color": "#00ff00",
+                "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
                     "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -564,7 +564,7 @@
                     "x": 0,
                     "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {

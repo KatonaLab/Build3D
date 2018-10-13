@@ -90,8 +90,8 @@
             "value": {
                 "color": "#b00000",
                 "lutParams": {
-                    "x": 0.010019844397902489,
-                    "y": 19030.46875
+                    "x": 0,
+                    "y": 0
                 },
                 "visible": false
             }
@@ -103,8 +103,8 @@
             "value": {
                 "color": "#35ff00",
                 "lutParams": {
-                    "x": 0.03261163830757141,
-                    "y": 17165.01171875
+                    "x": 0,
+                    "y": 0
                 },
                 "visible": false
             }
@@ -152,10 +152,10 @@
             "parentUid": 19,
             "uid": 0,
             "value": {
-                "color": "#00ffff",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
                 "visible": false
             }
@@ -203,10 +203,10 @@
             "parentUid": 20,
             "uid": 0,
             "value": {
-                "color": "#ff00ff",
+                "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
                 "visible": false
             }
@@ -284,10 +284,10 @@
             "parentUid": 21,
             "uid": 0,
             "value": {
-                "color": "#ffff00",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 1380
+                    "y": 0
                 },
                 "visible": false
             }
@@ -297,12 +297,12 @@
             "parentUid": 21,
             "uid": 1,
             "value": {
-                "color": "#ff0000",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -394,7 +394,7 @@
                 "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
-                    "y": 800
+                    "y": 0
                 },
                 "visible": false
             }
@@ -404,12 +404,12 @@
             "parentUid": 22,
             "uid": 1,
             "value": {
-                "color": "#00ff00",
+                "color": "#ff0000",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
@@ -546,10 +546,10 @@
             "parentUid": 23,
             "uid": 0,
             "value": {
-                "color": "#00ff00",
+                "color": "#0000ff",
                 "lutParams": {
                     "x": 0,
-                    "y": 491
+                    "y": 0
                 },
                 "visible": false
             }
@@ -562,9 +562,9 @@
                 "color": "#0000ff",
                 "lutParams": {
                     "x": 0,
-                    "y": 1
+                    "y": 0
                 },
-                "visible": false
+                "visible": true
             }
         },
         {
