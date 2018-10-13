@@ -21,8 +21,6 @@ FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
     
     tagged_img_list=[ch1_img, ch2_img]
-    print(str(ch1_img))
-    print(str(ch2_img))
     print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
     print('Filter settings: ' + str(ovl_settings))
     
@@ -89,7 +87,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     return ovl_img, ch1_img, ch2_img,  output_path  
 
 
-
 def read_params(filters=FILTERS):
     
     out_dict = {}
@@ -101,7 +98,7 @@ def read_params(filters=FILTERS):
         out_dict['Path']=os.path.dirname(a3.inputs['File Path'].path)
 
     out_dict['ChA Image']=VividImage(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChA DataBase'])
-    out_dict['ChB Image']=VividImage(a3.inputs['ChB Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChB DataBase'])
+    out_dict['ChB Image']=VividImage(a3.inputs['ChB Image'].image, a3.inputs['ChB Image'].metadata ,a3.inputs['ChB DataBase'])
     
     out_dict['to_text']=a3.inputs['Save to xlsx/text']
     out_dict['remove_filtered']=a3.inputs['Keep/Remove filtered objects']
@@ -211,7 +208,7 @@ def module_main(ctx):
         #Read Parameters
         print('Reading input parameters!')
         params = read_params()
-        
+
         output=colocalize(params['ChA Image'],
                    params['ChB Image'],
                    params['ChA'],

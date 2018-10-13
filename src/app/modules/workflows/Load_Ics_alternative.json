@@ -6,20 +6,20 @@
             "name": "Input Path",
             "order": 0,
             "parentUid": -1,
-            "uid": 0
+            "uid": 6
         },
         {
             "category": "parameter",
-            "parentUid": 0,
+            "parentUid": 6,
             "uid": 0,
             "value": ""
         },
         {
             "category": "output",
-            "parentUid": 0,
+            "parentUid": 6,
             "uid": 0,
             "value": {
-                "color": "#ff0000",
+                "color": "#0000ff",
                 "lutParams": {
                     "x": 0,
                     "y": 1
@@ -33,18 +33,201 @@
             "name": "Output Path",
             "order": 3,
             "parentUid": -1,
-            "uid": 1
+            "uid": 7
         },
         {
             "category": "parameter",
-            "parentUid": 1,
+            "parentUid": 7,
             "uid": 0,
             "value": ""
         },
         {
             "category": "output",
-            "parentUid": 1,
+            "parentUid": 7,
             "uid": 0,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "native://ics source",
+            "name": "Load Channels",
+            "order": 6,
+            "parentUid": -1,
+            "uid": 8
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 6,
+                "uid": 0
+            },
+            "parentUid": 8,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 8,
+            "uid": 1,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 8,
+            "uid": 2,
+            "value": 1
+        },
+        {
+            "category": "output",
+            "parentUid": 8,
+            "uid": 0,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 8,
+            "uid": 1,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "alternative_ics/module_Threshold.py",
+            "name": "Channel A",
+            "order": 12,
+            "parentUid": -1,
+            "uid": 9
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 8,
+                "uid": 0
+            },
+            "parentUid": 9,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 1,
+            "value": {
+                "first": 7,
+                "second": 11
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 2,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 3,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 9,
+            "uid": 0,
+            "value": {
+                "color": "#ffff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 9,
+            "uid": 1,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "alternative_ics/module_Threshold.py",
+            "name": "Channel B",
+            "order": 19,
+            "parentUid": -1,
+            "uid": 10
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 8,
+                "uid": 1
+            },
+            "parentUid": 10,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 10,
+            "uid": 1,
+            "value": {
+                "first": 7,
+                "second": 11
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 10,
+            "uid": 2,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 10,
+            "uid": 3,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 10,
+            "uid": 0,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 10,
+            "uid": 1,
             "value": {
                 "color": "#00ff00",
                 "lutParams": {
@@ -56,284 +239,11 @@
         },
         {
             "category": "module",
-            "module": "alternative_tiff/module_Source.py",
-            "name": "Load Channels",
-            "order": 6,
-            "parentUid": -1,
-            "uid": 3
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 0,
-                "uid": 0
-            },
-            "parentUid": 3,
-            "uid": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 3,
-            "uid": 1,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 3,
-            "uid": 2,
-            "value": 1
-        },
-        {
-            "category": "output",
-            "parentUid": 3,
-            "uid": 0,
-            "value": {
-                "color": "#00ffff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 3,
-            "uid": 1,
-            "value": {
-                "color": "#ff0000",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
-            "module": "alternative_tiff/module_Threshold.py",
-            "name": "Channel A",
-            "order": 12,
-            "parentUid": -1,
-            "uid": 4
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 3,
-                "uid": 0
-            },
-            "parentUid": 4,
-            "uid": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 4,
-            "uid": 1,
-            "value": {
-                "first": -1,
-                "second": -1
-            }
-        },
-        {
-            "category": "parameter",
-            "parentUid": 4,
-            "uid": 2,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 4,
-            "uid": 3,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 4,
-            "uid": 0,
-            "value": {
-                "color": "#ff0000",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
-            "module": "alternative_tiff/module_Threshold.py",
-            "name": "Channel B",
-            "order": 18,
-            "parentUid": -1,
-            "uid": 9
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 3,
-                "uid": 1
-            },
-            "parentUid": 9,
-            "uid": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 9,
-            "uid": 1,
-            "value": {
-                "first": -1,
-                "second": -1
-            }
-        },
-        {
-            "category": "parameter",
-            "parentUid": 9,
-            "uid": 2,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 9,
-            "uid": 3,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 9,
-            "uid": 0,
-            "value": {
-                "color": "#ffff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
             "module": "alternative_tiff/module_Analyze.py",
             "name": "Channel A",
-            "order": 24,
+            "order": 26,
             "parentUid": -1,
-            "uid": 13
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 3,
-                "uid": 0
-            },
-            "parentUid": 13,
-            "uid": 0
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 4,
-                "uid": 0
-            },
-            "parentUid": 13,
-            "uid": 1
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 2,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 3,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 4,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 5,
-            "value": null
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 6,
-            "value": false
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 7,
-            "value": false
-        },
-        {
-            "category": "parameter",
-            "parentUid": 13,
-            "uid": 8,
-            "value": false
-        },
-        {
-            "category": "output",
-            "parentUid": 13,
-            "uid": 0,
-            "value": {
-                "color": "#00ffff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 13,
-            "uid": 1,
-            "value": {
-                "color": "#ff00ff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 13,
-            "uid": 2,
-            "value": {
-                "color": "#ffff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "module",
-            "module": "alternative_tiff/module_Analyze.py",
-            "name": "Channel B",
-            "order": 37,
-            "parentUid": -1,
-            "uid": 14
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 3,
-                "uid": 1
-            },
-            "parentUid": 14,
-            "uid": 0
+            "uid": 18
         },
         {
             "category": "input",
@@ -341,55 +251,184 @@
                 "parentUid": 9,
                 "uid": 0
             },
-            "parentUid": 14,
+            "parentUid": 18,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 9,
+                "uid": 1
+            },
+            "parentUid": 18,
             "uid": 1
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 2,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 3,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 4,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 5,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 6,
             "value": false
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 7,
             "value": false
         },
         {
             "category": "parameter",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 8,
             "value": false
         },
         {
             "category": "output",
-            "parentUid": 14,
+            "parentUid": 18,
             "uid": 0,
+            "value": {
+                "color": "#0000ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 18,
+            "uid": 1,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 18,
+            "uid": 2,
+            "value": {
+                "color": "#ff00ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "alternative_tiff/module_Analyze.py",
+            "name": "Channel B",
+            "order": 39,
+            "parentUid": -1,
+            "uid": 19
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 10,
+                "uid": 0
+            },
+            "parentUid": 19,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 10,
+                "uid": 1
+            },
+            "parentUid": 19,
+            "uid": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 2,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 3,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 4,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 5,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 6,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 7,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 19,
+            "uid": 8,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 19,
+            "uid": 0,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 19,
+            "uid": 1,
             "value": {
                 "color": "#ff00ff",
                 "lutParams": {
@@ -401,23 +440,10 @@
         },
         {
             "category": "output",
-            "parentUid": 14,
-            "uid": 1,
-            "value": {
-                "color": "#ffff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 14,
+            "parentUid": 19,
             "uid": 2,
             "value": {
-                "color": "#ff0000",
+                "color": "#ffff00",
                 "lutParams": {
                     "x": 0,
                     "y": 1
@@ -429,122 +455,148 @@
             "category": "module",
             "module": "alternative_tiff/module_Colocalize.py",
             "name": "Colocalize A/B",
-            "order": 50,
+            "order": 52,
             "parentUid": -1,
-            "uid": 16
+            "uid": 20
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 0,
+                "parentUid": 6,
                 "uid": 0
             },
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 0
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 1,
+                "parentUid": 7,
                 "uid": 0
             },
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 1
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 13,
+                "parentUid": 18,
                 "uid": 0
             },
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 2
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 13,
+                "parentUid": 18,
                 "uid": 2
             },
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 3
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 14,
+                "parentUid": 19,
                 "uid": 0
             },
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 4
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 14,
+                "parentUid": 19,
                 "uid": 2
             },
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 5
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 6,
-            "value": 1
+            "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 7,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 16,
-            "uid": 8,
             "value": 1
         },
         {
             "category": "parameter",
-            "parentUid": 16,
-            "uid": 9,
+            "parentUid": 20,
+            "uid": 8,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
+            "uid": 9,
+            "value": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 20,
             "uid": 10,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 11,
-            "value": 0
+            "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 12,
             "value": false
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 13,
             "value": false
         },
         {
             "category": "parameter",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 14,
             "value": false
         },
         {
             "category": "output",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 0,
+            "value": {
+                "color": "#ff00ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 20,
+            "uid": 1,
+            "value": {
+                "color": "#ffff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 20,
+            "uid": 2,
             "value": {
                 "color": "#ff0000",
                 "lutParams": {
@@ -556,36 +608,10 @@
         },
         {
             "category": "output",
-            "parentUid": 16,
-            "uid": 1,
-            "value": {
-                "color": "#00ff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 16,
-            "uid": 2,
-            "value": {
-                "color": "#0000ff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 16,
+            "parentUid": 20,
             "uid": 3,
             "value": {
-                "color": "#00ffff",
+                "color": "#00ff00",
                 "lutParams": {
                     "x": 0,
                     "y": 1
@@ -596,37 +622,10 @@
         {
             "category": "module",
             "module": "alternative_tiff/module_Results.py",
-            "name": "Results",
-            "order": 70,
+            "name": "Results ",
+            "order": 72,
             "parentUid": -1,
-            "uid": 17
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 3,
-                "uid": 0
-            },
-            "parentUid": 17,
-            "uid": 0
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 3,
-                "uid": 1
-            },
-            "parentUid": 17,
-            "uid": 1
-        },
-        {
-            "category": "input",
-            "connection": {
-                "parentUid": 4,
-                "uid": 0
-            },
-            "parentUid": 17,
-            "uid": 2
+            "uid": 21
         },
         {
             "category": "input",
@@ -634,39 +633,66 @@
                 "parentUid": 9,
                 "uid": 0
             },
-            "parentUid": 17,
+            "parentUid": 21,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 10,
+                "uid": 0
+            },
+            "parentUid": 21,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 9,
+                "uid": 1
+            },
+            "parentUid": 21,
+            "uid": 2
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 10,
+                "uid": 1
+            },
+            "parentUid": 21,
             "uid": 3
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 13,
+                "parentUid": 18,
                 "uid": 1
             },
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 4
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 14,
+                "parentUid": 19,
                 "uid": 1
             },
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 5
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 16,
+                "parentUid": 20,
                 "uid": 1
             },
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 6
         },
         {
             "category": "output",
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 0,
             "value": {
                 "color": "#00ff00",
@@ -679,7 +705,7 @@
         },
         {
             "category": "output",
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 1,
             "value": {
                 "color": "#ff0000",
@@ -692,7 +718,7 @@
         },
         {
             "category": "output",
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 2,
             "value": {
                 "color": "#00ff00",
@@ -705,7 +731,7 @@
         },
         {
             "category": "output",
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 3,
             "value": {
                 "color": "#ff0000",
@@ -718,34 +744,8 @@
         },
         {
             "category": "output",
-            "parentUid": 17,
+            "parentUid": 21,
             "uid": 4,
-            "value": {
-                "color": "#00ff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 0
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 17,
-            "uid": 5,
-            "value": {
-                "color": "#ff0000",
-                "lutParams": {
-                    "x": 0,
-                    "y": 0
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 17,
-            "uid": 6,
             "value": {
                 "color": "#0000ff",
                 "lutParams": {
@@ -756,5 +756,5 @@
             }
         }
     ],
-    "uidCounter": 18
+    "uidCounter": 22
 }
