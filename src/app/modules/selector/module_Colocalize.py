@@ -5,7 +5,7 @@ import time
 import a3dc_module_interface as a3
 from modules.packages.a3dc.interface import colocalization, save_data, save_image#, apply_filter
 #from modules.packages.a3dc.core import filter_database
-from modules.packages.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
+from modules.packages.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal, rename_duplicates
 from modules.packages.a3dc.utils import VividImage
 
 
@@ -21,6 +21,14 @@ FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
 def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
     
     tagged_img_list=[ch1_img, ch2_img]
+    
+    #Gennerate list of names without duplicates and change 'Name' field in image metadata
+    name_list = rename_duplicates([x.metadata['Name'] for x in tagged_img_list])
+    
+    for idx, value in enumerate(name_list):
+        tagged_img_list[idx].metadata['Name']=name_list[idx]
+        
+        
     print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
     print('Filter settings: ' + str(ovl_settings))
     
