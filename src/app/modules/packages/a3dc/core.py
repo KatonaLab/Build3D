@@ -11,11 +11,11 @@ from .utils import reorder_list, VividImage
 	'''
 def overlap_image(array_list):
 
-    # Create Overlapping Image
-    output_array = array_list[0]
+    # Create Overlapping ImagE
+    output_array = array_list[0]> 0
     for i in range(1, len(array_list)):
-        output_array = np.multiply(output_array, array_list[i])
-
+        output_array = np.multiply(output_array, array_list[i]>0)
+        
     return output_array
 
 
@@ -37,7 +37,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     # Create Overlapping Image
     array_list=[x.get_3d_array() for x in image_list]
     ovl_array = overlap_image(array_list)
-  
+
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
     metadata['Name']=str.join('_', name_list)
@@ -325,13 +325,15 @@ def filter_database(dictionary, filter_dict, overwrite=True):
 def remove_filtered(tagged_img, database):
 
     change_dict={}
+    print('dsssssssssss0',len(database['filter']))
+
 
     if 'filter' in database.keys():
 
         for i in range(len(database['filter'])):#database should have a label key!!!
             if database['filter'][i]==False:
                 change_dict[int(database['tag'][i])]=0
-    
+                
         itk_img = tagged_img.to_itk()
 
         sitk_filter = sitk.ChangeLabelImageFilter()
@@ -345,10 +347,13 @@ def remove_filtered(tagged_img, database):
     
         output_database = df.to_dict(orient='list')
         
+        print('dsssssssssss1',len(database['filter']))
+        
         return output_image , output_database
        
         
     else:
+        print('dsssssssssss2',len(database['filter']))
         return tagged_img, database
     
     

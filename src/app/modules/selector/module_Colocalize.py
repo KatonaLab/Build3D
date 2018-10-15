@@ -3,7 +3,7 @@ import math
 import sys
 import time
 import a3dc_module_interface as a3
-from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
+from modules.packages.a3dc.interface import colocalization, save_data, save_image#, apply_filter
 #from modules.packages.a3dc.core import filter_database
 from modules.packages.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal
 from modules.packages.a3dc.utils import VividImage
@@ -30,8 +30,8 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Run filtering steps
     #ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
     #ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
-    ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
-    ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
+    #ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
+    #ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
     
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
@@ -83,7 +83,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     
     #Create outputpath ox data
     output_path=os.path.join(outputPath, file_name+extension)
-    
+   
     return ovl_img, ch1_img, ch2_img,  output_path  
 
 
