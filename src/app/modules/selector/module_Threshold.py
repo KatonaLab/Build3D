@@ -55,7 +55,7 @@ def module_main(ctx):
             kwargs={'lower':0, 'upper':a3.inputs['Manual threshold value']}
         elif method=='None':
             method='Manual'
-            kwargs={'lower':0, 'upper':1}
+            kwargs={'lower':0, 'upper':0}
         else:
             kwargs={}
             if a3.inputs['Slice/Stack histogram']:
