@@ -34,7 +34,6 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     #Create list of names
     name_list = [x.metadata['Name'] for x in image_list] 
     
-    
     # Create Overlapping Image
     array_list=[x.get_3d_array() for x in image_list]
     ovl_array = overlap_image(array_list)
