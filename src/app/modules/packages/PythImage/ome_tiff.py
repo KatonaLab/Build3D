@@ -15,7 +15,6 @@ from . import utils
 from itertools import product
 #from ..RoiClass import Roi
 from .roi import shapes
-
 import warnings
 
 
@@ -31,7 +30,7 @@ def load_image(path):
     of unit length are also marked. Note that order of axis will be from the slowest to the fastest 
     changing as returned by TiffFile.
     '''
-    print('sadasd')
+
     #Ignore some tiffile warnings that always occur ??Bug??
     warnings.filterwarnings("ignore", message="ome-xml: index out of range")
     warnings.filterwarnings("ignore", message="ome-xml: not well-formed")

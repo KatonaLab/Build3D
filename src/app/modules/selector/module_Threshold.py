@@ -5,13 +5,13 @@ from modules.packages.a3dc.interface import threshold
 from modules.packages.a3dc.utils import SEPARATOR, error
 from modules.packages.a3dc.utils import VividImage
 
-METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu']
+METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu','None']
 
 def module_threshold(image, method="Otsu", kwargs={}):
 
     #Threshold image
     output, logText = threshold(image, method, **kwargs)
-    print('Threshold value(s): ' + str(logText.split('\n')[-2].split(':')[-1]))
+    print('Threshold value(s): ' + str(logText.split('\n')[-2].split(':')[-1]).replace('}',''))
 
     return output
 
@@ -49,13 +49,13 @@ def module_main(ctx):
         img =VividImage.from_multidimimage(a3.inputs['Input Image'])
         print('Thresholding: '+img.metadata['Name'])
         
-        #Get method and mode
+        #Get method and mode. Get kwargs if method is manual
         method=METHODS[a3.inputs['Method'][-1]]
-        print('Method: ' + method)
-        
-        #Get kwargs if method is manual
         if method=='Manual':
             kwargs={'lower':0, 'upper':a3.inputs['Manual threshold value']}
+        elif method=='None':
+            method='Manual'
+            kwargs={'lower':0, 'upper':1}
         else:
             kwargs={}
             if a3.inputs['Slice/Stack histogram']:
@@ -63,7 +63,9 @@ def module_main(ctx):
             else:
                 kwargs['mode']='Slice'
             print('Mode: ' +kwargs['mode'])
-            
+        
+        print('Method: ' + method)
+        
         #Run thresholding            
         output_img=module_threshold(img, method,kwargs)
         
