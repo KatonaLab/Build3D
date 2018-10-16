@@ -282,7 +282,7 @@ def save_image(image_list, path, file_name):
     logText += '\t' + str([x.metadata['Name'] for x in image_list])
     logText += '\n\tPath: '+str(path)
     logText += '\n\tFile Name: '+str(file_name)
-    
+     
     #Save image
     core.save_image(image_list, path, file_name) 
 

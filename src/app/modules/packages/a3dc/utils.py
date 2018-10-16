@@ -73,7 +73,7 @@ class VividImage(PythImage):
             flag=True
             
         return flag
-    ################
+
     def get_dimension(self, index, dimension='C'):
 
         #Get channel from image. 

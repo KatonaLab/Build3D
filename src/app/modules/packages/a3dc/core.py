@@ -458,7 +458,11 @@ def save_image(img_list, path, file_name):
 
     #Combine images
     for idx, img in  enumerate(img_list):
-
+        
+        #Remove 'Path' key
+        if 'Path' in img.metadata.keys():
+            del img.metadata['Path']
+            
         if idx==0:
             output=copy.deepcopy(img)
         else:

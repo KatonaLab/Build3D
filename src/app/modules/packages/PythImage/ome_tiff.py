@@ -43,10 +43,10 @@ def load_image(path):
       
         #Load image into nd array
         images = tif.asarray()
-        
+        print(tif[0].tags['image_description'].value)
         #Load metadata
         ome_metadata=utils.xml2dict(tif[0].tags['image_description'].value, sanitize=True, prefix=None)
-
+    
     return images, ome_metadata
 
 
@@ -70,12 +70,16 @@ def convert_metadata(metadata_dict):
 
   
     if isinstance(pixels_dict['Channel'], list): 
-        metadata_dict_out['SamplesPerPixel']=[dic['SamplesPerPixel']  for dic in pixels_dict['Channel'] if 'SamplesPerPixel' in dic.keys()]
-        
-        #samples_list=[dic['SamplesPerPixel']  for dic in pixels_dict['Channel'] if 'SamplesPerPixel' in dic.keys()]
+        metadata_dict_out['SamplesPerPixel']=[1 for n in range(len(pixels_dict['Channel']))]
+        for dic in pixels_dict['Channel'] :
+            if 'SamplesPerPixel' in dic.keys():
+                metadata_dict_out['SamplesPerPixel']=dic['SamplesPerPixel']
+
         name_list=[dic['Name'] if 'Name' in dic.keys() else 'Ch'+str(index+1) for index, dic in enumerate(pixels_dict['Channel'])]
         metadata_dict_out['Name']=[]
+
         for idx, name in enumerate(name_list):
+
             if metadata_dict_out['SamplesPerPixel'][idx]==1:
                 metadata_dict_out['Name'].append(name)
             else: 
@@ -83,7 +87,10 @@ def convert_metadata(metadata_dict):
                    metadata_dict_out['Name'].append(name+'_S'+str(n))
                 
     elif isinstance(pixels_dict['Channel'], dict):
-        metadata_dict_out['SamplesPerPixel']=pixels_dict['Channel']['SamplesPerPixel']
+        if 'SamplesPerPixel' in pixels_dict['Channel']:
+            metadata_dict_out['SamplesPerPixel']=pixels_dict['Channel']['SamplesPerPixel']
+        else:
+            metadata_dict_out['SamplesPerPixel']=1
        
         if 'Name' in pixels_dict['Channel'].keys():
             name=pixels_dict['Channel']['Name']
@@ -203,7 +210,7 @@ def save_image(image, metadata, directory, file_name):
     '''
     Save Image. Metadata not saved currently!!
     ''' 
-    
+    print(metadata_to_ome(metadata, file_name))
     if metadata["DimensionOrder"]=='XYZCT':
         
         with TiffWriter(os.path.join(directory, file_name)) as tif:

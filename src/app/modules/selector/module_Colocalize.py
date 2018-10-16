@@ -91,7 +91,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     
     #Create outputpath ox data
     output_path=os.path.join(outputPath, file_name+extension)
-   
+
     return ovl_img, ch1_img, ch2_img,  output_path  
 
 
