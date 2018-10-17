@@ -530,6 +530,20 @@ def rename_duplicates(string_list):
     
     return output
 
+
+def get_next_filename(output_path, file_name):
+    
+    basename, extension=os.path.splitext(file_name)
+    
+    #If filename exists generate a neme that is not used
+    i=1
+    final_basename=basename
+    while os.path.exists(os.path.join(output_path, final_basename+extension)):
+         final_basename=basename+'_'+str('{:03d}'.format(i))
+         i += 1
+
+    return final_basename+extension   
+        
 #Class for error handling
 class VividException(Exception):
     def __init__(self, message, errors):

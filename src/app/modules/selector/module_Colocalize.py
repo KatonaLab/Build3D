@@ -3,9 +3,9 @@ import math
 import sys
 import time
 import a3dc_module_interface as a3
-from modules.packages.a3dc.interface import colocalization, save_data, save_image#, apply_filter
+from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
 #from modules.packages.a3dc.core import filter_database
-from modules.packages.a3dc.utils import quote, SEPARATOR, error, warning, value_to_key, dictinary_equal, rename_duplicates
+from modules.packages.a3dc.utils import quote, SEPARATOR, get_next_filename, error, warning, value_to_key, dictinary_equal, rename_duplicates
 from modules.packages.a3dc.utils import VividImage
 
 
@@ -38,18 +38,18 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Run filtering steps
     #ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
     #ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
-    #ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
-    #ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
+    ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
+    ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
     
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
     
     
     #Set path and filename
-    outputPath=os.path.join(path, 'Output')
-    if not os.path.exists(outputPath):
-        os.makedirs(outputPath)            
-    
+    output_path=os.path.join(path, 'Output')
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)            
+        
     #Generate output filename
     filename_1=os.path.basename(ch1_img.metadata['Path'])
     filename_2=os.path.basename(ch2_img.metadata['Path'])
@@ -59,10 +59,10 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     else:
         basename=os.path.splitext(filename_1)[0]
         
-    #Save databases
+    #Save data and give output path
     print('Saving object dataBases!')
-    file_name=basename+'_'+ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
-    
+    data_basename=basename+'_'+ch1_img.metadata['Name']+'_'+ch2_img.metadata['Name']
+
     #Get extension
     if to_text==True:
         extension=".txt"    
@@ -70,29 +70,24 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
         extension=".xlsx"
     
     #If filename exists generate a neme that is not used
-    i=1
-    final_name=file_name
-    while os.path.exists(os.path.join(outputPath, final_name+extension)):
-        final_name=file_name+'_'+str('{:03d}'.format(i))
-        i += 1
-    if i!=1:
-        file_name=final_name
-        warning('Warning: Filename already exists!! Data will be saved to '+file_name+extension)
+    file_name=get_next_filename(output_path, data_basename+extension)
 
-    #Save data and give output path
-    save_data([ch1_img, ch2_img ,ovl_img], path=outputPath, file_name=file_name, to_text=to_text)
+    #If filename exists issue warning
+    if file_name!=data_basename+extension:
+        warning('Warning: Filename already exists!! Data will be saved to '+file_name)
+
+    #Save to file
+    save_data([ch1_img, ch2_img ,ovl_img], path=output_path, file_name=os.path.splitext(file_name)[0], to_text=to_text)
+    
     
     #Save images
     print('Saving output images!')
     image_list=[ch1_img, ch2_img, ovl_img]
-    name_img = basename+'{}_{}.ome.tiff'.format(ch1_img.metadata['Name'],ch2_img.metadata['Name'])
+    name_img = basename+'_{}_{}.ome.tiff'.format(ch1_img.metadata['Name'],ch2_img.metadata['Name'])
     
-    save_image(image_list, outputPath, name_img)
+    save_image(image_list, output_path, name_img)
     
-    #Create outputpath ox data
-    output_path=os.path.join(outputPath, file_name+extension)
-
-    return ovl_img, ch1_img, ch2_img,  output_path  
+    return ovl_img, ch1_img, ch2_img,  os.path.join(output_path, file_name)  
 
 
 def read_params(filters=FILTERS):
@@ -176,6 +171,7 @@ def read_params(filters=FILTERS):
         unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
         ch1_unit={key:out_dict['ChA Image'].metadata[key] for key in unit_list if key in out_dict['ChA Image'].metadata.keys()}
         ch2_unit={key:out_dict['ChB Image'].metadata[key] for key in unit_list if key in out_dict['ChB Image'].metadata.keys()}
+        
         #Add defaul unit if not available
         for key in unit_list:
             if key not in ch1_unit:
@@ -184,6 +180,7 @@ def read_params(filters=FILTERS):
             if key not in ch1_unit:
                 ch2_unit[key]='um'
                 warning('Channel 2 '+key+' unavailable! The default unit um will be used!')
+        
         #Check if the two channels have the same unit dictionary
         if not dictinary_equal(ch1_unit, ch2_unit):
             raise Exception('Two channels have to have the same unit metadata! Channel 1: {}  and Channel 2: {}'.format(ch1_unit, ch2_unit))
