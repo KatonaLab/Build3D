@@ -23,7 +23,8 @@ def load(path='C:\\Users\\pongor.csaba\\Desktop\\aaaaaaaaaaaaaaaa.ome.tif'):
 if __name__ == "__main__":
    
 
-    img=load('C:\\Users\\pongor.csaba\\Desktop\\TestImages\\1024_64_40_04_16bit.ome.tif')
+    img=load('C:/Users/pongor.csaba/Desktop/TestImages/Output/icstestProbe_Ex_647nm_Probe_Ex_488nm.ome.tiff')
+    #img=load('C:/Users/pongor.csaba/Desktop/TestImages/Output/ometest.omeCh1_Ch2.ome.tiff')
     #img=load('C:\\Users\\pongor.csaba\\Desktop\\aaaaaaaaaaaaaaaa.ome.tif')
     #img=load('C:\\Users\\pongor.csaba\\Desktop\\Output\\aaaaaaaaaaaaaaaa.ome_Ch0_Ch0_overlap.tiff.tiff')
     #img=load('C:\\Users\\pongor.csaba\\Desktop\\Output\\LALALALALALA.tif')
@@ -31,6 +32,6 @@ if __name__ == "__main__":
 
     
     img2=PythImage(copy.deepcopy(img.image), copy.deepcopy(img.metadata))
-    img2.save('C:\\Users\\pongor.csaba\\Desktop\\TestImages\\', 'LALALALALALA.tif')
+    img2.save('C:\\Users\\pongor.csaba\\Desktop\\TestImages\\', 'LALALALALALAnd.tif')
 
-    print(str(img2))
+    print(str(img))
