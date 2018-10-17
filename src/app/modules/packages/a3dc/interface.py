@@ -4,9 +4,6 @@ from . import segmentation
 from . import core
 from .utils import VividImage
 
-   
-        
-        
 def tagImage(image):
 
     '''
@@ -28,7 +25,6 @@ def tagImage(image):
     output_metadata=image.metadata
     image.metadata['Type']=str(output_array.dtype)
     
-
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
@@ -56,7 +52,6 @@ def threshold(image, method="Otsu", **kwargs):
     auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
     adaptive_list = ['Adaptive Mean', 'Adaptive Gaussian']
-
 
     # Creatre LogText and start logging
     logText = '\nThresholding: '+image.metadata['Name']
@@ -91,7 +86,6 @@ def threshold(image, method="Otsu", **kwargs):
     else:
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
-    
     output_metadta=image.metadata
     output_metadta['Type']=str(output_array.dtype)
  
@@ -155,7 +149,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     :param removeFiltered: If True objects that are filtered out are removed
     :return:
     '''
-    
+
     # Start timing
     tstart = time.clock()
 
@@ -164,7 +158,6 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     logText += '\n\tFilter settings: '+str(filter_dict).replace('{', ' ').replace('}', ' ')
     logText += '\n\t\tremoveFiltered=' + str(remove_filtered)
     logText += '\n\t\toverwrite=' + str(overwrite)
-
 
     if filter_dict==None:
         filter_dict={}
@@ -177,12 +170,10 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     if remove_filtered == True:
         output_image , output_database = core.remove_filtered(image, output_database)
             
-
     # Finish timing and add to logText
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
-    
-    
+        
     return VividImage(output_image, image.metadata, output_database) , logText
 
 
@@ -236,9 +227,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
     :param fileName: fileneme WITHOUT extension
     :return:
     '''
-    
 
-    
     # Start timing
     tstart = time.clock()
     
