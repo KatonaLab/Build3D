@@ -5,6 +5,7 @@ import numpy as np
 import SimpleITK as sitk
 from .utils import round_up_to_odd
 from .core import convert_array_type
+import warnings
 
 def tag_image(ndarray):
 
@@ -57,32 +58,53 @@ def threshold_auto(ndarray, method, mode='Slice'):
 
     #Create ITK FIlter object
     threshold_filter=threshold_dict[method]
-
+    
+    #Suppress SimpleITK warnings
+    threshold_filter.GlobalWarningDisplayOff()
+    
     if mode=="Stack" or len(ndarray.shape)<3 :
         # Create ITK image
         itk_image = sitk.GetImageFromArray(ndarray)
+        
         # Apply threshold, invert and convert to nd array
-        output=sitk.GetArrayFromImage(sitk.InvertIntensity(threshold_filter.Execute(itk_image), 1))
-        #Get threshold value
-        threshold_val = threshold_filter.GetThreshold()
+        try:
+            output=sitk.GetArrayFromImage(sitk.InvertIntensity(threshold_filter.Execute(itk_image), 1))
+            #Get threshold value
+            threshold_val = threshold_filter.GetThreshold() 
+        except RuntimeError:
+            threshold_val=0
+            output=ndarray>0
+            
+        
 
     elif mode=="Slice":
-        #Remember taht the first dimension axis is taken as 
-        threshold_val=[]
-      
-        output=np.zeros(ndarray.shape)
-        for i in range(ndarray.shape[2]):
-            # Create ITK image
-            itk_image = sitk.GetImageFromArray(ndarray[:,:,i])
-            # Apply threshold, invert and convert to nd array
-            segmented_img = sitk.GetArrayFromImage(sitk.InvertIntensity(threshold_filter.Execute(itk_image), 1))
-            #Append threshold value to threshodValue
-            threshold_val.append(threshold_filter.GetThreshold())
-            #Append slice to outputImage
-            output[:,:,i]=segmented_img
-        
-        output=np.asarray(output)
 
+        try:
+            #Remember taht the first dimension axis is taken as 
+            threshold_val=[]
+          
+            output=np.zeros(ndarray.shape)
+            for i in range(ndarray.shape[2]):
+                
+                # Create ITK image
+                itk_image = sitk.GetImageFromArray(ndarray[:,:,i])
+                
+                # Apply threshold, invert and convert to nd array
+                segmented_img = sitk.GetArrayFromImage(sitk.InvertIntensity(threshold_filter.Execute(itk_image), 1))
+                
+                #Append threshold value to threshodValue
+                threshold_val.append(threshold_filter.GetThreshold())
+                
+                #Append slice to outputImage
+                output[:,:,i]=segmented_img
+            
+            output=np.asarray(output)
+           
+        except RuntimeError:
+            threshold_val=[0]*ndarray.shape[2]
+            output=ndarray>0
+
+    
     else:
         raise LookupError("'"+str(mode)+"' is Not a valid mode!")
 
