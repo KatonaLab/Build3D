@@ -208,6 +208,14 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     
     # Analyze colocalization
     overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
+    
+    #Remove unused keys from overlapping database
+    key_list=['meanIntensity','maximumPixel']
+    
+    for key in list(overlappingImage.database.keys()):
+        for k in key_list:
+            if k==key.split(' ')[0]:
+                del overlappingImage.database[key]
 
     #Print number of objects to logText
     logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))
