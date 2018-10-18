@@ -2,7 +2,8 @@ import time
 import math
 import a3dc_module_interface as a3
 from modules.packages.a3dc.interface import threshold
-from modules.packages.a3dc.utils import SEPARATOR, error
+from modules.packages.a3dc.utils import error
+from modules.packages.a3dc.constants import SEPARATOR
 
 
 METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu','None']

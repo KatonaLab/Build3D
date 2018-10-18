@@ -3,8 +3,9 @@ import math
 import sys
 import a3dc_module_interface as a3
 from modules.packages.a3dc.interface import tagImage, analyze, apply_filter
-from modules.packages.a3dc.utils import SEPARATOR, error, value_to_key
+from modules.packages.a3dc.utils import error, value_to_key
 from modules.packages.a3dc.utils import VividImage
+from modules.packages.a3dc.constants import SEPARATOR
 
 
 FILTERS = ['volume', 'meanIntensity']

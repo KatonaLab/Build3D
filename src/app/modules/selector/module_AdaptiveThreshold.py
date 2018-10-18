@@ -1,7 +1,8 @@
 import time
 import a3dc_module_interface as a3
 from modules.packages.a3dc.segmentation import threshold_adaptive
-from modules.packages.a3dc.utils import SEPARATOR, error, VividImage
+from modules.packages.a3dc.utils import error, VividImage
+from modules.packages.a3dc.constants import SEPARATOR
 
 
 METHODS=['Mean', 'Gaussian']

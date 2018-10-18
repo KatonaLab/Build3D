@@ -5,6 +5,7 @@ import copy
 import os
 from . import segmentation
 from .utils import reorder_list, VividImage
+from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
 
 '''The CoExpressGui Class is the main class used in A3DC. It is used to create the GUI/s to read data, loads images and contains
 	the workflows to process images.
@@ -291,7 +292,7 @@ def filter_database(dictionary, filter_dict, overwrite=True):
 
     df = pd.DataFrame(dictionary)
     
-    if 'filter' in df.keys() and overwrite==True:
+    if 'filter' in df.keys() and overwrite==False:
         final_filter = df['filter'].values
     else:
         final_filter=[True for i in range(len(df))]
@@ -325,9 +326,7 @@ def filter_database(dictionary, filter_dict, overwrite=True):
 def remove_filtered(tagged_img, database):
 
     change_dict={}
-    print('dsssssssssss0',len(database['filter']))
-
-
+ 
     if 'filter' in database.keys():
 
         for i in range(len(database['filter'])):#database should have a label key!!!
@@ -347,13 +346,10 @@ def remove_filtered(tagged_img, database):
     
         output_database = df.to_dict(orient='list')
         
-        print('dsssssssssss1',len(database['filter']))
-        
         return output_image , output_database
        
         
     else:
-        print('dsssssssssss2',len(database['filter']))
         return tagged_img, database
     
     
@@ -369,7 +365,7 @@ def save_data(img_list, path, file_name, to_text=True):
 
     dataframe_list=[]
     key_order_list=[]
-    col_width_list=[]
+
                 
     dict_list=[x.database for x in img_list]
     name_list = [x.metadata['Name'] for x in img_list]
@@ -384,7 +380,6 @@ def save_data(img_list, path, file_name, to_text=True):
         # Sort dictionary with numerical types first (tag, volume, voxelCount,  first) and all others after (centroid, center of mass, bounding box first)
         numeric_keys = []
         other_keys = []
-
         for key in list(dic.keys()):
 
             if str(df[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
@@ -400,15 +395,7 @@ def save_data(img_list, path, file_name, to_text=True):
         preset_order = ['centroid']
         other_keys=reorder_list(other_keys,preset_order)
         key_order_list.append(numeric_keys+other_keys)
-
-        # Measure the column widths based on header
-        col_width=0
-        for i in range(len(key_order_list)):
-            for j in range(len(key_order_list[i])):
-                w=len(key_order_list[i][j])
-                if w>col_width:
-                    col_width=w
-        col_width_list.append(col_width)
+        
 
     if to_text==False:
         # Create a Pandas Excel writer using XlsxWriter as the engine.
@@ -427,17 +414,45 @@ def save_data(img_list, path, file_name, to_text=True):
                 name=(str(name)[:30] + '_')
             
             dataframe_list[i].to_excel(writer, sheet_name=name, columns=key_order_list[i], header=True)
-
-            #Get workbook, worksheet and format
+            
+            #Get workbook, worksheet
             workbook = writer.book
-            format=workbook.add_format()
-            format.set_shrink('auto')
-            format.set_align('center')
-            format.set_text_wrap()
-
+            
             worksheet=writer.sheets[name]
-            worksheet.set_zoom(90)
-            worksheet.set_column(j, 1, col_width_list[i]*0.6, format)
+            worksheet.set_zoom(90)        
+        
+        
+            #Set column widths based on header
+            cell_format=workbook.add_format()
+            cell_format.set_shrink('auto')
+            cell_format.set_align('center')
+            cell_format.set_align('vcenter')
+            cell_format.set_text_wrap()
+            cell_format.set_shrink()
+            
+            #Set format of the first column
+            worksheet.set_column(1, 1, 20, cell_format)            
+            #Set column format from the second onwards
+            for j in range(len(key_order_list[i])):
+                worksheet.set_column(j+1, j+1, len(key_order_list[i][j])*1.5, cell_format)  
+
+
+            #Add comments to excel cells
+            for j in range(len(key_order_list[i])):
+                
+                comment_string='N/A'
+                key=key_order_list[i][j]
+                
+                if key in SHAPE_DESCRIPTORS.keys():
+                    comment_string=SHAPE_DESCRIPTORS[key]
+                else:
+                    int_key=key.split(' ')[0]
+                    if int_key in INTENSITY_DESCRIPTORS.keys():
+                        comment_string=INTENSITY_DESCRIPTORS[int_key]
+                    if int_key in OTHER_DESCRIPTORS.keys():
+                        comment_string=OTHER_DESCRIPTORS[int_key]
+                        
+                worksheet.write_comment(0, j+1, comment_string, {'height': 70})
 
         # Close the Pandas Excel writer and save Excel file.
         writer.save()

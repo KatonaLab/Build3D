@@ -2,7 +2,8 @@ import os
 import sys
 import a3dc_module_interface as a3
 from modules.packages.a3dc.interface import  save_data
-from modules.packages.a3dc.utils import SEPARATOR, error, warning
+from modules.packages.a3dc.utils import error, warning
+from modules.packages.a3dc.constants import SEPARATOR
 
 
 CHFILTERS=['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']

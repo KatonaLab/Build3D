@@ -1,6 +1,7 @@
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.segmentation import threshold_auto
-from modules.a3dc_modules.a3dc.utils import SEPARATOR, error, VividImage
+from modules.a3dc_modules.a3dc.utils import error, VividImage
+from modules.packages.a3dc.constants import SEPARATOR
 import time
 
 

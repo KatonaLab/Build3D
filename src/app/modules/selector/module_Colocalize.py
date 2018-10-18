@@ -5,7 +5,8 @@ import time
 import a3dc_module_interface as a3
 from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
 #from modules.packages.a3dc.core import filter_database
-from modules.packages.a3dc.utils import quote, SEPARATOR, get_next_filename, error, warning, value_to_key, dictinary_equal, rename_duplicates
+from modules.packages.a3dc.utils import quote, get_next_filename, error, warning, value_to_key, dictinary_equal, rename_duplicates
+from modules.packages.a3dc.constants import SEPARATOR
 from modules.packages.a3dc.utils import VividImage
 
 
