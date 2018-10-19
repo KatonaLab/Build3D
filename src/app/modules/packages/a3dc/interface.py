@@ -2,7 +2,6 @@ import time
 import collections
 from . import segmentation
 from . import core
-from .utils import VividImage
 
 def tagImage(image):
 
@@ -29,7 +28,7 @@ def tagImage(image):
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
-    return VividImage(output_array, output_metadata), logText
+    return core.VividImage(output_array, output_metadata), logText
 
 
 def threshold(image, method="Otsu", **kwargs):
@@ -93,7 +92,7 @@ def threshold(image, method="Otsu", **kwargs):
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
     
-    return VividImage(output_array, image.metadata), logText
+    return core.VividImage(output_array, image.metadata), logText
 
 
 def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'meanIntensity']):
@@ -174,7 +173,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     tstop = time.clock()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
         
-    return VividImage(output_image, image.metadata, output_database) , logText
+    return core.VividImage(output_image, image.metadata, output_database) , logText
 
 
 def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=None,
@@ -208,14 +207,6 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     
     # Analyze colocalization
     overlappingImage, _ = core.colocalization_analysis(tagged_img_list, overlappingImage)
-    
-    #Remove unused keys from overlapping database
-    key_list=['meanIntensity','maximumPixel']
-    
-    for key in list(overlappingImage.database.keys()):
-        for k in key_list:
-            if k==key.split(' ')[0]:
-                del overlappingImage.database[key]
 
     #Print number of objects to logText
     logText += '\n\tNumber of Overlapping Objects: '+str(len(overlappingImage.database['tag']))

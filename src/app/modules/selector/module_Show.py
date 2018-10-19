@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 21 15:21:27 2018
-
-@author: pongor.csaba
-"""
 from pathlib import Path
 import a3dc_module_interface as a3
 from modules.a3dc_modules.a3dc.utils import  os_open

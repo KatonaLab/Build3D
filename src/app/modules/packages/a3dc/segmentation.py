@@ -3,8 +3,7 @@ from skimage.filters import threshold_local
 import cv2
 import numpy as np
 import SimpleITK as sitk
-from .utils import round_up_to_odd
-from .core import convert_array_type
+from .utils import round_up_to_odd, convert_array_type
 import warnings
 
 def tag_image(ndarray):

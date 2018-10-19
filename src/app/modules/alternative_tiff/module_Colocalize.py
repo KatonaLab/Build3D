@@ -6,7 +6,7 @@ import a3dc_module_interface as a3
 from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
 #from modules.packages.a3dc.core import filter_database
 from modules.packages.a3dc.utils import quote, error, warning, get_next_filename, value_to_key, dictinary_equal,  rename_duplicates
-from modules.packages.a3dc.utils import VividImage
+from modules.packages.a3dc.core import VividImage
 from modules.packages.a3dc.constants import SEPARATOR
 
 
@@ -79,7 +79,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
 
     #Save to file
     save_data([ch1_img, ch2_img ,ovl_img], path=output_path, file_name=os.path.splitext(file_name)[0], to_text=to_text)
-    
     
     #Save images
     print('Saving output images!')

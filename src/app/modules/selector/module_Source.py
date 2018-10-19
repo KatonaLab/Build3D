@@ -1,7 +1,7 @@
 import time
 import a3dc_module_interface as a3
 from modules.packages.a3dc.utils import error, print_line_by_line
-from modules.packages.a3dc.utils import VividImage
+from modules.packages.a3dc.core import VividImage
 from modules.packages.a3dc.constants import SEPARATOR
 
 def module_main(ctx):

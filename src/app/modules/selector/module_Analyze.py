@@ -2,9 +2,10 @@ import time
 import math
 import sys
 import a3dc_module_interface as a3
+from modules.packages.a3dc.core import  VividImage
 from modules.packages.a3dc.interface import tagImage, analyze, apply_filter
-from modules.packages.a3dc.utils import error, value_to_key, VividImage
-from modules.packages.a3dc.constants import SEPARATOR
+from modules.packages.a3dc.utils import error, value_to_key
+from modules.packages.a3dc.constants import SEPARATOR, INTENSITY_DESCRIPTORS
 
 FILTERS = ['volume', 'meanIntensity']
 TRANSLATE={'volume':'Volume', 'meanIntensity':'Mean intensity' }
@@ -16,14 +17,10 @@ def analyze_image(source, mask, settings, removeFiltered=False):
     print('Filter settings: '+str(settings))
     
     #Parameters to measure
-    measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder']
+    measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder', 'meanIntensity']
     
-    #TEMP###########TEMP##############TEMP#################TEMP
-    multi_img_keys = ['meanIntensity','medianIntensity', 'skewness', 'kurtosis', 'variance','maximumPixel',
-                           'maximumValue', 'minimumValue','minimumPixel','centerOfMass','standardDeviation',
-                           'cumulativeIntensity','getWeightedElongation','getWeightedFlatness','getWeightedPrincipalAxes',
-                           'getWeightedPrincipalMoments']
-    
+    #Rename multi image measurement keys
+    multi_img_keys = INTENSITY_DESCRIPTORS.keys()
     for key in settings:
         if key in multi_img_keys:
             settings[str(key)+' in '+str(source.metadata['Name'])] = settings[key]

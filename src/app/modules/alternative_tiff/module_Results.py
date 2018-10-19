@@ -1,6 +1,6 @@
 import a3dc_module_interface as a3
 from modules.packages.a3dc.utils import error
-from modules.packages.a3dc.utils import VividImage
+from modules.packages.a3dc.core import VividImage
  
 
 def module_main(ctx):

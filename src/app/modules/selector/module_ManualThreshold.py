@@ -3,7 +3,7 @@ from modules.packages.a3dc.segmentation import threshold_manual
 import numpy as np
 import time
 from modules.packages.a3dc.utils import error
-from modules.packages.a3dc.utils import VividImage
+from modules.packages.a3dc.core import VividImage
 from modules.packages.a3dc.constants import SEPARATOR
 
 
