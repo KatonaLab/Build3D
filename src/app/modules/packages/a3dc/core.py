@@ -369,7 +369,7 @@ def save_data(img_list, path, file_name, to_text=True):
             
             worksheet=writer.sheets[name]
             worksheet.set_zoom(90)        
-        
+            worksheet.freeze_panes(1, 0)
         
             #Set column widths based on header
             cell_format=workbook.add_format()
@@ -379,12 +379,22 @@ def save_data(img_list, path, file_name, to_text=True):
             cell_format.set_text_wrap()
             cell_format.set_shrink()
             
+
+            
+            
             #Set format of the first column
-            worksheet.set_column(1, 1, 20, cell_format)            
+            worksheet.set_column(1, 1, 20, cell_format) 
+            
             #Set column format from the second onwards
             for j in range(len(key_order_list[i])):
                 worksheet.set_column(j+1, j+1, len(key_order_list[i][j])*1.5, cell_format)  
-
+            
+            #Set formatt of the first row
+            row_format=workbook.add_format()
+            row_format.set_align('center')
+            row_format.set_align('vcenter')
+            row_format.set_bottom(1)
+            worksheet.set_row(0, 70, row_format)
 
             #Add comments to excel cells
             for j in range(len(key_order_list[i])):
@@ -401,7 +411,7 @@ def save_data(img_list, path, file_name, to_text=True):
                     if int_key in OTHER_DESCRIPTORS.keys():
                         comment_string=OTHER_DESCRIPTORS[int_key]
                         
-                worksheet.write_comment(0, j+1, comment_string, {'height': 70})
+                worksheet.write_comment(0, j+1, comment_string, {'height': 80, 'width':300, 'color': '#00ffffcc'})
 
         # Close the Pandas Excel writer and save Excel file.
         writer.save()

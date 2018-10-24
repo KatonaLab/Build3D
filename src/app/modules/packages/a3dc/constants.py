@@ -1,5 +1,5 @@
 
-SHAPE_DESCRIPTORS = {'volume': 'The size of the object in physical units. It is equal to the NumberOfPixels multiplied by the physical pixel size eg. um^3',
+SHAPE_DESCRIPTORS = {'volume': 'The size of the object in physical units. It is equal to the NumberOfPixels multiplied by the physical pixel size eg. um\u00B3',
                                  'voxelCount': 'The size of object in voxels (number of object voxels)',
                                  'centroid': 'The position of the center of the shape in physical coordinates (order:Z,Y,X). Calculated as the average of the pixel coordinates in the 3 dimensions. It is not constrained to be in the object, and thus can be outside if the object is not convex.',
                                  'ellipsoidDiameter': 'The diameter of the ellipsoid of the same size and the same ratio on all the axes than the label object. Measured in physical units.',
