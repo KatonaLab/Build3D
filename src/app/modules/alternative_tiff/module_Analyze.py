@@ -56,24 +56,16 @@ def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
 
     if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
         
-        #Check if physical size metadata is available  if any is missing raise Exeption
-        size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
-        missing_size=[s for s in size_list if s not in params['Source'].metadata.keys()]
-        if len(missing_size)!=0:
-            raise Exception('Missing :'+str(missing_size)+'! Unable to carry out analysis!')
-
         #Check if unit metadata is available, default Unit is um!!!!!!!!
-        unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
+        unit_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ','PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
+
         missing_unit=[u for u in unit_list if u not in params['Source'].metadata.keys()]
-        if len(missing_size)!=0:
-            print('Warning: DEFAULT value (um or micron) used for :'
-                 +str(missing_unit)+'!', file=sys.stderr)        
-        
-        #Set default Unit values if not in metadata
-        #Remember that if unit value is missing an exception is raised
-        for un in missing_unit:
-            params['Source'].metadata[un]='um'
-            params['Mask'].metadata[un]='um'
+        if len(missing_unit)!=0:
+            raise Exception('Image is missing the following unit :'+str(missing_unit))
+
+        missing_unit=[u for u in unit_list if u not in params['Mask'].metadata.keys()]
+        if len(missing_unit)!=0:
+            raise Exception('Mask Image is missing the following unit :'+str(missing_unit))
         
         print('Physical voxel volume is : '
               +str(params['Source'].metadata['PhysicalSizeX']*params['Source'].metadata['PhysicalSizeY']*params['Source'].metadata['PhysicalSizeZ'])

@@ -147,44 +147,19 @@ def read_params(filters=FILTERS):
         else:
             ovl_settings[key] = settings[key]
     
-    if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
-        #Get size and unit metadata and check if the two channels have the same 
-        #metadata and raise error if not available         
+    
+    if not a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
         
-        
-        #Create a dictionary of pixel sizes for the two cahnnels
-        size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
-        ch1_size={key:out_dict['ChA Image'].metadata[key] for key in size_list if key in out_dict['ChA Image'].metadata.keys()}
-        ch2_size={key:out_dict['ChB Image'].metadata[key] for key in size_list if key in out_dict['ChB Image'].metadata.keys()}
-        #Add defaul unit if not available
-        for key in size_list:
-            if key not in ch1_size:
-                ch1_size[key]=1.0
-                warning('Channel 1 '+key+' unavailable! The default value of 1.0 will be used!')
-            if key not in ch1_size:
-                ch2_size[key]=1.0
-                warning('Channel 2 '+key+' unavailable! The default value of 1.0 will be used!')
-        #Check if the two channels have the same unit dictionary
-        if not dictinary_equal(ch1_size,ch2_size): #or len(ch1_size.keys())!=3 or len(ch1_size.keys())!=3:
-            raise Exception('Two channels have to have the same size metadata! Channel 1: {}  and Channel 2: {}'.format(ch1_size, ch2_size))                
-                
-                
-        #Create a dictionary of units for the two cahnnels
-        unit_list=['PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
-        ch1_unit={key:out_dict['ChA Image'].metadata[key] for key in unit_list if key in out_dict['ChA Image'].metadata.keys()}
-        ch2_unit={key:out_dict['ChB Image'].metadata[key] for key in unit_list if key in out_dict['ChB Image'].metadata.keys()}
-        
-        #Add defaul unit if not available
-        for key in unit_list:
-            if key not in ch1_unit:
-                ch1_unit[key]='um'
-                warning('Channel 1 '+key+' unavailable! The default unit um will be used!')
-            if key not in ch1_unit:
-                ch2_unit[key]='um'
-                warning('Channel 2 '+key+' unavailable! The default unit um will be used!')
-        #Check if the two channels have the same unit dictionary
-        if not dictinary_equal(ch1_unit, ch2_unit):
-            raise Exception('Two channels have to have the same unit metadata! Channel 1: {}  and Channel 2: {}'.format(ch1_unit, ch2_unit))
+        #Check if unit metadata is available, default Unit is um!!!!!!!!
+        unit_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ','PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
+
+        missing_unit_A=[u for u in unit_list if u not in out_dict['ChA Image'].metadata.keys()]
+        if len(missing_unit_A)!=0:
+            raise Exception('ChA Image is missing the following unit :'+str(missing_unit_A))
+
+        missing_unit_B=[u for u in unit_list if u not in out_dict['ChB Image'].metadata.keys()]
+        if len(missing_unit_B)!=0:
+            raise Exception('ChB Image is missing the following unit :'+str(missing_unit_B))
                
         print('Physical voxel volume is : '
               +str(out_dict['ChA Image'].metadata['PhysicalSizeX']*out_dict['ChA Image'].metadata['PhysicalSizeY']*out_dict['ChA Image'].metadata['PhysicalSizeZ'])

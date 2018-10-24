@@ -55,6 +55,21 @@ class VividImage(PythImage):
              #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
              image=image.astype(metadata['Type'])
 
+        
+        #Check if physical size information available, if not set default values
+        size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
+        #Add defaul unit if not available
+        for key in size_list:
+            if key not in metadata.keys():
+                metadata[key]=1.0
+                
+        #Check if physical unit information available, if not set default values
+        unit_list=['PhysicalSizeXUnit', 'PhysicalSizeYUnit', 'PhysicalSizeZUnit']
+        #Add defaul unit if not available
+        for key in unit_list:
+            if key not in metadata.keys():
+                metadata[key]='um'
+ 
         #Call parent __init__
         super(VividImage, self).__init__(image, metadata)
         
