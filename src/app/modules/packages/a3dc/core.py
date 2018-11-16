@@ -379,9 +379,6 @@ def save_data(img_list, path, file_name, to_text=True):
             cell_format.set_text_wrap()
             cell_format.set_shrink()
             
-
-            
-            
             #Set format of the first column
             worksheet.set_column(1, 1, 20, cell_format) 
             

@@ -19,10 +19,8 @@ def module_main(ctx):
         base_dir = os.path.dirname(path)
         ext = os.path.splitext(path)[1]
         print('Input directory:', base_dir)   
-   
     else:
         error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' ! Path is not a file!", OSError('Path is not a file!'))
-  
 
     # Gett all the files with matching extensions
     file_list = [os.path.abspath(x) for x in glob(base_dir + '/*' + ext)]
@@ -33,7 +31,7 @@ def module_main(ctx):
 
     if len(file_list) == 0:
         raise Warning('path {} is empty'.format(base_dir))
-
+    
     index = ctx.run_id()
     if index < len(file_list) - 1:
         ctx.set_require_next_run(True)

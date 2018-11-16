@@ -179,7 +179,7 @@ def read_params(filters=FILTERS):
     
 
 def module_main(ctx):
-    
+
     try:   
         #Inizialization
         tstart = time.clock()
