@@ -2,14 +2,11 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import copy
-import os
 import sys
 from ast import literal_eval
-
 from . import segmentation
-from .utils import reorder_list, warning
+from .utils import  warning
 from modules.packages.PythImage.ImageClass import ImageClass as PythImage
-from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
 
 
 class VividImage(PythImage):
@@ -300,152 +297,8 @@ class VividImage(PythImage):
 
 
 ###############################################################################
-##############################IO Functio#######################################
-###############################################################################        
-
-def save_data(img_list, path, file_name, to_text=True):
-    '''
-    :param dict_list: Save dictionaries in inputdict_list
-    :param path: path where file is saved
-    :param to_text: if True data are saved to text
-    :param fileName: fileneme WITHOUT extension
-    :return:
-    '''
-
-    dataframe_list=[]
-    key_order_list=[]
-
-                
-    dict_list=[x.database for x in img_list]
-    name_list = [x.metadata['Name'] for x in img_list]
-
-    for dic in  dict_list:
-
-        # Convert to Pandas dataframe
-        df=pd.DataFrame(dic)
-        
-        dataframe_list.append(df)
-
-        # Sort dictionary with numerical types first (tag, volume, voxelCount,  first) and all others after (centroid, center of mass, bounding box first)
-        numeric_keys = []
-        other_keys = []
-        for key in list(dic.keys()):
-
-            if str(df[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
-                'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
-                numeric_keys.append(key)
-
-            else:
-                other_keys.append(key)
-
-        #Rearange keylist
-        preset_order=['tag', 'volume', 'voxelCount', 'filter']
-        numeric_keys=reorder_list(numeric_keys,preset_order)
-        preset_order = ['centroid']
-        other_keys=reorder_list(other_keys,preset_order)
-        key_order_list.append(numeric_keys+other_keys)
-        
-
-    if to_text==False:
-        # Create a Pandas Excel writer using XlsxWriter as the engine.
-        writer = pd.ExcelWriter(os.path.join(path, file_name+'.xlsx'), engine='xlsxwriter')
-        
-        for i in range(len(dataframe_list)):
-            
-            #If no names are given ore name_list is shorter generate worksheet name
-            if name_list==None or i>len(name_list):
-                name='Data_'+str(i)
-            else:
-               name =str(name_list[i]) 
-
-            # Convert the dataframe to an XlsxWriter Excel object. Crop worksheet name if too long
-            if len(name) > 30:
-                name=(str(name)[:30] + '_')
-            
-            dataframe_list[i].to_excel(writer, sheet_name=name, columns=key_order_list[i], header=True)
-            
-            #Get workbook, worksheet
-            workbook = writer.book
-            
-            worksheet=writer.sheets[name]
-            worksheet.set_zoom(90)        
-            worksheet.freeze_panes(1, 0)
-        
-            #Set column widths based on header
-            cell_format=workbook.add_format()
-            cell_format.set_shrink('auto')
-            cell_format.set_align('center')
-            cell_format.set_align('vcenter')
-            cell_format.set_text_wrap()
-            cell_format.set_shrink()
-            
-            #Set format of the first column
-            worksheet.set_column(1, 1, 20, cell_format) 
-            
-            #Set column format from the second onwards
-            for j in range(len(key_order_list[i])):
-                worksheet.set_column(j+1, j+1, len(key_order_list[i][j])*1.5, cell_format)  
-            
-            #Set formatt of the first row
-            row_format=workbook.add_format()
-            row_format.set_align('center')
-            row_format.set_align('vcenter')
-            row_format.set_bottom(1)
-            worksheet.set_row(0, 70, row_format)
-
-            #Add comments to excel cells
-            for j in range(len(key_order_list[i])):
-                
-                comment_string='N/A'
-                key=key_order_list[i][j]
-                
-                if key in SHAPE_DESCRIPTORS.keys():
-                    comment_string=SHAPE_DESCRIPTORS[key]
-                else:
-                    int_key=key.split(' ')[0]
-                    if int_key in INTENSITY_DESCRIPTORS.keys():
-                        comment_string=INTENSITY_DESCRIPTORS[int_key]
-                    if int_key in OTHER_DESCRIPTORS.keys():
-                        comment_string=OTHER_DESCRIPTORS[int_key]
-                        
-                worksheet.write_comment(0, j+1, comment_string, {'height': 80, 'width':300, 'color': '#00ffffcc'})
-
-        # Close the Pandas Excel writer and save Excel file.
-        writer.save()
-
-    elif to_text==True:
-
-        with open(os.path.join(path, file_name + '.txt'), 'w') as outputFile:
-
-            for i in range(len(dataframe_list)):
-                #if dataframe_list[i] != None:
-                outputFile.write('name= '+name_list[i]+'\n')
-                outputFile.write(dataframe_list[i].to_csv(sep='\t', columns=key_order_list[i], index=False, header=True))    
-    
-       
-def save_image(img_list, path, file_name):
-    '''
-    '''
-
-    #Combine images
-    for idx, img in  enumerate(img_list):
-        
-        #Remove 'Path' key
-        if 'Path' in img.metadata.keys():
-            del img.metadata['Path']
-            
-        if idx==0:
-            output=copy.deepcopy(img)
-        else:
-            output.append_to_dimension(img)
-    
-    #save image
-    output.save(path, file_name)
-
-###############################################################################
 ###############################Analysis########################################
 ###############################################################################
-    
 def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBorder', 'centroid', 'meanIntensity', 'maximumPixel']):
 
     #Convert tagged image to ITK image
@@ -459,39 +312,39 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
     itk_filter = sitk.LabelIntensityStatisticsImageFilter()
 
     shape_functions = {'volume': itk_filter.GetPhysicalSize,
-                                 'voxelCount': itk_filter.GetNumberOfPixels,
-                                 'centroid': itk_filter.GetCentroid,
-                                 'ellipsoidDiameter': itk_filter.GetEquivalentEllipsoidDiameter,
-                                 'boundingBox': itk_filter.GetBoundingBox,
-                                 'pixelsOnBorder': itk_filter.GetNumberOfPixelsOnBorder,
-                                 'elongation': itk_filter.GetElongation,
-                                 'equivalentSphericalRadius': itk_filter.GetEquivalentSphericalRadius,
-                                 'flatness': itk_filter.GetFlatness,
-                                 'principalAxes': itk_filter.GetPrincipalAxes,
-                                 'principalMoments': itk_filter.GetPrincipalMoments,
-                                 'roundness': itk_filter.GetRoundness,
-                                 'feretDiameter': itk_filter.GetFeretDiameter,
-                                 'perimeter': itk_filter.GetPerimeter,
-                                 'perimeterOnBorder': itk_filter.GetPerimeterOnBorder,
-                                 'perimeterOnBorderRatio': itk_filter.GetPerimeterOnBorderRatio,
-                                 'equivalentSphericalPerimeter': itk_filter.GetEquivalentSphericalPerimeter}
+                       'voxelCount': itk_filter.GetNumberOfPixels,
+                       'centroid': itk_filter.GetCentroid,
+                       'ellipsoidDiameter': itk_filter.GetEquivalentEllipsoidDiameter,
+                       'boundingBox': itk_filter.GetBoundingBox,
+                       'pixelsOnBorder': itk_filter.GetNumberOfPixelsOnBorder,
+                       'elongation': itk_filter.GetElongation,
+                       'equivalentSphericalRadius': itk_filter.GetEquivalentSphericalRadius,
+                       'flatness': itk_filter.GetFlatness,
+                       'principalAxes': itk_filter.GetPrincipalAxes,
+                       'principalMoments': itk_filter.GetPrincipalMoments,
+                       'roundness': itk_filter.GetRoundness,
+                       'feretDiameter': itk_filter.GetFeretDiameter,
+                       'perimeter': itk_filter.GetPerimeter,
+                       'perimeterOnBorder': itk_filter.GetPerimeterOnBorder,
+                       'perimeterOnBorderRatio': itk_filter.GetPerimeterOnBorderRatio,
+                       'equivalentSphericalPerimeter': itk_filter.GetEquivalentSphericalPerimeter}
 
     intensity_functions = {'meanIntensity': itk_filter.GetMean,
-                               'medianIntensity': itk_filter.GetMedian,
-                               'skewness': itk_filter.GetSkewness,
-                               'kurtosis': itk_filter.GetKurtosis,
-                               'variance': itk_filter.GetVariance,
-                               'maximumPixel': itk_filter.GetMaximumIndex,
-                               'maximumValue': itk_filter.GetMaximum,
-                               'minimumValue': itk_filter.GetMinimum,
-                               'minimumPixel': itk_filter.GetMaximumIndex,
-                               'centerOfMass': itk_filter.GetCenterOfGravity,
-                               'standardDeviation': itk_filter.GetStandardDeviation,
-                               'cumulativeIntensity': itk_filter.GetSum,
-                               'getWeightedElongation': itk_filter.GetWeightedElongation,
-                               'getWeightedFlatness': itk_filter.GetWeightedFlatness,
-                               'getWeightedPrincipalAxes': itk_filter.GetWeightedPrincipalAxes,
-                               'getWeightedPrincipalMoments': itk_filter.GetWeightedPrincipalMoments}
+                           'medianIntensity': itk_filter.GetMedian,
+                           'skewness': itk_filter.GetSkewness,
+                           'kurtosis': itk_filter.GetKurtosis,
+                           'variance': itk_filter.GetVariance,
+                           'maximumPixel': itk_filter.GetMaximumIndex,
+                           'maximumValue': itk_filter.GetMaximum,
+                           'minimumValue': itk_filter.GetMinimum,
+                           'minimumPixel': itk_filter.GetMaximumIndex,
+                           'centerOfMass': itk_filter.GetCenterOfGravity,
+                           'standardDeviation': itk_filter.GetStandardDeviation,
+                           'cumulativeIntensity': itk_filter.GetSum,
+                           'getWeightedElongation': itk_filter.GetWeightedElongation,
+                           'getWeightedFlatness': itk_filter.GetWeightedFlatness,
+                           'getWeightedPrincipalAxes': itk_filter.GetWeightedPrincipalAxes,
+                           'getWeightedPrincipalMoments': itk_filter.GetWeightedPrincipalMoments}
 
     
     #Sort measurement list and parametrize itk_filter
@@ -591,8 +444,8 @@ def filter_database(dictionary, filter_dict, overwrite=True):
         final_filter=[True for i in range(len(df))]
 
     # Only run filter if key has numerical value
-    typeList = ['int', 'float', 'bool', 'complex', 'int_', 'intc', 'intp', 'int8', 'int16', 'int32', 'int64'
-        , 'uint8', 'uint16', 'uint32', 'uint64', 'float_', 'float16', 'float32', 'float64', 'loat64', 'complex_',
+    typeList = ['int', 'float', 'bool', 'complex', 'int_', 'intc', 'intp', 'int8', 'int16', 'int32', 'int64',
+                'uint8', 'uint16', 'uint32', 'uint64', 'float_', 'float16', 'float32', 'float64', 'loat64', 'complex_',
                 'complex64', 'complex128']
 
     for key in filter_dict:
@@ -650,10 +503,6 @@ def remove_filtered(tagged_img, database):
 ###############################################################################
 ##############################Colocalization###################################
 ###############################################################################
-
-
-
-
 def overlap_image(array_list):
 
     # Create Overlapping ImagE

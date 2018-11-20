@@ -125,7 +125,8 @@ def dictinary_equal(dict_1,dict_2):
     return flag
 
 def rename_duplicates(string_list):
-    '''Processes a list of strings. If list has duplicate elements an index is added to it.
+    '''Processes a list of strings. If list has duplicate elements an index is 
+    added to it.
     '''
     if isinstance(string_list, str) or not isinstance(string_list, list):
         raise Exception('Object must be list of strings!')

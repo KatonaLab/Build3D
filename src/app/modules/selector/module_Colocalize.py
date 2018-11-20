@@ -3,8 +3,9 @@ import math
 import sys
 import time
 import a3dc_module_interface as a3
-from modules.packages.a3dc.interface import colocalization, save_data, save_image, apply_filter
+from modules.packages.a3dc.interface import colocalization, apply_filter
 #from modules.packages.a3dc.core import filter_database
+from modules.packages.a3dc.io import save_data, save_image
 from modules.packages.a3dc.utils import quote, get_next_filename, error, warning, value_to_key, dictinary_equal, rename_duplicates
 from modules.packages.a3dc.constants import SEPARATOR
 from modules.packages.a3dc.core import VividImage
@@ -45,7 +46,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
     
-    
     #Set path and filename
     output_path=os.path.join(path, 'Output')
     if not os.path.exists(output_path):
@@ -79,7 +79,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
 
     #Save to file
     save_data([ch1_img, ch2_img ,ovl_img], path=output_path, file_name=os.path.splitext(file_name)[0], to_text=to_text)
-    
     
     #Save images
     print('Saving output images!')
