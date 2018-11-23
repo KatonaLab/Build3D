@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors, is_interactive, interactive
 import random
 from io import BytesIO
-#from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
-#from .utils import reorder_list
+from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
+from .utils import reorder_list
 
 
         
@@ -75,6 +75,9 @@ def save_data(img_list, path, file_name, to_text=True):
         
 
     if to_text==False:
+        
+        
+        
         # Create a Pandas Excel writer using XlsxWriter as the engine.
         writer = pd.ExcelWriter(os.path.join(path, file_name+'.xlsx'), engine='xlsxwriter')
         
@@ -137,7 +140,17 @@ def save_data(img_list, path, file_name, to_text=True):
                         comment_string=OTHER_DESCRIPTORS[int_key]
                         
                 worksheet.write_comment(0, j+1, comment_string, {'height': 80, 'width':300, 'color': '#00ffffcc'})
-
+        '''                                                         
+        #Create statistical report
+        data_dic={name_list[i]:dict_list[i] for i in range(len(dict_list))}
+        rep=report(data_dic, [], ['voxelCount'] )
+        report_to_xls(rep[0], rep[1], workbook)
+    
+        #Create graphical report
+        graphical_report(data_dic, workbook)
+        ''' 
+        
+        
         # Close the Pandas Excel writer and save Excel file.
         writer.save()
 
@@ -184,7 +197,8 @@ def report(dictionary, measurement_list, parameter_list ):
         for st in measurement_list:
             if st not in STAT_FUNCTIONS.keys():
                 del st
-
+    
+    #Generate descriptive statistics
     results={}
     for idx, dic in enumerate(database_list):
 
@@ -203,20 +217,27 @@ def report(dictionary, measurement_list, parameter_list ):
           
      
         results[str(name_list[idx])]=parameters
-       
-    return results
+    #Generate violin plots and add to 
+    graphs=[]
+    for ind , key in enumerate(parameter_list):
+        data_list=[database[key]  for database in database_list if key in database.keys()]
+        graphs.append(violin_plot(data_list, data_name_list=name_list, labelx='', labely=key))      
+    
+    return results, graphs
 
     
-def report_to_xls(dictionary, workbook ):
+def report_to_xls(dictionary,graphs, workbook ):
     """Print report dictionary to table form. Parameters are listed so the 
     common elements come first in the table.
     
     @param: dictionary Dictionary from report function
     @param: workbook xlsxwriter Workbook object
+    @param: parameter_list
     """
     
     database_list=[dictionary[key] for key in dictionary.keys()]
     name_list=list(dictionary.keys())
+
 
     
     #Get list of parameters and statistical descriptors for each parameter
@@ -283,7 +304,12 @@ def report_to_xls(dictionary, workbook ):
             worksheet.write_row(j+2,column_start, row)
    
         column_start+=((len(stats[i])+2))   
-       
+    
+    #Add violin plots of measured parameters
+    if  isinstance(graphs, list) and len(graphs)>0:
+        for ind, gra in enumerate(graphs):
+            worksheet.insert_image(ind*27, column_end+1, 'Hist.png', {'image_data':figure_to_stream(gra),'x_scale': 1, 'y_scale': 1, 'x_offset': 0, 'y_offset': 0}) 
+
            
 def plot_hist(data,  title=None, label='Data', colormap='viridis', binning='fd', 
               histtype='stepfilled', facecolor='green', alpha=0.9, grid=True, dpi=300):
@@ -484,7 +510,7 @@ def violin_plot(data_list, color_list=None,  data_name_list=None, alpha=0.5 , ro
     fig.set_facecolor('white')
     
     # Violin plot
-    violin=axes.violinplot(data,
+    violin=axes.violinplot(data_list,
                        showmeans=False,
                        showmedians=False, showextrema=False,points=100, widths=0.3)
     
@@ -512,10 +538,7 @@ def violin_plot(data_list, color_list=None,  data_name_list=None, alpha=0.5 , ro
     
     #Set interactive mode to its starting state
     interactive(current_mode)
-    
-    #plot and save
-    plt.show()
-    
+        
     return fig
 
 
@@ -534,7 +557,7 @@ def box_plot(data_list, color_list=None, data_name_list=None, alpha=0.5,  rotati
     def add_scatter_data(ax, data_list, color_list):
            
         for j in range(len(data_list)):
-            ax.scatter([j+1]*len(data[j]), data[j], marker='*', color=color_list[j], s=30, zorder=3)
+            ax.scatter([j+1]*len(data_list[j]), data_list[j], marker='*', color=color_list[j], s=30, zorder=3)
 
     # generate name lsit
     if not isinstance(data_name_list, list):
@@ -603,8 +626,7 @@ def box_plot(data_list, color_list=None, data_name_list=None, alpha=0.5,  rotati
     #Set interactive mode to its starting state
     interactive(current_mode)
     
-    #plot and save
-    plt.show()
+
    
     return fig
        
@@ -613,13 +635,10 @@ def box_plot(data_list, color_list=None, data_name_list=None, alpha=0.5,  rotati
 
         
 
-
-
-
- 
-    
     
 ###############################Utilities####################################### 
+
+
 def longest_element(lst):
     return max(len(str(s)) for s in lst)
 
@@ -724,12 +743,11 @@ if __name__ == '__main__':
     
     #Create statistical report
     rep=report(test_dict, [], [] )
-    report_to_xls(rep, workbook)
+    report_to_xls(rep[0], rep[1], workbook)
     
     #Create graphical report
     graphical_report(test_dict, workbook)
    
-    
     #Close
     workbook.close()
     
