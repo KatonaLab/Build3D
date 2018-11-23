@@ -4,19 +4,18 @@ import pandas as pd
 import copy
 import os
 import matplotlib.pyplot as plt
-from matplotlib import colors
-
+from matplotlib import colors, is_interactive, interactive
+import random
 from io import BytesIO
-from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
-from .utils import reorder_list
+#from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
+#from .utils import reorder_list
 
 
-##############################IO Functio#######################################
-###############################################################################        
+        
 def save_image(img_list, path, file_name):
     '''
     '''
-
+        
     #Combine images
     for idx, img in  enumerate(img_list):
         
@@ -68,10 +67,10 @@ def save_data(img_list, path, file_name, to_text=True):
                 other_keys.append(key)
 
         #Rearange keylist
-        preset_order=['tag', 'volume', 'voxelCount', 'filter']
-        numeric_keys=reorder_list(numeric_keys,preset_order)
-        preset_order = ['centroid']
-        other_keys=reorder_list(other_keys,preset_order)
+        numeric_keys=reorder_list(numeric_keys,['tag', 'volume', 'voxelCount', 'filter'])
+        
+        other_keys=reorder_list(other_keys,['centroid'])
+        
         key_order_list.append(numeric_keys+other_keys)
         
 
@@ -176,6 +175,7 @@ def report(dictionary, measurement_list, parameter_list ):
     #If no stat_list hase been given common keys will be analyzed
     if parameter_list==None or parameter_list==[] :
         parameter_list=common_keys(database_list)
+
         
     #Remove elements of stat_list not in STAT_FUNCTIONS
     if measurement_list==None or measurement_list==[] :
@@ -240,14 +240,9 @@ def report_to_xls(dictionary, workbook ):
         stats.append(list(stats_element))
     
     #Generate a new worksheet named 'Report'
-    worksheet_name='Report'
-    worksheet_name_list=get_worksheet_names(workbook)
-    
-    #If worksheet ''Reports' exists generate a name with counter
-    if worksheet_name in  worksheet_name_list:
-        worksheet_name=get_next_name(worksheet_name,  worksheet_name_list)
-        
+    worksheet_name=next_worksheet_name(workbook, 'Report') 
     worksheet = workbook.add_worksheet(worksheet_name)
+
     
     # Create a format to use in the merged range
     merge_format = workbook.add_format({
@@ -314,8 +309,10 @@ def plot_hist(data,  title=None, label='Data', colormap='viridis', binning='fd',
     
     """
     
-    #Disable matplotlib interactive mode
-    plt.ioff()
+    #Get interactive mode and torn off if on
+    current_mode=is_interactive()
+    if current_mode:
+        plt.ioff()
     
     # Create figure and histogram
     fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
@@ -350,12 +347,13 @@ def plot_hist(data,  title=None, label='Data', colormap='viridis', binning='fd',
     axs.set_axisbelow(True)
     axs.grid(grid)
 
-    plt.ion()
+    #Set interactive mode to its starting state
+    interactive(current_mode)
     
     return fig
 
 
-def graphical_report(dictionary, workbook ):
+def graphical_report(dictionary, workbook):
     """Generate a graphical report. A new workshhet is generated with a 
     histogram for each parameter.
     
@@ -366,13 +364,7 @@ def graphical_report(dictionary, workbook ):
     name_list=list(dictionary.keys())
     
     #Generate a new worksheet named 'Report'
-    worksheet_name='Report_Graphical'
-    worksheet_name_list=get_worksheet_names(workbook)
-    
-    #If worksheet ''Reports_Graphical' exists generate a name with counter
-    if worksheet_name in worksheet_name_list:
-        worksheet_name=get_next_name(worksheet_name, worksheet_name_list)
-        
+    worksheet_name=next_worksheet_name(workbook, 'Report_Graphical')  
     worksheet = workbook.add_worksheet(worksheet_name)
 
     #Create a list of parameters that starts with common elements
@@ -415,7 +407,218 @@ def graphical_report(dictionary, workbook ):
         
     #plt.close('all')
 
+def database_to_xls(dictionary, workbook):
+    """ 
+    
+    @param: dict_list list or array of databases.
+    @param: workbook xlsxwriter Workbook object
+    """
+    database_list=[dictionary[key] for key in dictionary.keys()]
+    name_list=list(dictionary.keys())
+    
+    
+def violin_plot(data_list, color_list=None,  data_name_list=None, alpha=0.5 , rotation=60, labelx='', labely=''):
+    
+    def set_violinplot_style(violin, color_list, alpha):
+        
+        for partname in ('cbars','cmins','cmaxes','cmeans','cmedians'):
+            
+            if partname in violin:
+                #violin[partname].set_facecolor('black')
+                violin[partname].set_edgecolor(color_list)
+                violin[partname].set_linewidth(1)
+               
+        for i in range(len(violin['bodies'])):
+            
+            #violin['bodies'][i].set_facecolor(lineColors)
+            violin['bodies'][i].set_edgecolor(color_list[i])
+            violin['bodies'][i].set_alpha(alpha)
+            violin['bodies'][i].set_facecolor(color_list[i])
+        
+    def add_violinplotStats(ax, violin, data_list, color_list):
+       
+       for i in range(len(data_list)):
+           
+           quartile1, median, quartile3 = np.percentile(data_list[i], [25,50,75])
+           whiskers1=quartile1-1.5*(quartile3-quartile1)
+           whiskers3=quartile3+1.5*(quartile3-quartile1)
+    
+           ax.scatter([i+1]*5, [whiskers1, quartile1, median,quartile3,whiskers3], marker='_', color=color_list[i], s=100, zorder=3)
+           ax.vlines(i+1, quartile1, quartile3, color=color_list[i], linestyle='-', lw=5)
+           ax.vlines(i+1, whiskers1, whiskers3, color=color_list[i], linestyle='-', lw=1)
+    
+    # generate name lsit
+    if not isinstance(data_name_list, list):
+        data_name_list=['Series '+str(i+1) for i in range(len(data_list))]
+    else:
+         data_name_list=[str(data_name_list[i]) for i in range(len(data_name_list))]
+    
+    if len(data_name_list)<len(data_list):
+        length=len(data_name_list)
+        for i in range(len(data_list)-len(data_name_list)):
+            data_name_list.append('Series '+str(length+i+1))   
 
+    #Generate or correct color list
+    colormap=plt.get_cmap('gist_rainbow')#'tab20b'   
+    
+    if not isinstance(color_list, list):
+        color_list=COLOR_LIST
+
+    else:
+        for i in range(len(color_list)):
+            if not colors.is_color_like(color_list[i]):
+                color_list[i]=colormap(random.uniform(0, 1))
+    
+    if len(color_list)<len(data_list):
+        for i in range(len(data_list)-len(color_list)):
+            color_list.append(colormap(random.uniform(0, 1)))
+    
+    
+    #Get interactive mode and torn off if on
+    current_mode=is_interactive()
+    if current_mode:
+        plt.ioff()
+
+    #Create Figure
+    fig, axes = plt.subplots(nrows=1, ncols=1)
+    fig.set_facecolor('white')
+    
+    # Violin plot
+    violin=axes.violinplot(data,
+                       showmeans=False,
+                       showmedians=False, showextrema=False,points=100, widths=0.3)
+    
+    #Add violinplot
+    set_violinplot_style(violin, color_list, alpha)
+    add_violinplotStats(axes, violin, data_list, color_list)
+    
+
+    #Format axes
+    axes.yaxis.grid(True)
+   
+    axes.set_xticks([y+1 for y in range(len(data_list))])
+    
+    for tick in axes.get_xticklabels():
+        tick.set_rotation(rotation)
+    
+    axes.set_xlabel(labelx)
+    axes.set_ylabel(labely)
+
+    # add x-tick labels    
+    plt.setp(axes, xticks=[y+1 for y in range(len(data_list))], xticklabels=data_name_list)
+    
+    #set layout
+    plt.tight_layout()
+    
+    #Set interactive mode to its starting state
+    interactive(current_mode)
+    
+    #plot and save
+    plt.show()
+    
+    return fig
+
+
+def box_plot(data_list, color_list=None, data_name_list=None, alpha=0.5,  rotation=60, labelx='', labely=''):
+
+    
+    def set_boxplot_style(box, color_list, alpha):
+    
+        for i in range(len(box['boxes'])):
+            box['boxes'][i].set_facecolor(color_list[i])
+            box['boxes'][i].set_alpha(alpha)
+            for element in ['whiskers', 'fliers', 'medians', 'caps']:
+                plt.setp(box[element][i], color='black')       
+        
+    
+    def add_scatter_data(ax, data_list, color_list):
+           
+        for j in range(len(data_list)):
+            ax.scatter([j+1]*len(data[j]), data[j], marker='*', color=color_list[j], s=30, zorder=3)
+
+    # generate name lsit
+    if not isinstance(data_name_list, list):
+        data_name_list=['Series '+str(i+1) for i in range(len(data_list))]
+    else:
+         data_name_list=[str(data_name_list[i]) for i in range(len(data_name_list))]
+    
+    if len(data_name_list)<len(data_list):
+        length=len(data_name_list)
+        for i in range(len(data_list)-len(data_name_list)):
+            data_name_list.append('Series '+str(length+i+1))   
+
+    #Generate or correct color list
+    colormap=plt.get_cmap('gist_rainbow')#'tab20b'   
+    
+    if not isinstance(color_list, list):
+        color_list=COLOR_LIST
+
+    else:
+        for i in range(len(color_list)):
+            if not colors.is_color_like(color_list[i]):
+                color_list[i]=colormap(random.uniform(0, 1))
+
+    if len(color_list)<len(data_list):
+        for i in range(len(data_list)-len(color_list)):
+            color_list.append(colormap(random.uniform(0, 1)))
+  
+
+    #Get interactive mode and torn off if on
+    current_mode=is_interactive()
+    if current_mode:
+        plt.ioff()
+
+    #Create figure
+    fig, axes = plt.subplots(nrows=1, ncols=1)
+    fig.set_facecolor('white')
+    
+    # Boxplot
+    box=axes.boxplot(data_list,notch=False,  # notch shape
+                             vert=True,   # vertical box aligmnent
+                             patch_artist=True,showmeans=False, meanline=False,)
+    
+    set_boxplot_style(box, color_list, alpha)
+        
+        
+    add_scatter_data(axes, data_list, color_list)
+    
+    #Format axes
+    # adding horizontal grid lines
+    axes.yaxis.grid(True)
+   
+    axes.set_xticks([y+1 for y in range(len(data_list))])
+    
+    for tick in axes.get_xticklabels():
+        tick.set_rotation(rotation)
+    
+    axes.set_xlabel(labelx)
+    axes.set_ylabel(labely)
+    
+    # add x-tick labels    
+    plt.setp(axes, xticks=[y+1 for y in range(len(data_list))], xticklabels=data_name_list)
+    
+    #set layout
+    plt.tight_layout()
+    
+    #Set interactive mode to its starting state
+    interactive(current_mode)
+    
+    #plot and save
+    plt.show()
+   
+    return fig
+       
+       
+
+
+        
+
+
+
+
+ 
+    
+    
 ###############################Utilities####################################### 
 def longest_element(lst):
     return max(len(str(s)) for s in lst)
@@ -428,14 +631,14 @@ def common_keys(dict_list):
     return list(set.intersection(*map(set,keylists)))    
 
 
-def get_worksheet_names(workbook):
+def worksheet_names(workbook):
     
     wsheets=workbook.worksheets()
     
     return [sheet.get_name() for sheet in wsheets ]
 
     
-def get_next_name(name, name_list):
+def next_name(name, name_list):
     
     i=1
     final_name=name
@@ -444,6 +647,16 @@ def get_next_name(name, name_list):
          i += 1
 
     return final_name
+
+def next_worksheet_name(workbook, name):
+    
+    name_list=worksheet_names(workbook)
+        
+    #If worksheet ''Reports_Graphical' exists generate a name with counter
+    if name in name_list:
+        name=next_name(name, name_list)
+        
+    return name 
 
 
 def db_list_to_dict(database_list, name_list=None):
@@ -475,13 +688,12 @@ def figure_to_stream(fig, width=10, height=5):
     """
     stream=BytesIO()
     
-    plt.ioff()
+
     
     fig.set_size_inches(width,height)
-    fig.savefig(stream, format='png', quality=100, dpi=400, edgecolor='Black')
+    fig.savefig(stream, facecolor=fig.get_facecolor(), format='png', quality=100, dpi=400, edgecolor='Black')
     
-    plt.ion()
-    
+
     return stream    
         
 ############################Statistical Function###############################
@@ -497,6 +709,7 @@ STAT_FUNCTIONS={'Mean':np.mean,
        'First Quartile (Q\u2081)':q1,
        'Third Quartile (Q\u2083)':q3}
 
+COLOR_LIST=['green', 'red', 'darkorange', 'blue', 'magenta', 'crimson' ]
 
 if __name__ == '__main__':
     
@@ -519,11 +732,38 @@ if __name__ == '__main__':
     
     #Close
     workbook.close()
+    
+    '''
+    #Data
+    A_colocalized=[926,	574,	1342,	477,	714,	1728,	1486,	2805,	2563,	868,	723,	347,	734,	2665,	1939,	1269,	1149]
+    A_nonColocalized=[926,	574,	1342,	477,	714,	1728,	1486,	2805,	2563,	868,	723,	347,	734,	2665,	1939,	1269,	1149]
+    B_colocalized=[521,	604,	642,	389,	437,	400,	369,	464,	742,	726,	773,	822,	819,	836,	990,	1065,	865,	833,	1385,	1747,	1278,	1101,	1210,	1104]
+    B_nonColocalized=[521,	604,	642,	389,	437,	400,	369,	464,	742,	726,	773,	822,	819,	836,	990,	1065,	865,	833,	1385,	1747,	1278,	1101,	1210,	1104]
+    
+    #Settings
+    data =[[1237, 1217, 903, 457, 312, 1077, 977, 892, 1208, 1453, 411, 181, 302, 350, 1080, 843, 522], [275, 399, 534, 620, 265, 618, 429, 757, 1263, 1231, 1288, 1078, 741, 617, 1225, 1506, 1212, 1172, 318, 364, 807, 647, 508, 722]]#[A_colocalized, A_nonColocalized, B_colocalized, B_nonColocalized]
 
+    color_list=['green', 'red', 'green','red']
+    color_list=['red']
+    alpha=0.5
+    data_name_list=['A', 'B', 'B Colocalized', 'B non-Colocalized']
+    data_name_list=['A']
+    rotation=60
+    
+    labelx='Data'
+    labely='Number of non-Colocalizing vGlut Objects'
+    
+    
+    
+    outputpath=outputPath='E:\Results\Results_ovlVol1_REDO'
+    saveFormat='png'
+    
+    #main(data, faceColor, lineColor, alpha, labels, rotation, labelx, labely, outputpath, saveFormat)   
 
+    violin_plot(data, labelx=labelx, labely=labelx)
+    box_plot(data, labelx=labelx, labely=labelx)
+    '''
 
-
-
-
+    
 
 
