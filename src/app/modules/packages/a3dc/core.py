@@ -7,6 +7,7 @@ from ast import literal_eval
 from . import segmentation
 from .utils import  warning
 from modules.packages.PythImage.ImageClass import ImageClass as PythImage
+from.constants import  NUMERIC_DTYPES
 
 
 class VividImage(PythImage):
@@ -444,14 +445,11 @@ def filter_database(dictionary, filter_dict, overwrite=True):
         final_filter=[True for i in range(len(df))]
 
     # Only run filter if key has numerical value
-    typeList = ['int', 'float', 'bool', 'complex', 'int_', 'intc', 'intp', 'int8', 'int16', 'int32', 'int64',
-                'uint8', 'uint16', 'uint32', 'uint64', 'float_', 'float16', 'float32', 'float64', 'loat64', 'complex_',
-                'complex64', 'complex128']
 
     for key in filter_dict:
         
 
-        if df[key].dtype in typeList:
+        if df[key].dtype in NUMERIC_DTYPES:
          
             curr_filter = (df[key] >= filter_dict[key]['min']) & (df[key] <= filter_dict[key]['max']).values
                 

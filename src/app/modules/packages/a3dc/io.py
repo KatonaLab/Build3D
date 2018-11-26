@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors, is_interactive, interactive
 import random
 from io import BytesIO
-from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS
+from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS, NUMERIC_DTYPES
 from .utils import reorder_list
 
 
@@ -59,8 +59,7 @@ def save_data(img_list, path, file_name, to_text=True):
         other_keys = []
         for key in list(dic.keys()):
 
-            if str(df[key].dtype) in ['int', 'float', 'bool', 'complex', 'Bool_', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
-                'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64','loat64' ,'complex_' ,'complex64' ,'complex128' ]:
+            if str(df[key].dtype) in NUMERIC_DTYPES:
                 numeric_keys.append(key)
 
             else:
@@ -140,15 +139,15 @@ def save_data(img_list, path, file_name, to_text=True):
                         comment_string=OTHER_DESCRIPTORS[int_key]
                         
                 worksheet.write_comment(0, j+1, comment_string, {'height': 80, 'width':300, 'color': '#00ffffcc'})
-        '''                                                         
+                                                       
         #Create statistical report
-        data_dic={name_list[i]:dict_list[i] for i in range(len(dict_list))}
-        rep=report(data_dic, [], ['voxelCount'] )
-        report_to_xls(rep[0], rep[1], workbook)
+        #data_dic={name_list[i]:dict_list[i] for i in range(len(dict_list))}
+        #rep=report(data_dic, [], ['volume', 'voxelCount', 'totalOverlappingRatio', 'meanIntensity'])
+        #report_to_xls(rep,  workbook)
     
         #Create graphical report
-        graphical_report(data_dic, workbook)
-        ''' 
+        #graphical_report(data_dic, workbook)
+   
         
         
         # Close the Pandas Excel writer and save Excel file.
@@ -185,11 +184,12 @@ def report(dictionary, measurement_list, parameter_list ):
     database_list=[dictionary[key] for key in dictionary.keys()]
     name_list=list(dictionary.keys())
     
-    #If no stat_list hase been given common keys will be analyzed
+    #If no stat_list hase been given common keys will be lsited first and
+    #all other keys appended to the list
     if parameter_list==None or parameter_list==[] :
         parameter_list=common_keys(database_list)
 
-        
+
     #Remove elements of stat_list not in STAT_FUNCTIONS
     if measurement_list==None or measurement_list==[] :
         measurement_list=STAT_FUNCTIONS.keys()
@@ -207,26 +207,30 @@ def report(dictionary, measurement_list, parameter_list ):
             
             measurements={}
             for idx2, meas_key in enumerate(measurement_list):
+      
+                measurements[meas_key]='n/a'
                 
                 if key in dic:
-                    measurements[meas_key]=STAT_FUNCTIONS[meas_key](dic[key])
-                else:
-                    measurements[meas_key]='n/a'
-            
+                    try:
+                        measurements[meas_key]=STAT_FUNCTIONS[meas_key](dic[key])
+                    except:
+                        pass
+                    
             parameters[key]=measurements
           
      
         results[str(name_list[idx])]=parameters
-    #Generate violin plots and add to 
-    graphs=[]
-    for ind , key in enumerate(parameter_list):
-        data_list=[database[key]  for database in database_list if key in database.keys()]
-        graphs.append(violin_plot(data_list, data_name_list=name_list, labelx='', labely=key))      
     
-    return results, graphs
+    #Generate violin plots and add to 
+    #graphs=[]
+    #for ind , key in enumerate(parameter_list):
+        #data_list=[database[key]  for database in database_list if key in database.keys()]
+        #graphs.append(violin_plot(data_list, data_name_list=name_list, labelx='', labely=key))      
+    
+    return results#, graphs
 
     
-def report_to_xls(dictionary,graphs, workbook ):
+def report_to_xls(dictionary, workbook ):
     """Print report dictionary to table form. Parameters are listed so the 
     common elements come first in the table.
     
@@ -306,9 +310,9 @@ def report_to_xls(dictionary,graphs, workbook ):
         column_start+=((len(stats[i])+2))   
     
     #Add violin plots of measured parameters
-    if  isinstance(graphs, list) and len(graphs)>0:
-        for ind, gra in enumerate(graphs):
-            worksheet.insert_image(ind*27, column_end+1, 'Hist.png', {'image_data':figure_to_stream(gra),'x_scale': 1, 'y_scale': 1, 'x_offset': 0, 'y_offset': 0}) 
+    #if  isinstance(graphs, list) and len(graphs)>0:
+        #for ind, gra in enumerate(graphs):
+            #worksheet.insert_image(ind*27, column_end+1, 'Hist.png', {'image_data':figure_to_stream(gra),'x_scale': 1, 'y_scale': 1, 'x_offset': 0, 'y_offset': 0}) 
 
            
 def plot_hist(data,  title=None, label='Data', colormap='viridis', binning='fd', 

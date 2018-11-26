@@ -43,6 +43,8 @@ OTHER_DESCRIPTORS={'filter':'False if object has been filtered out and True if o
                    'totalOverlappingRatio':'The ratio of the sum of the volumes that overlapping regions to the total volume of the object',
                    'colocalizationCount':'Number of objects colocalizing with the given channel.'}
 
+NUMERIC_DTYPES=['int', 'float', 'bool', 'complex', 'int_','intc', 'intp', 'int8' ,'int16' ,'int32' ,'int64',
+                'uint8' ,'uint16' ,'uint32' ,'uint64' ,'float_' ,'float16' ,'float32' ,'float64' ,'complex_' ,'complex64' ,'complex128' ]
 
 SEPARATOR='#####################################################################################################################'
     
