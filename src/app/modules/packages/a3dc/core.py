@@ -235,6 +235,7 @@ class VividImage(PythImage):
                         value=':'.join(line_list[1:])
                     else:
                         key=':'.join(line_list[:-1])
+                        print(line_list,key, '$$$$$$$$$$$$$$$$$$$$$$$')
                         value=multidimimage.meta.get(key)
                     
                     #ad metadata key value to outpit dictionary
@@ -249,7 +250,12 @@ class VividImage(PythImage):
     
         #get image array
         array=md.MultiDimImageFloat_to_ndarray(multidimimage)
-    
+        
+        
+        #!!!!!!!!!!!!!!!!!!!!!!!!!!!Temporarily solve LUT min max issue
+        array[0][0][0]=0
+        array[0][0][1]=255
+        
         #Get image metadata and convert database if the metadata is ICS style
         metadata=metadata_to_dict(multidimimage)
     
