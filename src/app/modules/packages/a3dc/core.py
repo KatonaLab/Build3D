@@ -234,8 +234,7 @@ class VividImage(PythImage):
                         key=line_list[0].lstrip()
                         value=':'.join(line_list[1:])
                     else:
-                        key=':'.join(line_list[:-1])
-                        print(line_list,key, '$$$$$$$$$$$$$$$$$$$$$$$')
+                        key=str(line_list[0])
                         value=multidimimage.meta.get(key)
                     
                     #ad metadata key value to outpit dictionary
