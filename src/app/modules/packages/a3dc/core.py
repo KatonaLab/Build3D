@@ -228,14 +228,19 @@ class VividImage(PythImage):
                     
                     line_list=line.split(':')
                     
-                    #Get key and value. Ics metadata keys have : as separator
-                    #for the 'path' key the path is separated as well.
+                    #Get key and value. Ics metadata keys have ':' as separator
+                    #For the 'path' key the path also contains ':'  separated as well.
                     if line_list[0].lstrip().lower()=='path':
                         key=line_list[0].lstrip()
                         value=':'.join(line_list[1:])
-                    else:
-                        key=str(line_list[0])
-                        value=multidimimage.meta.get(key)
+                        
+                    else:    
+                        try:
+                            key=str(line_list[0])
+                            value=multidimimage.meta.get(key)
+                        except:
+                            key=':'.join(line_list[:-1])
+                            value=multidimimage.meta.get(key)
                     
                     #ad metadata key value to outpit dictionary
                     try:

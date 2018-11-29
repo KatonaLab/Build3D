@@ -52,7 +52,7 @@ def read_params(filters=[TRANSLATE[key] for key in FILTERS]):
             settings[value_to_key(TRANSLATE,f)][m] = a3.inputs['{} {}'.format( f, m)]
     
     if a3.inputs['Filter objects on border']:       
-        settings['pixelsOnBorder']={'min': 1, 'max':float(math.inf)}
+        settings['pixelsOnBorder']={'min': 0, 'max':0}
 
     if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
         
