@@ -258,7 +258,12 @@ class VividImage(PythImage):
         
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!Temporarily solve LUT min max issue
         array[0][0][0]=0
-        array[0][0][1]=255
+        #maximum=np.amax(array)
+        try:
+           maximum=np.iinfo(array.dtype).max
+        except:
+           maximum=np.finfo(array.dtype).max
+        array[0][0][1]=maximum
         #array.flat[0]=0
 
         

@@ -180,7 +180,6 @@ def read_params(filters=FILTERS):
     #out_dict['FileName']=a3.inputs['FileName']
 
     return out_dict    
-    
 
 def module_main(ctx):
 
