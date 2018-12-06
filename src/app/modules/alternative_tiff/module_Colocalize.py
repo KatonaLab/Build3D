@@ -149,7 +149,7 @@ def read_params(filters=FILTERS):
             ovl_settings[key] = settings[key]
     
     
-    if not a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
+    if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
         
         #Check if unit metadata is available, default Unit is um!!!!!!!!
         unit_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ','PhysicalSizeZUnit', 'PhysicalSizeZUnit', 'PhysicalSizeZUnit']
@@ -161,9 +161,10 @@ def read_params(filters=FILTERS):
         missing_unit_B=[u for u in unit_list if u not in out_dict['ChB Image'].metadata.keys()]
         if len(missing_unit_B)!=0:
             raise Exception('ChB Image is missing the following unit :'+str(missing_unit_B))
-               
+        
+        
         print('Physical voxel volume is : '
-              +str(out_dict['ChA Image'].metadata['PhysicalSizeX']*out_dict['ChA Image'].metadata['PhysicalSizeY']*out_dict['ChA Image'].metadata['PhysicalSizeZ'])
+              +str(float(out_dict['ChA Image'].metadata['PhysicalSizeX'])*float(out_dict['ChA Image'].metadata['PhysicalSizeY'])*float(out_dict['ChA Image'].metadata['PhysicalSizeZ']))
               +' '+out_dict['ChA Image'].metadata['PhysicalSizeXUnit']+'*'+out_dict['ChA Image'].metadata['PhysicalSizeYUnit']+'*'+out_dict['ChA Image'].metadata['PhysicalSizeZUnit'])
                 
         ovl_settings['volume']= settings.pop('volume')

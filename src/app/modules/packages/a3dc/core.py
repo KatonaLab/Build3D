@@ -259,6 +259,8 @@ class VividImage(PythImage):
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!Temporarily solve LUT min max issue
         array[0][0][0]=0
         array[0][0][1]=255
+        #array.flat[0]=0
+
         
         #Get image metadata and convert database if the metadata is ICS style
         metadata=metadata_to_dict(multidimimage)
@@ -282,6 +284,8 @@ class VividImage(PythImage):
     def to_multidimimage(self):
         
         import a3dc_module_interface as md
+        
+
         
         #Check if image is time series
         if self.metadata['SizeT']>1:

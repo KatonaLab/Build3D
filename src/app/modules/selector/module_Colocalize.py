@@ -32,7 +32,7 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
         
         
     print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
-    print('Filter settings: ' + str(ovl_settings))
+    print('Filter settings: ' + str(ovl_settings)) 
     
     #Run colocaliyation analysis
     ovl_img, _=colocalization(tagged_img_list, overlapping_filter=ovl_settings, remove_filtered=remove_filtered)
@@ -42,6 +42,10 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     #ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
     ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
     ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
+    
+    
+
+    
     
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
@@ -147,7 +151,7 @@ def read_params(filters=FILTERS):
         else:
             ovl_settings[key] = settings[key]
     
-    
+
     if a3.inputs['Volume in pixels/um\u00B3'] and ('volume' in settings.keys()):
         
         #Check if unit metadata is available, default Unit is um!!!!!!!!
@@ -160,9 +164,10 @@ def read_params(filters=FILTERS):
         missing_unit_B=[u for u in unit_list if u not in out_dict['ChB Image'].metadata.keys()]
         if len(missing_unit_B)!=0:
             raise Exception('ChB Image is missing the following unit :'+str(missing_unit_B))
-               
+        
+
         print('Physical voxel volume is : '
-              +str(out_dict['ChA Image'].metadata['PhysicalSizeX']*out_dict['ChA Image'].metadata['PhysicalSizeY']*out_dict['ChA Image'].metadata['PhysicalSizeZ'])
+              +str(float(out_dict['ChA Image'].metadata['PhysicalSizeX'])*float(out_dict['ChA Image'].metadata['PhysicalSizeY'])*float(out_dict['ChA Image'].metadata['PhysicalSizeZ']))
               +' '+out_dict['ChA Image'].metadata['PhysicalSizeXUnit']+'*'+out_dict['ChA Image'].metadata['PhysicalSizeYUnit']+'*'+out_dict['ChA Image'].metadata['PhysicalSizeZUnit'])
                 
         ovl_settings['volume']= settings.pop('volume')
