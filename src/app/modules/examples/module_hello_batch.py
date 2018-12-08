@@ -1,6 +1,7 @@
 import a3dc_module_interface as a3
 from a3dc_module_interface import def_process_module
 from glob import glob
+import time
 
 
 def module_main(ctx):
@@ -19,6 +20,8 @@ def module_main(ctx):
     url.path = files[index]
     print('file:', files[index])
     a3.outputs['directory'] = url
+    print('sleeping for 1 secs')
+    time.sleep(1)
 
 
 config = [

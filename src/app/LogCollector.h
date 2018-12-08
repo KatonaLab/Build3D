@@ -4,6 +4,7 @@
 #include <QtCore>
 #include <QQmlEngine>
 #include <QJSEngine>
+#include <QMutex>
 #include <sstream>
 
 class LogCollector : public QObject {
@@ -13,18 +14,22 @@ class LogCollector : public QObject {
 public:
     static LogCollector& instance();
     QString unfilteredLog();
-    void debugMsg(const QString& msg);
-    void infoMsg(const QString& msg);
-    void warningMsg(const QString& msg);
-    void criticalMsg(const QString& msg);
-    void fatalMsg(const QString& msg);
+    inline void debugMsg(const QString& msg);
+    inline void infoMsg(const QString& msg);
+    inline void warningMsg(const QString& msg);
+    inline void criticalMsg(const QString& msg);
+    inline void fatalMsg(const QString& msg);
     virtual ~LogCollector();
 Q_SIGNALS:
     void logChanged();
 private:
     explicit LogCollector(QObject* parent = nullptr);
     std::stringstream m_log;
+    QReadWriteLock m_rwLock;
     static LogCollector* m_instance;
+
+    static QString newLines(const QString& msg);
+    inline void log(const QString& msg, const std::string& color, const std::string& prefix);
 };
 
 QObject* singletonLogCollectorProvider(QQmlEngine *engine, QJSEngine *scriptEngine);

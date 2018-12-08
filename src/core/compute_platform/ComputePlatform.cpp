@@ -44,7 +44,8 @@ size_t ComputePlatform::size() const
     return m_modules.size();
 }
 
-vector<ModuleContext> ComputePlatform::run(ModuleContext ctx)
+vector<ModuleContext> ComputePlatform::run(ModuleContext ctx,
+    const std::atomic<bool>& shouldRun)
 {
     for (ComputeModule& module : m_modules) {
         module.reset();
@@ -52,7 +53,7 @@ vector<ModuleContext> ComputePlatform::run(ModuleContext ctx)
     }
 
     auto t = m_graph->traverse();
-    while (t.hasNext()) {
+    while (t.hasNext() && shouldRun) {
         t.next()->notified();
     }
 

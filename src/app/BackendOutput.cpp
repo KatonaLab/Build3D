@@ -21,6 +21,8 @@ ImageOutputValue::ImageOutputValue(QObject* parent)
 
     QObject::connect(this, &ImageOutputValue::requestSetTextureFromImage,
                      this, &ImageOutputValue::setTextureFromImage);
+    QObject::connect(this, &ImageOutputValue::requestSetLutLimits,
+                     this, &ImageOutputValue::setLutParams);
 }
 
 QVariantMap ImageOutputValue::convertToVariantMap(ImageOutputValue* x)
@@ -159,12 +161,11 @@ QVector2D ImageOutputValue::lutLimits() const
     return m_lutLimits;
 }
 
-void ImageOutputValue::calculateLutLimits()
+QVector2D details::calculateLutLimits(std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> im)
 {
-    bool uninited = qFuzzyCompare(m_lutLimits, QVector2D(0, 0));
     QVector2D newLutLimits;
-    if (m_image) {
-        auto& d = m_image->unsafeData();
+    if (im) {
+        auto& d = im->unsafeData();
         float minVal = numeric_limits<float>::infinity();
         float maxVal = -numeric_limits<float>::infinity();
         for (const auto& plane: d) {
@@ -182,14 +183,7 @@ void ImageOutputValue::calculateLutLimits()
         newLutLimits = QVector2D(0, 0);
     }
 
-    if (!qFuzzyCompare(newLutLimits, m_lutLimits)) {
-        m_lutLimits = newLutLimits;
-        Q_EMIT lutLimitsChanged();
-    }
-
-    if (uninited) {
-        setLutParams(m_lutLimits);
-    }
+    return newLutLimits;
 }
 
 void ImageOutputValue::textureDeleted()
@@ -256,13 +250,13 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
                      &ImageOutputValue::lutLimitsChanged,
                      this, &BackendStoreItem::valueChanged);
     QObject::connect(&m_internalValue,
-                     &ImageOutputValue::textureChanged, this,
+                     &ImageOutputValue::textureChanged,
                      [this]() {
-                        if (this->m_internalValue.texture()) {
-                            this->m_ready = true;
-                            Q_EMIT this->statusChanged();
-                            this->m_internalValue.calculateLutLimits();
-                        }
+                         bool tmp = m_ready;
+                         m_ready = (bool)m_internalValue.texture();
+                         if (tmp != m_ready) {
+                             Q_EMIT statusChanged();
+                         }
                      });
 
     if (m_source.lock() == nullptr) {
@@ -377,8 +371,13 @@ void BackendOutput::onExecuted()
 {
     if (m_interfaceModule) {
         auto im = m_interfaceModule->getImage();
+
+        QVector2D lutLimits = details::calculateLutLimits(im);
+
         ImageWrapper wrapper;
         wrapper.m_image = im;
+
         Q_EMIT m_internalValue.requestSetTextureFromImage(wrapper);
+        Q_EMIT m_internalValue.requestSetLutLimits(lutLimits);
     }
 }

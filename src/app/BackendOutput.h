@@ -40,14 +40,13 @@ public:
     QVector2D lutLimits() const;
     void setColor(QColor color);
     void setVisible(bool visible);
-    void setLutParams(QVector2D lutParams);
     virtual ~ImageOutputValue();
     static QVariantMap convertToVariantMap(ImageOutputValue* x);
     QVariantMap toVariantMap() const;
     void fromVariantMap(QVariantMap vmap);
-    void calculateLutLimits();
 public Q_SLOTS:
     void setTextureFromImage(const ImageWrapper& wrapper);
+    void setLutParams(QVector2D lutParams);
 Q_SIGNALS:
     void textureChanged();
     void sizeChanged();
@@ -56,6 +55,7 @@ Q_SIGNALS:
     void lutParamsChanged();
     void lutLimitsChanged();
     void requestSetTextureFromImage(const ImageWrapper& wrapper);
+    void requestSetLutLimits(QVector2D);
 protected:
     std::shared_ptr<MultiDimImage<float>> m_image;
     VolumeTexture* m_texture = nullptr;
@@ -65,6 +65,10 @@ protected:
     QVector2D m_lutLimits = QVector2D(0, 0);
     void textureDeleted();
 };
+
+namespace details {
+    QVector2D calculateLutLimits(std::shared_ptr<core::multidim_image_platform::MultiDimImage<float>> im);
+}
 
 class BackendOutput : public BackendStoreItem {
     typedef core::compute_platform::ComputePlatform ComputePlatform;

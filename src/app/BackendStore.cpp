@@ -577,8 +577,10 @@ void BackendStore::startAsyncEvaluate(int uid)
             pybind11::gil_scoped_acquire acquire;
             try {
                 if (uid == -1) {
-                    this->m_platform.printModuleConnections();
-                    this->m_platform.run();
+                    m_platform.printModuleConnections();
+                    ModuleContext ctx;
+                    ctx.runId = 0;
+                    m_platform.run(ctx, m_asyncTaskShouldRun);
                 } else {
                     // TODO:
                 }
@@ -612,12 +614,15 @@ void BackendStore::startAsyncEvaluateBatch()
                 do {
                     ModuleContext ctx;
                     ctx.runId = runIdCnt++;
-                    vector<ModuleContext> ctxs = m_platform.run(ctx);
+
+                    vector<ModuleContext> ctxs =
+                        m_platform.run(ctx, m_asyncTaskShouldRun);
+
                     shouldRun = any_of(ctxs.begin(), ctxs.end(),
                         [](ModuleContext ctx) {
                             return ctx.hasNext;
                         });
-                } while(shouldRun && this->m_asyncTaskShouldRun);
+                } while(shouldRun && m_asyncTaskShouldRun);
             } catch (exception& e) {
                 qCritical() << e.what();
             }

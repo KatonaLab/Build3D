@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <QtConcurrent>
 
 using namespace std;
 
@@ -18,10 +19,13 @@ LogCollector& LogCollector::instance()
 
 QString LogCollector::unfilteredLog()
 {
-    return QString::fromStdString(m_log.str());
+    m_rwLock.lockForRead();
+    QString ret = QString::fromStdString(std::string(m_log.str()));
+    m_rwLock.unlock();
+    return ret;
 }
 
-QString newLines(const QString& msg)
+QString LogCollector::newLines(const QString& msg)
 {
     QString newOne(msg);
     if (newOne.endsWith("\n")) {
@@ -30,16 +34,22 @@ QString newLines(const QString& msg)
     return newOne.replace(QString("\n"), QString("<br/>"));
 }
 
+void LogCollector::log(const QString& msg, const std::string& color, const std::string& prefix)
+{
+    m_rwLock.lockForWrite();
+    m_log << "<span style='color:" << color << "'>" << prefix << ": " << newLines(msg).toStdString() << "</span><br/>";
+    m_rwLock.unlock();
+    Q_EMIT logChanged();
+}
+
 void LogCollector::debugMsg(const QString& msg)
 {
-    m_log << "<span style='color:lightseagreen'>debug: " << newLines(msg).toStdString() << "</span><br/>";
-    Q_EMIT logChanged();
+    log(msg, "lightseagreen", "debug");
 }
 
 void LogCollector::infoMsg(const QString& msg)
 {
-    m_log << "<span style='color:seagreen'>info: " << newLines(msg).toStdString() << "</span><br/>";
-    Q_EMIT logChanged();
+    log(msg, "seagreen", "info");
 }
 
 void LogCollector::warningMsg(const QString& msg)
@@ -57,20 +67,17 @@ void LogCollector::warningMsg(const QString& msg)
         return;
     }
 
-    m_log << "<span style='color:gold'>warning: " << newLines(msg).toStdString() << "</span><br/>";
-    Q_EMIT logChanged();
+    log(msg, "gold", "warning");
 }
 
 void LogCollector::criticalMsg(const QString& msg)
 {
-    m_log << "<span style='color:crimson'>critical: " << newLines(msg).toStdString() << "</span><br/>";
-    Q_EMIT logChanged();
+    log(msg, "crimson", "critical");
 }
 
 void LogCollector::fatalMsg(const QString& msg)
 {
-    m_log << "<span style='color:crimson'>fatal: " << newLines(msg).toStdString() << "</span><br/>";
-    Q_EMIT logChanged();
+    log(msg, "crimson", "fatal");
 }
 
 LogCollector::LogCollector(QObject* parent)
@@ -95,8 +102,11 @@ QObject* singletonLogCollectorProvider(QQmlEngine *engine, QJSEngine *scriptEngi
     return LogCollector::m_instance;
 }
 
-void logMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void logMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
+    static QMutex mtx;
+    QMutexLocker locker(&mtx);
+
     QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
         case QtDebugMsg:

@@ -53,6 +53,7 @@ bool OutputPort::bind(std::weak_ptr<InputPort> inputPort)
                 ptr->m_source = shared_from_this();
                 return true;
             }
+            // TODO: remove or throw if necessary
             std::cout << "can not connect types " << traits().typeName() << " -> " << ptr->traits().typeName() << std::endl;
         }
     }

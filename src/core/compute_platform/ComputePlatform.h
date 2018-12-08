@@ -6,6 +6,7 @@
 #include <core/directed_acyclic_graph/types.h>
 #include "ModuleContext.h"
 #include <vector>
+#include <atomic>
 
 namespace core {
 namespace compute_platform {
@@ -19,7 +20,7 @@ public:
     // TODO: removeModule <- NOTE: it is done when the ComputeModule instance is destroyed
     // TODO: should be managed explicilty, not just through module ctr/dctr ?
     size_t size() const;
-    std::vector<ModuleContext> run(ModuleContext ctx = ModuleContext());
+    std::vector<ModuleContext> run(ModuleContext ctx = ModuleContext(), const std::atomic<bool>& shouldRun = true);
     bool checkCompleteness();
     // TODO: test this function
     void printModuleConnections();
