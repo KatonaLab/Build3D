@@ -12,6 +12,15 @@
 #include "VolumeTexture.h"
 #include <QJsonValue>
 
+// Helper class to enable handing over std::shared_ptr<MultiDimImage<float>>
+// through signal/slots.
+class ImageWrapper {
+    template <typename T> using MultiDimImage = core::multidim_image_platform::MultiDimImage<T>;
+public:
+    std::shared_ptr<MultiDimImage<float>> m_image;
+};
+Q_DECLARE_METATYPE(ImageWrapper);
+
 class ImageOutputValue: public QObject {
     Q_OBJECT
     Q_PROPERTY(VolumeTexture* texture READ texture NOTIFY textureChanged)
@@ -29,7 +38,6 @@ public:
     bool visible() const;
     QVector2D lutParams() const;
     QVector2D lutLimits() const;
-    void setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image);
     void setColor(QColor color);
     void setVisible(bool visible);
     void setLutParams(QVector2D lutParams);
@@ -38,6 +46,8 @@ public:
     QVariantMap toVariantMap() const;
     void fromVariantMap(QVariantMap vmap);
     void calculateLutLimits();
+public Q_SLOTS:
+    void setTextureFromImage(const ImageWrapper& wrapper);
 Q_SIGNALS:
     void textureChanged();
     void sizeChanged();
@@ -45,6 +55,7 @@ Q_SIGNALS:
     void visibleChanged();
     void lutParamsChanged();
     void lutLimitsChanged();
+    void requestSetTextureFromImage(const ImageWrapper& wrapper);
 protected:
     std::shared_ptr<MultiDimImage<float>> m_image;
     VolumeTexture* m_texture = nullptr;

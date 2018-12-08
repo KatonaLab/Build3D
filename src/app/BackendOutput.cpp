@@ -15,8 +15,12 @@ ImageOutputValue::ImageOutputValue(QObject* parent)
     static bool registered = false;
     if (!registered) {
         QMetaType::registerConverter<ImageOutputValue*, QVariantMap>(ImageOutputValue::convertToVariantMap);
+        qRegisterMetaType<ImageWrapper>();
         registered = true;
     }
+
+    QObject::connect(this, &ImageOutputValue::requestSetTextureFromImage,
+                     this, &ImageOutputValue::setTextureFromImage);
 }
 
 QVariantMap ImageOutputValue::convertToVariantMap(ImageOutputValue* x)
@@ -129,8 +133,9 @@ QColor details::waveLengthToQColor(double w, double gamma)
     return QColor::fromRgb(floor(R), floor(G), floor(B));
 }
 
-void ImageOutputValue::setTextureFromImage(std::shared_ptr<MultiDimImage<float>> image)
+void ImageOutputValue::setTextureFromImage(const ImageWrapper& wrapper)
 {
+    std::shared_ptr<MultiDimImage<float>> image = wrapper.m_image;
     if (image.get() != m_image.get()) {
         m_image = image;
         if (m_image) {
@@ -250,6 +255,15 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
     QObject::connect(&m_internalValue,
                      &ImageOutputValue::lutLimitsChanged,
                      this, &BackendStoreItem::valueChanged);
+    QObject::connect(&m_internalValue,
+                     &ImageOutputValue::textureChanged, this,
+                     [this]() {
+                        if (this->m_internalValue.texture()) {
+                            this->m_ready = true;
+                            Q_EMIT this->statusChanged();
+                            this->m_internalValue.calculateLutLimits();
+                        }
+                     });
 
     if (m_source.lock() == nullptr) {
         throw std::runtime_error("invalid source port");
@@ -363,11 +377,8 @@ void BackendOutput::onExecuted()
 {
     if (m_interfaceModule) {
         auto im = m_interfaceModule->getImage();
-        m_internalValue.setTextureFromImage(im);
-        if (m_internalValue.texture()) {
-            m_ready = true;
-            Q_EMIT statusChanged();
-            m_internalValue.calculateLutLimits();
-        }
+        ImageWrapper wrapper;
+        wrapper.m_image = im;
+        Q_EMIT m_internalValue.requestSetTextureFromImage(wrapper);
     }
 }

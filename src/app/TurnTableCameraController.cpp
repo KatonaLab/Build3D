@@ -56,7 +56,7 @@ TurnTableCameraController::TurnTableCameraController(Qt3DCore::QNode *parent)
             // TODO: not working on macOS, Qt doesn't ends up at this slot after double clicked
             // debug
             if (m_camera) {
-                m_camera->viewAll();
+                // m_camera->viewAll();
             }
         });
 }

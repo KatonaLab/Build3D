@@ -2,14 +2,14 @@ include($$TOP_SRC_DIR/common.pri)
 include($$TOP_SRC_DIR/pybind11.pri)
 include($$TOP_SRC_DIR/libics.pri)
 include($$TOP_SRC_DIR/core.pri)
-include($$TOP_SRC_DIR/crashpad.pri)
+# include($$TOP_SRC_DIR/crashpad.pri)
 
 SOURCES += $$files(*.cpp, false)
 HEADERS += $$files(*.h, false)
 HEADERS += $$files(*.hpp, false)
 HEADERS += $$files(*.ipp, false)
 
-QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras
+QT += gui core widgets quick qml 3dcore 3drender 3dinput quickwidgets 3dextras concurrent
 
 CONFIG += app_bundle
 TARGET = a3-dc

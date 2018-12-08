@@ -12,9 +12,9 @@
 #include <QCommandLineParser>
 #include <QDir>
 
-#include "client/crashpad_client.h"
-#include "client/crash_report_database.h"
-#include "client/settings.h"
+// #include "client/crashpad_client.h"
+// #include "client/crash_report_database.h"
+// #include "client/settings.h"
 
 #include "version.h"
 #include "LogCollector.h"
@@ -33,48 +33,48 @@
 
 
 using namespace std;
-using namespace crashpad;
+// using namespace crashpad;
 
-static bool startCrashHandler()
-{
-    map<string, string> annotations;
-    vector<string> arguments;
-    CrashpadClient client;
-    bool rc;
+// static bool startCrashHandler()
+// {
+//     map<string, string> annotations;
+//     vector<string> arguments;
+//     CrashpadClient client;
+//     bool rc;
     
-#ifdef _WIN32
-    wchar_t exePathChar[2048];
-    wstring exePath(exePathChar, GetModuleFileName(NULL, exePathChar, 2048));
-    exePath = exePath.substr(0, exePath.rfind('\\'));
-    // TODO: change it to AppData since Program Files is readonly for the application
-    wstring db_path(exePath + L"\\crashes");
-    wstring handler_path(exePath + L"\\crashpad_handler.exe");
-    wcout << handler_path << endl;
-#else
-    string db_path("crashes/");
-    string handler_path("./crashpad_handler");
-#endif
+// #ifdef _WIN32
+//     wchar_t exePathChar[2048];
+//     wstring exePath(exePathChar, GetModuleFileName(NULL, exePathChar, 2048));
+//     exePath = exePath.substr(0, exePath.rfind('\\'));
+//     // TODO: change it to AppData since Program Files is readonly for the application
+//     wstring db_path(exePath + L"\\crashes");
+//     wstring handler_path(exePath + L"\\crashpad_handler.exe");
+//     wcout << handler_path << endl;
+// #else
+//     string db_path("crashes/");
+//     string handler_path("./crashpad_handler");
+// #endif
 
-    string url("https://a3dc.sp.backtrace.io:6098");
-    annotations["token"] = "e8c10c5d9cd420229c8d21a7d6c365ea88a4dae0d79bc2cc8c4623b851d8bf02";
-    annotations["format"] = "minidump";
+//     string url("https://a3dc.sp.backtrace.io:6098");
+//     annotations["token"] = "e8c10c5d9cd420229c8d21a7d6c365ea88a4dae0d79bc2cc8c4623b851d8bf02";
+//     annotations["format"] = "minidump";
 
-    base::FilePath db(db_path);
-    base::FilePath handler(handler_path);
-    arguments.push_back("--no-rate-limit");
+//     base::FilePath db(db_path);
+//     base::FilePath handler(handler_path);
+//     arguments.push_back("--no-rate-limit");
 
-    unique_ptr<CrashReportDatabase> database =
-        crashpad::CrashReportDatabase::Initialize(db);
+//     unique_ptr<CrashReportDatabase> database =
+//         crashpad::CrashReportDatabase::Initialize(db);
 
-    if (database == nullptr || database->GetSettings() == NULL)
-        return false;
+//     if (database == nullptr || database->GetSettings() == NULL)
+//         return false;
 
-    database->GetSettings()->SetUploadsEnabled(true);
+//     database->GetSettings()->SetUploadsEnabled(true);
 
-    rc = client.StartHandler(handler, db, db, url, annotations, arguments, true, false);
+//     rc = client.StartHandler(handler, db, db, url, annotations, arguments, true, false);
 
-    return rc;
-}
+//     return rc;
+// }
 
 void setSurfaceFormat()
 {

@@ -12,6 +12,9 @@
 #include <fstream>
 #include <algorithm>
 #include <QStandardPaths>
+#include <QtConcurrent>
+
+#include <iostream>
 
 using namespace std;
 using namespace core::compute_platform;
@@ -539,16 +542,42 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
 
 void BackendStore::evaluate(int uid)
 {
-    try {
-        if (uid == -1) {
-            m_platform.printModuleConnections();
-            m_platform.run();
-        } else {
-            // TODO:
-        }
-    } catch (exception& e) {
-        qCritical() << e.what();
+    if (m_taskFuture.isFinished() == false) {
+        return;
+        // TODO: report "already running"
     }
+
+    // the main thread has the Python GIL, if we want to do
+    // python calculations in a background thread we should
+    // acquire the lock.
+    // Here we construct a shared_ptr GIL release, this will
+    // be releasing GIL while gil_scoped_release is alive.
+    // To make sure it is alive during the concurrent run,
+    // we put it to the concurrent lambda function's capture.
+    // When the lambda function starts it can acquire the
+    // lock, since the shared_ptr GIL release is still alive.
+    // After the concurrent lambda, the `acquire` lock will
+    // destroyed (giving up on lock) and the shared_ptr GIL
+    // release will also be destroyed (giving up on the main
+    // thread's GIL release) - everything goes back to the
+    // original.
+
+    std::shared_ptr<pybind11::gil_scoped_release> release =
+        std::make_shared<pybind11::gil_scoped_release>();
+
+    m_taskFuture = QtConcurrent::run([this, uid, release]() {
+        pybind11::gil_scoped_acquire acquire;
+        try {
+            if (uid == -1) {
+                this->m_platform.printModuleConnections();
+                this->m_platform.run();
+            } else {
+                // TODO:
+            }
+        } catch (exception& e) {
+            qCritical() << e.what();
+        }
+    });
 }
 
 void BackendStore::evaluateBatch()

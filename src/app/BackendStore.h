@@ -9,6 +9,7 @@
 #include <QString>
 #include <QUrl>
 #include <QJsonObject>
+#include <QFuture>
 
 #include "BackendStoreItem.h"
 #include "GlobalSettings.h"
@@ -113,6 +114,7 @@ protected:
     bool m_unsaved = false;
     bool m_smoothTextures = false;
     std::map<QString, int> m_moduleTypeCounter;
+    QFuture<void> m_taskFuture;
 
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);
