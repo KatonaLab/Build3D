@@ -145,7 +145,7 @@ QString BackendStore::generateModuleName(const QString &type)
 }
 
 BackendStore::BackendStore(QObject* parent)
-    : QAbstractListModel(parent)
+    : QAbstractListModel(parent), m_asyncTaskShouldRun(true)
 {
     try {
         OutStreamRouters routers;
@@ -169,6 +169,12 @@ BackendStore::BackendStore(QObject* parent)
         QObject::connect(this, &BackendStore::dataChanged, [this]() {
             this->setUnsaved();
         });
+
+        QObject::connect(&m_asyncTaskFutureWatcher, &QFutureWatcher<void>::started,
+                         this, &BackendStore::hasActiveAsyncTaskChanged);
+
+        QObject::connect(&m_asyncTaskFutureWatcher, &QFutureWatcher<void>::finished,
+                         this, &BackendStore::hasActiveAsyncTaskChanged);
 
     } catch (exception& e) {
         qCritical() << e.what();
@@ -540,9 +546,9 @@ bool BackendStore::connect(int outModuleUid, int outPortUid, int inModuleUid, in
     return false;
 }
 
-void BackendStore::evaluate(int uid)
+void BackendStore::startAsyncEvaluate(int uid)
 {
-    if (m_taskFuture.isFinished() == false) {
+    if (hasActiveAsyncTask()) {
         return;
         // TODO: report "already running"
     }
@@ -565,38 +571,62 @@ void BackendStore::evaluate(int uid)
     std::shared_ptr<pybind11::gil_scoped_release> release =
         std::make_shared<pybind11::gil_scoped_release>();
 
-    m_taskFuture = QtConcurrent::run([this, uid, release]() {
-        pybind11::gil_scoped_acquire acquire;
-        try {
-            if (uid == -1) {
-                this->m_platform.printModuleConnections();
-                this->m_platform.run();
-            } else {
-                // TODO:
+    m_asyncTaskShouldRun = true;
+    m_asyncTaskFutureWatcher.setFuture(
+        QtConcurrent::run([this, uid, release]() {
+            pybind11::gil_scoped_acquire acquire;
+            try {
+                if (uid == -1) {
+                    this->m_platform.printModuleConnections();
+                    this->m_platform.run();
+                } else {
+                    // TODO:
+                }
+            } catch (exception& e) {
+                qCritical() << e.what();
             }
-        } catch (exception& e) {
-            qCritical() << e.what();
-        }
-    });
+        }));
 }
 
-void BackendStore::evaluateBatch()
+void BackendStore::startAsyncEvaluateBatch()
 {
-    try {
-        bool shouldRun = false;
-        int runIdCnt = 0;
-        do {
-            ModuleContext ctx;
-            ctx.runId = runIdCnt++;
-            vector<ModuleContext> ctxs = m_platform.run(ctx);
-            shouldRun = any_of(ctxs.begin(), ctxs.end(),
-                [](ModuleContext ctx) {
-                    return ctx.hasNext;
-                });
-        } while(shouldRun);
-    } catch (exception& e) {
-        qCritical() << e.what();
+    // NOTE: see comments for BackendStore::evaluate
+
+    if (hasActiveAsyncTask()) {
+        return;
+        // TODO: report "already running"
     }
+
+    std::shared_ptr<pybind11::gil_scoped_release> release =
+        std::make_shared<pybind11::gil_scoped_release>();
+
+    // TODO: extract the task init and clean up the code
+
+    m_asyncTaskShouldRun = true;
+    m_asyncTaskFutureWatcher.setFuture(
+        QtConcurrent::run([this, release]() {
+            pybind11::gil_scoped_acquire acquire;
+            try {
+                bool shouldRun = false;
+                int runIdCnt = 0;
+                do {
+                    ModuleContext ctx;
+                    ctx.runId = runIdCnt++;
+                    vector<ModuleContext> ctxs = m_platform.run(ctx);
+                    shouldRun = any_of(ctxs.begin(), ctxs.end(),
+                        [](ModuleContext ctx) {
+                            return ctx.hasNext;
+                        });
+                } while(shouldRun && this->m_asyncTaskShouldRun);
+            } catch (exception& e) {
+                qCritical() << e.what();
+            }
+        }));
+}
+
+void BackendStore::stopAsync()
+{
+    m_asyncTaskShouldRun = false;
 }
 
 QVariantList BackendStore::availableModules() const

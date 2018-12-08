@@ -9,11 +9,12 @@
 #include <QString>
 #include <QUrl>
 #include <QJsonObject>
-#include <QFuture>
+#include <QFutureWatcher>
 
 #include "BackendStoreItem.h"
 #include "GlobalSettings.h"
 #include <utility>
+#include <atomic>
 #include <core/compute_platform/ports.h>
 
 class BackendStore;
@@ -33,6 +34,7 @@ class BackendStore: public QAbstractListModel {
     Q_PROPERTY(bool editorMode READ editorMode NOTIFY editorModeChanged)
     Q_PROPERTY(bool unsaved READ unsaved WRITE setUnsaved NOTIFY unsavedChanged)
     Q_PROPERTY(bool smoothTextures READ smoothTextures WRITE setSmoothTextures NOTIFY smoothTexturesChanged)
+    Q_PROPERTY(bool hasActiveAsyncTask READ hasActiveAsyncTask NOTIFY hasActiveAsyncTaskChanged)
 
     friend class BackendStoreSerializer;
 public:
@@ -65,8 +67,9 @@ public:
     Q_INVOKABLE bool connect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
     // TODO:
     // Q_INVOKABLE bool disconnect(int outModuleUid, int outPortUid, int inModuleUid, int inPortUid);
-    Q_INVOKABLE void evaluate(int uid = -1);
-    Q_INVOKABLE void evaluateBatch();
+    Q_INVOKABLE void startAsyncEvaluate(int uid = -1);
+    Q_INVOKABLE void startAsyncEvaluateBatch();
+    Q_INVOKABLE void stopAsync();
     Q_INVOKABLE void readWorkflow(const QUrl& url);
     Q_INVOKABLE void writeWorkflow(const QUrl& url);
     Q_INVOKABLE void newWorkflow();
@@ -97,12 +100,18 @@ public:
             Q_EMIT smoothTexturesChanged();
         }
     }
+
+    bool hasActiveAsyncTask()
+    {
+        return m_asyncTaskFutureWatcher.isRunning();
+    }
 Q_SIGNALS:
     void availableModulesChanged();
     void availableWorkflowsChanged();
     void editorModeChanged();
     void unsavedChanged();
     void smoothTexturesChanged();
+    void hasActiveAsyncTaskChanged();
 
 protected:
     std::vector<std::unique_ptr<BackendStoreItem>> m_items;
@@ -114,7 +123,8 @@ protected:
     bool m_unsaved = false;
     bool m_smoothTextures = false;
     std::map<QString, int> m_moduleTypeCounter;
-    QFuture<void> m_taskFuture;
+    QFutureWatcher<void> m_asyncTaskFutureWatcher;
+    std::atomic<bool> m_asyncTaskShouldRun;
 
     void addBackendStoreItem(std::unique_ptr<BackendStoreItem>&& item);
     void itemChanged(const BackendStoreItem* item, ModuleRoles role);

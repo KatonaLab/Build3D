@@ -74,10 +74,10 @@ ApplicationWindow {
                 text: runBatchAction.text
                 onTriggered: runBatchAction.triggered()
             }
-            // MenuItem {
-            //     text: stopAction.text
-            //     onTriggered: saveWorkflowAction.triggered()
-            // }
+            MenuItem {
+                text: stopAction.text
+                onTriggered: saveWorkflowAction.triggered()
+            }
         }
 
         Menu {
@@ -186,6 +186,7 @@ ApplicationWindow {
     }
 
     header: ToolBar {
+        id: toolBar
         font.pixelSize: 14
         Material.primary: parent.Material.background
 
@@ -245,15 +246,14 @@ ApplicationWindow {
                 text: "\uE80C"
             }
 
-            // ToolButton {
-            //     action: stopAction
-            //     font.family: "fontello"
-            //     text: "\uE80A"
-            // }
-        }
+            ToolButton {
+                id: toolButton
+                action: stopAction
+                font.family: "fontello"
+                text: "\uE80A"
+            }
 
-        RowLayout {
-            anchors.right: parent.right
+            ToolSeparator {}
 
             ToolButton {
                 action: toggleSmoothTexturesAction
@@ -268,6 +268,16 @@ ApplicationWindow {
                 onClicked: {
                     settings.darkTheme = !settings.darkTheme;
                 }
+            }
+        }
+
+        RowLayout {
+            anchors.right: parent.right
+
+            BusyIndicator {
+                running: ModuleStore.model.hasActiveAsyncTask
+                implicitWidth: toolBar.height
+                implicitHeight: toolBar.height
             }            
         }
     }
@@ -482,21 +492,22 @@ ApplicationWindow {
     Action {
         id: runAction
         text: "Run"
-        onTriggered: ModuleStore.model.evaluate(-1);
+        onTriggered: ModuleStore.model.startAsyncEvaluate(-1);
+        enabled: !ModuleStore.model.hasActiveAsyncTask
     }
 
     Action {
         id: runBatchAction
         text: "Run Batch"
-        onTriggered: ModuleStore.model.evaluateBatch();
+        onTriggered: ModuleStore.model.startAsyncEvaluateBatch();
+        enabled: !ModuleStore.model.hasActiveAsyncTask
     }
 
     Action {
         id: stopAction
         text: "Stop"
-        onTriggered: {
-            // TODO:
-        }
+        onTriggered: ModuleStore.model.stopAsync();
+        enabled: ModuleStore.model.hasActiveAsyncTask
     }
 
     Action {
