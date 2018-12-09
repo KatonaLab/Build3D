@@ -22,7 +22,7 @@ ImageOutputValue::ImageOutputValue(QObject* parent)
     QObject::connect(this, &ImageOutputValue::requestSetTextureFromImage,
                      this, &ImageOutputValue::setTextureFromImage);
     QObject::connect(this, &ImageOutputValue::requestSetLutLimits,
-                     this, &ImageOutputValue::setLutParams);
+                     this, &ImageOutputValue::setLutLimits);
 }
 
 QVariantMap ImageOutputValue::convertToVariantMap(ImageOutputValue* x)
@@ -212,6 +212,18 @@ void ImageOutputValue::setLutParams(QVector2D lutParams)
     if (!qFuzzyCompare(m_lutParams, lutParams)) {
         m_lutParams = lutParams;
         Q_EMIT lutParamsChanged();
+    }
+}
+
+void ImageOutputValue::setLutLimits(QVector2D lutLimits)
+{
+    if (!qFuzzyCompare(m_lutLimits, lutLimits)) {
+        bool uninited = qFuzzyCompare(m_lutLimits, QVector2D(0, 0));
+        m_lutLimits = lutLimits;
+        Q_EMIT lutLimitsChanged();
+        if (uninited) {
+            setLutParams(m_lutLimits);
+        }
     }
 }
 

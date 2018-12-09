@@ -40,13 +40,14 @@ public:
     QVector2D lutLimits() const;
     void setColor(QColor color);
     void setVisible(bool visible);
+    void setLutParams(QVector2D lutParams);
     virtual ~ImageOutputValue();
     static QVariantMap convertToVariantMap(ImageOutputValue* x);
     QVariantMap toVariantMap() const;
     void fromVariantMap(QVariantMap vmap);
 public Q_SLOTS:
     void setTextureFromImage(const ImageWrapper& wrapper);
-    void setLutParams(QVector2D lutParams);
+    void setLutLimits(QVector2D lutLimits);
 Q_SIGNALS:
     void textureChanged();
     void sizeChanged();
