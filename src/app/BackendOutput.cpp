@@ -19,6 +19,8 @@ ImageOutputValue::ImageOutputValue(QObject* parent)
         registered = true;
     }
 
+    // Note: these connections can potentially require a thread-hop,
+    // Qt's signal-slot mechanism takes care of it
     QObject::connect(this, &ImageOutputValue::requestSetTextureFromImage,
                      this, &ImageOutputValue::setTextureFromImage);
     QObject::connect(this, &ImageOutputValue::requestSetLutLimits,
@@ -70,6 +72,11 @@ void ImageOutputValue::fromVariantMap(QVariantMap vmap)
 VolumeTexture* ImageOutputValue::texture() const
 {
     return m_texture;
+}
+
+bool ImageOutputValue::textureReady() const
+{
+    return m_textureReady;
 }
 
 QVector3D ImageOutputValue::size() const
@@ -150,7 +157,11 @@ void ImageOutputValue::setTextureFromImage(const ImageWrapper& wrapper)
             if (m_image->meta.has("wavelength")) {
                 setColor(details::waveLengthToQColor(stod(m_image->meta.get("wavelength"))));
             }
+            m_textureReady = true;
+        }  else {
+            m_textureReady = false;
         }
+        Q_EMIT textureReadyChanged();
         Q_EMIT textureChanged();
         Q_EMIT sizeChanged();
     }
@@ -262,11 +273,10 @@ BackendOutput::BackendOutput(std::weak_ptr<OutputPort> source,
                      &ImageOutputValue::lutLimitsChanged,
                      this, &BackendStoreItem::valueChanged);
     QObject::connect(&m_internalValue,
-                     &ImageOutputValue::textureChanged,
+                     &ImageOutputValue::textureReadyChanged,
                      [this]() {
-                         bool tmp = m_ready;
-                         m_ready = (bool)m_internalValue.texture();
-                         if (tmp != m_ready) {
+                         if (m_ready != m_internalValue.textureReady()) {
+                             m_ready = m_internalValue.textureReady();
                              Q_EMIT statusChanged();
                          }
                      });
@@ -360,6 +370,12 @@ QVariant BackendOutput::value() const
 QVariant BackendOutput::hints() const
 {
     return m_hints;
+}
+
+void BackendOutput::invalidate()
+{
+    ImageWrapper emptyWrapper;
+    Q_EMIT m_internalValue.requestSetTextureFromImage(emptyWrapper);
 }
 
 void BackendOutput::setName(const QString&)

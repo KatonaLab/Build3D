@@ -79,6 +79,11 @@ Entity {
                 value: baseModel.smoothTextures
             }
 
+            Connections {
+                target: model
+                onStatusChanged: console.log("status changed", model.status)
+            }
+
             Component.onCompleted: {
                 lutDataMax = 1.;
             }
@@ -91,7 +96,7 @@ Entity {
 
             // note: JSValue to QColor conversion
             volumeColor: Qt.rgba(model.value.color.r, model.value.color.g, model.value.color.b, model.value.color.a);
-            visible: model.value.visible
+            visible: model.value.visible && model.status == 1
             labeled: false
 
             lutLowCut: model.value.lutParams.x

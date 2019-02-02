@@ -26,6 +26,7 @@ public:
     virtual int status() const = 0;
     virtual QVariant value() const = 0;
     virtual QVariant hints() const = 0;
+    virtual void invalidate() = 0;
 
     virtual void setName(const QString& name) = 0;
     virtual void setStatus(int status) = 0;

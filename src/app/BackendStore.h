@@ -131,6 +131,7 @@ protected:
     void addAvailableNativeModules();
     QString generateModuleName(const QString &type);
     void setUnsaved(bool value = true);
+    void invalidateBackendStoreItems();
 };
 
 class BackendStoreFilter: public QSortFilterProxyModel {

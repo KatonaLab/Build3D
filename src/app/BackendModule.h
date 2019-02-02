@@ -17,6 +17,7 @@ public:
     int status() const override;
     QVariant value() const override;
     QVariant hints() const override;
+    void invalidate() override {}
 
     void setName(const QString& name) override;
     void setStatus(int status) override;

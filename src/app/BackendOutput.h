@@ -24,6 +24,7 @@ Q_DECLARE_METATYPE(ImageWrapper);
 class ImageOutputValue: public QObject {
     Q_OBJECT
     Q_PROPERTY(VolumeTexture* texture READ texture NOTIFY textureChanged)
+    Q_PROPERTY(bool textureReady READ textureReady NOTIFY textureReadyChanged)
     Q_PROPERTY(QVector3D size READ size NOTIFY sizeChanged)
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
@@ -33,6 +34,7 @@ class ImageOutputValue: public QObject {
 public:
     ImageOutputValue(QObject* parent = nullptr);
     VolumeTexture* texture() const;
+    bool textureReady() const;
     QVector3D size() const;
     QColor color() const;
     bool visible() const;
@@ -50,6 +52,7 @@ public Q_SLOTS:
     void setLutLimits(QVector2D lutLimits);
 Q_SIGNALS:
     void textureChanged();
+    void textureReadyChanged();
     void sizeChanged();
     void colorChanged();
     void visibleChanged();
@@ -60,6 +63,7 @@ Q_SIGNALS:
 protected:
     std::shared_ptr<MultiDimImage<float>> m_image;
     VolumeTexture* m_texture = nullptr;
+    bool m_textureReady = false;
     QColor m_color;
     bool m_visible = false;
     QVector2D m_lutParams = QVector2D(0, 0);
@@ -85,6 +89,7 @@ public:
     int status() const override;
     QVariant value() const override;
     QVariant hints() const override;
+    void invalidate() override;
 
     void setName(const QString& name) override;
     void setStatus(int status) override;

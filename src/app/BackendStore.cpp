@@ -136,6 +136,13 @@ void BackendStore::setUnsaved(bool value)
     }
 }
 
+void BackendStore::invalidateBackendStoreItems()
+{
+    for (auto& item: m_items) {
+        item->invalidate();
+    }
+}
+
 QString BackendStore::generateModuleName(const QString &type)
 {
     if (!m_moduleTypeCounter.count(type)) {
@@ -553,6 +560,8 @@ void BackendStore::startAsyncEvaluate(int uid)
         // TODO: report "already running"
     }
 
+    invalidateBackendStoreItems();
+
     // the main thread has the Python GIL, if we want to do
     // python calculations in a background thread we should
     // acquire the lock.
@@ -598,6 +607,8 @@ void BackendStore::startAsyncEvaluateBatch()
         return;
         // TODO: report "already running"
     }
+
+    invalidateBackendStoreItems();
 
     std::shared_ptr<pybind11::gil_scoped_release> release =
         std::make_shared<pybind11::gil_scoped_release>();
