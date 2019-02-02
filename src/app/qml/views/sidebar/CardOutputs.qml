@@ -20,7 +20,7 @@ Repeater {
 
         sourceComponent: {
             switch (model.type) {
-                case "uint32-image": return floatImageOutputDelegate;
+                case "int-image": return floatImageOutputDelegate;
                 case "float-image": return floatImageOutputDelegate;
                 case "int":
                 case "float":

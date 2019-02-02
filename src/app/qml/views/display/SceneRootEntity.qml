@@ -65,6 +65,7 @@ Entity {
         delegate: VolumeEntity {
             uid: model.uid
 
+            // arbitrary size scaling
             property real scale: 1.0/512.0
 
             width: model.value.size.x * scale

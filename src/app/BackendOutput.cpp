@@ -66,7 +66,7 @@ void ImageOutputValue::fromVariantMap(QVariantMap vmap)
     }
 }
 
-// TODO: move to separate file
+// TODO: move to a separate file
 VolumeTexture* ImageOutputValue::texture() const
 {
     return m_texture;

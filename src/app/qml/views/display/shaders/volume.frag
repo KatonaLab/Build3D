@@ -8,7 +8,7 @@ out vec4 outputColor;
 uniform sampler2D backFaceMap;
 uniform sampler3D volumeTexture;
 uniform vec4 volumeColor;
-uniform vec4 lutParameters;
+uniform vec4 lutParameters; // dataMinValue=0, dataMaxValue=1, lutLowCut, lutHightCut
 uniform float accumDivisor;
 uniform float visible;
 uniform float labeled;
@@ -53,38 +53,17 @@ vec3 hash31(float p)
 
 //----------------------------------------------------------------------------------------
 
-float lut(in sampler3D tex, in vec3 pos, in vec4 params)
+float lut(in float t, in vec4 params)
 {
     // normalize to [0, 1] by dividing with max data value
-    float x = texture(tex, pos).r / params.y;
-    float a = params.z;
-    float b = params.w + 0.0001;
-    // float r = max(b - a, 0.0001); // prevent division by zero, TODO: do something with it, it doesnt work
+    float x = (t - params.x) / params.y;
+    float a = params.z - 0.0001;
+    float b = params.w + 0.0001; // small offset to prevent div by 0
     float r = b - a;
-    // return 0 if x < a
-    // return x if a < x < b
-    // return 0 if b < x
+    // return (x - a)/(b - a) if a <= x <= b
+    // return 0 otherwise
     // https://www.wolframalpha.com/input/?i=((min(max(x,+2.5),+4)+-+2.5)%2F(4-2.5)+-+step(x-4)
     return (clamp(x, a, b) - a) / r - step(b, x);
-    // return (clamp(x, a, b) - a) / r;
-    //return a;
-}
-
-float lut2(in float t, in vec4 params)
-{
-    // normalize to [0, 1] by dividing with max data value
-    float x = t / params.y;
-    float a = params.z;
-    float b = params.w + 0.0001;
-    // float r = max(b - a, 0.0001); // prevent division by zero, TODO: do something with it, it doesnt work
-    float r = b - a;
-    // return 0 if x < a
-    // return x if a < x < b
-    // return 0 if b < x
-    // https://www.wolframalpha.com/input/?i=((min(max(x,+2.5),+4)+-+2.5)%2F(4-2.5)+-+step(x-4)
-    return (clamp(x, a, b) - a) / r - step(b, x);
-    // return (clamp(x, a, b) - a) / r;
-    //return a;
 }
 
 vec3 getLabelColor(in sampler3D tex, in vec3 pos)
@@ -102,12 +81,11 @@ void main()
     for (int i = 0; i <= 48; ++i) {
         vec3 pos = mix(far, near, float(i) * 1./48.);
         float x = texture(volumeTexture, pos).r;
-        // alpha = alpha + lut2(x, lutParameters) * 1./48.;
-        alpha = max(alpha, lut2(x, lutParameters));
-        if (labeled < 0.5) {
-            continue;
-        }
-        labelColor = labelColor + getLabelColor(volumeTexture, pos) * 1./48.;
+        alpha = max(alpha, lut(x, lutParameters));
+        // if (labeled < 0.5) {
+        //     continue;
+        // }
+        // labelColor = labelColor + getLabelColor(volumeTexture, pos) * 1./48.;
     }
     vec3 finalColor = mix(alpha * volumeColor.rgb, labelColor, labeled);
     outputColor = vec4(accumDivisor * visible * finalColor, 1.0);
