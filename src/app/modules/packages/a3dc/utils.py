@@ -4,8 +4,8 @@ import subprocess
 import random
 import traceback
 import numpy as np
-from .constants import SEPARATOR, QUOTE_LIST
-
+#from .constants import SEPARATOR, QUOTE_LIST
+from constants import SEPARATOR, QUOTE_LIST
 
 def reorder_list(lst, val_list):
 

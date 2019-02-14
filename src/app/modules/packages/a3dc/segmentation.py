@@ -3,8 +3,8 @@ from skimage.filters import threshold_local
 import cv2
 import numpy as np
 import SimpleITK as sitk
-from .utils import round_up_to_odd, convert_array_type
-
+#from .utils import round_up_to_odd, convert_array_type
+from utils import round_up_to_odd, convert_array_type
 
 
 ###############################################################################
@@ -172,22 +172,30 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
         raise Exception('Mode has to be amond the following:\n'+str(method_list))
     
     blocksize=round_up_to_odd(blocksize)
-    converted_image=img_as_ubyte(ndarray)
+    
+    
+    #For 2D images array needs to be reshaped to run properly through next cycle
+    if len(ndarray.shape)<3:
+        ndarray=[ndarray]
+    
     #Cycle through image
-    outputImage = []
+    outputImage = [] 
+    converted_image=img_as_ubyte(ndarray)
     for i in range(len(ndarray)):
         
         if method == 'Mean':
     
-            outputImage.append(threshold_local(ndarray[i], blocksize, 'mean', float(offset)))
+            outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                                cv2.THRESH_BINARY, blocksize, offset))
 
         elif method == 'Gaussian':
+            
             outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                 cv2.THRESH_BINARY, blocksize, offset))
         else:
             raise LookupError('Not a valid method!')
 
-    return np.asarray(outputImage)
+    return (np.asarray(outputImage)>0).astype(np.int8)
 
 ###############################################################################
 ##############################Preprocessing####################################
