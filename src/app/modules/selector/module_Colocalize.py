@@ -8,7 +8,7 @@ from modules.packages.a3dc.interface import colocalization, apply_filter
 from modules.packages.a3dc.io import save_data, save_image
 from modules.packages.a3dc.utils import quote, get_next_filename, error, warning, value_to_key, dictinary_equal, rename_duplicates,reorder_list
 from modules.packages.a3dc.constants import SEPARATOR
-from modules.packages.a3dc.core import VividImage
+from modules.packages.a3dc.ImageClass import VividImage
 
 
 CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']

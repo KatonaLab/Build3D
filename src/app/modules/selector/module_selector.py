@@ -3,7 +3,7 @@ import copy
 import sys
 import a3dc_module_interface as a3
 from modules.packages.a3dc.utils import error, warning
-from modules.packages.a3dc.core import VividImage
+from modules.packages.a3dc.ImageClass import VividImage
 from modules.packages.a3dc.constants import SEPARATOR
 
 
