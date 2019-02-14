@@ -4,7 +4,12 @@ import cv2
 import numpy as np
 import SimpleITK as sitk
 from .utils import round_up_to_odd, convert_array_type
-import warnings
+
+
+
+###############################################################################
+###############################Segmentation####################################
+###############################################################################
 
 def tag_image(ndarray):
 
@@ -27,7 +32,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
     '''The first dimension of the array has to start with z (shape of (z,x,y) or (z,y,x)) 
     '''
 
-    #Initialization
+    #Initializaton
     threshold_dict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                             'Huang': sitk.HuangThresholdImageFilter(),
                             'MaxEntropy': sitk.MaximumEntropyThresholdImageFilter(),
@@ -184,4 +189,69 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
 
     return np.asarray(outputImage)
 
+###############################################################################
+##############################Preprocessing####################################
+###############################################################################
+
+def smoothingGaussianFilter(image, sigma):
+
+    itk_img = sitk.GetImageFromArray(image)
+    pixel_type = itk_img.GetPixelID()
+
+    sGaussian = sitk.SmoothingRecursiveGaussianImageFilter()
+    sGaussian.SetSigma(float(sigma))
+    itk_img = sGaussian.Execute(itk_img)
+
+    caster = sitk.CastImageFilter()
+    caster.SetOutputpixel_type(pixel_type)
+
+    return sitk.GetArrayFromImage(caster.Execute(itk_img))
+
+
+def discreteGaussianFilter(image, sigma):
+    itk_img = sitk.GetImageFromArray(image)
+    pixel_type = itk_img.GetPixelID()
+
+    dGaussian = sitk.DiscreteGaussianImageFilter ()
+    dGaussian.SetVariance(int(sigma))
+    dGaussian.SetUseImageSpacing(False)
+    itk_img = dGaussian.Execute(itk_img)
+
+    caster = sitk.CastImageFilter(itk_img)
+    caster.SetOutputpixel_type(pixel_type)
+
+    return sitk.GetArrayFromImage(caster.Execute(itk_img))
+
+
+def medianFilter(image, radius):
+    itk_img = sitk.GetImageFromArray(image)
+    pixel_type = itk_img.GetPixelID()
+
+    median = sitk.MedianImageFilter()
+    median.SetRadius(int(radius))
+    itk_img = median.Execute(itk_img)
+
+    caster = sitk.CastImageFilter(itk_img)
+    caster.SetOutputpixel_type(pixel_type)
+
+    return sitk.GetArrayFromImage(caster.Execute(itk_img))
+
+
+def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, multiplier=2.5, NbrOfIterations=5,
+                              replaceValue=255):
+    itk_img = sitk.GetImageFromArray(image)
+
+
+    filter = sitk.ConfidenceConnectedImageFilter()
+    filter.SetSeedList(seedList)
+    filter.SetMultiplier(multiplier)
+    filter.SetNumberOfIterations(NbrOfIterations)
+    filter.SetReplaceValue(replaceValue)
+    filter.SetInitialNeighborhoodRadius(initialNeighborhoodRadius)
+    itk_img = filter.Execute(itk_img)
+
+
+    return sitk.GetArrayFromImage(itk_img)
+
+ 
 
