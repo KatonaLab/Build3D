@@ -1,24 +1,112 @@
 import unittest
 import segmentation
 import numpy as np
+import time
+import cProfile
+import pstats 
+import io
+import sys
 
 class SegmentationTest(unittest.TestCase):
+        
+    def setUp(self):
+        self.__start = time.time()
+        print('Running: {}'.format(self.id()))
+        #print('{} ({}s)'.format(self.id(), round(elapsed, 2))) 
+        
+    def tearDown(self):
+        elapsed = time.time() - self.__start
+        print('Finished: {} ({}s)\n'.format(self.id(), round(elapsed, 4)))    
     
     def test_tag_image(self):
         
-        input_array = np.array([[1,0,3],[0,0,0], [0,5,6]],dtype=np.uint16)
-        result_array = np.array([[1,0,2],[0,0,0], [0,3,3]], dtype=np.uint32)
+        input_array = np.array([[0,0,0,0,0,0,0,0,0,0],
+                                [0,200,200,200,0,0,0,0,0,0], 
+                                [0,200,255,200,0,0,0,0,0,0],
+                                [0,200,200,200,0,0,0,0,0,0],
+                                [0,0,0,0,0,0,50,50,50,0],
+                                [150,150,150,150,150,0,50,100,50,0],
+                                [150,50,100,50,150,0,50,50,50,0],
+                                [150,100,150,100,150,0,0,0,0,0],
+                                [150,50,100,50,150,0,0,255,0,255],
+                                [150,150,150,150,150,0,0,0,0,0]],dtype=np.uint16)
+    
+    
+        input_array_2 = np.array([[[0,0,0,0,0,0,0,0,0,0],
+                            [0,200,200,200,0,0,0,0,0,0], 
+                            [0,200,255,200,0,0,0,0,0,0],
+                            [0,200,200,200,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,50,50,50,0],
+                            [150,150,150,150,150,0,50,100,50,0],
+                            [150,50,100,50,150,0,50,50,50,0],
+                            [150,100,150,100,150,0,0,0,0,0],
+                            [150,50,100,50,150,0,0,255,0,255],
+                            [150,150,150,150,150,0,0,0,0,0]],[[0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0], 
+                            [0,0,255,0,0,0,0,0,0,0],
+                            [0,0,200,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,50,50,50,0],
+                            [0,0,0,0,150,0,50,100,50,0],
+                            [0,50,100,50,0,0,50,50,50,0],
+                            [0,100,150,100,0,0,0,0,0,0],
+                            [0,50,100,50,0,0,0,255,0,255],
+                            [0,0,0,0,150,0,0,0,0,0]]],dtype=np.uint16)
+
         
-        output_array=segmentation.tag_image(input_array)
+        case_1={'input':input_array, 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                          [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                          [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                          [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                          [0, 0, 0, 0, 0, 0, 2, 2, 2, 0],
+                                                          [3, 3, 3, 3, 3, 0, 2, 2, 2, 0],
+                                                          [3, 3, 3, 3, 3, 0, 2, 2, 2, 0],
+                                                          [3, 3, 3, 3, 3, 0, 0, 0, 0, 0],
+                                                          [3, 3, 3, 3, 3, 0, 0, 4, 0, 5],
+                                                          [3, 3, 3, 3, 3, 0, 0, 0, 0, 0]],dtype=np.uint32)} 
         
-        #Test if data types are equal
-        with self.subTest():
-            self.assertEqual(output_array.dtype,  result_array.dtype,  msg="Array data types are not equal!")
         
-        #Test if array values are equal
-        #If data type is float use assert_almost_equal or assert_allclose
-        with self.subTest():
-            np.testing.assert_array_equal(output_array,result_array, verbose=True,err_msg="Error!")
+        case_2={'input':input_array_2, 'result':np.array([[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 0, 0, 0, 0, 0, 2, 2, 2, 0],
+                                                                      [3, 3, 3, 3, 3, 0, 2, 2, 2, 0],
+                                                                      [3, 3, 3, 3, 3, 0, 2, 2, 2, 0],
+                                                                      [3, 3, 3, 3, 3, 0, 0, 0, 0, 0],
+                                                                      [3, 3, 3, 3, 3, 0, 0, 4, 0, 5],
+                                                                      [3, 3, 3, 3, 3, 0, 0, 0, 0, 0]],
+
+                                                                     [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 0, 0, 0, 0, 0, 2, 2, 2, 0],
+                                                                      [0, 0, 0, 0, 3, 0, 2, 2, 2, 0],
+                                                                      [0, 3, 3, 3, 0, 0, 2, 2, 2, 0],
+                                                                      [0, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+                                                                      [0, 3, 3, 3, 0, 0, 0, 4, 0, 5],
+                                                                      [0, 0, 0, 0, 3, 0, 0, 0, 0, 0]]],dtype=np.uint32)} 
+        case_list=[case_1,case_2]
+        
+        
+        for idx, cs in enumerate(case_list):
+            
+            output_array=segmentation.tag_image(cs['input'])
+            result_array=cs['result']
+            
+
+            case_text="Case "+str(idx)
+            
+            #Test if data types are equal
+            with self.subTest():
+                self.assertEqual(output_array.dtype,  result_array.dtype, msg=case_text) 
+            
+            #Test if array values are equal
+            #If data type is float use assert_almost_equal or assert_allclose
+            with self.subTest():
+                np.testing.assert_array_equal(output_array,result_array, verbose=True,err_msg=case_text)        
+        
+
         
     def test_threshold_manual(self):
         
@@ -32,6 +120,27 @@ class SegmentationTest(unittest.TestCase):
                                 [150,100,150,100,150,0,0,0,0,0],
                                 [150,50,100,50,150,0,0,255,0,255],
                                 [150,150,150,150,150,0,0,0,0,0]],dtype=np.uint16)
+    
+    
+        input_array_2 = np.array([[[0,0,0,0,0,0,0,0,0,0],
+                            [0,200,200,200,0,0,0,0,0,0], 
+                            [0,200,255,200,0,0,0,0,0,0],
+                            [0,200,200,200,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,50,50,50,0],
+                            [150,150,150,150,150,0,50,100,50,0],
+                            [150,50,100,50,150,0,50,50,50,0],
+                            [150,100,150,100,150,0,0,0,0,0],
+                            [150,50,100,50,150,0,0,255,0,255],
+                            [150,150,150,150,150,0,0,0,0,0]],[[0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0], 
+                            [0,0,255,0,0,0,0,0,0,0],
+                            [0,0,200,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,50,50,50,0],
+                            [0,0,0,0,150,0,50,100,50,0],
+                            [0,50,100,50,0,0,50,50,50,0],
+                            [0,100,150,100,0,0,0,0,0,0],
+                            [0,50,100,50,0,0,0,255,0,255],
+                            [0,0,0,0,150,0,0,0,0,0]]],dtype=np.uint16)
         
         
         
@@ -80,7 +189,7 @@ class SegmentationTest(unittest.TestCase):
                                                             [0, 1, 0, 1, 0, 1, 1, 1, 1, 1],
                                                             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]],dtype=np.uint8)} 
 
-
+    
     
         
         case_list=[case_1,case_2,case_3,case_4]
@@ -377,9 +486,142 @@ class SegmentationTest(unittest.TestCase):
             with self.subTest():
                 self.assertEqual(output[1], cs['result_threshold'], msg='Threshold values do not match '+case_text)                
 
+
+    def test_threshold_adaptive(self):
+        
+        input_array = np.array([[0,0,0,0,0,0,0,0,0,0],
+                                [0,200,200,200,0,0,0,0,0,0], 
+                                [0,200,255,200,0,0,0,0,0,0],
+                                [0,200,200,200,0,0,0,0,0,0],
+                                [0,0,0,0,0,0,50,50,50,0],
+                                [150,150,150,150,150,0,50,100,50,0],
+                                [150,50,100,50,150,0,50,50,50,0],
+                                [150,100,150,100,150,0,0,0,0,0],
+                                [150,50,100,50,150,0,0,255,0,255],
+                                [150,150,150,150,150,0,0,0,0,0]],dtype=np.uint16)
+        
+        
+        
+        case_1={'blocksize':2, 'offset':0, 'method':'Mean', 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                               [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                               [1, 0, 0, 0, 1, 0, 1, 1, 1, 0],
+                                                                               [1, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+                                                                               [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array} 
+        
+        case_2={'blocksize':5, 'offset':0, 'method':'Mean', 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                               [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                               [1, 0, 1, 0, 1, 0, 0, 1, 0, 0],
+                                                                               [1, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                                                                               [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array}        
+        
+
+
+        case_3={'blocksize':10, 'offset':0, 'method':'Mean', 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                                [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                                [1, 1, 1, 1, 1, 0, 0, 1, 1, 0],
+                                                                                [1, 0, 1, 0, 1, 0, 0, 1, 1, 0],
+                                                                                [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+                                                                                [1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+                                                                                [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array}
+
+        case_4={'blocksize':2, 'offset':0, 'method':'Gaussian', 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                                   [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                   [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                   [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                   [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                                   [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                                   [1, 0, 0, 0, 1, 0, 1, 1, 1, 0],
+                                                                                   [1, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+                                                                                   [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                                   [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array}         
+        
+        
+        case_5={'blocksize':5, 'offset':0, 'method':'Gaussian', 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                                    [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                    [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                    [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                                    [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                                    [1, 0, 0, 0, 1, 0, 1, 1, 1, 0],
+                                                                                    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+                                                                                    [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                                    [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array}  
+        
+        case_6={'blocksize':10, 'offset':0, 'method':'Gaussian', 'result':np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                                     [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                     [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                     [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                     [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                                     [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                                     [1, 0, 0, 0, 1, 0, 1, 1, 1, 0],
+                                                                                     [1, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                                                                                     [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                                     [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array}  
+    
+        case_7={'blocksize':5, 'offset':2, 'method':'Mean', 'result':np.array([[0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+                                                                               [0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                               [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                               [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                               [1, 0, 1, 0, 1, 0, 0, 1, 1, 0],
+                                                                               [1, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                                                                               [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array} 
+    
+        case_8={'blocksize':5, 'offset':2, 'method':'Gaussian', 'result':np.array([[0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+                                                                                   [0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+                                                                                   [0, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+                                                                                   [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                                                                                   [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                                                                                   [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+                                                                                   [1, 0, 0, 0, 1, 0, 1, 1, 1, 0],
+                                                                                   [1, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+                                                                                   [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                                                                                   [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]],dtype=np.uint8), 'input':input_array}  
+        
+    
+    
+        case_list=[case_1,case_2, case_3, case_4, case_5, case_6, case_7, case_8]#,,case_3,case_4]
+        
+  
+        for idx, cs in enumerate(case_list):
+            
+            output_array=segmentation.threshold_adaptive(cs['input'], method=cs['method'], blocksize=cs['blocksize'], offset=cs['offset'])
+            result_array=cs['result']
+            
+
+            case_text="Case "+str(idx)+" with method="+str(cs['method'])+" blocksize="+str(cs['blocksize'])+" offset="+str(cs['offset'])
+            
+            #Test if data types are equal
+            with self.subTest():
+                self.assertEqual(output_array.dtype,  result_array.dtype, msg=case_text) 
+            
+            #Test if array values are equal
+            #If data type is float use assert_almost_equal or assert_allclose
+            with self.subTest():
+                np.testing.assert_array_equal(output_array,result_array, verbose=True,err_msg=case_text)
+        
+        
+    
+    
+
 if __name__ == '__main__':
 
-    input_array = np.array([[0,0,0,0,0,0,0,0,0,0],
+    input_array = np.array([[[0,0,0,0,0,0,0,0,0,0],
                             [0,200,200,200,0,0,0,0,0,0], 
                             [0,200,255,200,0,0,0,0,0,0],
                             [0,200,200,200,0,0,0,0,0,0],
@@ -388,15 +630,69 @@ if __name__ == '__main__':
                             [150,50,100,50,150,0,50,50,50,0],
                             [150,100,150,100,150,0,0,0,0,0],
                             [150,50,100,50,150,0,0,255,0,255],
-                            [150,150,150,150,150,0,0,0,0,0]],dtype=np.uint16)
+                            [150,150,150,150,150,0,0,0,0,0]],[[0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0], 
+                            [0,0,255,0,0,0,0,0,0,0],
+                            [0,0,200,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,50,50,50,0],
+                            [0,0,0,0,150,0,50,100,50,0],
+                            [0,50,100,50,0,0,50,50,50,0],
+                            [0,100,150,100,0,0,0,0,0,0],
+                            [0,50,100,50,0,0,0,255,0,255],
+                            [0,0,0,0,150,0,0,0,0,0]]],dtype=np.uint16)
+    
+    
+    input_array_2 = np.array([[[0,0], [5,82]],
+                                  [[0,200], [15,45]], 
+                                  [[0,200], [45,70]]], dtype=np.uint16)
     
     methods=['Mean', 'Gaussian']
-    print(segmentation.threshold_adaptive(input_array, method=methods[1], blocksize=5, offset=0))
+    
+    print(list([segmentation.tag_image(input_array)]))
     
      
+    print('\nRunning Tests:')
+    print('-------------\n')
+    
+    #Redirest stderr to dummy stream
+    #Some SimpleITK functions output warnings to stderr
+    sys.stderr = io.StringIO()
+
+
+    #Run cProfiles without saving to files
+    #Using cProfile.run('fun()') convention prints full report
+    pr=cProfile.Profile()#
+    pr.enable()
+    
+    
+    test_suite = unittest.TestLoader().loadTestsFromTestCase(SegmentationTest)
+
+
+    unittest.TestResult()
+    test_stream=io.StringIO()
+    test_result=unittest.TextTestRunner(stream=test_stream, verbosity=4).run(test_suite)
+    
+    pr.disable()
+
+    #Create stream and generate profile stats report form profile
+    s=io.StringIO()
+    ps = pstats.Stats(pr, stream=s)
+    
+    #Format and sort stats report
+    #Sort by cumulative time and only show results for functions containing 'tests'
+    ps.strip_dirs().sort_stats('cumulative').print_stats('test')
+    
+    #Print results
+    print('\nTest Results:')
+    print('-------------\n')
+    print(test_stream.getvalue())
+    #Print formatted stats report
+    print('\nProfile Report:')
+    print('---------------\n')
+    print(s.getvalue())
 
 
 
     
     
-    unittest.main()
+    

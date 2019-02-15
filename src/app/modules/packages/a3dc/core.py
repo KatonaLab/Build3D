@@ -113,20 +113,6 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
             for key in intensity_meas_list:
                 database[key+' in '+img_list[i].metadata['Name']].append(intensity_functions[key](label))
     
-    #Measure object surface
-    if 'surface' in meas_list:
-        #Create and measure Surface Image
-        surface=segmentation.create_surfaceImage(tagged_img)
-      
-        surfaceitk_img=sitk.GetImageFromArray(surface)
-        
-        itk_filter=sitk.LabelShapeStatisticsImageFilter()
-        itk_filter.Execute(surfaceitk_img)
-        surface_data=itk_filter.GetLabels()
-
-        database['surface']=[]
-        for label in surface_data:
-            database['surface'].append(shape_functions['voxelCount'](label))
             
     #Determine objects on front and back surface
     if 'onFaces' in meas_list:

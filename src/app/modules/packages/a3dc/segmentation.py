@@ -116,26 +116,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
     return output, threshold_val
 
 
-def create_surfaceImage(ndarray):
 
-    # Convert nd array to itk image
-    itk_image = sitk.GetImageFromArray(ndarray)
-    pixel_type = itk_image.GetPixelID()
-    # Run binary threshold
-    thresholded_itk_img = sitk.BinaryThreshold(itk_image, 0, 0, 0, 1)
-
-    # Create an parametrize instance ofBinaryContourImageFilter()
-    itk_filter = sitk.BinaryContourImageFilter()
-    itk_filter.SetFullyConnected(False)
-    #Execute to get a surface mask
-    output = itk_filter.Execute(thresholded_itk_img)
-
-    # Change pixel_type of the object map to be the same as the input image
-    caster = sitk.CastImageFilter()
-    caster.SetOutputpixel_type(pixel_type)
-    output=caster.Execute(output)*itk_image
-
-    return sitk.GetArrayFromImage(output)
 
 
 
@@ -176,30 +157,52 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     
     #For 2D images array needs to be reshaped to run properly through next cycle
     if len(ndarray.shape)<3:
-        ndarray=[ndarray]
-    
+        converted_image=[img_as_ubyte(ndarray)]
+    else:
+        converted_image=img_as_ubyte(ndarray)
+
     #Cycle through image
     outputImage = [] 
-    converted_image=img_as_ubyte(ndarray)
-    for i in range(len(ndarray)):
-        
-        if method == 'Mean':
+    for i in range(len(converted_image)):
     
+        if method == 'Mean':
             outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_MEAN_C,
                                                 cv2.THRESH_BINARY, blocksize, offset))
 
-        elif method == 'Gaussian':
-            
+        elif method == 'Gaussian':  
             outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                 cv2.THRESH_BINARY, blocksize, offset))
         else:
             raise LookupError('Not a valid method!')
-
-    return (np.asarray(outputImage)>0).astype(np.int8)
+    
+    #Remove singleton dimension (eg. if image was 2D)
+    outputImage=np.squeeze(np.array(outputImage)>0).astype(np.uint8)
+        
+    return outputImage
 
 ###############################################################################
 ##############################Preprocessing####################################
 ###############################################################################
+def create_surfaceImage(ndarray):
+
+    # Convert nd array to itk image
+    itk_image = sitk.GetImageFromArray(ndarray)
+    pixel_type = itk_image.GetPixelID()
+    # Run binary threshold
+    thresholded_itk_img = sitk.BinaryThreshold(itk_image, 0, 0, 0, 1)
+
+    # Create an parametrize instance ofBinaryContourImageFilter()
+    itk_filter = sitk.BinaryContourImageFilter()
+    itk_filter.SetFullyConnected(False)
+    #Execute to get a surface mask
+    output = itk_filter.Execute(thresholded_itk_img)
+
+    # Change pixel_type of the object map to be the same as the input image
+    caster = sitk.CastImageFilter()
+    caster.SetOutputPixelType(pixel_type)
+    output=caster.Execute(output)*itk_image
+
+    return (sitk.GetArrayFromImage(output)>0).astype(np.uint8)
 
 def smoothingGaussianFilter(image, sigma):
 
