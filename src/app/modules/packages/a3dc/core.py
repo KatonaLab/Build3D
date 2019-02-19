@@ -3,21 +3,50 @@ import numpy as np
 import pandas as pd
 import copy
 from ast import literal_eval
-from . import segmentation
-from .utils import  warning
-from .image_class import VividImage
-from.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS, NUMERIC_DTYPES
-from .utils import reorder_list
+import segmentation
+from utils import  warning
+from ImageClass import VividImage
+from constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS, NUMERIC_DTYPES
+from utils import reorder_list
 import os
+
+
 
 ###############################################################################
 ###############################Analysis########################################
 ###############################################################################
 
 def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBorder', 'centroid', 'meanIntensity', 'maximumPixel']):
+    
+    
+    '''       
+    primary_keys={'SizeX','SizeY',
+                       'SizeZ', 'SizeT'}  
+    
+    
+    secondary_keys={'PhysicalSizeX','PhysicalSizeY',
+                   'PhysicalSizeZ', 'TimeIncrement', 
+                   'PhysicalSizeXUnit',
+                   'PhysicalSizeYUnit',
+                   'PhysicalSizeZUnit',
+                   'TimeIncrementUnit'}
+    
+    
+    res=True
+    if len(error_list)!=0:
+        raise Exception('Incompattible images! The following metadata do not match '+str(error_list))
+        res=False
+        
+    if len(error_list)!=0:
+        raise Warning('Possibly Incompattible images! The following metadata do not match '+str(warning_list))
+    '''                                    
 
     #Convert tagged image to ITK image
+    print('In analysis1: '+str(tagged_img.image.shape))
+    print('In analysis1: '+str(tagged_img.metadata['DimensionOrder']))
     itk_img = tagged_img.to_itk()
+    print('In analysis2: '+str(tagged_img.image.shape))
+    print('In analysis1: '+str(tagged_img.metadata['DimensionOrder']))
 
     
     #Measurements apartain to two groups, one  with single input (shape descriptors) 
@@ -97,7 +126,7 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
         itk_raw = img_list[i].to_itk()
         
         for key in intensity_meas_list:
-            database[key+' in '+img_list[i].metadata['Name']] = []
+            database[key+' in '+img_list[i].metadata['Name'][i]] = []
 
         #Execute Filter and get database
         itk_filter.Execute(itk_img, itk_raw)
@@ -111,23 +140,9 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
                     database[key].append(shape_functions[key](label))
 
             for key in intensity_meas_list:
-                database[key+' in '+img_list[i].metadata['Name']].append(intensity_functions[key](label))
+                database[key+' in '+img_list[i].metadata['Name'][i]].append(intensity_functions[key](label))
     
             
-    #Determine objects on front and back surface
-    if 'onFaces' in meas_list:
-     
-        #Create and measure Surface Image
-        facesitk_img=sitk.GetImageFromArray([tagged_img.image[0]])
-       
-        itk_filter=sitk.LabelShapeStatisticsImageFilter()
-        itk_filter.Execute(facesitk_img)
-        faces_data=itk_filter.GetLabels()
-        
-        database['onFaces']=[False]*np.amax(tagged_img.image)
-        for label in faces_data:
-            database['onFaces'][label-1]=True
-    
     #Add results to input image
     tagged_img.database=database
 

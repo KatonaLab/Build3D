@@ -3,14 +3,15 @@ import numpy as np
 import sys
 import copy
 
-from .utils import  warning
+from utils import  warning
+from external.PythImage import ImageClass as PythImage
 from ast import literal_eval
 
-try:
-    from modules.packages.PythImage.ImageClass import ImageClass as PythImage
-except:
-    sys.path.append("..")
-    from PythImage.ImageClass import ImageClass as PythImage
+#try:
+ #   from modules.packages.PythImage.ImageClass import ImageClass as PythImage
+#except:
+ #   sys.path.append("..")
+  #  from PythImage.ImageClass import ImageClass as PythImage
 
 
 class VividImage(PythImage):
@@ -40,7 +41,7 @@ class VividImage(PythImage):
     __DIM_TRANSLATE=PythImage._ImageClass__DIM_TRANSLATE   
     
     def __init__(self, image, metadata, database=None):
-     
+
         #Check if compulsory keys are missing
         key_list=['Type']# 'Name', 'SizeC', 'SizeT', 'SizeX', 'SizeY', 'SizeZ', 'DimensionOrder']
         missing_keys=[]
@@ -56,7 +57,7 @@ class VividImage(PythImage):
              #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
              image=image.astype(metadata['Type'])
 
-        
+
         #Check if physical size information available, if not set default values
         size_list=['PhysicalSizeX','PhysicalSizeY', 'PhysicalSizeZ']
         #Add defaul unit if not available
@@ -70,9 +71,14 @@ class VividImage(PythImage):
         for key in unit_list:
             if key not in metadata.keys():
                 metadata[key]='um'
- 
+
         #Call parent __init__
-        super(VividImage, self).__init__(image, metadata)
+        super(VividImage, self).__init__(image, copy.deepcopy(metadata))
+        
+        #Add additional keys
+        for key in metadata.keys():
+            if key not in self.metadata.keys():
+                self.metadata[key]=copy.deepcopy(metadata[key])
         
         #Set database if supplied
         if database!=None:
@@ -137,18 +143,46 @@ class VividImage(PythImage):
                 output=output.get_dimension( C, dimension='C')
         
         if output.metadata['SizeT']==1 and output.metadata['SizeC']==1 :
-            self.reorder('ZYXCT')
+            #self.reorder('ZYXCT')
+            print(self.metadata['DimensionOrder'])
+            print(self.image.shape)
             array=output.image[0][0]
             
         else:
             raise Exception('Image has to be 3D only (must contain one time point or one channel)!')
 
-
         return array
+    
+    @staticmethod
+    def check_compatibility(image_1, image_2, metadata_list, strict=True):
+        
+        if not isinstance(image_1, list):
+            image_1=[image_1]
+        
+        if not isinstance(image_2, list):
+            image_1=[image_1]
+            
+        processing_list=image_1+image_2
+            
+        
+        def check(dict_list, key_list):
+            output=[]
+            for key in key_list:
+                value_list=[dic[key] for dic in dict_list]
+                if all(x == value_list[0] for x in value_list):
+                    output.append(key)
+                    
+            return output
+        
+        error_list=check(processing_list,  metadata_list)         
+  
+
+        return error_list                    
+        
 
     def to_itk(self):
 
-        
+        print('In InIn analysis: '+str(np.squeeze(self.image).shape))
         itk_img = sitk.GetImageFromArray(self.get_3d_array())
         
         #Get calibration values 
@@ -286,8 +320,6 @@ class VividImage(PythImage):
             output.database=database
     
         return output
-    
-
 
     def to_multidimimage(self):
         
@@ -319,3 +351,53 @@ class VividImage(PythImage):
         return multidimimage
 
 
+    @classmethod
+    def from_ndarray(cls, ndarray, key_dict=None, database=None):
+
+
+        def metadata_from_ndarray(ndarray, key_dict=None):
+
+            #List of additional keys
+            accepted_keys=['PhysicalSizeX','PhysicalSizeY','PhysicalSizeZ',
+                           'TimeIncrement','PhysicalSizeXUnit',
+                           'PhysicalSizeYUnit','PhysicalSizeZUnit',
+                           'TimeIncrementUnit']
+
+            #Create metadata dictionary
+            metadata={}
+            #Set type
+            metadata['Type']=ndarray.dtype
+            #Set dimmension ordes
+            metadata['DimensionOrder']='XYZCT'
+            #Check if array shape is of the appropriate length
+            if len(metadata['DimensionOrder'])!=len(ndarray.shape):
+                raise Exception('The supplied ndarray should be '+str(len(metadata['DimensionOrder']))+' dimensional!')
+            
+            #Set keys
+            metadata['Name']=['Channel '+str(i+1) for i in range(ndarray.shape[1])]            
+            metadata['SamplesPerPixel']=[1]*ndarray.shape[1]
+            metadata['SizeY']=ndarray.shape[4]
+            metadata['SizeX']=ndarray.shape[3]
+            metadata['SizeZ']=ndarray.shape[2]
+            metadata['SizeC']=ndarray.shape[1]
+            metadata['SizeT']=ndarray.shape[0]
+            
+            metadata['TimeIncrementUnit']='test unit t'            
+            
+            #Add additional keys to metadata
+            if key_dict!=None:                
+                for key in key_dict:
+                    if key in accepted_keys:
+                        metadata[key]=key_dict[key]
+
+            return metadata
+        
+        image=cls(ndarray,metadata=metadata_from_ndarray(ndarray, key_dict=key_dict), database=database)
+
+ 
+        #Set database if supplied
+        if database!=None:
+            image.database=database
+            
+        return image
+        

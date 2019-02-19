@@ -13,7 +13,7 @@ from utils import round_up_to_odd, convert_array_type
 def tag_image(ndarray):
 
     # Cast to 16-bit
-    ndarray = convert_array_type(ndarray, 'int16')
+    #ndarray = convert_array_type(ndarray, 'int16')
     
     #Convert ndarray to itk image
     itk_image = sitk.GetImageFromArray(ndarray)
