@@ -1,8 +1,7 @@
-from skimage import img_as_ubyte, img_as_uint
-from skimage.filters import threshold_local
 import cv2
 import numpy as np
 import SimpleITK as sitk
+from skimage import img_as_ubyte
 #from .utils import round_up_to_odd, convert_array_type
 from utils import round_up_to_odd, convert_array_type
 
@@ -27,6 +26,15 @@ def tag_image(ndarray):
 
     return sitk.GetArrayFromImage(ndarray)
  
+def overlap_image(array_list):
+
+    # Create Overlapping ImagE
+    output_array = array_list[0]> 0
+    for i in range(1, len(array_list)):
+        output_array = np.multiply(output_array, array_list[i]>0)
+        
+    return output_array.astype(np.uint8)
+
 
 def threshold_auto(ndarray, method, mode='Slice'):
     '''The first dimension of the array has to start with z (shape of (z,x,y) or (z,y,x)) 
@@ -183,7 +191,7 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
 ###############################################################################
 ##############################Preprocessing####################################
 ###############################################################################
-def create_surfaceImage(ndarray):
+def create_surfaceImage2D(ndarray):
 
     # Convert nd array to itk image
     itk_image = sitk.GetImageFromArray(ndarray)

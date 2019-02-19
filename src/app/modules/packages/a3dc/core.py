@@ -202,14 +202,7 @@ def remove_filtered(tagged_img, database):
 ##############################Colocalization###################################
 ###############################################################################
         
-def overlap_image(array_list):
 
-    # Create Overlapping ImagE
-    output_array = array_list[0]> 0
-    for i in range(1, len(array_list)):
-        output_array = np.multiply(output_array, array_list[i]>0)
-        
-    return output_array
 
 
 def colocalization_connectivity(image_list, raw_img_list=None):
@@ -242,7 +235,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
      
     # Create Overlapping Image
     array_list=[x.get_3d_array() for x in image_list]
-    ovl_array = overlap_image(array_list)
+    ovl_array = segmentation.overlap_image(array_list)
 
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
