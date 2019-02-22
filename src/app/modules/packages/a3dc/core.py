@@ -16,7 +16,8 @@ import os
 ###############################Analysis########################################
 ###############################################################################
 
-def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBorder', 'centroid', 'meanIntensity', 'maximumPixel']):
+
+def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBorder', 'centroid', 'meanIntensity', 'maximumPixel']):
     
     
     '''       
@@ -39,16 +40,33 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
         
     if len(error_list)!=0:
         raise Warning('Possibly Incompattible images! The following metadata do not match '+str(warning_list))
-    '''                                    
-
-    #Convert tagged image to ITK image
-    print('In analysis1: '+str(tagged_img.image.shape))
-    print('In analysis1: '+str(tagged_img.metadata['DimensionOrder']))
-    itk_img = tagged_img.to_itk()
-    print('In analysis2: '+str(tagged_img.image.shape))
-    print('In analysis1: '+str(tagged_img.metadata['DimensionOrder']))
-
+    '''
+    #Tagg Image
+    tagged_img=VividImage(segmentation.tag_image(img.get_3d_array()), copy.deepcopy(img.metadata ))   
     
+
+    #If image list is empty or None intensity parameters measured on tagged image
+    if img_list == None or img_list ==[] :
+        img_list = [tagged_img]
+                                    
+    #Validate input images
+    #Check if images ara 3D 
+    for i in img_list+[tagged_img]:
+        if not i.is_3d:
+            raise Exception('Input images must be 3D')
+            
+    #Check if image size parameters match
+    VividImage.check_compatibility(img_list+[tagged_img], metadata_list=['SizeX','SizeY','SizeZ', 'SizeT'])
+
+           
+    #Check if channel names are unique if not rename
+    name_list=[a.metadata['Name'][0] for a in img_list]
+    if len(name_list)!=len(set(name_list)):
+        raise(Exception('Channel names in img_list have to be unique!'))
+        
+    #Convert tagged image to ITK image
+    itk_img = tagged_img.to_itk()
+
     #Measurements apartain to two groups, one  with single input (shape descriptors) 
     #and multi image measurements (parameters that depend on intensity )
     
@@ -110,25 +128,21 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
             intensity_meas_list.append(key)
                 
 
-    # database dictionary to store results
+    #Initialize database dictionary to store results
     database = {'tag': [], }
     
     for key in shape_meas_list:
         database[key] = []
 
     #Cycle through images to measure parameters
-    if img_list == None:
-        img_list = []
-        img_list.append(tagged_img)
-
     for i in range(len(img_list)):
 
         itk_raw = img_list[i].to_itk()
         
         for key in intensity_meas_list:
-            database[key+' in '+img_list[i].metadata['Name'][i]] = []
+            database[key+' in '+img_list[i].metadata['Name'][0]] = []
 
-        #Execute Filter and get database
+        #Execute ITK Filter and get database
         itk_filter.Execute(itk_img, itk_raw)
         data=itk_filter.GetLabels()
 
@@ -140,7 +154,7 @@ def analyze(tagged_img, img_list=None, meas_list=['volume', 'voxelCount', 'pixel
                     database[key].append(shape_functions[key](label))
 
             for key in intensity_meas_list:
-                database[key+' in '+img_list[i].metadata['Name'][i]].append(intensity_functions[key](label))
+                database[key+' in '+img_list[i].metadata['Name'][0]].append(intensity_functions[key](label))
     
             
     #Add results to input image

@@ -26,31 +26,48 @@ class CoreTest(unittest.TestCase):
     
 
 
-    def test_threshold_auto(self):
+    def test_analyze(self):
          
         
-        for idx, cs in enumerate(assets_core.threshold_auto_case_list):
+        for idx, cs in enumerate(assets_core.analyze_case_list):
             
-            case_text="Case "+str(idx+1)+" with method="+str(cs['method'])+" mode="+str(cs['mode'])
             
-            output=segmentation.threshold_auto(cs['input'], method=cs['method'], mode=cs['mode'])
             
-            #Test if data types are equal
+            case_text="Case "+str(idx+1)+" with "
+            
+            #Settings
+            if cs['settings']==None:
+                case_text=case_text+'Default settings'
+            else:
+                for key in cs['settings']:
+                    case_text+=' '+str(key)+' = '+str(cs['settings'][key])
+            
+            if cs['settings']!=None:
+                output =core.analyze(cs['input'], **cs['settings'] )
+            
+            else:
+                output =core.analyze(cs['input'])
+            
+            #Test if image data types are equal
             with self.subTest():
-                self.assertEqual(output[0].dtype,  cs['result_array'].dtype, msg=case_text) 
+                self.assertEqual(output.image.dtype,  cs['result'].image.dtype, msg='Data type of image arrays do not match in '+case_text)
             
-            #Test if array values are equal
-            #If data type is float use assert_almost_equal or assert_allclose
+                
+            #Test if image arrays are the same
+            with self.subTest():
+                np.testing.assert_array_equal(output.image,  cs['result'].image, verbose=True,err_msg='Image arrays do not match in '+case_text)
+           
+            #Test if image metadata are the same
+            with self.subTest():
+                self.assertDictEqual(output.metadata,  cs['result'].metadata, msg='Image metadata do not match in '+case_text)
             
-
+            #Test if image database are the same
             with self.subTest():
-                np.testing.assert_array_equal(output[0], cs['result_array'], verbose=True, err_msg=case_text)
-            #Test if thresholds are equal
-            with self.subTest():
-                self.assertEqual(output[1], cs['result_threshold'], msg='Threshold values do not match '+case_text)                
+                self.assertDictEqual(output.database,  cs['result'].database, msg='Image databases do not match in '+case_text) 
 
 
-    def test_threshold_adaptive(self):
+    '''
+    def test_analyze_error(self):
         
 
   
@@ -71,7 +88,7 @@ class CoreTest(unittest.TestCase):
             with self.subTest():
                 np.testing.assert_array_equal(output_array,result_array, verbose=True,err_msg=case_text)
         
-        
+    '''        
     
     
 
@@ -80,61 +97,47 @@ if __name__ == '__main__':
     #Ansi Escap characers:
     ANSI_DICT={'close':'\u001b[0m', 'open':u'', 'underlined':'\u001b[4m', 'red':'\u001b[31m', 'green':'\u001b[32m'}
     
-    
-    
-    keys_1={'PhysicalSizeX':0.1,'PhysicalSizeY':0.2,
-                       'PhysicalSizeZ':0.3, 'TimeIncrement':0.4, 
-                       'PhysicalSizeXUnit':'test unit x',
-                       'PhysicalSizeYUnit':'test unit y',
-                       'PhysicalSizeZUnit':'test unit z',
-                       'TimeIncrementUnit':'test unit t'}
-    
-    image_1=VividImage.from_ndarray(assets_core.input_array_1, key_dict=keys_1)
 
     
-    keys_2={'PhysicalSizeX':0.1,'PhysicalSizeY':0.2,
-                       'PhysicalSizeZ':0.3, 'TimeIncrement':0.4, 
-                       'PhysicalSizeXUnit':'test unit x',
-                       'PhysicalSizeYUnit':'test unit y',
-                       'PhysicalSizeZUnit':'test unit z',
-                       'TimeIncrementUnit':'test unit t'}
+  
+    def tag_image(img):
+        
+        tagged_array=segmentation.tag_image(img.get_3d_array())
     
-    image_2=VividImage.from_ndarray(assets_core.input_array_2, key_dict=keys_2)
+        return VividImage(tagged_array, copy.deepcopy(img.metadata ))
 
 
-    keys_3={'PhysicalSizeX':0.1,'PhysicalSizeY':0.2,
-                       'PhysicalSizeZ':0.3, 'TimeIncrement':0.4, 
-                       'PhysicalSizeXUnit':'test unit x',
-                       'PhysicalSizeYUnit':'test unit y',
-                       'PhysicalSizeZUnit':'test unit z',
-                       'TimeIncrementUnit':'test unit t'}
     
-    image_3=VividImage.from_ndarray(assets_core.input_array_3, key_dict=keys_3)
 
     
-   
-    image_4=VividImage.from_ndarray(assets_core.input_array_4, key_dict=keys_3) 
+    #analyzed_image =core.analyze(assets_core.analyze_input_5, meas_list=assets_core.intensity_descriptors)
     
-    image_5=VividImage.from_ndarray(assets_core.input_array_5, key_dict=keys_3) 
+    analyzed_image =core.analyze(assets_core.analyze_input_7, meas_list=assets_core.shape_descriptors+assets_core.intensity_descriptors)
+    print('FuckThisshit', analyzed_image.database)
+    
+    #assets_core.image_1.metadata['Name']=['Image 1']
+    #assets_core.image_2.metadata['Name']=['Image 2']
+    #analyzed_image =core.analyze(tag_image(assets_core.image_1), img_list=[assets_core.image_1, assets_core.image_2])
+    
+    #assets_core.image_1.metadata['Name']=['Image 1']
+    #assets_core.image_2.metadata['Name']=['Image 2']
+    #analyzed_image =core.analyze(tag_image(assets_core.image_1), img_list=[assets_core.image_1, assets_core.image_2], meas_list=assets_core.shape_descriptors+assets_core.intensity_descriptors)
+    
+    #assets_core.image_1.metadata['Name']=['Image 1']
+    #assets_core.image_2.metadata['Name']=['Image 2']
+    #analyzed_image =core.analyze(tag_image(assets_core.image_1), img_list=[assets_core.image_1], meas_list=assets_core.shape_descriptors+assets_core.intensity_descriptors)
+    
 
-    print(image_4)
-    #print(image_1.get_dimension(0, dimension='C'))
-    image_tagged=segmentation.tag_image(image_5.get_3d_array())
-    
-    vividimage_tagged=VividImage(image_tagged, copy.deepcopy(image_5.metadata ))
-    print(image_tagged)
-    print(vividimage_tagged)
-    print(vividimage_tagged.image.shape)
-    
-    analyzed_image =core.analyze(vividimage_tagged, meas_list=assets_core.shape_descriptors+assets_core.intensity_descriptors)
-    
-    print(analyzed_image.database)
-    print(analyzed_image.image)
+    print((analyzed_image.image, None))
+    print('')
     print(analyzed_image.metadata)
+    print('')
     print(analyzed_image.database)
+    print('')
     print(analyzed_image.image.shape)
-    '''
-    print(list([segmentation.overlap_image([input_array_1,input_array_2])]))
+    
+    
+    
     
          
 
@@ -152,7 +155,7 @@ if __name__ == '__main__':
     pr.enable()
     
     
-    #test_suite = unittest.TestLoader().loadTestsFromTestCase(SegmentationTest)
+    test_suite = unittest.TestLoader().loadTestsFromTestCase(CoreTest)
 
 
     unittest.TestResult()
@@ -185,5 +188,5 @@ if __name__ == '__main__':
         print(ANSI_DICT["open"]+ANSI_DICT["red"]+ANSI_DICT["underlined"]+'RUN WAS UNSUCCESSFUL!'+ANSI_DICT["close"])
     
     
-'''    
+
     

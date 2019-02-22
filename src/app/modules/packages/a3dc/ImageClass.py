@@ -144,8 +144,6 @@ class VividImage(PythImage):
         
         if output.metadata['SizeT']==1 and output.metadata['SizeC']==1 :
             #self.reorder('ZYXCT')
-            print(self.metadata['DimensionOrder'])
-            print(self.image.shape)
             array=output.image[0][0]
             
         else:
@@ -154,35 +152,34 @@ class VividImage(PythImage):
         return array
     
     @staticmethod
-    def check_compatibility(image_1, image_2, metadata_list, strict=True):
-        
-        if not isinstance(image_1, list):
-            image_1=[image_1]
-        
-        if not isinstance(image_2, list):
-            image_1=[image_1]
-            
-        processing_list=image_1+image_2
+    def check_compatibility(image_list,  metadata_list=['SizeX','SizeY','SizeZ', 'SizeT']):
             
         
         def check(dict_list, key_list):
-            output=[]
+            buffer=[]
             for key in key_list:
                 value_list=[dic[key] for dic in dict_list]
-                if all(x == value_list[0] for x in value_list):
-                    output.append(key)
-                    
+                
+                if not all(x == value_list[0] for x in value_list):
+                    buffer.append(key)
+            
+            if buffer==[]:
+                output=None
+            else:
+                output=buffer
+                
             return output
         
-        error_list=check(processing_list,  metadata_list)         
+        
+        error_list=check([a.metadata for a in image_list],  metadata_list)         
   
 
-        return error_list                    
+        if error_list!=None:
+            raise(Exception, 'The following image metadata do not match: '+ str(error_list))                   
         
 
     def to_itk(self):
 
-        print('In InIn analysis: '+str(np.squeeze(self.image).shape))
         itk_img = sitk.GetImageFromArray(self.get_3d_array())
         
         #Get calibration values 
