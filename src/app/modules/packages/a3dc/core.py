@@ -21,25 +21,7 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
     
     
     '''       
-    primary_keys={'SizeX','SizeY',
-                       'SizeZ', 'SizeT'}  
-    
-    
-    secondary_keys={'PhysicalSizeX','PhysicalSizeY',
-                   'PhysicalSizeZ', 'TimeIncrement', 
-                   'PhysicalSizeXUnit',
-                   'PhysicalSizeYUnit',
-                   'PhysicalSizeZUnit',
-                   'TimeIncrementUnit'}
-    
-    
-    res=True
-    if len(error_list)!=0:
-        raise Exception('Incompattible images! The following metadata do not match '+str(error_list))
-        res=False
-        
-    if len(error_list)!=0:
-        raise Warning('Possibly Incompattible images! The following metadata do not match '+str(warning_list))
+
     '''
     #Tagg Image
     tagged_img=VividImage(segmentation.tag_image(img.get_3d_array()), copy.deepcopy(img.metadata ))   
@@ -162,18 +144,81 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
 
     return tagged_img
 
+###############################################################################
+#################################Filter########################################
+###############################################################################
+    
+def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True):
+    '''
+    Filters dictionary stored in the 'database' key of the inputDisctionary to 
+    be filtered and removes filtered taggs if filterImage=True. Boolean mask is appended to inputDictionary['database']
+    and returned through the output dictionary. If removeFiltered=True tags are removed from the output. If overWrite=True a new Boolean mask is created.
 
-def filter_database(dictionary, filter_dict, overwrite=True):
+    :param inputDictionary: Dictionary containing informason related to inputImage
+    :param inputImage: Tagged image
+    :param filterDict: Dictionary contains the keywords to be filtered and the min/maximum value as the following example:
+
+            dictFilter={'volume':{'min':2, 'max':11}}#, 'mean in '+taggedDictList[0]['name']: {'min':2, 'max':3}}
+
+    :param outputDictionary
+    :param inputImage
+    :param removeFiltered: If True objects that are filtered out are removed
+    :return:
+    '''
+
+    if filter_dict==None:
+        filter_dict={}
+        
+    # 1. Check if image has database and raise warning     
+    # 2. Check if keys in database are available and raise warning 
+    # 3. Check if keys in filter_dict have numerical type in database
+    #(__filter_database dismissed thes keys, however it is good for the users 
+    #toknow)
+
+    if hasattr(image,'database'):
+        
+        df = pd.DataFrame(image.database)
+        
+        non_numeric=[]
+        missing=[]
+        for key in filter_dict.keys():
+                if key not in df.keys():
+                    missing.append(str(key))
+                else:
+                    if  df[key].dtype not in NUMERIC_DTYPES:
+                        non_numeric.append(str(key))
+        if missing!=[]:
+            warning('Object database is missing the '+str(missing)+' key(s)!')
+        if missing!=[]:
+            warning('Object database keys(s) '+str(key)+' are not of numeric datatype!')
+    
+        # Filter dictionary
+        output_database=__filter_database(df, filter_dict, overwrite).to_dict(orient='list')
+        output_image=image.image
+        
+        
+        # Remove Filtered objects from database and image
+        if remove_filtered == True:
+            output_image , output_database = __remove_filtered(image, output_database)
+    
+        output=VividImage(output_image, image.metadata, output_database)
+    
+    else:
+        warning('Image is missing the "database" attribute!')
+        output=copy.deepcopy(image)
+
+            
+    return output
+
+
+def __filter_database(df, filter_dict, overwrite=True):
  
 
-    df = pd.DataFrame(dictionary)
     
     if 'filter' in df.keys() and overwrite==False:
         final_filter = df['filter'].values
     else:
-        final_filter=[True for i in range(len(df))]
-
-    # Only run filter if key has numerical value
+        final_filter=[False for i in range(len(df))]
 
     for key in filter_dict:
         
@@ -182,21 +227,19 @@ def filter_database(dictionary, filter_dict, overwrite=True):
          
             curr_filter = (df[key] >= filter_dict[key]['min']) & (df[key] <= filter_dict[key]['max']).values
                 
-            final_filter = np.multiply(final_filter, curr_filter)
+            final_filter = np.logical_or(final_filter, curr_filter)
 
-    df['filter'] = final_filter     
+    df['filter'] = final_filter   
     
-    if remove_filtered==True and 'filter' in df.keys() :
+    if __remove_filtered==True and 'filter' in df.keys() :
         df.drop(df[df['filter'] == False].index, inplace=True)
 
-
-    dictionary = df.to_dict(orient='list')
    
-    return dictionary
+    return df
 
 
 
-def remove_filtered(tagged_img, database):
+def __remove_filtered(tagged_img, database):
 
     change_dict={}
  
@@ -230,37 +273,91 @@ def remove_filtered(tagged_img, database):
 ###############################################################################
 ##############################Colocalization###################################
 ###############################################################################
-        
-
-
-
-def colocalization_connectivity(image_list, raw_img_list=None):
-
+def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=None,
+                   remove_filtered=False, overWrite=True):
+    '''
+    :param tagged_img_list:
+    :param taggedDictList:
+    :param sourceImageList:
+    :param overlappingFilterList:
+    :param filterImage:
+    :return:
+    '''
+    #Validate input images   
+    #Check if at least two images are supplied
+    if (len(tagged_img_list)<2):
+        raise Exception('Input image_list has to have two or more elements!')
     
-    #Check if images have database and contain the appropriate measurements
+    #Check if channel names are unique if not rename
+    name_list=[a.metadata['Name'][0] for a in tagged_img_list]
+    if len(name_list)!=len(set(name_list)):
+        raise(Exception('Channel names in input images must be unique!'))
+        
+    #Create image list to validate
+    if source_image_list==None:
+        check_list=tagged_img_list
+    else:
+        check_list=tagged_img_list+source_image_list
+        
+    if source_image_list!=None and  isinstance(source_image_list, list):
+        check_list+=source_image_list
+    
+    #Check if images ara 3D    
+    for i in check_list:
+        if not i.is_3d:
+            raise Exception('Input images must be 3D.')
+            
+    #Check if image size parameters match
+    VividImage.check_compatibility(check_list, metadata_list=['SizeX','SizeY',
+                                                        'SizeZ', 'SizeT',
+                                                        'PhysicalSizeZUnit',
+                                                        'PhysicalSizeXUnit',
+                                                        'PhysicalSizeYUnit',
+                                                        'PhysicalSizeX',
+                                                        'PhysicalSizeY',
+                                                        'PhysicalSizeZ'])
+
+    #Check if images have database and contain the appropriate keys
+    #All images are checked beforehand which helps users creating new scripts 
+    #etc. exceptions are raised i
     missing_database=[]
     missing_key=[]
-    for img in image_list:
+    for img in tagged_img_list:
         if  hasattr( img, 'database'):
             if 'voxelCount' not in img.database.keys():
-                missing_key.append(img.metadata['Name'])
+                missing_key.append(img.metadata['Name'][0])
         else:
-            missing_database.append(img.metadata['Name'])
-    
-    #Raise exception if database or voxelCount is missing
-    if  missing_database!=[] or missing_key!=[]:
-        error_msg=''
-        if missing_database!=[]:
-            error_msg+='Images :'+str(missing_database)+' are missing attribute "database"!!'
-        if missing_database!=[]:
-            error_msg+='Database in :'+str(missing_key)+' is missing the "voxelCount" key!!'        
+            
+            missing_database.append(img.metadata['Name'][0])
         
+    #Raise exception if database or voxelCount is missing
+    if missing_database!=[]:
+        error_msg='Images :'+str(missing_database)+' are missing attribute "database"!!'
         raise Exception(error_msg)
-            
-            
-            
+    if missing_key!=[]:
+        error_msg='Database in :'+str(missing_key)+' is missing the "voxelCount" key!!'
+        raise Exception(error_msg)        
+
+               
+    #Determine connectivity data
+    overlapping_image=__colocalization_connectivity(tagged_img_list, source_image_list)
+    
+    #Filter database and image
+    overlapping_image=apply_filter(overlapping_image, overlapping_filter, remove_filtered)
+    
+    #Analyze colocalization
+    overlapping_image, tagged_img_list=__colocalization_analysis(tagged_img_list, overlapping_image)
+    
+
+    return overlapping_image, tagged_img_list       
+
+
+
+def __colocalization_connectivity(image_list, raw_img_list=None):
+    
+
     #Create list of names 
-    name_list = [x.metadata['Name'] for x in image_list]
+    name_list = [image_list[i].metadata['Name'][0] for i in range(len(image_list))]
      
     # Create Overlapping Image
     array_list=[x.get_3d_array() for x in image_list]
@@ -268,11 +365,11 @@ def colocalization_connectivity(image_list, raw_img_list=None):
 
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
-    metadata['Name']=str.join('_', name_list)
-    
+    metadata['Name']=[str.join('_', name_list)]
+
     #Create overlapping image
     ovl_image=VividImage(segmentation.tag_image(ovl_array), metadata)
-    
+
     if raw_img_list==None:
         raw_img_list=[ovl_image]
 
@@ -287,7 +384,7 @@ def colocalization_connectivity(image_list, raw_img_list=None):
         itk_image = sitk.GetImageFromArray(image_list[i].get_3d_array())
 
         #Get pixel from database
-        ovl_pixels=ovl_image.database['maximumPixel in '+ovl_image.metadata['Name']]
+        ovl_pixels=ovl_image.database['maximumPixel in '+ovl_image.metadata['Name'][0]]
 
         object_list = [None for i in range(len(ovl_pixels))]
         ovl_ratio_list = [None for i in range(len(ovl_pixels))]
@@ -312,13 +409,13 @@ def colocalization_connectivity(image_list, raw_img_list=None):
     return ovl_image
 
 
-def colocalization_analysis(image_list, ovl_img):
-    
+def __colocalization_analysis(image_list, ovl_img):
+
     #Start analysis
     database_list=[x.database for x in image_list]
     ovl_database=ovl_img.database
-
-    name_list = [x.metadata['Name'] for x in  image_list]
+    
+    name_list = [image_list[i].metadata['Name'][0] for i in range(len(image_list))]
 
     obj_no = [len(x.database['tag']) for x in image_list]
     input_element_no=len(database_list)
@@ -327,14 +424,10 @@ def colocalization_analysis(image_list, ovl_img):
     dict_is_filtered = [('filter' in x.keys()) for x in database_list]
     
     #Check if images have database attribute
-    missing_database=[]
-    for img in image_list+[ovl_img]:
-        if  not hasattr(img, 'database'):
-            missing_database.append(img.metadata['Name'])
-    if missing_database!=[]:
-       raise Exception('Images :'+str(missing_database)+' are missing attribute "database"!!')
+    if  not hasattr(ovl_img, 'database'):
+        raise Exception('Overlapping image is missing attribute "database"!!')
     
-    #Check if overlapping database has the appropriatekeys
+    #Check if overlapping database has the appropriate keys
     missing_key=[]
     required_keys=['object in '+name for name in name_list]+['overlappingRatio in '+name for name in name_list]
     for key in required_keys:
@@ -363,7 +456,7 @@ def colocalization_analysis(image_list, ovl_img):
         #Determine if any of the objects have been filtered out and retrieve tags and their rispected position
         flag=True
 
-        if ovl_is_filtered==True:
+        if ovl_is_filtered==False:
             flag=ovl_database['filter'][j]
             
         curr_tag_list=[]

@@ -6,6 +6,7 @@ import copy
 from utils import  warning
 from external.PythImage import ImageClass as PythImage
 from ast import literal_eval
+from external.PythImage import ImageClass
 
 #try:
  #   from modules.packages.PythImage.ImageClass import ImageClass as PythImage
@@ -147,7 +148,7 @@ class VividImage(PythImage):
             array=output.image[0][0]
             
         else:
-            raise Exception('Image has to be 3D only (must contain one time point or one channel)!')
+            raise Exception('Image has to be 3D image (onlz x, y, z data)!')
 
         return array
     
@@ -348,53 +349,5 @@ class VividImage(PythImage):
         return multidimimage
 
 
-    @classmethod
-    def from_ndarray(cls, ndarray, key_dict=None, database=None):
 
-
-        def metadata_from_ndarray(ndarray, key_dict=None):
-
-            #List of additional keys
-            accepted_keys=['PhysicalSizeX','PhysicalSizeY','PhysicalSizeZ',
-                           'TimeIncrement','PhysicalSizeXUnit',
-                           'PhysicalSizeYUnit','PhysicalSizeZUnit',
-                           'TimeIncrementUnit']
-
-            #Create metadata dictionary
-            metadata={}
-            #Set type
-            metadata['Type']=ndarray.dtype
-            #Set dimmension ordes
-            metadata['DimensionOrder']='XYZCT'
-            #Check if array shape is of the appropriate length
-            if len(metadata['DimensionOrder'])!=len(ndarray.shape):
-                raise Exception('The supplied ndarray should be '+str(len(metadata['DimensionOrder']))+' dimensional!')
-            
-            #Set keys
-            metadata['Name']=['Channel '+str(i+1) for i in range(ndarray.shape[1])]            
-            metadata['SamplesPerPixel']=[1]*ndarray.shape[1]
-            metadata['SizeY']=ndarray.shape[4]
-            metadata['SizeX']=ndarray.shape[3]
-            metadata['SizeZ']=ndarray.shape[2]
-            metadata['SizeC']=ndarray.shape[1]
-            metadata['SizeT']=ndarray.shape[0]
-            
-            metadata['TimeIncrementUnit']='test unit t'            
-            
-            #Add additional keys to metadata
-            if key_dict!=None:                
-                for key in key_dict:
-                    if key in accepted_keys:
-                        metadata[key]=key_dict[key]
-
-            return metadata
-        
-        image=cls(ndarray,metadata=metadata_from_ndarray(ndarray, key_dict=key_dict), database=database)
-
- 
-        #Set database if supplied
-        if database!=None:
-            image.database=database
-            
-        return image
         

@@ -34,8 +34,8 @@ class ImageClass(object):
         self.__validate(ndarray, metadata)
         
         #Set attributes
-        self.__metadata=metadata
-        self.__image=ndarray
+        self.__metadata=copy.deepcopy(metadata)
+        self.__image=copy.deepcopy(ndarray)
 
     
     def __getitem__(self, key):
@@ -139,7 +139,56 @@ class ImageClass(object):
 
         return cls(image, metadata)
     
+    @classmethod
+    def from_ndarray(cls, ndarray, name=None, key_dict=None):
 
+
+        def metadata_from_ndarray(ndarray, key_dict=None):
+
+            #List of additional keys
+            accepted_keys=['PhysicalSizeX','PhysicalSizeY','PhysicalSizeZ',
+                           'TimeIncrement','PhysicalSizeXUnit',
+                           'PhysicalSizeYUnit','PhysicalSizeZUnit',
+                           'TimeIncrementUnit']
+
+            #Create metadata dictionary
+            metadata={}
+            #Set type
+            metadata['Type']=ndarray.dtype
+            #Set dimmension ordes
+            metadata['DimensionOrder']='XYZCT'
+            #Check if array shape is of the appropriate length
+            if len(metadata['DimensionOrder'])!=len(ndarray.shape):
+                raise Exception('The supplied ndarray should be '+str(len(metadata['DimensionOrder']))+' dimensional!')
+            
+            #Set keys
+            metadata['Name']=['Channel '+str(i+1) for i in range(ndarray.shape[1])]            
+            metadata['SamplesPerPixel']=[1]*ndarray.shape[1]
+            metadata['SizeY']=ndarray.shape[4]
+            metadata['SizeX']=ndarray.shape[3]
+            metadata['SizeZ']=ndarray.shape[2]
+            metadata['SizeC']=ndarray.shape[1]
+            metadata['SizeT']=ndarray.shape[0]
+            
+            metadata['TimeIncrementUnit']='test unit t'            
+            
+            #Add additional keys to metadata
+            if key_dict!=None:                
+                for key in key_dict:
+                    if key in accepted_keys:
+                        metadata[key]=key_dict[key]
+
+            return metadata
+        
+        metadata=metadata_from_ndarray(copy.deepcopy(ndarray), key_dict=key_dict)
+        
+        if name!=None and isinstance(name, str):
+            metadata['Name']=[name]
+        
+  
+        image=cls(ndarray,metadata=metadata)
+
+        return image
 
               
     def save(self, directory, file_name):
