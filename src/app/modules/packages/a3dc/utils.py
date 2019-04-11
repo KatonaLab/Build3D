@@ -1,11 +1,9 @@
 import os
 import sys
 import subprocess
-import random
+
 import traceback
 import numpy as np
-#from .constants import SEPARATOR, QUOTE_LIST
-from constants import SEPARATOR, QUOTE_LIST
 
 def reorder_list(lst, val_list):
 
@@ -43,71 +41,11 @@ def os_open(path):
         raise Warning(str(e))
 
 
-def quote(verbose=False):
-	
-    '''Generates a random quote (most of which are from Gaussian03).
-    '''
-	 #Generate random index
-    index=random.randint(0,len(QUOTE_LIST)-1)
-    
-    #Get quote
-    quote=QUOTE_LIST[index]
-    
-    #Print if verbose is set to true
-    if verbose:
-        print_line_by_line(quote)
-    
-    return quote
-
-
 def print_line_by_line(string, file=sys.stdout):
     
     string_list=string.split("\n")
     for i in string_list:
         print(i, file)
-
-
-def warning(string):
-    
-    print(string, file=sys.stderr)
-        
-
-def error(message, exception=None, verbose=True):
-
-    if verbose==False:
-        len=1
-    else:
-        len=10
-    
-    print(SEPARATOR, file=sys.stderr)
-    
-    print("Traceback:",file=sys.stderr)
-    print(traceback.format_exc(len), file=sys.stderr)
-    
-    print(SEPARATOR, file=sys.stderr)
-    print(message, file=sys.stderr) 
-    print(SEPARATOR, file=sys.stderr) 
-
-    raise Exception(message, exception)
-
-
-def value_to_key(dictionary, val):
-    
-    #Get the ocurrences of val among dictionary values
-    count=sum(value == val for value in dictionary.values())
-    #version 2: count=sum(map((val).__eq__, dictionary.values()))
-    
-    #If value is not in dictionary.values raise exception
-    if count==0:
-        raise LookupError('Value %s is not in dictionary'.forma(str(val)))
-    if count>1:
-        raise LookupError('More than one key have value %s!'.forma(str(val)))
-    
-    #get value
-    #version 2: list(dictionary.keys())[list(dictionary.values()).index(val)]
-    for key, value in dictionary.items():
-        if value == val:
-            return key 
 
 
 def dictinary_equal(dict_1,dict_2):
@@ -160,10 +98,10 @@ def convert_array_type(array, dtype):
     return array
         
 #Class for error handling
-class VividException(Exception):
+class a3dcException(Exception):
     def __init__(self, message, errors):
 			
-        super(VividException, self).__init__(message)
+        super(a3dcException, self).__init__(message)
         self.errors = errors
     
         print(traceback.format_exc(10), file=sys.stderr)	

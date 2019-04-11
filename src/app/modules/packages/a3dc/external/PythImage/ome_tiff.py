@@ -21,7 +21,7 @@ import warnings
 DIM_ORDERS=['XYZCT','XYZTC','XYCTZ','XYCZT','XYTCZ','XYTZC']
 DIM_TRANSLATE={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
 
-BIT_DEPTH_LOOKUP={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}	
+BIT_DEPTH_LOOKUP={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64', 'bool':'bool', 'float64':'float64', 'int':'int32'}	
 
 OTHER_KEYS=['DimensionOrder','Type','SamplesPerPixel']
 UNIT_KEYS=['PhysicalSizeZUnit', 'PhysicalSizeXUnit', 'PhysicalSizeYUnit', 'TimeIncrementUnit']

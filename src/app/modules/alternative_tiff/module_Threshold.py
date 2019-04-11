@@ -1,9 +1,10 @@
 import time
 import math
 import a3dc_module_interface as a3
-from modules.packages.a3dc.interface import threshold
-from modules.packages.a3dc.utils import error
-from modules.packages.a3dc.constants import SEPARATOR
+
+
+from modules.a3dc_interface import threshold
+from modules.a3dc_interface_utils import error, SEPARATOR
 
 
 METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu','None']
@@ -13,6 +14,7 @@ def module_threshold(image, method="Otsu", kwargs={}):
 
     #Threshold image
     output, logText = threshold(image, method, **kwargs)
+
     print('Threshold value(s): ' + str(logText.split('\n')[-2].split(':')[-1]).replace('}',''))
 
     return output

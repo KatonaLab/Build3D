@@ -2,13 +2,73 @@ import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 import copy
-from ast import literal_eval
-import segmentation
-from utils import  warning
-from ImageClass import VividImage
-from constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS, NUMERIC_DTYPES
-from utils import reorder_list
 import os
+
+try:
+    from ImageClass import ImageClass
+    from constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS, NUMERIC_DTYPES
+    from utils import reorder_list
+    import segmentation 
+except:
+    from modules.packages.a3dc.constants import SHAPE_DESCRIPTORS, INTENSITY_DESCRIPTORS, OTHER_DESCRIPTORS, NUMERIC_DTYPES
+    from modules.packages.a3dc.utils import reorder_list
+    from  modules.packages.a3dc import segmentation
+    from modules.packages.a3dc.ImageClass import ImageClass
+
+
+
+def threshold(image, method="Otsu", **kwargs):
+    '''
+
+    :param image:
+    :param imageDictionary:
+    :param method:
+    :param kwargs:
+        lowerThreshold, upperThreshold, mode,blockSize=5, offSet=0
+
+    :return:
+        LogText
+    '''
+
+    # Threshold methods
+    auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
+                         'RenyiEntropy', 'Shanbhag', 'Triangle']
+    adaptive_list = ['Adaptive Mean', 'Adaptive Gaussian']
+
+
+
+    # Parse kwargs
+    if kwargs != {}:
+        if method in auto_list:
+            keyList=['mode']
+        elif method in adaptive_list:
+            keyList = ['blockSize', 'offSet']
+        elif method == 'Manual':
+            keyList =['lower', 'upper']
+        else:
+            raise KeyError('Thresholding method '+str(method)+' not available or valid!')
+
+        kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
+    
+    # Run thresholding functions    
+    if method in auto_list:
+        output_array, thresholdValue = segmentation.threshold_auto(image.get_3d_array(), method, **kwargs)
+
+    elif method in adaptive_list:
+        output_array = segmentation.threshold_adaptive(image.get_3d_array(), method, **kwargs)
+
+    elif method == 'Manual':
+        output_array = segmentation.threshold_manual(image.get_3d_array(), **kwargs)
+        
+    else:
+        raise LookupError("'" + str(method) + "' is Not a valid mode!")
+
+    output_metadta=image.metadata
+    output_metadta['Type']=str(output_array.dtype)
+ 
+ 
+    return ImageClass(output_array, image.metadata)
+
 
 
 
@@ -21,10 +81,12 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
     
     
     '''       
-
+    #TODO: Deal with case when image list contains channels with same name!!!!
+    #TODO: Create separate function to validate
     '''
+    
     #Tagg Image
-    tagged_img=VividImage(segmentation.tag_image(img.get_3d_array()), copy.deepcopy(img.metadata ))   
+    tagged_img=ImageClass(segmentation.tag_image(img.get_3d_array()), copy.deepcopy(img.metadata ))   
     
 
     #If image list is empty or None intensity parameters measured on tagged image
@@ -33,19 +95,20 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
                                     
     #Validate input images
     #Check if images ara 3D 
+    #!!!Repeated in colocalization
     for i in img_list+[tagged_img]:
         if not i.is_3d:
             raise Exception('Input images must be 3D')
             
     #Check if image size parameters match
-    VividImage.check_compatibility(img_list+[tagged_img], metadata_list=['SizeX','SizeY','SizeZ', 'SizeT'])
+    ImageClass.check_compatibility(img_list+[tagged_img], metadata_list=['SizeX','SizeY','SizeZ', 'SizeT'])
 
-           
     #Check if channel names are unique if not rename
-    name_list=[a.metadata['Name'][0] for a in img_list]
+    name_list=[a.metadata['Name'] for a in img_list]
+    print(name_list)
     if len(name_list)!=len(set(name_list)):
         raise(Exception('Channel names in img_list have to be unique!'))
-        
+  
     #Convert tagged image to ITK image
     itk_img = tagged_img.to_itk()
 
@@ -122,7 +185,7 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
         itk_raw = img_list[i].to_itk()
         
         for key in intensity_meas_list:
-            database[key+' in '+img_list[i].metadata['Name'][0]] = []
+            database[key+' in '+name_list[i]] = []
 
         #Execute ITK Filter and get database
         itk_filter.Execute(itk_img, itk_raw)
@@ -136,7 +199,7 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
                     database[key].append(shape_functions[key](label))
 
             for key in intensity_meas_list:
-                database[key+' in '+img_list[i].metadata['Name'][0]].append(intensity_functions[key](label))
+                database[key+' in '+name_list[i]].append(intensity_functions[key](label))
     
             
     #Add results to input image
@@ -188,9 +251,9 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
                     if  df[key].dtype not in NUMERIC_DTYPES:
                         non_numeric.append(str(key))
         if missing!=[]:
-            warning('Object database is missing the '+str(missing)+' key(s)!')
+            raise KeyError('Object database is missing the '+str(missing)+' key(s)!')
         if missing!=[]:
-            warning('Object database keys(s) '+str(key)+' are not of numeric datatype!')
+            raise ValueError('Object database keys(s) '+str(key)+' are not of numeric datatype!')
     
         # Filter dictionary
         output_database=__filter_database(df, filter_dict, overwrite).to_dict(orient='list')
@@ -201,10 +264,10 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
         if remove_filtered == True:
             output_image , output_database = __remove_filtered(image, output_database)
     
-        output=VividImage(output_image, image.metadata, output_database)
+        output=ImageClass(output_image, image.metadata, output_database)
     
     else:
-        warning('Image is missing the "database" attribute!')
+        raise AttributeError('Image is missing the "database" attribute!')
         output=copy.deepcopy(image)
 
             
@@ -283,16 +346,32 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     :param filterImage:
     :return:
     '''
-    #Validate input images   
-    #Check if at least two images are supplied
-    if (len(tagged_img_list)<2):
-        raise Exception('Input image_list has to have two or more elements!')
     
-    #Check if channel names are unique if not rename
-    name_list=[a.metadata['Name'][0] for a in tagged_img_list]
-    if len(name_list)!=len(set(name_list)):
-        raise(Exception('Channel names in input images must be unique!'))
+    
+    #If source_image_list is None it is converted to empty list
+    if source_image_list == None:
+        source_image_list = []
         
+    #Validate input images   
+
+
+    #Allow only images with single channel and timepoint 
+    #(img.metadat['SizeT']==1 and img.metadata['SizeC']==1)      
+    #Check if channel names are unique if not rename
+    #Validate input images
+    #Check if images ara 3D 
+    for i in tagged_img_list+source_image_list:
+        if not i.is_3d:
+            raise Exception('Input images must be 3D')
+            
+    #Check if image size parameters match
+    ImageClass.check_compatibility(tagged_img_list+source_image_list, metadata_list=['SizeX','SizeY','SizeZ', 'SizeT'])
+    
+
+    name_list=[a.metadata['Name'] for a in tagged_img_list]
+    if len(name_list)!=len(set(name_list)):
+        raise(Exception('Channel names in img_list have to be unique!'))
+
     #Create image list to validate
     if source_image_list==None:
         check_list=tagged_img_list
@@ -308,7 +387,7 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
             raise Exception('Input images must be 3D.')
             
     #Check if image size parameters match
-    VividImage.check_compatibility(check_list, metadata_list=['SizeX','SizeY',
+    ImageClass.check_compatibility(check_list, metadata_list=['SizeX','SizeY',
                                                         'SizeZ', 'SizeT',
                                                         'PhysicalSizeZUnit',
                                                         'PhysicalSizeXUnit',
@@ -347,7 +426,6 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     
     #Analyze colocalization
     overlapping_image, tagged_img_list=__colocalization_analysis(tagged_img_list, overlapping_image)
-    
 
     return overlapping_image, tagged_img_list       
 
@@ -357,7 +435,7 @@ def __colocalization_connectivity(image_list, raw_img_list=None):
     
 
     #Create list of names 
-    name_list = [image_list[i].metadata['Name'][0] for i in range(len(image_list))]
+    name_list = [image_list[i].metadata['Name'] for i in range(len(image_list))]
      
     # Create Overlapping Image
     array_list=[x.get_3d_array() for x in image_list]
@@ -365,10 +443,10 @@ def __colocalization_connectivity(image_list, raw_img_list=None):
 
     #Create overlapping image metadata
     metadata=copy.deepcopy(image_list[0].metadata)
-    metadata['Name']=[str.join('_', name_list)]
+    metadata['Name']=str.join('_', name_list)
 
     #Create overlapping image
-    ovl_image=VividImage(segmentation.tag_image(ovl_array), metadata)
+    ovl_image=ImageClass(segmentation.tag_image(ovl_array), metadata)
 
     if raw_img_list==None:
         raw_img_list=[ovl_image]
@@ -384,7 +462,7 @@ def __colocalization_connectivity(image_list, raw_img_list=None):
         itk_image = sitk.GetImageFromArray(image_list[i].get_3d_array())
 
         #Get pixel from database
-        ovl_pixels=ovl_image.database['maximumPixel in '+ovl_image.metadata['Name'][0]]
+        ovl_pixels=ovl_image.database['maximumPixel in '+ovl_image.metadata['Name']]
 
         object_list = [None for i in range(len(ovl_pixels))]
         ovl_ratio_list = [None for i in range(len(ovl_pixels))]
@@ -405,7 +483,7 @@ def __colocalization_connectivity(image_list, raw_img_list=None):
         for k in ['meanIntensity','maximumPixel']:
             if k==key.split(' ')[0]:
                 del ovl_image.database[key]
-    
+
     return ovl_image
 
 
@@ -415,7 +493,7 @@ def __colocalization_analysis(image_list, ovl_img):
     database_list=[x.database for x in image_list]
     ovl_database=ovl_img.database
     
-    name_list = [image_list[i].metadata['Name'][0] for i in range(len(image_list))]
+    name_list = [image_list[i].metadata['Name'] for i in range(len(image_list))]
 
     obj_no = [len(x.database['tag']) for x in image_list]
     input_element_no=len(database_list)

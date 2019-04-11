@@ -1,13 +1,13 @@
 import time
 import a3dc_module_interface as a3
-from modules.packages.a3dc.utils import error, print_line_by_line
-from modules.packages.a3dc.ImageClass import VividImage
-from modules.packages.a3dc.constants import SEPARATOR
 
+from modules.packages.a3dc.ImageClass import ImageClass
+from modules.a3dc_interface_utils import error, print_line_by_line, SEPARATOR
 
 def module_main(ctx):
 
     try:
+
         filename = a3.inputs['FileName'].path
 
         #Inizialization
@@ -16,7 +16,7 @@ def module_main(ctx):
         print('Loading the following image: ', filename)
         
         #Load and reshape image
-        img=VividImage.load(filename)
+        img=ImageClass.load(filename)
         #Print important image parameters
         print_line_by_line(str(img))
         

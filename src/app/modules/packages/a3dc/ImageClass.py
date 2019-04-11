@@ -3,19 +3,18 @@ import numpy as np
 import sys
 import copy
 
-from utils import  warning
-from external.PythImage import ImageClass as PythImage
+
+
 from ast import literal_eval
-from external.PythImage import ImageClass
-
-#try:
- #   from modules.packages.PythImage.ImageClass import ImageClass as PythImage
-#except:
- #   sys.path.append("..")
-  #  from PythImage.ImageClass import ImageClass as PythImage
 
 
-class VividImage(PythImage):
+try:
+    from external.PythImage import ImageClass as PythImage
+except:
+    from modules.packages.a3dc.external.PythImage import ImageClass as PythImage
+
+
+class ImageClass(PythImage):
     '''   
     ITK image: Is an image type used by the SimpleITK package.
     
@@ -51,12 +50,6 @@ class VividImage(PythImage):
                 missing_keys.append(key)
         if len(missing_keys)>0:
             raise Exception('Invalid Metadata! Missing the following keys: '+str(missing_keys))
-        
-        
-        #Check if metadata 'Type' field matches the type of the image
-        if metadata['Type']!=image.dtype:
-             #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
-             image=image.astype(metadata['Type'])
 
 
         #Check if physical size information available, if not set default values
@@ -74,7 +67,7 @@ class VividImage(PythImage):
                 metadata[key]='um'
 
         #Call parent __init__
-        super(VividImage, self).__init__(image, copy.deepcopy(metadata))
+        super(ImageClass, self).__init__(image, copy.deepcopy(metadata))
         
         #Add additional keys
         for key in metadata.keys():
@@ -125,7 +118,7 @@ class VividImage(PythImage):
 
         array=np.take(self.image, index, len(order)-order.index(dimension)-1)
 
-        return VividImage(array, metadata)
+        return ImageClass(array, metadata)
     
     def get_3d_array(self, T=None, C=None):
         
@@ -202,7 +195,7 @@ class VividImage(PythImage):
         if len(missing_unit)!=0:
             print('Warning: DEFAULT value (um or micron) used for :'
                  +str(missing_unit)+'!', file=sys.stderr)
-    
+
         return itk_img
     
     @classmethod
@@ -217,7 +210,7 @@ class VividImage(PythImage):
             if 'IcsGetCoordinateSystem' OR 'IcsGetSignificantBits' is among the 
             dictionary keys the dictionary is taken as ics.
             '''
-            return (multidimimage.meta.has(VividImage.__REQUIRED_ICS_KEYS[0]) or multidimimage.meta.has(VividImage.__REQUIRED_ICS_KEYS[1]))   
+            return (multidimimage.meta.has(ImageClass.__REQUIRED_ICS_KEYS[0]) or multidimimage.meta.has(ImageClass.__REQUIRED_ICS_KEYS[1]))   
         
         def ics_to_metadata(array, ics_metadata):
         
@@ -316,7 +309,7 @@ class VividImage(PythImage):
         #Add database if available
         if database!=None and isinstance(database, dict):
             output.database=database
-    
+
         return output
 
     def to_multidimimage(self):
@@ -327,12 +320,12 @@ class VividImage(PythImage):
         
         #Check if image is time series
         if self.metadata['SizeT']>1:
-            warning("Image is a time series! Only the first time step will be extracted!")
+            raise Warning("Image is a time series! Only the first time step will be extracted!")
             self.metadata['SizeT']=1
             
         #Check if image has multiple channels
         if self.metadata['SizeC']>1:
-            warning("Image is a multichannel image! Only the first channel will be extracted!")
+            raise Warning("Image is a multichannel image! Only the first channel will be extracted!")
             self.metadata['SizeC']=1
         
         #Create output MultiDimImageFloat

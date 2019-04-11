@@ -1,12 +1,11 @@
 import time
 import math
-import sys
 import a3dc_module_interface as a3
-from modules.packages.a3dc.interface import tagImage, analyze, apply_filter
-from modules.packages.a3dc.utils import error, value_to_key
-from modules.packages.a3dc.ImageClass import VividImage
-from modules.packages.a3dc.constants import SEPARATOR, INTENSITY_DESCRIPTORS
-
+ 
+from modules.a3dc_interface import tagImage, analyze, apply_filter
+from modules.packages.a3dc.ImageClass import ImageClass
+from modules.packages.a3dc.constants import INTENSITY_DESCRIPTORS
+from modules.a3dc_interface_utils import error, value_to_key, SEPARATOR
 
 FILTERS = ['volume', 'meanIntensity']
 TRANSLATE={'volume':'Volume', 'meanIntensity':'Mean intensity' }
@@ -107,6 +106,7 @@ def generate_config(filters=[TRANSLATE[key] for key in FILTERS]):
     return config
 
 def module_main(ctx):
+    
     try:
         #Inizialization
         tstart = time.clock()
@@ -127,7 +127,7 @@ def module_main(ctx):
         
         #Create Output
         a3.outputs['Analyzed Image'] = output
-        a3.outputs['Analyzed Binary'] = VividImage(output.image>0,output.metadata)
+        a3.outputs['Analyzed Binary'] = ImageClass(output.image>0,output.metadata)
         a3.outputs['Analyzed Database']=output.database
         
         #Finalization

@@ -3,12 +3,12 @@ import math
 import sys
 import time
 import a3dc_module_interface as a3
-from modules.packages.a3dc.interface import colocalization, apply_filter
-#from modules.packages.a3dc.core import filter_database
-from modules.packages.a3dc.io import save_data, save_image
-from modules.packages.a3dc.utils import quote, error, warning, get_next_filename, value_to_key,  rename_duplicates
-from modules.packages.a3dc.ImageClass import VividImage
-from modules.packages.a3dc.constants import SEPARATOR
+
+from modules.packages.a3dc.ImageClass import ImageClass
+
+
+from modules.a3dc_interface import colocalization, apply_filter, save_data, save_image
+from modules.a3dc_interface_utils import quote, error, warning, get_next_filename, value_to_key,  rename_duplicates, SEPARATOR
 
 
 CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
@@ -30,7 +30,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     for idx, value in enumerate(name_list):
         tagged_img_list[idx].metadata['Name']=name_list[idx]
         
-        
     print('Processing the following channels: '+ str([img.metadata['Name'] for img in tagged_img_list]))
     print('Filter settings: ' + str(ovl_settings))
     
@@ -38,15 +37,12 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     ovl_img, _=colocalization(tagged_img_list, overlapping_filter=ovl_settings, remove_filtered=remove_filtered)
     
     #Run filtering steps
-    #ch1_img.database=filter_database(ch1_img.database, ch1_settings, overwrite=True)
-    #ch2_img.database=filter_database(ch2_img.database, ch2_settings, overwrite=True)
     ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
     ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
-    
+
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
-    
-    
+        
     #Set path and filename
     output_path=os.path.join(path, 'Output')
     if not os.path.exists(output_path):
@@ -56,7 +52,6 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     filename_1=os.path.basename(ch1_img.metadata['Path'])
     filename_2=os.path.basename(ch2_img.metadata['Path'])
     if filename_1!=filename_2:
-        
         basename=os.path.splitext(filename_1)[0]+'_'+os.path.splitext(filename_2)[0]
     else:
         basename=os.path.splitext(filename_1)[0]
@@ -101,8 +96,8 @@ def read_params(filters=FILTERS):
     else:
         out_dict['Path']=os.path.dirname(a3.inputs['File Path'].path)
 
-    out_dict['ChA Image']=VividImage(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChA DataBase'])
-    out_dict['ChB Image']=VividImage(a3.inputs['ChB Image'].image, a3.inputs['ChB Image'].metadata ,a3.inputs['ChB DataBase'])
+    out_dict['ChA Image']=ImageClass(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata ,a3.inputs['ChA DataBase'])
+    out_dict['ChB Image']=ImageClass(a3.inputs['ChB Image'].image, a3.inputs['ChB Image'].metadata ,a3.inputs['ChB DataBase'])
     
     out_dict['to_text']=a3.inputs['Save to xlsx/text']
     out_dict['remove_filtered']=a3.inputs['Keep/Remove filtered objects']
@@ -199,10 +194,9 @@ def module_main(ctx):
                    to_text=params['to_text'], remove_filtered=params['remove_filtered'])
             
         a3.outputs['Overlapping Image'] = output[0]
-        a3.outputs['Overlapping Binary'] = VividImage(output[0].image>0,output[0].metadata)
-        a3.outputs['Overlapping DataBase'] =output[0].database
-        #a3.outputs['Channel A Image']=to_multidimimage(VividImage(output[1].image>0,output[1].metadata))
-        #a3.outputs['Channel B Image']=to_multidimimage(VividImage(output[2].image>0,output[2].metadata))        
+        
+        a3.outputs['Overlapping Binary'] = ImageClass(output[0].image>0,output[0].metadata)
+        a3.outputs['Overlapping DataBase'] =output[0].database     
         
         path=a3.Url()
         path.path=output[3]
@@ -233,8 +227,6 @@ def generate_config(filters=FILTERS):
         a3.Input('ChA DataBase', a3.types.GeneralPyType), 
         a3.Input('ChB Image', a3.types.GeneralPyType),
         a3.Input('ChB DataBase', a3.types.GeneralPyType),
-        #a3.Output('Channel A Image', a3.types.ImageFloat),
-        #a3.Output('Channel B Image', a3.types.ImageFloat),
         a3.Output('Overlapping Image', a3.types.GeneralPyType),
         a3.Output('Overlapping Binary', a3.types.GeneralPyType),
         a3.Output('Overlapping DataBase', a3.types.GeneralPyType),

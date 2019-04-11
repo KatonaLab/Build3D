@@ -3,8 +3,10 @@ import numpy as np
 import SimpleITK as sitk
 from skimage import img_as_ubyte
 #from .utils import round_up_to_odd, convert_array_type
-from utils import round_up_to_odd, convert_array_type
-
+try:
+    from utils import round_up_to_odd, convert_array_type
+except:
+    from modules.packages.a3dc.utils import  round_up_to_odd, convert_array_type
 
 ###############################################################################
 ###############################Segmentation####################################
@@ -12,9 +14,9 @@ from utils import round_up_to_odd, convert_array_type
 
 def tag_image(ndarray):
 
-    # Cast to 16-bit
-    #ndarray = convert_array_type(ndarray, 'int16')
-    
+    #Cast to 16-bit
+    ndarray = convert_array_type(ndarray, 'int16')
+
     #Convert ndarray to itk image
     itk_image = sitk.GetImageFromArray(ndarray)
 
@@ -39,7 +41,9 @@ def overlap_image(array_list):
 def threshold_auto(ndarray, method, mode='Slice'):
     '''The first dimension of the array has to start with z (shape of (z,x,y) or (z,y,x)) 
     '''
-
+    # Cast to 16-bit
+    ndarray = convert_array_type(ndarray, 'int16')
+    
     #Initializaton
     threshold_dict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
                             'Huang': sitk.HuangThresholdImageFilter(),
@@ -59,11 +63,9 @@ def threshold_auto(ndarray, method, mode='Slice'):
         raise Exception('Mode has to be amond the following:\n'+str(mode_list))
     
     
-    # Cast to 16-bit
-    ndarray = convert_array_type(ndarray, 'int16')
-    #ndarray = img_as_ubyte(ndarray)
-    
 
+
+    
     #Check if method is valid
     if method not in threshold_dict.keys():
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
@@ -188,89 +190,7 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
         
     return outputImage
 
-###############################################################################
-##############################Preprocessing####################################
-###############################################################################
-def create_surfaceImage2D(ndarray):
 
-    # Convert nd array to itk image
-    itk_image = sitk.GetImageFromArray(ndarray)
-    pixel_type = itk_image.GetPixelID()
-    # Run binary threshold
-    thresholded_itk_img = sitk.BinaryThreshold(itk_image, 0, 0, 0, 1)
-
-    # Create an parametrize instance ofBinaryContourImageFilter()
-    itk_filter = sitk.BinaryContourImageFilter()
-    itk_filter.SetFullyConnected(False)
-    #Execute to get a surface mask
-    output = itk_filter.Execute(thresholded_itk_img)
-
-    # Change pixel_type of the object map to be the same as the input image
-    caster = sitk.CastImageFilter()
-    caster.SetOutputPixelType(pixel_type)
-    output=caster.Execute(output)*itk_image
-
-    return (sitk.GetArrayFromImage(output)>0).astype(np.uint8)
-
-def smoothingGaussianFilter(image, sigma):
-
-    itk_img = sitk.GetImageFromArray(image)
-    pixel_type = itk_img.GetPixelID()
-
-    sGaussian = sitk.SmoothingRecursiveGaussianImageFilter()
-    sGaussian.SetSigma(float(sigma))
-    itk_img = sGaussian.Execute(itk_img)
-
-    caster = sitk.CastImageFilter()
-    caster.SetOutputpixel_type(pixel_type)
-
-    return sitk.GetArrayFromImage(caster.Execute(itk_img))
-
-
-def discreteGaussianFilter(image, sigma):
-    itk_img = sitk.GetImageFromArray(image)
-    pixel_type = itk_img.GetPixelID()
-
-    dGaussian = sitk.DiscreteGaussianImageFilter ()
-    dGaussian.SetVariance(int(sigma))
-    dGaussian.SetUseImageSpacing(False)
-    itk_img = dGaussian.Execute(itk_img)
-
-    caster = sitk.CastImageFilter(itk_img)
-    caster.SetOutputpixel_type(pixel_type)
-
-    return sitk.GetArrayFromImage(caster.Execute(itk_img))
-
-
-def medianFilter(image, radius):
-    itk_img = sitk.GetImageFromArray(image)
-    pixel_type = itk_img.GetPixelID()
-
-    median = sitk.MedianImageFilter()
-    median.SetRadius(int(radius))
-    itk_img = median.Execute(itk_img)
-
-    caster = sitk.CastImageFilter(itk_img)
-    caster.SetOutputpixel_type(pixel_type)
-
-    return sitk.GetArrayFromImage(caster.Execute(itk_img))
-
-
-def regionGrowingSegmentation(image, seedList, initialNeighborhoodRadius=2, multiplier=2.5, NbrOfIterations=5,
-                              replaceValue=255):
-    itk_img = sitk.GetImageFromArray(image)
-
-
-    filter = sitk.ConfidenceConnectedImageFilter()
-    filter.SetSeedList(seedList)
-    filter.SetMultiplier(multiplier)
-    filter.SetNumberOfIterations(NbrOfIterations)
-    filter.SetReplaceValue(replaceValue)
-    filter.SetInitialNeighborhoodRadius(initialNeighborhoodRadius)
-    itk_img = filter.Execute(itk_img)
-
-
-    return sitk.GetArrayFromImage(itk_img)
 
  
 

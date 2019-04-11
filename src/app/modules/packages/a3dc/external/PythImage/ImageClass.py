@@ -4,14 +4,18 @@ import copy
 from .imagej_tiff import  load_image as load_imagej
 from .imagej_tiff import  convert_metadata as convert_imagej_metadata
 
-from .ome_tiff import SIZE_KEYS, OTHER_KEYS, DIM_TRANSLATE, UNIT_KEYS, UNITS
+from .ome_tiff import SIZE_KEYS, OTHER_KEYS, DIM_TRANSLATE, UNIT_KEYS, UNITS, BIT_DEPTH_LOOKUP
 from .ome_tiff import convert_units
 from .ome_tiff import load_image as load_ome
 from .ome_tiff import save_image as save_ome
 from .ome_tiff import convert_metadata as convert_ome_metadata
 
 from .roi import roi_to_coordinates
-from . import utils
+
+try:
+    from . import utils
+except:
+    import  modules.packages.a3dc.external.PythImage.utils as utils
 
 
 ##!!!!!!!!!!!!Add channel, remove channel, extract channel etc.
@@ -29,13 +33,14 @@ class ImageClass(object):
 
         #Reshape image so it contains all dimensions
         ndarray=self.__expand_singleton_dimensions(ndarray, metadata)
-        
+     
         #Check if image and metadata is valid
         self.__validate(ndarray, metadata)
         
         #Set attributes
         self.__metadata=copy.deepcopy(metadata)
         self.__image=copy.deepcopy(ndarray)
+
 
     
     def __getitem__(self, key):
@@ -113,7 +118,7 @@ class ImageClass(object):
             #Load image and create simplified metadata dictionary
             image, imagej_metadata=load_imagej(path)
             
-            metadata=convert_imagej_metadata(imagej_metadata) 
+            metadata=convert_imagej_metadata(imagej_metadata)
             
             return image, metadata
         
@@ -135,8 +140,8 @@ class ImageClass(object):
         
         if 'image' not in locals():
             raise Exception('Currently only {} files are supported!'.format(list(loader_dict.keys())))
-       
 
+        
         return cls(image, metadata)
     
     @classmethod
@@ -154,7 +159,7 @@ class ImageClass(object):
             #Create metadata dictionary
             metadata={}
             #Set type
-            metadata['Type']=ndarray.dtype
+            metadata['Type']=str(ndarray.dtype)
             #Set dimmension ordes
             metadata['DimensionOrder']='XYZCT'
             #Check if array shape is of the appropriate length
@@ -209,10 +214,16 @@ class ImageClass(object):
             raise TypeError('Image must be a a NumPy array!')
         
         #Check if metadata 'Type' field matches the type of the image
-        #print('dsfgewewttergtrhtyhjtyjuyk;uihdhfhhhhhhhhhhh',image.dtype)
-        #if self.__BIT_DEPTH_LOOKUP[metadata['Type']]!=image.dtype:
-             #metadata['Type']=utils.value_to_key(self.__BIT_DEPTH_LOOKUP, image.dtype)
+
+        if BIT_DEPTH_LOOKUP[str(metadata['Type'])]!=str(image.dtype):
+             metadata['Type']=utils.value_to_key(BIT_DEPTH_LOOKUP, image.dtype)
              #raise TypeError('Image data type does not mach the one specified in the metadata!')
+        #Check if metadata 'Type' field matches the type of the image
+        #if metadata['Type']!=image.dtype:
+             #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
+             #metadata['Type']=BIT_DEPTH_LOOKUP[metadata['Type']]
+             #image=image.astype(BIT_DEPTH_LOOKUP[metadata['Type']]) 
+             
              
         #Check if number of channels and length of the name list is the same
         if 'SizeC' in metadata.keys():
@@ -253,7 +264,7 @@ class ImageClass(object):
         shape_metadata=[metadata[key] for key in available_keys if metadata[key]!=1]
   
         if shape_image!=shape_metadata:
-            raise Exception('shape information in metadata is not compattible to the image shape!','')
+            raise Exception('Shape information in metadata is not compattible to the image shape!','')
             
         #Check units: trsanslate to OME compattible unit or else delete metadata      
         metadata=convert_units(metadata, UNIT_KEYS, UNITS) 
