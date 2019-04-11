@@ -1,5 +1,6 @@
 import time
 import math
+import numpy as np
 import a3dc_module_interface as a3
 from modules.a3dc_interface import threshold
 from modules.a3dc_interface_utils import error, SEPARATOR
@@ -49,6 +50,12 @@ def module_main(ctx):
         
         #Create Image object
         img =ImageClass.from_multidimimage(a3.inputs['Input Image'])
+        #img.image=img.image.astype('float')
+        print('sdaffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+        print(img.image.dtype)
+        print(img.metadata)
+        print(np.amax(img.image))
+        print(np.amin(img.image))
         print('Thresholding: '+img.metadata['Name'])
         
 
@@ -70,9 +77,7 @@ def module_main(ctx):
         
         #Run thresholding            
         output_img=module_threshold(img, method,kwargs)
-        
-        #Change Name in metadata
-        #output_img.metadata['Name']=img.metadata['Name']+'_auto_thr'
+
         
         #Set output
         a3.outputs['Thresholded Image']=output_img

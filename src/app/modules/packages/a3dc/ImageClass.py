@@ -284,16 +284,6 @@ class ImageClass(PythImage):
         array=md.MultiDimImageFloat_to_ndarray(multidimimage)
         
         
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!Temporarily solve LUT min max issue
-        array[0][0][0]=0
-        #maximum=np.amax(array)
-        try:
-           maximum=np.iinfo(array.dtype).max
-        except:
-           maximum=np.finfo(array.dtype).max
-        array[0][0][1]=maximum
-        #array.flat[0]=0
-
         
         #Get image metadata and convert database if the metadata is ICS style
         metadata=metadata_to_dict(multidimimage)
@@ -302,7 +292,8 @@ class ImageClass(PythImage):
             metadata=ics_to_metadata(array, metadata)
         #else:
            #array=array[::,::-1,::] 
-        
+        print('############################################################x#')
+        print('The Type ', array.dtype)
         #Create output image    
         output=cls(array, metadata)
     
@@ -331,7 +322,9 @@ class ImageClass(PythImage):
         #Create output MultiDimImageFloat
         self.reorder('ZYXCT')
         multidimimage=md.MultiDimImageFloat_from_ndarray(self.image[0][0].astype(np.float))
-    
+        
+        print('############################################################x#')
+        print('The Type ', self.image[0][0].dtype)
         
         #Clear metadata
         multidimimage.meta.clear()

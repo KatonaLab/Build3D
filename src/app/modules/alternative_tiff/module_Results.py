@@ -1,5 +1,5 @@
 import a3dc_module_interface as a3
-
+import numpy as np
 from modules.packages.a3dc.ImageClass import ImageClass
 from modules.a3dc_interface_utils import error
  
@@ -7,6 +7,12 @@ from modules.a3dc_interface_utils import error
 def module_main(ctx):
     
     try:
+        print(a3.inputs['ChA Image'].image.dtype)
+        print(np.amax(a3.inputs['ChA Image'].image))
+        print(np.amin(a3.inputs['ChA Image'].image))
+        print(a3.inputs['ChB Image'].image.dtype)
+        print(np.amax(a3.inputs['ChB Image'].image))
+        print(np.amin(a3.inputs['ChB Image'].image))
         a3.outputs['ChA Image']=ImageClass(a3.inputs['ChA Image'].image, a3.inputs['ChA Image'].metadata).to_multidimimage()
         a3.outputs['ChB Image']=ImageClass(a3.inputs['ChB Image'].image, a3.inputs['ChB Image'].metadata).to_multidimimage()
         a3.outputs['ChA Analyzed']=ImageClass(a3.inputs['ChA Analyzed'].image, a3.inputs['ChA Analyzed'].metadata).to_multidimimage()

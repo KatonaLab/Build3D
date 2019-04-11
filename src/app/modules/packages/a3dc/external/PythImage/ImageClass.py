@@ -213,18 +213,10 @@ class ImageClass(object):
         if not isinstance(image, np.ndarray):
             raise TypeError('Image must be a a NumPy array!')
         
-        #Check if metadata 'Type' field matches the type of the image
-
+        #Check if metadata 'Type' field matches numpy array.dtype
         if BIT_DEPTH_LOOKUP[str(metadata['Type'])]!=str(image.dtype):
-             metadata['Type']=utils.value_to_key(BIT_DEPTH_LOOKUP, image.dtype)
-             #raise TypeError('Image data type does not mach the one specified in the metadata!')
-        #Check if metadata 'Type' field matches the type of the image
-        #if metadata['Type']!=image.dtype:
-             #raise Warning('Image array type is '+str(array.dtype)+' while metadata is '+str( metadata['Type'])+' ! Metadata is modified acordingly!')
-             #metadata['Type']=BIT_DEPTH_LOOKUP[metadata['Type']]
-             #image=image.astype(BIT_DEPTH_LOOKUP[metadata['Type']]) 
-             
-             
+             metadata['Type']=BIT_DEPTH_LOOKUP[str(metadata['Type'])]
+
         #Check if number of channels and length of the name list is the same
         if 'SizeC' in metadata.keys():
            

@@ -2,7 +2,7 @@ import time
 import math
 import a3dc_module_interface as a3
  
-from modules.a3dc_interface import tagImage, analyze, apply_filter
+from modules.a3dc_interface import analyze, apply_filter
 from modules.packages.a3dc.ImageClass import ImageClass
 from modules.packages.a3dc.constants import INTENSITY_DESCRIPTORS
 from modules.a3dc_interface_utils import error, value_to_key, SEPARATOR
@@ -24,14 +24,10 @@ def analyze_image(source, mask, settings, removeFiltered=False):
         if key in multi_img_keys:
             settings[str(key)+' in '+str(source.metadata['Name'])] = settings[key]
             del settings[key]
-
-    #Tagging Image
-    print('Running connected components!')
-    taggedImage, _ = tagImage(mask)
     
-    # Analysis and Filtering of objects
-    print('Analyzing tagged image!')
-    taggedImage, _ = analyze(taggedImage, image_list=[source], measurementInput=measurementList)
+    # Running connected components and analyzing image
+    print('Running connected components and analyzing tagged image!')
+    taggedImage, _ = analyze(mask, image_list=[source], measurementInput=measurementList)
     
     print('Filtering object database!')
     taggedImage, _ = apply_filter(taggedImage, filter_dict=settings, remove_filtered=removeFiltered)#{'tag':{'min': 2, 'max': 40}}
