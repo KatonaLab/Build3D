@@ -43,7 +43,6 @@ def module_main(ctx):
         print(SEPARATOR)
         
     except Exception as e:
-
         raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
 
 
