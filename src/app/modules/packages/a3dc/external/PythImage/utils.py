@@ -15,7 +15,6 @@ class PythImageError(Exception):
         self.errors = errors
     
     def __str__(self):
-               
         return repr(self.message)#+"\n\nERROR:"+repr(self.errors)+"\n\nTRACEBACK:"+str(self.traceback)
 
 class lazyattr(object):
@@ -74,10 +73,10 @@ def dict_to_string(d, string='', lvl=0):
         string+='%s%s' % (lvl * '\t', str(k))
         if type(v) == dict:
             string+=':%s'%str(v)+'\n'
+            #If deeper recursion is needed
             #utils.dict_to_string(v, string, lvl+1)
         else:
            string+=':%s'%v+'\n'
-    
     return string            
  
           

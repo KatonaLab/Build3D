@@ -4,7 +4,7 @@ import copy
 from .imagej_tiff import  load_image as load_imagej
 from .imagej_tiff import  convert_metadata as convert_imagej_metadata
 
-from .ome_tiff import SIZE_KEYS, OTHER_KEYS, DIM_TRANSLATE, UNIT_KEYS, UNITS, BIT_DEPTH_LOOKUP
+from .ome_tiff import SIZE_KEYS, OTHER_KEYS, DIM_TRANSLATE, UNIT_KEYS, UNITS
 from .ome_tiff import convert_units
 from .ome_tiff import load_image as load_ome
 from .ome_tiff import save_image as save_ome
@@ -68,7 +68,7 @@ class ImageClass(object):
         return ImageClass(image , metadata)
     
     def __repr__(self):
-        rep='Shape:'+str(self.image.shape)+'\n'+utils.dict_to_string(self.__metadata)
+        rep=utils.dict_to_string(self.__metadata)+'Shape:'+str(self.image.shape)
         return rep      
     
     def __getattr__(self, atr):

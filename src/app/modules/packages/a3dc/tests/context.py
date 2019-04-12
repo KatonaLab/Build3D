@@ -6,5 +6,5 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import segmentation
 import core
-from ImageClass import VividImage
+from ImageClass import ImageClass
 import utils

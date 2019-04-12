@@ -2,7 +2,7 @@ import time
 import a3dc_module_interface as a3
 
 from modules.packages.a3dc.ImageClass import ImageClass
-from modules.a3dc_interface_utils import error, print_line_by_line, SEPARATOR
+from modules.a3dc_interface_utils import error, warning, print_line_by_line, SEPARATOR
 
 def module_main(ctx):
 
@@ -17,6 +17,7 @@ def module_main(ctx):
         
         #Load and reshape image
         img=ImageClass.load(filename)
+            
         #Print important image parameters
         print_line_by_line(str(img))
         
@@ -40,8 +41,9 @@ def module_main(ctx):
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
         print('Image loaded successfully!')
         print(SEPARATOR)
-
+        
     except Exception as e:
+
         raise error("Error occured while executing '"+str(ctx.type())+"' module '"+str(ctx.name())+"' !",exception=e)
 
 

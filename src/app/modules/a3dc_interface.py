@@ -44,21 +44,16 @@ def threshold(image, method="Otsu", **kwargs):
     :return:
         LogText
     '''
-    
-    # Start timing
-    tstart = time.clock()
 
     # Creatre LogText and start logging
-    logText = '\nThresholding: '+image.metadata['Name']
+    logText = 'Thresholding: '+image.metadata['Name']
     logText += '\n\tMethod: ' + method
 
     logText += '\n\tSettings: ' + str(kwargs).replace('}','').replace('{','')
         
-    output=core.threshold(image, method, **kwargs)
- 
-    # Finish timing and add to logText
-    tstop = time.clock()
-    logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
+    output, thresholdValue=core.threshold(image, method, **kwargs)
+    
+    logText += '\n\tThreshold Value: ' +str(thresholdValue)
     
     return output, logText
 

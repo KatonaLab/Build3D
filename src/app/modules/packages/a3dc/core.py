@@ -15,6 +15,7 @@ except:
     from  modules.packages.a3dc import segmentation
     from modules.packages.a3dc.ImageClass import ImageClass
 
+#TODO:Fix unit tests
 
 
 def threshold(image, method="Otsu", **kwargs):
@@ -26,16 +27,12 @@ def threshold(image, method="Otsu", **kwargs):
     :param kwargs:
         lowerThreshold, upperThreshold, mode,blockSize=5, offSet=0
 
-    :return:
-        LogText
     '''
 
     # Threshold methods
     auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
     adaptive_list = ['Adaptive Mean', 'Adaptive Gaussian']
-
-
 
     # Parse kwargs
     if kwargs != {}:
@@ -50,16 +47,17 @@ def threshold(image, method="Otsu", **kwargs):
 
         kwargs = {your_key: kwargs[your_key] for your_key in keyList if your_key in kwargs}
     
-    # Run thresholding functions    
+    # Run thresholding functions
+    thresholdValue=None    
     if method in auto_list:
         output_array, thresholdValue = segmentation.threshold_auto(image.get_3d_array(), method, **kwargs)
 
     elif method in adaptive_list:
         output_array = segmentation.threshold_adaptive(image.get_3d_array(), method, **kwargs)
-
+        thresholdValue='Local'
     elif method == 'Manual':
         output_array = segmentation.threshold_manual(image.get_3d_array(), **kwargs)
-        
+        thresholdValue=kwargs['upper']
     else:
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
@@ -67,7 +65,7 @@ def threshold(image, method="Otsu", **kwargs):
     output_metadta['Type']=str(output_array.dtype)
  
  
-    return ImageClass(output_array, image.metadata)
+    return ImageClass(output_array, image.metadata), thresholdValue
 
 
 
@@ -105,9 +103,9 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
 
     #Check if channel names are unique if not rename
     name_list=[a.metadata['Name'] for a in img_list]
-  
+
     if len(name_list)!=len(set(name_list)):
-        raise(Exception('Channel names in img_list have to be unique!'))
+        raise Exception('Channel names in img_list have to be unique!')
   
     #Convert tagged image to ITK image
     itk_img = tagged_img.to_itk()
