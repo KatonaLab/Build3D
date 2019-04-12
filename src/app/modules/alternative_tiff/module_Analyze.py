@@ -120,12 +120,12 @@ def module_main(ctx):
         
         #Change Name in metadata
         #output.metadata['Name']=params['Mask'].metadata['Name']+'_tagged'
-        
+
         #Create Output
         a3.outputs['Analyzed Image'] = output
         a3.outputs['Analyzed Binary'] = ImageClass(output.image>0,output.metadata)
         a3.outputs['Analyzed Database']=output.database
-        
+      
         #Finalization
         tstop = time.clock()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')

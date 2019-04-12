@@ -214,8 +214,8 @@ class ImageClass(object):
             raise TypeError('Image must be a a NumPy array!')
         
         #Check if metadata 'Type' field matches numpy array.dtype
-        if BIT_DEPTH_LOOKUP[str(metadata['Type'])]!=str(image.dtype):
-             metadata['Type']=BIT_DEPTH_LOOKUP[str(metadata['Type'])]
+        #if BIT_DEPTH_LOOKUP[str(metadata['Type'])]!=str(image.dtype):
+             #metadata['Type']=BIT_DEPTH_LOOKUP[str(metadata['Type'])]
 
         #Check if number of channels and length of the name list is the same
         if 'SizeC' in metadata.keys():

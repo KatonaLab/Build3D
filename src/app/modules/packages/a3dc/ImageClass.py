@@ -292,8 +292,7 @@ class ImageClass(PythImage):
             metadata=ics_to_metadata(array, metadata)
         #else:
            #array=array[::,::-1,::] 
-        print('############################################################x#')
-        print('The Type ', array.dtype)
+
         #Create output image    
         output=cls(array, metadata)
     
@@ -322,9 +321,6 @@ class ImageClass(PythImage):
         #Create output MultiDimImageFloat
         self.reorder('ZYXCT')
         multidimimage=md.MultiDimImageFloat_from_ndarray(self.image[0][0].astype(np.float))
-        
-        print('############################################################x#')
-        print('The Type ', self.image[0][0].dtype)
         
         #Clear metadata
         multidimimage.meta.clear()

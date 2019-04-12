@@ -105,7 +105,7 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
 
     #Check if channel names are unique if not rename
     name_list=[a.metadata['Name'] for a in img_list]
-    print(name_list)
+  
     if len(name_list)!=len(set(name_list)):
         raise(Exception('Channel names in img_list have to be unique!'))
   

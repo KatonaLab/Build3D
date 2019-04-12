@@ -51,11 +51,7 @@ def module_main(ctx):
         #Create Image object
         img =ImageClass.from_multidimimage(a3.inputs['Input Image'])
         #img.image=img.image.astype('float')
-        print('sdaffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
-        print(img.image.dtype)
-        print(img.metadata)
-        print(np.amax(img.image))
-        print(np.amin(img.image))
+
         print('Thresholding: '+img.metadata['Name'])
         
 
