@@ -92,8 +92,9 @@ def get_next_filename(output_path, file_name):
     return final_basename+extension   
 
 def convert_array_type(array, dtype):
+    
 
-    array=array.astype(np.dtype(dtype))
+    array=array.astype(np.dtype(dtype), casting='safe')
     
     return array
         

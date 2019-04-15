@@ -15,7 +15,7 @@ except:
 def tag_image(ndarray):
 
     #Cast to 16-bit
-    ndarray = convert_array_type(ndarray, 'int16')
+    #ndarray = convert_array_type(ndarray, 'int16')
 
     #Convert ndarray to itk image
     itk_image = sitk.GetImageFromArray(ndarray)
@@ -42,7 +42,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
     '''The first dimension of the array has to start with z (shape of (z,x,y) or (z,y,x)) 
     '''
     # Cast to 16-bit
-    ndarray = convert_array_type(ndarray, 'int16')
+    #ndarray = convert_array_type(ndarray, 'int16')
     
     #Initializaton
     threshold_dict = {'IsoData': sitk.IsoDataThresholdImageFilter(), 'Otsu': sitk.OtsuThresholdImageFilter(),
@@ -154,7 +154,7 @@ def threshold_manual(ndarray, upper=1, lower=0):
 def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     
     # Cast to 16-bit
-    ndarray = convert_array_type(ndarray, 'int16')
+    #ndarray = convert_array_type(ndarray, 'int16')
     
     #Inizialize
     method_list = ['Mean', 'Gaussian']
