@@ -3,24 +3,28 @@ import math
 import sys
 import time
 import a3dc_module_interface as a3
+import numpy as np
 
 from modules.packages.a3dc.ImageClass import ImageClass
+from modules.packages.a3dc.constants import NUMERIC_DTYPES
 
 
 from modules.a3dc_interface import colocalization, apply_filter, save_data, save_image
 from modules.a3dc_interface_utils import quote, error, warning, get_next_filename, value_to_key,  rename_duplicates, SEPARATOR
 
 
-CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA overlappingRatio', 'ChB overlappingRatio''ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
+#CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA overlappingRatio', 'ChB overlappingRatio''ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
 OVLFILTERS=[ 'volume']#,'Ch1 overlappingRatio','Ch2 overlappingRatio']
 
-TRANSLATE={'volume':'Overlapping volume', 'ChA totalOverlappingRatio':'ChA Overlapping ratio', 'ChB totalOverlappingRatio':'ChB Overlapping ratio'}
+TRANSLATE={'volume':'Overlapping volume'}#, 'ChA totalOverlappingRatio':'ChA Overlapping ratio', 'ChB totalOverlappingRatio':'ChB Overlapping ratio'
 DEFAULT_VALUE={'volume':float(math.inf), 'ChA totalOverlappingRatio':1.0, 'ChB totalOverlappingRatio':1.0}
 
 #Generate filter list. Sort so the input fields come in the appropriate order
-FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
+#FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
+FILTERS = sorted(OVLFILTERS, key=str.lower)
 
-def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
+
+def colocalize(ch1_img, ch2_img, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
 
     tagged_img_list=[ch1_img, ch2_img]
     
@@ -37,8 +41,8 @@ def colocalize(ch1_img, ch2_img, ch1_settings, ch2_settings, ovl_settings, path,
     ovl_img, _=colocalization(tagged_img_list, overlapping_filter=ovl_settings, remove_filtered=remove_filtered)
     
     #Run filtering steps
-    ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
-    ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
+    #ch1_img, _ =apply_filter(ch1_img, ch1_settings, overwrite=False, remove_filtered=False)
+    #ch2_img, _ =apply_filter(ch2_img, ch2_settings, overwrite=False, remove_filtered=False)
 
     #Print number of objects to logText
     print('Number of Overlapping Objects: '+str(len(ovl_img.database['tag'])))            
@@ -109,23 +113,8 @@ def read_params(filters=FILTERS):
         for m in ['min', 'max']:
             settings[value_to_key(TRANSLATE,f)][m] = a3.inputs['{} {}'.format( f, m)]
  
-    #Generate channel 1 and channel 2 settings dictionary
-    ch1_settings={}
-    ch2_settings={}
-    for key in CHFILTERS:
-        if key in settings:
-            prefix=key.split(' ', 1)[0]
-            filter_key=key.split(' ', 1)[-1]
-            
-            if prefix=='ChA':
-                ch1_settings[filter_key] = settings[key]
-            if prefix=='ChB':
-                ch2_settings[filter_key] = settings[key]
 
-    out_dict['ChA'] = ch1_settings
-    out_dict['ChB'] = ch2_settings
 
-            
     #Generate overlapping settings dictionary
     ovl_settings={}
     for key in OVLFILTERS:
@@ -188,8 +177,6 @@ def module_main(ctx):
 
         output=colocalize(params['ChA Image'],
                    params['ChB Image'],
-                   params['ChA'],
-                   params['ChB'],
                    params['Ovl'], 
                    params['Path'],
                    to_text=params['to_text'], remove_filtered=params['remove_filtered'])
@@ -236,6 +223,7 @@ def generate_config(filters=FILTERS):
     
     #Set parameters
     for f in filters:
+        print(DEFAULT_VALUE[f])
         for m in ['min', 'max']:
             config.append(
                 a3.Parameter('{} {}'.format(TRANSLATE[f], m), a3.types.float)

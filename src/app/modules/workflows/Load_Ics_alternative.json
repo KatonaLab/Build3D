@@ -457,7 +457,7 @@
             "name": "Colocalize A/B",
             "order": 52,
             "parentUid": -1,
-            "uid": 20
+            "uid": 22
         },
         {
             "category": "input",
@@ -465,7 +465,7 @@
                 "parentUid": 6,
                 "uid": 0
             },
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 0
         },
         {
@@ -474,7 +474,7 @@
                 "parentUid": 7,
                 "uid": 0
             },
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 1
         },
         {
@@ -483,7 +483,7 @@
                 "parentUid": 18,
                 "uid": 0
             },
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 2
         },
         {
@@ -492,7 +492,7 @@
                 "parentUid": 18,
                 "uid": 2
             },
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 3
         },
         {
@@ -501,7 +501,7 @@
                 "parentUid": 19,
                 "uid": 0
             },
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 4
         },
         {
@@ -510,93 +510,43 @@
                 "parentUid": 19,
                 "uid": 2
             },
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 5
         },
         {
             "category": "parameter",
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 6,
             "value": 0
         },
         {
             "category": "parameter",
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 7,
-            "value": 1
-        },
-        {
-            "category": "parameter",
-            "parentUid": 20,
-            "uid": 8,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 20,
-            "uid": 9,
-            "value": 1
-        },
-        {
-            "category": "parameter",
-            "parentUid": 20,
-            "uid": 10,
-            "value": 0
-        },
-        {
-            "category": "parameter",
-            "parentUid": 20,
-            "uid": 11,
             "value": null
         },
         {
             "category": "parameter",
-            "parentUid": 20,
-            "uid": 12,
+            "parentUid": 22,
+            "uid": 8,
             "value": false
         },
         {
             "category": "parameter",
-            "parentUid": 20,
-            "uid": 13,
+            "parentUid": 22,
+            "uid": 9,
             "value": false
         },
         {
             "category": "parameter",
-            "parentUid": 20,
-            "uid": 14,
+            "parentUid": 22,
+            "uid": 10,
             "value": false
         },
         {
             "category": "output",
-            "parentUid": 20,
+            "parentUid": 22,
             "uid": 0,
-            "value": {
-                "color": "#ff00ff",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 20,
-            "uid": 1,
-            "value": {
-                "color": "#ffff00",
-                "lutParams": {
-                    "x": 0,
-                    "y": 1
-                },
-                "visible": false
-            }
-        },
-        {
-            "category": "output",
-            "parentUid": 20,
-            "uid": 2,
             "value": {
                 "color": "#ff0000",
                 "lutParams": {
@@ -608,10 +558,36 @@
         },
         {
             "category": "output",
-            "parentUid": 20,
-            "uid": 3,
+            "parentUid": 22,
+            "uid": 1,
             "value": {
                 "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 22,
+            "uid": 2,
+            "value": {
+                "color": "#0000ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 22,
+            "uid": 3,
+            "value": {
+                "color": "#00ffff",
                 "lutParams": {
                     "x": 0,
                     "y": 1
@@ -622,10 +598,10 @@
         {
             "category": "module",
             "module": "alternative_tiff/module_Results.py",
-            "name": "Results ",
-            "order": 72,
+            "name": "Results",
+            "order": 68,
             "parentUid": -1,
-            "uid": 21
+            "uid": 23
         },
         {
             "category": "input",
@@ -633,7 +609,7 @@
                 "parentUid": 9,
                 "uid": 0
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 0
         },
         {
@@ -642,7 +618,7 @@
                 "parentUid": 10,
                 "uid": 0
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 1
         },
         {
@@ -651,7 +627,7 @@
                 "parentUid": 9,
                 "uid": 1
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 2
         },
         {
@@ -660,7 +636,7 @@
                 "parentUid": 10,
                 "uid": 1
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 3
         },
         {
@@ -669,7 +645,7 @@
                 "parentUid": 18,
                 "uid": 0
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 4
         },
         {
@@ -678,21 +654,21 @@
                 "parentUid": 19,
                 "uid": 0
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 5
         },
         {
             "category": "input",
             "connection": {
-                "parentUid": 20,
-                "uid": 1
+                "parentUid": 22,
+                "uid": 0
             },
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 6
         },
         {
             "category": "output",
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 0,
             "value": {
                 "color": "#00ff00",
@@ -705,7 +681,7 @@
         },
         {
             "category": "output",
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 1,
             "value": {
                 "color": "#ff0000",
@@ -718,7 +694,7 @@
         },
         {
             "category": "output",
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 2,
             "value": {
                 "color": "#00ff00",
@@ -731,7 +707,7 @@
         },
         {
             "category": "output",
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 3,
             "value": {
                 "color": "#ff0000",
@@ -744,7 +720,7 @@
         },
         {
             "category": "output",
-            "parentUid": 21,
+            "parentUid": 23,
             "uid": 4,
             "value": {
                 "color": "#0000ff",
@@ -756,5 +732,5 @@
             }
         }
     ],
-    "uidCounter": 22
+    "uidCounter": 24
 }

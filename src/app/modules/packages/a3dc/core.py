@@ -287,16 +287,11 @@ def __filter_database(df, filter_dict, overwrite=True):
 
         if df[key].dtype in NUMERIC_DTYPES:
             
-            curr_filter = curr_filter = (df[key] >= filter_dict[key]['min']).values & (df[key] <= filter_dict[key]['max']).values
+            curr_filter = (df[key] >= filter_dict[key]['min']).values & (df[key] <= filter_dict[key]['max']).values
 
             df['filter']  =  np.logical_and(df['filter'].values, curr_filter)
 
 
-
-    if __remove_filtered==True and 'filter' in df.keys() :
-        df.drop(df[df['filter'] == False].index, inplace=True)
-
-   
     return df
 
 
