@@ -484,10 +484,8 @@ def __colocalization_connectivity(image_list, raw_img_list=None):
 
     return ovl_image
 
-
 def __colocalization_analysis(image_list, ovl_img):
 
-    #Start analysis
     database_list=[x.database for x in image_list]
     ovl_database=ovl_img.database
     
@@ -532,8 +530,98 @@ def __colocalization_analysis(image_list, ovl_img):
         #Determine if any of the objects have been filtered out and retrieve tags and their rispected position
         flag=True
 
-        if ovl_is_filtered==False:
+        if ovl_is_filtered==True:
             flag=ovl_database['filter'][j]
+            
+        curr_tag_list=[]
+        curr_pos_list=[]
+        for i in range(0,input_element_no):
+
+            currentTag=ovl_database['object in ' + name_list[i]][j]
+
+            currentPosition=database_list[i]['tag'].index(currentTag)
+
+            curr_tag_list.append(currentTag)
+            curr_pos_list.append(currentPosition)
+
+
+            if dict_is_filtered[i]==True :#and 'filter' in database_list[i].keys() :
+
+                    flag*=database_list[i]['filter'][currentPosition]
+                    
+        #If none of the objects have been filtered out add info to output
+        if flag==True:
+
+            for i in range(input_element_no):
+
+                if curr_tag_list[i] in database_list[i]['tag']:
+
+                        output_list[i]['colocalizationCount'][curr_pos_list[i]]+=1
+                        output_list[i]['totalOverlappingRatio'][curr_pos_list[i]] += ovl_database['overlappingRatio in ' + name_list[i]][j]
+           
+                position_list = [x for x in range(input_element_no) if x != i]
+                for k in range(len(position_list)):
+                    output_list[i]['object in ' + name_list[position_list[k]]][curr_pos_list[i]].append(curr_tag_list[position_list[k]])
+
+
+    for i in range(input_element_no):
+        for key in output_list[i]:
+            image_list[i].database[key]=output_list[i][key]
+        ovl_img.database=ovl_database
+           
+    return ovl_img, image_list 
+
+
+def __colocalization_analysis2(image_list, ovl_img):
+
+    database_list=[x.database for x in image_list]
+    ovl_database=ovl_img.database
+    
+    name_list = [image_list[i].metadata['Name'] for i in range(len(image_list))]
+
+    obj_no = [len(x.database['tag']) for x in image_list]
+    input_element_no=len(database_list)
+
+    ovl_is_filtered = 'filter' in ovl_database.keys()
+    dict_is_filtered = [('filter' in x.keys()) for x in database_list]
+    
+    #Check if images have database attribute
+    if  not hasattr(ovl_img, 'database'):
+        raise Exception('Overlapping image is missing attribute "database"!!')
+    
+    #Check if overlapping database has the appropriate keys
+    missing_key=[]
+    required_keys=['object in '+name for name in name_list]+['overlappingRatio in '+name for name in name_list]
+    for key in required_keys:
+        if key not in ovl_img.database.keys():
+            missing_key.append(key)
+    if missing_key!=[]:
+        raise Exception('Overlapping database is missing the following keys :'+str(missing_key)+'!!')
+
+ 
+    # Create list of dictionaries to store data
+    output_list=[{} for x in range(input_element_no)]
+
+
+    for i in range(input_element_no):
+        output_list[i]['colocalizationCount']=[0  for i in range(obj_no[i])]
+        output_list[i]['totalOverlappingRatio'] = [0  for i in range(obj_no[i])]
+
+        position_list = [x for x in range(input_element_no) if x != i]
+
+        for j in range(0, len(position_list)):
+            
+            output_list[i]['object in '+name_list[position_list[j]]]=[[] for i in range(obj_no[i])]
+
+
+    for j in range(len(ovl_database['tag'])):
+        #Determine if any of the objects have been filtered out and retrieve tags and their rispected position
+        flag=True
+
+        if ovl_is_filtered==True:
+            flag=ovl_database['filter'][j]
+            print('#######################################################x')
+            print(ovl_database['filter'][j])
             
         curr_tag_list=[]
         curr_pos_list=[]
