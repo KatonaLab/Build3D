@@ -26,12 +26,14 @@ def analyze_image(source, mask, settings, removeFiltered=False):
             del settings[key]
     
     # Running connected components and analyzing image
-    print('Running connected components and analyzing tagged image!')
+    print('Analyzing Image!')
     taggedImage, _ = analyze(mask, image_list=[source], measurementInput=measurementList)
+    print('\tNumber of objects: '+str(len(taggedImage.database['tag'])))
     
     print('Filtering object database!')
     taggedImage, _ = apply_filter(taggedImage, filter_dict=settings, remove_filtered=removeFiltered)#{'tag':{'min': 2, 'max': 40}}
-        
+
+    
     return taggedImage
 
 

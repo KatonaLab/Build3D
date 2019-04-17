@@ -282,11 +282,12 @@ class ImageClass(PythImage):
     
         #get image array
         array=md.MultiDimImageFloat_to_ndarray(multidimimage)
-        
+        print(array.dtype)
         
         
         #Get image metadata and convert database if the metadata is ICS style
         metadata=metadata_to_dict(multidimimage)
+        print(metadata)
     
         if is_ics(multidimimage):
             metadata=ics_to_metadata(array, metadata)

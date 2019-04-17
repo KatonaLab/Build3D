@@ -94,7 +94,7 @@ def get_next_filename(output_path, file_name):
 def convert_array_type(array, dtype):
     
 
-    array=array.astype(np.dtype(dtype), casting='safe')
+    array=array.astype(np.dtype(dtype))#, casting='safe'
     
     return array
         

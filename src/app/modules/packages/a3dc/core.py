@@ -63,8 +63,8 @@ def threshold(image, method="Otsu", **kwargs):
 
     output_metadta=image.metadata
     output_metadta['Type']=str(output_array.dtype)
- 
- 
+    
+
     return ImageClass(output_array, image.metadata), thresholdValue
 
 
@@ -250,11 +250,12 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
                         non_numeric.append(str(key))
         if missing!=[]:
             raise KeyError('Object database is missing the '+str(missing)+' key(s)!')
-        if missing!=[]:
-            raise ValueError('Object database keys(s) '+str(key)+' are not of numeric datatype!')
+        if non_numeric!=[]:
+            raise ValueError('Object database keys(s) '+str(non_numeric)+' are not of numeric datatype!')
     
         # Filter dictionary
         output_database=__filter_database(df, filter_dict, overwrite).to_dict(orient='list')
+
         output_image=image.image
         
         
@@ -268,7 +269,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
         raise AttributeError('Image is missing the "database" attribute!')
         output=copy.deepcopy(image)
 
-            
+    
     return output
 
 
@@ -277,21 +278,21 @@ def __filter_database(df, filter_dict, overwrite=True):
 
     
     if 'filter' in df.keys() and overwrite==False:
-        final_filter = df['filter'].values
+        df['filter'] = df['filter'].values
     else:
-        final_filter=[False for i in range(len(df))]
-
-    for key in filter_dict:
+        df['filter']=np.array([True for i in range(len(df))])
         
+    
+    for key in filter_dict:
 
         if df[key].dtype in NUMERIC_DTYPES:
-         
-            curr_filter = (df[key] >= filter_dict[key]['min']) & (df[key] <= filter_dict[key]['max']).values
-                
-            final_filter = np.logical_or(final_filter, curr_filter)
+            
+            curr_filter = curr_filter = (df[key] >= filter_dict[key]['min']).values & (df[key] <= filter_dict[key]['max']).values
 
-    df['filter'] = final_filter   
-    
+            df['filter']  =  np.logical_and(df['filter'].values, curr_filter)
+
+
+
     if __remove_filtered==True and 'filter' in df.keys() :
         df.drop(df[df['filter'] == False].index, inplace=True)
 
@@ -344,8 +345,7 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     :param filterImage:
     :return:
     '''
-    
-    
+
     #If source_image_list is None it is converted to empty list
     if source_image_list == None:
         source_image_list = []

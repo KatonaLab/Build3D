@@ -202,6 +202,7 @@ class ImageClass(object):
         '''        
         #Load image and create simplified metadata dictionary
         self.reorder('XYZCT')
+
         save_ome(self.image,self.metadata, directory, file_name)
                   
     

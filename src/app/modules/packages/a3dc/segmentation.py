@@ -63,9 +63,6 @@ def threshold_auto(ndarray, method, mode='Slice'):
         raise Exception('Mode has to be amond the following:\n'+str(mode_list))
     
     
-
-
-    
     #Check if method is valid
     if method not in threshold_dict.keys():
         raise LookupError("'" + str(method) + "' is Not a valid mode!")
@@ -90,7 +87,6 @@ def threshold_auto(ndarray, method, mode='Slice'):
             output=ndarray>0
             
         
-
     elif mode=="Slice":
 
         try:
@@ -122,12 +118,7 @@ def threshold_auto(ndarray, method, mode='Slice'):
     else:
         raise LookupError("'"+str(mode)+"' is Not a valid mode!")
 
-
-    return output, threshold_val
-
-
-
-
+    return convert_array_type(output, 'int8'), threshold_val
 
 
 def threshold_manual(ndarray, upper=1, lower=0):
@@ -188,7 +179,7 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     #Remove singleton dimension (eg. if image was 2D)
     outputImage=np.squeeze(np.array(outputImage)>0).astype(np.uint8)
         
-    return outputImage
+    return convert_array_type(outputImage, 'int8')
 
 
 

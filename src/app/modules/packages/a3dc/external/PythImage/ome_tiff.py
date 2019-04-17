@@ -21,7 +21,8 @@ import warnings
 DIM_ORDERS=['XYZCT','XYZTC','XYCTZ','XYCZT','XYTCZ','XYTZC']
 DIM_TRANSLATE={'T':'SizeT', 'C':'SizeC', 'Z':'SizeZ', 'X':'SizeX', 'Y': 'SizeY'}#, 'S':'SamplesPerPixel'}
 
-BIT_DEPTH_LOOKUP={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64'}	#, 'bool':'bool''float64':'float64', 'float32':'float64'
+#BIT_DEPTH_LOOKUP={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32', 'float':'float32','double':'float64','uint8':'int8','uint16':'int16','uint32':'int32', 'uint64':'int64'}	#, 'bool':'bool''float64':'float64', 'float32':'float64'
+BIT_DEPTH_LOOKUP={'uint8':'uint8','uint16':'uint16', 'uint32':'uint32','uint64':'uint64','int8':'int8','int16':'int16', 'int32':'uint32','int64':'uint64','float':'float32','double':'float64'}
 
 OTHER_KEYS=['DimensionOrder','Type','SamplesPerPixel']
 UNIT_KEYS=['PhysicalSizeZUnit', 'PhysicalSizeXUnit', 'PhysicalSizeYUnit', 'TimeIncrementUnit']
@@ -211,7 +212,8 @@ def metadata_to_ome (metadata, file_name):
     from xml.etree import cElementTree as etree
     
     #Set metadata type from ome type to numpy array
-    metadata['Type']=utils.value_to_key(BIT_DEPTH_LOOKUP, metadata['Type'])
+
+    metadata['Type']=BIT_DEPTH_LOOKUP[metadata['Type']]
     
     #Generate uuid
     uid=str(uuid.uuid1())
