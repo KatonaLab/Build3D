@@ -223,7 +223,7 @@ def generate_config(filters=FILTERS):
     
     #Set parameters
     for f in filters:
-        print(DEFAULT_VALUE[f])
+
         for m in ['min', 'max']:
             config.append(
                 a3.Parameter('{} {}'.format(TRANSLATE[f], m), a3.types.float)
@@ -239,9 +239,6 @@ def generate_config(filters=FILTERS):
  
     
     return config
-
-
-
 
 
 a3.def_process_module(generate_config(), module_main)
