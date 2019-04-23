@@ -16,6 +16,7 @@ except:
     from modules.packages.a3dc.ImageClass import ImageClass
 
 #TODO:Fix unit tests
+#     unit test for threshold 
 
 
 def threshold(image, method="Otsu", **kwargs):
@@ -29,14 +30,18 @@ def threshold(image, method="Otsu", **kwargs):
 
     '''
 
-    # Threshold methods
+    # ITK Threshold methods
     auto_list = ['Otsu', 'Huang', 'IsoData', 'Li', 'MaxEntropy', 'KittlerIllingworth', 'Moments', 'Yen',
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
-    adaptive_list = ['Adaptive Mean', 'Adaptive Gaussian']
+
+    # Scikit-image Threshold methods
+    auto_list_skimage = ['IsoData_skimage', 'Otsu_skimage','Li_skimage','Yen_skimage','Triangle_skimage']
+    
+    adaptive_list = ['Mean', 'Gaussian','Sauvola','Niblack']
 
     # Parse kwargs
     if kwargs != {}:
-        if method in auto_list:
+        if method in auto_list or method in auto_list_skimage:
             keyList=['mode']
         elif method in adaptive_list:
             keyList = ['blockSize', 'offSet']
@@ -52,9 +57,15 @@ def threshold(image, method="Otsu", **kwargs):
     if method in auto_list:
         output_array, thresholdValue = segmentation.threshold_auto(image.get_3d_array(), method, **kwargs)
 
+    
+    elif method in auto_list_skimage:
+        method=method.replace('_skimage', '')
+        output_array, thresholdValue = segmentation.threshold_auto_skimage(image.get_3d_array(), method, **kwargs)
+        
     elif method in adaptive_list:
         output_array = segmentation.threshold_adaptive(image.get_3d_array(), method, **kwargs)
         thresholdValue='Local'
+        
     elif method == 'Manual':
         output_array = segmentation.threshold_manual(image.get_3d_array(), **kwargs)
         thresholdValue=kwargs['upper']

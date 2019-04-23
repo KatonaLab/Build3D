@@ -2,15 +2,16 @@ import cv2
 import numpy as np
 import SimpleITK as sitk
 from skimage import img_as_ubyte
+from skimage.filters import threshold_otsu, threshold_yen, threshold_triangle, threshold_sauvola, threshold_niblack, threshold_minimum, threshold_mean, threshold_li, threshold_isodata
+
 #from .utils import round_up_to_odd, convert_array_type
 try:
     from utils import round_up_to_odd, convert_array_type
 except:
     from modules.packages.a3dc.utils import  round_up_to_odd, convert_array_type
 
-###############################################################################
-###############################Segmentation####################################
-###############################################################################
+#TODO:-unittest for 'Sauvola','Niblack' method in threshold_adaptive
+#     -unittest for threshold_auto_skimage
 
 def tag_image(ndarray):
 
@@ -57,15 +58,12 @@ def threshold_auto(ndarray, method, mode='Slice'):
 
     mode_list=['Stack','Slice']
     
+    #Check if method and mode is valid
     if method not in threshold_dict.keys():
         raise Exception('Method has to be amond the following:\n'+str(threshold_dict.keys))
     if mode not in mode_list:
         raise Exception('Mode has to be amond the following:\n'+str(mode_list))
     
-    
-    #Check if method is valid
-    if method not in threshold_dict.keys():
-        raise LookupError("'" + str(method) + "' is Not a valid mode!")
 
     #Create ITK FIlter object
     threshold_filter=threshold_dict[method]
@@ -120,6 +118,71 @@ def threshold_auto(ndarray, method, mode='Slice'):
 
     return convert_array_type(output, 'int8'), threshold_val
 
+def threshold_auto_skimage(ndarray, method, mode='Slice'):
+    '''The first dimension of the array has to start with z (shape of (z,x,y) or (z,y,x)) 
+    '''
+    # Cast to 16-bit
+    #ndarray = convert_array_type(ndarray, 'int16')
+
+    #Initializaton
+    threshold_dict = {'IsoData': threshold_isodata, 'Otsu': threshold_otsu,
+                            'Li': threshold_li,'Yen': threshold_yen,
+                            'Triangle': threshold_triangle}
+        #'Mean': threshold_mean(),'Minimum': threshold_minimum()
+
+    mode_list=['Stack','Slice']
+
+    #Check if method and mode is valid
+    if method not in threshold_dict.keys():
+        raise Exception('Method has to be among the following:\n'+str(threshold_dict.keys()))
+    if mode not in mode_list:
+        raise Exception('Mode has to be among the following:\n'+str(mode_list))
+    
+    #Get thresholding method
+    threshold_filter=threshold_dict[method]
+
+    if mode=="Stack" or len(ndarray.shape)<3 :
+  
+        #Get threshold value and apply threshold
+        try:
+
+            threshold_val = threshold_filter(ndarray)
+            output = ndarray > threshold_val
+            
+        except:
+            threshold_val=0
+            output=ndarray>0
+            
+        
+    elif mode=="Slice":
+
+        try:
+            #Remember taht the first dimension axis is taken as 
+            threshold_val=[]
+          
+            output=np.zeros(ndarray.shape)
+            for i in range(ndarray.shape[2]):
+                
+                #Get threshold value and apply threshold, append slice to outputImage
+                threshold = threshold_filter(ndarray[:,:,i])
+                output[:,:,i] = ndarray[:,:,i] > threshold
+                              
+                #Append threshold value to threshodValue
+                threshold_val.append(threshold)
+
+            
+            output=np.asarray(output)
+           
+        except RuntimeError:
+            threshold_val=[0]*ndarray.shape[2]
+            output=ndarray>0
+
+    
+    else:
+        raise LookupError("'"+str(mode)+"' is Not a valid mode!")
+
+    return convert_array_type(output, 'int8'), threshold_val
+
 
 def threshold_manual(ndarray, upper=1, lower=0):
  
@@ -141,14 +204,13 @@ def threshold_manual(ndarray, upper=1, lower=0):
     return sitk.GetArrayFromImage(sitk.InvertIntensity(segmented_img, 1))
 
 
-
 def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
     
     # Cast to 16-bit
     #ndarray = convert_array_type(ndarray, 'int16')
     
     #Inizialize
-    method_list = ['Mean', 'Gaussian']
+    method_list = ['Mean', 'Gaussian', 'Sauvola','Niblack']
     
     if method not in method_list:
         raise Exception('Mode has to be amond the following:\n'+str(method_list))
@@ -173,6 +235,12 @@ def threshold_adaptive(ndarray, method, blocksize=5, offset=0):
         elif method == 'Gaussian':  
             outputImage.append(cv2.adaptiveThreshold(converted_image[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                 cv2.THRESH_BINARY, blocksize, offset))
+        elif  method =='Sauvola':
+            outputImage.append(threshold_sauvola(converted_image[i]))
+
+        elif  method =='Niblack':
+             outputImage.append(threshold_niblack(converted_image[i]))                          
+        
         else:
             raise LookupError('Not a valid method!')
     

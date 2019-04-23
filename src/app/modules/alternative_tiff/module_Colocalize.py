@@ -13,16 +13,14 @@ from modules.a3dc_interface import colocalization, apply_filter, save_data, save
 from modules.a3dc_interface_utils import quote, error, warning, get_next_filename, value_to_key,  rename_duplicates, SEPARATOR
 
 
-#CHFILTERS=['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA overlappingRatio', 'ChB overlappingRatio''ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
-OVLFILTERS=[ 'volume']#,'Ch1 overlappingRatio','Ch2 overlappingRatio']
+CHFILTERS=[]#['ChA totalOverlappingRatio', 'ChB totalOverlappingRatio']#,'ChA overlappingRatio', 'ChB overlappingRatio''ChA colocalizationCount','ChB colocalizationCount']#['Ch1 totalOverlappingRatio', 'Ch2 totalOverlappingRatio','Ch1 colocalizationCount','Ch2 colocalizationCount']
+OVLFILTERS=[ 'volume', 'ChA overlappingRatio', 'ChB overlappingRatio']#,'Ch1 overlappingRatio','Ch2 overlappingRatio']
 
-TRANSLATE={'volume':'Overlapping volume'}#, 'ChA totalOverlappingRatio':'ChA Overlapping ratio', 'ChB totalOverlappingRatio':'ChB Overlapping ratio'
-DEFAULT_VALUE={'volume':float(math.inf), 'ChA totalOverlappingRatio':1.0, 'ChB totalOverlappingRatio':1.0}
+TRANSLATE={'volume':'Overlapping volume', 'ChA overlappingRatio':'ChA overlapping ratio', 'ChB overlappingRatio':'ChB overlapping ratio'}#, 'ChA totalOverlappingRatio':'ChA Overlapping ratio', 'ChB totalOverlappingRatio':'ChB Overlapping ratio'
+DEFAULT_VALUE={'volume':float(math.inf), 'ChA overlappingRatio':1.0, 'ChB overlappingRatio':1.0}#'ChA totalOverlappingRatio':1.0, 'ChB totalOverlappingRatio':1.0}
 
 #Generate filter list. Sort so the input fields come in the appropriate order
-#FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
-FILTERS = sorted(OVLFILTERS, key=str.lower)
-
+FILTERS = sorted(OVLFILTERS+CHFILTERS, key=str.lower)
 
 def colocalize(ch1_img, ch2_img, ovl_settings, path, show=True, to_text=False, remove_filtered=False):
 
@@ -125,10 +123,10 @@ def read_params(filters=FILTERS):
             filter_key=key.split(' ', 1)[-1]
             
             if prefix=='ChA':
-                ovl_settings[filter_key+' in '+str(a3.inputs['ChA MetaData']['Name'])] = settings[key]
+                ovl_settings[filter_key+' in '+str(a3.inputs['ChA Image'].metadata['Name'])] = settings[key]
      
             if prefix=='ChB':
-                ovl_settings[filter_key+' in '+str(a3.inputs['ChB MetaData']['Name'])] = settings[key]
+                ovl_settings[filter_key+' in '+str(a3.inputs['ChB Image'].metadata['Name'])] = settings[key]
 
         else:
             ovl_settings[key] = settings[key]
@@ -225,6 +223,7 @@ def generate_config(filters=FILTERS):
     for f in filters:
 
         for m in ['min', 'max']:
+
             config.append(
                 a3.Parameter('{} {}'.format(TRANSLATE[f], m), a3.types.float)
                 .setFloatHint('default', 0 if m == 'min' else DEFAULT_VALUE[f])
