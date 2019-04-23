@@ -131,8 +131,8 @@
             "parentUid": 9,
             "uid": 1,
             "value": {
-                "first": 7,
-                "second": 12
+                "first": 6,
+                "second": 16
             }
         },
         {
@@ -195,8 +195,8 @@
             "parentUid": 10,
             "uid": 1,
             "value": {
-                "first": 7,
-                "second": 12
+                "first": 6,
+                "second": 16
             }
         },
         {
@@ -523,24 +523,48 @@
             "category": "parameter",
             "parentUid": 22,
             "uid": 7,
-            "value": null
+            "value": 1
         },
         {
             "category": "parameter",
             "parentUid": 22,
             "uid": 8,
-            "value": false
+            "value": 0
         },
         {
             "category": "parameter",
             "parentUid": 22,
             "uid": 9,
-            "value": false
+            "value": 1
         },
         {
             "category": "parameter",
             "parentUid": 22,
             "uid": 10,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 22,
+            "uid": 11,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 22,
+            "uid": 12,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 22,
+            "uid": 13,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 22,
+            "uid": 14,
             "value": false
         },
         {
@@ -599,7 +623,7 @@
             "category": "module",
             "module": "alternative_tiff/module_Results.py",
             "name": "Results",
-            "order": 68,
+            "order": 72,
             "parentUid": -1,
             "uid": 23
         },

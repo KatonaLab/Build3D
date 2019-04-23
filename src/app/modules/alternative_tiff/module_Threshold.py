@@ -7,7 +7,7 @@ from modules.a3dc_interface import threshold
 from modules.a3dc_interface_utils import error,print_line_by_line, SEPARATOR
 
 
-METHODS=['Manual', 'Triangle', 'IsoData', 'MaxEntropy', 'Moments','RenyiEntropy','Huang', 'Li','KittlerIllingworth','Yen','Shanbhag','Otsu','IsoData_skimage', 'Otsu_skimage','Li_skimage','Yen_skimage','Triangle_skimage','None']
+METHODS=['Huang', 'IsoData', 'IsoData_skimage', 'KittlerIllingworth', 'Li','Li_skimage',  'MaxEntropy', 'Moments','Otsu', 'Otsu_skimage', 'RenyiEntropy', 'Shanbhag','Triangle', 'Triangle_skimage', 'Yen','Yen_skimage','Manual']
 
 
 def module_threshold(image, method="Otsu", kwargs={}):
@@ -30,7 +30,7 @@ def generate_config(methods=METHODS):
     param=a3.Parameter('Method', a3.types.enum)
     for idx, m in enumerate(methods):
         param.setIntHint(str(m), idx)
-    
+       
     config.append(param)
     config.append(a3.Parameter('Manual threshold value', a3.types.float)
             .setFloatHint('default', float(math.inf)))
