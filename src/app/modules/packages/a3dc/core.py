@@ -427,7 +427,7 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     
     #Filter database and image
     overlapping_image=apply_filter(overlapping_image, overlapping_filter, remove_filtered)
-    
+
     #Analyze colocalization
     overlapping_image, tagged_img_list=__colocalization_analysis(tagged_img_list, overlapping_image)
 

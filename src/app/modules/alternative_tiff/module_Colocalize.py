@@ -178,7 +178,7 @@ def module_main(ctx):
                    params['Ovl'], 
                    params['Path'],
                    to_text=params['to_text'], remove_filtered=params['remove_filtered'])
-            
+
         a3.outputs['Overlapping Image'] = output[0]
         
         a3.outputs['Overlapping Binary'] = ImageClass(output[0].image>0,output[0].metadata)
