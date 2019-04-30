@@ -86,8 +86,7 @@ def threshold(image, method="Otsu", **kwargs):
 ###############################################################################
 
 
-def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBorder', 'centroid', 'meanIntensity', 'maximumPixel']):
-    
+def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBorder', 'centroid', 'meanIntensity','sumIntensity', 'maximumPixel']):
     
     '''       
     #TODO: Deal with case when image list contains channels with same name!!!!
@@ -146,6 +145,7 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
                        'equivalentSphericalPerimeter': itk_filter.GetEquivalentSphericalPerimeter}
 
     intensity_functions = {'meanIntensity': itk_filter.GetMean,
+                           'sumIntensity':itk_filter.GetSum,
                            'medianIntensity': itk_filter.GetMedian,
                            'skewness': itk_filter.GetSkewness,
                            'kurtosis': itk_filter.GetKurtosis,
@@ -161,7 +161,7 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
                            'getWeightedFlatness': itk_filter.GetWeightedFlatness,
                            'getWeightedPrincipalAxes': itk_filter.GetWeightedPrincipalAxes,
                            'getWeightedPrincipalMoments': itk_filter.GetWeightedPrincipalMoments}
-
+    
     
     #Sort measurement list and parametrize itk_filter
     shape_meas_list = []
@@ -215,6 +215,40 @@ def analyze(img, img_list=None, meas_list=['volume', 'voxelCount', 'pixelsOnBord
     tagged_img.database=database
 
     return tagged_img
+
+def analyze_raw(image, meas_list=['meanIntensity', 'sumIntensity']):
+    
+    '''       
+    Analize raw parameters of image.
+    '''
+    
+    #Convert tagged image to ITK image
+    itk_img = sitk.GetImageFromArray(image.get_3d_array())
+
+    #Measurements apartain to two groups, one  with single input (shape descriptors) 
+    #and multi image measurements (parameters that depend on intensity )
+    
+    # Instatiate ITK LabelIntensityStatisticsImageFilter()
+    itk_filter = sitk.StatisticsImageFilter()
+
+
+    functions = {'meanIntensity': itk_filter.GetMean,
+                           'sumIntensity':itk_filter.GetSum,
+                           'maximumValue': itk_filter.GetMaximum,
+                           'minimumValue': itk_filter.GetMinimum,
+                           'variance': itk_filter.GetVariance,
+                           'sigma': itk_filter.GetSigma}
+    
+    #Execute ITK Filter and get database
+    itk_filter.Execute(itk_img)    
+  
+    #Get results
+    results={}
+    for key in meas_list:
+        results[key] =functions[key]()
+
+
+    return results
 
 ###############################################################################
 #################################Filter########################################

@@ -47,8 +47,12 @@ def threshold(image, method="Otsu", **kwargs):
 
     # Creatre LogText and start logging
     logText = 'Thresholding: '+image.metadata['Name']
+    
+    #Measure raw image data:
+    raw_data=core.analyze_raw(image)
+    logText += '\n\tRaw Image Parameters: ' + str(raw_data)
+    
     logText += '\n\tMethod: ' + method
-
     logText += '\n\tSettings: ' + str(kwargs).replace('}','').replace('{','')
         
     output, thresholdValue=core.threshold(image, method, **kwargs)
@@ -58,7 +62,7 @@ def threshold(image, method="Otsu", **kwargs):
     return output, logText
 
 
-def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'meanIntensity']):
+def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'meanIntensity', 'sumIntensity']):
     '''
     Analyzes tagedImage and appends 'database' to its dictionary that contain measured values.
     :param tagged_img: tagged image
@@ -81,7 +85,8 @@ def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'mean
         logText += '\n\tMeasuring intensity in: '
         for img in image_list:
             logText += img.metadata['Name']
-
+    
+    
     #Analyze image
     tagged_img=core.analyze(tagged_image, image_list, measurementInput)
 
