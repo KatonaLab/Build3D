@@ -7,7 +7,7 @@ from modules.a3dc_interface import threshold
 from modules.a3dc_interface_utils import error,print_line_by_line, SEPARATOR
 
 
-METHODS=['Huang', 'IsoData', 'IsoData_skimage', 'KittlerIllingworth', 'Li','Li_skimage',  'MaxEntropy', 'Moments','Otsu', 'Otsu_skimage', 'RenyiEntropy', 'Shanbhag','Triangle', 'Triangle_skimage', 'Yen','Yen_skimage','Manual']
+METHODS=['Huang', 'IsoData', 'IsoData_skimage', 'KittlerIllingworth', 'Li','Li_skimage',  'MaxEntropy', 'MaxEntropy_skimage','Moments','Otsu', 'Otsu_skimage', 'RenyiEntropy', 'Shanbhag','Triangle', 'Triangle_skimage', 'Yen','Yen_skimage','Manual']
 
 
 def module_threshold(image, method="Otsu", kwargs={}):

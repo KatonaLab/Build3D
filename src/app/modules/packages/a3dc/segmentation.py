@@ -7,8 +7,12 @@ from skimage.filters import threshold_otsu, threshold_yen, threshold_triangle, t
 #from .utils import round_up_to_odd, convert_array_type
 try:
     from utils import round_up_to_odd, convert_array_type
+    from external.max_entropy import max_entropy
 except:
     from modules.packages.a3dc.utils import  round_up_to_odd, convert_array_type
+    from modules.packages.a3dc.external.max_entropy import max_entropy
+
+    
 
 #TODO:-unittest for 'Sauvola','Niblack' method in threshold_adaptive
 #     -unittest for threshold_auto_skimage
@@ -127,7 +131,9 @@ def threshold_auto_skimage(ndarray, method, mode='Slice'):
     #Initializaton
     threshold_dict = {'IsoData': threshold_isodata, 'Otsu': threshold_otsu,
                             'Li': threshold_li,'Yen': threshold_yen,
-                            'Triangle': threshold_triangle}
+                            'Triangle': threshold_triangle, 
+                            'MaxEntropy':max_entropy}
+    
         #'Mean': threshold_mean(),'Minimum': threshold_minimum()
 
     mode_list=['Stack','Slice']
@@ -144,20 +150,37 @@ def threshold_auto_skimage(ndarray, method, mode='Slice'):
     if mode=="Stack" or len(ndarray.shape)<3 :
   
         #Get threshold value and apply threshold
-        try:
+        if method!='MaxEntropy': 
+            try:
+        
+                threshold_val = threshold_filter(ndarray)
+                output = ndarray > threshold_val
+                
+            except:
+                threshold_val=0
+                output=ndarray>0
+        else:
+            #Remember taht the first dimension axis is taken as z
+            threshold_list=[]
+          
+            output=np.zeros(ndarray.shape)
+            for i in range(ndarray.shape[2]):
+                
+                #Get threshold value and apply threshold, append slice to outputImage
+                threshold = threshold_filter(ndarray[:,:,i])
+                output[:,:,i] = ndarray[:,:,i] > threshold
+                              
+                #Append threshold value to threshodValue
+                threshold_list.append(threshold)
 
-            threshold_val = threshold_filter(ndarray)
-            output = ndarray > threshold_val
+            threshold_val=np.mean(threshold_list)
             
-        except:
-            threshold_val=0
-            output=ndarray>0
             
         
     elif mode=="Slice":
 
         try:
-            #Remember taht the first dimension axis is taken as 
+            #Remember taht the first dimension axis is taken as z
             threshold_val=[]
           
             output=np.zeros(ndarray.shape)
@@ -176,7 +199,6 @@ def threshold_auto_skimage(ndarray, method, mode='Slice'):
         except RuntimeError:
             threshold_val=[0]*ndarray.shape[2]
             output=ndarray>0
-
     
     else:
         raise LookupError("'"+str(mode)+"' is Not a valid mode!")

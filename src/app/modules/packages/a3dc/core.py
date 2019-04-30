@@ -35,7 +35,7 @@ def threshold(image, method="Otsu", **kwargs):
                          'RenyiEntropy', 'Shanbhag', 'Triangle']
 
     # Scikit-image Threshold methods
-    auto_list_skimage = ['IsoData_skimage', 'Otsu_skimage','Li_skimage','Yen_skimage','Triangle_skimage']
+    auto_list_skimage = ['IsoData_skimage', 'Otsu_skimage','Li_skimage','Yen_skimage','Triangle_skimage', 'MaxEntropy_skimage']
     
     adaptive_list = ['Mean', 'Gaussian','Sauvola','Niblack']
 
