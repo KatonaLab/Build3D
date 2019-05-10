@@ -16,7 +16,7 @@ def analyze_image(source, mask, settings, removeFiltered=False):
     print('Filter settings: '+str(settings))
     
     #Parameters to measure
-    measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder', 'meanIntensity', 'maximumPixel']
+    measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder', 'meanIntensity', 'maximumPixel', 'sumIntensity']
         
     #Rename multi image measurement keys
     multi_img_keys = INTENSITY_DESCRIPTORS.keys()    
