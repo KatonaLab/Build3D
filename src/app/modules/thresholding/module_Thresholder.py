@@ -28,7 +28,7 @@ def module_main(ctx):
         
         #Thresholding Methods
         METHODS=['Huang', 'IsoData', 'IsoData_skimage', 'KittlerIllingworth', 'Li','Li_skimage',  'MaxEntropy','MaxEntropy_skimage','Moments','Otsu', 'Otsu_skimage', 'RenyiEntropy', 'Shanbhag','Triangle', 'Triangle_skimage', 'Yen','Yen_skimage']
-        print('Filename '+str(METHODS).replace('[','').replace(']','').replace(',',''))
+        print('Filename '+'meanIntensity sumIntensity '+str(METHODS).replace('[','').replace(']','').replace(',',''))
         for name in file_list:
             
             
@@ -46,6 +46,11 @@ def module_main(ctx):
             
             #Run thresholding
             res=name
+            
+            #Analyze raw image parameters
+            raw_data=core.analyze_raw(ch_1)
+            
+            res+=' '+str(raw_data['meanIntensity'])+' '+str(raw_data['sumIntensity'])
             
             for meth in METHODS: 
                 ch_1_thr, thr_value=core.threshold(ch_1, meth, mode='Stack')
