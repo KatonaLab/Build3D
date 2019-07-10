@@ -99,6 +99,8 @@ def quote(verbose=False):
 
 SEPARATOR='#####################################################################################################################'
 
+METHODS=['Huang', 'IsoData', 'IsoData_skimage', 'KittlerIllingworth', 'Li','Li_skimage',  'MaxEntropy', 'MaxEntropy_skimage','Moments','Otsu', 'Otsu_skimage', 'RenyiEntropy', 'Shanbhag','Triangle', 'Triangle_skimage', 'Yen','Yen_skimage','Manual']
+
 QUOTE_LIST=["You know you're a teacher when you say 2, write 3, and mean 4.\n     -Ronald Anstrom, high school teacher, Underwood, N.D. 1974",
 		"Research is what I am doing when I don't know what I am doing.\n     -Werner von Braun",
 		"Learn from yesterday, live for today, look to tomorrow, rest this afternoon.\n     -Snoopy",

@@ -1,0 +1,157 @@
+{
+    "items": [
+        {
+            "category": "module",
+            "module": "selector/module_File.py",
+            "name": "Input File",
+            "order": 0,
+            "parentUid": -1,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 0,
+            "uid": 0,
+            "value": ""
+        },
+        {
+            "category": "output",
+            "parentUid": 0,
+            "uid": 0,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "selector/module_Directory.py",
+            "name": "Output Directory",
+            "order": 3,
+            "parentUid": -1,
+            "uid": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 1,
+            "uid": 0,
+            "value": ""
+        },
+        {
+            "category": "output",
+            "parentUid": 1,
+            "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "alternative_tiff/module_Source_1Ch.py",
+            "name": "Source",
+            "order": 6,
+            "parentUid": -1,
+            "uid": 5
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 0,
+                "uid": 0
+            },
+            "parentUid": 5,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 5,
+            "uid": 1,
+            "value": 1
+        },
+        {
+            "category": "output",
+            "parentUid": 5,
+            "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "alternative_tiff/module_Thresholder.py",
+            "name": "Thresholder",
+            "order": 10,
+            "parentUid": -1,
+            "uid": 9
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 5,
+                "uid": 0
+            },
+            "parentUid": 9,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 0,
+                "uid": 0
+            },
+            "parentUid": 9,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 1,
+                "uid": 0
+            },
+            "parentUid": 9,
+            "uid": 2
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 3,
+            "value": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 4,
+            "value": {
+                "first": 0,
+                "second": 17
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 5,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 9,
+            "uid": 6,
+            "value": false
+        }
+    ],
+    "uidCounter": 10
+}

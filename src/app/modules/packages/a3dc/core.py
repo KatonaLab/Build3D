@@ -721,7 +721,7 @@ def save_image(img_list, path, file_name):
             output=copy.deepcopy(img)
         else:
             output.append_to_dimension(img)
-    
+
     #save image
     output.save(path, file_name)
 
