@@ -81,7 +81,7 @@ Entity {
 
             Connections {
                 target: model
-                onStatusChanged: console.log("status changed", model.status)
+                // onStatusChanged: console.log("status changed", model.status)
             }
 
             Component.onCompleted: {

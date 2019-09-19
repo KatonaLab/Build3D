@@ -1,6 +1,6 @@
 #version 150 core
 
-noperspective in vec2 screenCoordGeom;
+in vec4 screenCoordGeom;
 in vec3 tex3DCoordGeom;
 
 out vec4 outputColor;
@@ -74,7 +74,8 @@ vec3 getLabelColor(in sampler3D tex, in vec3 pos)
 
 void main()
 {
-    vec3 far = texture(backFaceMap, screenCoordGeom.xy).xyz;
+    vec2 uv = (screenCoordGeom.xyz / screenCoordGeom.w * 0.5 + 0.5).xy;
+    vec3 far = texture(backFaceMap, uv).xyz;
     vec3 near = tex3DCoordGeom;
     float alpha = 0.;
     vec3 labelColor = vec3(0.);
@@ -89,4 +90,6 @@ void main()
     }
     vec3 finalColor = mix(alpha * volumeColor.rgb, labelColor, labeled);
     outputColor = vec4(accumDivisor * visible * finalColor, 1.0);
+    // outputColor = vec4(step(0.5, vec3(uv.x, uv.y, 0.0)), 1.0);
+    // outputColor = vec4(far, 1.0);
 }

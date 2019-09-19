@@ -3,13 +3,12 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 5) out;
 
-// NOTE: important not to do perspective correct interpolation, 
-// because it is in the screen space
-noperspective out vec2 screenCoordGeom;
+out vec4 screenCoordGeom;
 out vec3 tex3DCoordGeom;
 
 uniform mat4 mvp; // = modelViewProjection
 uniform mat4 vertexToTex3DCoordMatrix;
+uniform mat4 modelView;
 uniform mat4 inverseModelView;
 
 // for testing purposes:
@@ -69,7 +68,9 @@ CuttedTriangleData fillTriangleData(vec3 distances, ivec3 indices)
 void transformAndEmit(vec4 point)
 {
     gl_Position = mvp * point;
-    screenCoordGeom = (gl_Position.xyz / gl_Position.w * 0.5 + 0.5).xy;
+    // screenCoordGeom = (gl_Position.xyz / gl_Position.w * 0.5 + 0.5).xy;
+    // screenCoordGeom = gl_Position.xy / gl_Position.w;
+    screenCoordGeom = gl_Position;
     tex3DCoordGeom = (vertexToTex3DCoordMatrix * point).xyz;
     EmitVertex();
 }
@@ -120,10 +121,66 @@ void emitOriginal()
     }
 }
 
+// tex3d space
+const vec4 boxCorners[8] = vec4[](
+    vec4(0.,0.,0.,1.),
+    vec4(1.,0.,0.,1.),
+    vec4(1.,1.,0.,1.),
+    vec4(0.,1.,0.,1.),
+    vec4(0.,0.,1.,1.),
+    vec4(1.,0.,1.,1.),
+    vec4(1.,1.,1.,1.),
+    vec4(0.,1.,1.,1.));
+
+// vertex space, the box center should be handed over through a uniform
+const vec3 boxCenter = vec3(0.0);
+
 void main()
 {
-    cutPlaneCenter = (inverseModelView * vec4(0., 0., -0.11, 1.)).xyz;
+    // note that near cut plane in SceneRootEntity is 0.1, we choose the offset of -0.11 as our geometry cut
+    float cutZ = -0.11;
+
+    // find a box corner that is behind the camera plane
+    mat4 toCameraSpace = modelView * inverse(vertexToTex3DCoordMatrix);
+    vec4 cornerBehindCamera = vec4(0.0);
+    float farthestCornerBehindCamera = cutZ;
+    for (int i = 0; i < 8; ++i) {
+        vec4 p = toCameraSpace * boxCorners[i];
+        p /= p.w;
+        if (p.z > farthestCornerBehindCamera) { // behind the camera
+            cornerBehindCamera = boxCorners[i];
+            farthestCornerBehindCamera = p.z;
+        }
+    }
+    
     cutPlaneNormal = (inverseModelView * vec4(0., 0., -1., 0.)).xyz;
+
+    if (length(cornerBehindCamera) < 0.00001) {
+        // the camera plane does not intersect the box, cornerBehindCamera is stayed its initial value of vec4(0.0)
+        cutPlaneCenter = (inverseModelView * vec4(0.0, 0.0, cutZ, 1.)).xyz; 
+    } else {
+
+        // connect the box center with the found corner and intersect with the camera plane
+        vec3 n = cutPlaneNormal;
+        vec3 p1 = boxCenter;
+        
+        vec4 tmp = inverse(vertexToTex3DCoordMatrix) * cornerBehindCamera;
+        tmp /= tmp.w;
+        vec3 p0 = tmp.xyz;
+
+        tmp = inverseModelView * vec4(0.0, 0.0, cutZ, 1.);
+        tmp /= tmp.w;
+        vec3 c = tmp.xyz;
+
+        float denum = dot(p1 - p0, n);
+        if (abs(denum) < 0.00001) {
+            cutPlaneCenter = (inverseModelView * vec4(0.0, 0.0, cutZ, 1.)).xyz;
+        } else {
+            float a = (dot(c, n) - dot(p0, n)) / denum;
+            cutPlaneCenter = p0 + a * (p1 - p0);
+            // cutPlaneCenter = (inverseModelView * vec4(0.0, 0.0, cutZ, 1.)).xyz;
+        }
+    }
 
     vec3 signedDistances;
 

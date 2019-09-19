@@ -104,7 +104,14 @@ Entity {
         xExtent: width
         yExtent: height
         zExtent: depth
+        // primitiveType: GeometryRenderer.Points
     }
+
+    // GeometryRenderer {
+    //     id: geometryRenderer
+    //     primitiveType: GeometryRenderer.LineStrip
+    // }
+
 
     components: [mesh, material, layer]
 }
