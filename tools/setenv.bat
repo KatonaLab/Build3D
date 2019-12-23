@@ -3,15 +3,16 @@ set BUILD_MODE=release
 set WORK_DIR=%~dp0\..\
 set BUILD_DIR=%WORK_DIR%\build
 
-set QT_DIR=C:\Qt\5.11.1\msvc2017_64
+set QT_DIR=C:\Qt\5.12.6\msvc2017_64
 set QT_CREATOR_DIR=C:\Qt\Tools\QtCreator
 
-set PYTHON_DIR_NAME=python-3.6.5.amd64
-set PYTHON_DIR_FULL_PATH=C:\WinPython36\%PYTHON_DIR_NAME%
+set PYTHON_DIR_NAME=python-3.8.9.amd64
+if "%APPVEYOR_BUILD_FOLDER%"=="" (set PYTHON_DIR_FULL_PATH=C:\WPy64-3890\%PYTHON_DIR_NAME%) else (set PYTHON_DIR_FULL_PATH="%APPVEYOR_BUILD_FOLDER%\WPy64-3890\%PYTHON_DIR_NAME%")
+echo "PYTHON_DIR_FULL_PATH=%PYTHON_DIR_FULL_PATH%"
 
 set CRASHPAD_DIR=C:\Users\balint\projects\tools\crashpad\crashpad
 
-set VCREDIST_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.13.26020\vcredist_x64.exe
+set VCREDIST_PATH=%VCToolsRedistDir%\vcredist_x64.exe
 
 set PATH=%QT_DIR%\bin;%QT_CREATOR_DIR%\bin;%PATH%
 set SCRIPT_DIR=%WORK_DIR%\src\app\modules

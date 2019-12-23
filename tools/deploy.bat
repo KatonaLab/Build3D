@@ -11,7 +11,8 @@ set ABS_QML_PATH=%cd%
 popd
 
 windeployqt -verbose=1 "%ABS_APP_PATH%" -qmldir="%ABS_QML_PATH%" ^
-	&& (echo "sucessfull windeployqt") || (echo "windeployqt failed" & pause & exit /b 3)
+	&& (echo "sucessfull windeployqt") || (echo "windeployqt failed" & exit /b 3)
+	@REM && (echo "sucessfull windeployqt") || (echo "windeployqt failed" & pause & exit /b 3)
 
 mkdir "%BUILD_DIR%\src\app\%BUILD_MODE%\%PYTHON_DIR_NAME%"
 pushd "%BUILD_DIR%\src\app\%BUILD_MODE%\%PYTHON_DIR_NAME%"
@@ -38,6 +39,7 @@ iscc /Qp ^
 	/DAPP_VERSION="%DEFINED_AT_COMPILATION_A3DC_BUILD_GIT_SHA%-%DEFINED_AT_COMPILATION_A3DC_BUILD_DATE%" ^
 	/DBUILD_ID="%BUILD_ID%" ^
 	/DBUILD_MODE="%BUILD_MODE%" ^
-	win-install.iss && (echo "sucessfull deployment") || (echo "deployment failed" & pause & exit /b 4)
+	win-install.iss
+@REM && (echo "sucessfull deployment") || (echo "deployment failed" & pause & exit /b 4)
 
-pause
+@REM pause
