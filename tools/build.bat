@@ -11,5 +11,6 @@ qmake.exe "%WORK_DIR%\a3-dc.pro" -spec win32-msvc "CONFIG+=%BUILD_MODE%" "CONFIG
 	"DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM=%DEFINED_AT_COMPILATION_A3DC_BUILD_PLATFORM%"^
 	"CRASHPAD_DIR=%CRASHPAD_DIR%"^
 	&& jom.exe qmake_all
-jom.exe && (echo "sucessfull build") || (echo "build failed" & pause & exit /b 1)
-pause
+jom.exe
+@REM  && (echo "sucessfull build") || (echo "build failed" & pause & exit /b 1)
+@REM pause

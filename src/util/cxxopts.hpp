@@ -38,6 +38,12 @@ THE SOFTWARE.
 #define BENCH_CONSTEXPR constexpr
 #endif
 
+#ifndef _MSC_VER
+#define _NOEXCEPT noexcept
+#else
+#define _NOEXCEPT
+#endif
+
 #include <exception>
 #include <iostream>
 #include <map>
