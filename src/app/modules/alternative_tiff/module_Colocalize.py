@@ -165,7 +165,7 @@ def module_main(ctx):
     
     try:   
         #Inizialization
-        tstart = time.clock()
+        tstart = time.process_time()
         print(SEPARATOR)
         print('Colocalization analysis started!')
         
@@ -189,7 +189,7 @@ def module_main(ctx):
         a3.outputs['Overlapping Path'] = path
 
         #Finalization
-        tstop = time.clock()
+        tstop = time.process_time()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
         print('Object analysis was run successfully!')
         print(SEPARATOR)

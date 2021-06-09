@@ -8,8 +8,10 @@
 ###############################################################################
 #dfdsffasfa
 ####
+#import tifffile
+#from tifffile import TiffFile, TiffWriter
 
-from skimage.external.tifffile import TiffFile, TiffWriter
+from .external.tifffile import TiffFile, TiffWriter
 import os
 from . import utils
 from itertools import product
@@ -100,7 +102,7 @@ def load_image(path):
     of unit length are also marked. Note that order of axis will be from the slowest to the fastest 
     changing as returned by TiffFile.
     '''
-
+    
     #Ignore some tiffile warnings that always occur ??Bug??
     warnings.filterwarnings("ignore", message="ome-xml: index out of range")
     warnings.filterwarnings("ignore", message="ome-xml: not well-formed")
@@ -108,8 +110,8 @@ def load_image(path):
     with TiffFile(path, is_ome=True) as tif:
                 
         #Check if image is OME-Tiff
-        #if not tif.is_ome:
-            #raise TypeError('The file is corrupt or not an OME-tiff file!')
+        if not tif.is_ome:
+            raise TypeError('The file is corrupt or not an OME-tiff file!')
       
         #Load image into nd array
         images = tif.asarray()

@@ -19,8 +19,13 @@ def analyze_image(source, mask, settings, removeFiltered=False):
     measurementList = ['volume', 'voxelCount', 'centroid', 'pixelsOnBorder', 'meanIntensity', 'maximumPixel', 'sumIntensity']
         
     #Rename multi image measurement keys
-    multi_img_keys = INTENSITY_DESCRIPTORS.keys()    
-    for key in settings:
+    multi_img_keys = INTENSITY_DESCRIPTORS.keys() 
+    
+    #Since python 3.8 interpreter throws:
+    #RuntimeError('dictionary keys changed during iteration'))
+    #If keys change during iteration. Keys are put in a  list. 
+    key_list=list(settings.keys())
+    for key in key_list:
         if key in multi_img_keys:
             settings[str(key)+' in '+str(source.metadata['Name'])] = settings[key]
             del settings[key]
@@ -107,7 +112,7 @@ def module_main(ctx):
     
     try:
         #Inizialization
-        tstart = time.clock()
+        tstart = time.process_time()
         print(SEPARATOR)
         print('Object analysis started!')
         
@@ -129,7 +134,7 @@ def module_main(ctx):
         a3.outputs['Analyzed Database']=output.database
       
         #Finalization
-        tstop = time.clock()
+        tstop = time.process_time()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
         print('Object analysis was run successfully!')
         print(SEPARATOR)

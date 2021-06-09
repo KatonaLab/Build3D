@@ -7,14 +7,19 @@
 #roi-s can not beloaded!!
 ###############################################################################
 
-from skimage.external.tifffile import TiffFile, TiffWriter
+#import pip #needed to use the pip functions
 
+#for i in pip.get_installed_distributions(local_only=True):
+    #print(i)
+
+    
+#import tifffile
+from .external.tifffile import TiffFile, TiffWriter
+#from tifffile import TiffFile, TiffWriter
 from . import utils
 import numpy as np
 from itertools import product
 import os
-
-
 
 def load_image(path):
     '''
@@ -23,7 +28,10 @@ def load_image(path):
     with normalized shape where axes of unit length are also marked. Note that order of axis will be 
     from the slowest to the fastest changing as returned by TiffFile.
     '''
-          
+    
+
+
+    
     with TiffFile(path) as tif:
              
         if not tif.is_imagej:

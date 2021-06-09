@@ -11,7 +11,7 @@ def module_main(ctx):
         filename = a3.inputs['FileName'].path
 
         #Inizialization
-        tstart = time.clock()
+        tstart = time.process_time()
         print(SEPARATOR)
         print('Loading the following image: ', filename)
         
@@ -37,7 +37,7 @@ def module_main(ctx):
         a3.outputs['Channel B'] = ch_2
 
         #Finalization
-        tstop = time.clock()
+        tstop = time.process_time()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds! ')
         print('Image loaded successfully!')
         print(SEPARATOR)

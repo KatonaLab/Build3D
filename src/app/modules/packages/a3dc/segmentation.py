@@ -29,9 +29,15 @@ def tag_image(ndarray):
     #itk_image=sitk.Cast(itk_image, sitk.sitkUInt)
 
     # Run ITK Connectedcomponents. Numpy array has to be converted to ITK image format.
-    ndarray = sitk.ConnectedComponent(itk_image, fullyConnected=True)
+    #output_image = sitk.ConnectedComponent(itk_image, fullyConnected=True) had to be changed.
+    #https://discourse.itk.org/t/sitk-connectedcomponent/876%20Ziv%20Yaniv
+    #Due to q problem/feature of SWIG and needs to be addressed there.
+    #When we overload a function, named arguments don’t work. The ConnectedComponent 81 function has two variants now.
+    #The solution in your case is to provide all arguments based on location (use the default values for those you didn’t provided in the past).
+    output_image = sitk.ConnectedComponent(itk_image, True)
+    
 
-    return sitk.GetArrayFromImage(ndarray)
+    return sitk.GetArrayFromImage(output_image)
  
 def overlap_image(array_list):
 

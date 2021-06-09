@@ -1,4 +1,5 @@
-from skimage.external.tifffile import TiffFile
+from tifffile import TiffFile
+
 import collections
 from xml.etree import cElementTree as etree 
 import traceback
@@ -211,3 +212,12 @@ def rename_duplicates(string_list):
         output.append(val +'_'+ str(count + 1) if totalcount > 1 else val)
     
     return output
+
+def get_version(package_name):
+    
+    '''Return package version number.
+    '''
+    
+    from pip._vendor import pkg_resources
+   
+    return str(pkg_resources.get_distribution(package_name).version)

@@ -45,7 +45,7 @@ def module_main(ctx):
     
     try:
         #Inizialization
-        tstart = time.process_time()
+        tstart = time.clock()
         print(SEPARATOR)
         print('Thresholding started!')
         
@@ -76,7 +76,7 @@ def module_main(ctx):
         a3.outputs['Thresholded Image']=output_img
       
         #Finalization
-        tstop = time.process_time()
+        tstop = time.clock()
         print('Processing finished in ' + str((tstop - tstart)) + ' seconds!')
         print('Autothresholding was successfully!')
         print(SEPARATOR)

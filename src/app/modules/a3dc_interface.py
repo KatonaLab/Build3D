@@ -13,7 +13,7 @@ def tagImage(image):
     '''
 
     # Start timing
-    tstart = time.clock()
+    tstart = time.process_time()
 
     # Creatre LogText and start logging
     logText = '\nRunning connected components on : ' + str(image.metadata['Name'])
@@ -26,7 +26,7 @@ def tagImage(image):
     image.metadata['Type']=str(output_array.dtype)
     
     # Finish timing and add to logText
-    tstop = time.clock()
+    tstop = time.process_time()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
     return ImageClass(output_array, output_metadata), logText
@@ -75,7 +75,7 @@ def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'mean
     '''
 
     # Start timing
-    tstart = time.clock()
+    tstart = time.process_time()
 
     # Creatre LogText and start logging
     logText = '\nAnalyzing: ' + str(tagged_image.metadata['Name'])
@@ -94,7 +94,7 @@ def analyze(tagged_image, image_list=None, measurementInput=['voxelCount', 'mean
     logText += '\n\tNumber of objects: '+str(len(tagged_img.database['tag']))
 
     # Finish timing and add to logText
-    tstop = time.clock()
+    tstop = time.process_time()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
     
     return tagged_img, logText
@@ -118,7 +118,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     '''
 
     # Start timing
-    tstart = time.clock()
+    tstart = time.process_time()
 
     # Creatre LogText and start logging
     logText = '\nFiltering: ' + str(image.metadata['Name'])
@@ -130,7 +130,7 @@ def apply_filter(image, filter_dict=None, remove_filtered=False, overwrite=True)
     output_image=core.apply_filter(image, filter_dict, remove_filtered, overwrite)
     
     # Finish timing and add to logText
-    tstop = time.clock()
+    tstop = time.process_time()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
         
     return output_image , logText
@@ -147,7 +147,7 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     :return:
     '''
     # Start timingsourceDictionayList
-    tstart = time.clock()
+    tstart = time.process_time()
 
     # Creatre LogText
     logText = '\nColocalization analysis started using: '
@@ -166,7 +166,7 @@ def colocalization(tagged_img_list, source_image_list=None, overlapping_filter=N
     logText += '\n\tNumber of Overlapping Objects: '+str(len(overlapping_image.database['tag']))
 
     # Finish timing and add to logText
-    tstop = time.clock()
+    tstop = time.process_time()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
     return overlapping_image, logText
@@ -182,7 +182,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
     '''
 
     # Start timing
-    tstart = time.clock()
+    tstart = time.process_time()
     
     #If input is not list create list
     if not isinstance(image_list, collections.Iterable):
@@ -204,7 +204,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
     core.save_data(image_list, path, file_name, to_text)
 
     # Finish timing and add to logText
-    tstop = time.clock()
+    tstop = time.process_time()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
     return logText
@@ -213,7 +213,7 @@ def save_data(image_list, path, file_name='output', to_text=True):
 def save_image(image_list, path, file_name):
     
     # Start timing
-    tstart = time.clock()
+    tstart = time.process_time()
     
     #If input is not list create list
     if not isinstance(image_list, collections.Iterable):
@@ -229,7 +229,7 @@ def save_image(image_list, path, file_name):
     core.save_image(image_list, path, file_name) 
 
     # Finish timing and add to logText
-    tstop = time.clock()
+    tstop = time.process_time()
     logText += '\n\tProcessing finished in ' + str((tstop - tstart)) + ' seconds! '
 
     return logText
