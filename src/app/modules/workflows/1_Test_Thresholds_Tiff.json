@@ -1,0 +1,372 @@
+{
+    "items": [
+        {
+            "category": "module",
+            "module": "selector/module_File.py",
+            "name": "Input Path",
+            "order": 0,
+            "parentUid": -1,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 0,
+            "uid": 0,
+            "value": "file:///C:/Users/User%20ITK%2001/Desktop/bb15_mgllp_SPCB1_sc2_R.ome_crop.tif"
+        },
+        {
+            "category": "output",
+            "parentUid": 0,
+            "uid": 0,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "selector/module_Directory.py",
+            "name": "Output Path",
+            "order": 3,
+            "parentUid": -1,
+            "uid": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 1,
+            "uid": 0,
+            "value": ""
+        },
+        {
+            "category": "output",
+            "parentUid": 1,
+            "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "tiff/module_Source.py",
+            "name": "Load Channels",
+            "order": 6,
+            "parentUid": -1,
+            "uid": 3
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 0,
+                "uid": 0
+            },
+            "parentUid": 3,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 3,
+            "uid": 1,
+            "value": 1
+        },
+        {
+            "category": "parameter",
+            "parentUid": 3,
+            "uid": 2,
+            "value": 2
+        },
+        {
+            "category": "output",
+            "parentUid": 3,
+            "uid": 0,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 3,
+            "uid": 1,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "thresholding/module_Threshold.py",
+            "name": "Threshold 1",
+            "order": 12,
+            "parentUid": -1,
+            "uid": 38
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 0,
+                "uid": 0
+            },
+            "parentUid": 38,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 1,
+                "uid": 0
+            },
+            "parentUid": 38,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 3,
+                "uid": 0
+            },
+            "parentUid": 38,
+            "uid": 2
+        },
+        {
+            "category": "parameter",
+            "parentUid": 38,
+            "uid": 3,
+            "value": {
+                "first": -1,
+                "second": -1
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 38,
+            "uid": 4,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 38,
+            "uid": 5,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 38,
+            "uid": 6,
+            "value": true
+        },
+        {
+            "category": "parameter",
+            "parentUid": 38,
+            "uid": 7,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 38,
+            "uid": 0,
+            "value": {
+                "color": "#ff00ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "thresholding/module_Threshold.py",
+            "name": "Threshold 2",
+            "order": 22,
+            "parentUid": -1,
+            "uid": 39
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 0,
+                "uid": 0
+            },
+            "parentUid": 39,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 1,
+                "uid": 0
+            },
+            "parentUid": 39,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 3,
+                "uid": 1
+            },
+            "parentUid": 39,
+            "uid": 2
+        },
+        {
+            "category": "parameter",
+            "parentUid": 39,
+            "uid": 3,
+            "value": {
+                "first": -1,
+                "second": -1
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 39,
+            "uid": 4,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 39,
+            "uid": 5,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 39,
+            "uid": 6,
+            "value": true
+        },
+        {
+            "category": "parameter",
+            "parentUid": 39,
+            "uid": 7,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 39,
+            "uid": 0,
+            "value": {
+                "color": "#ffff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "thresholding/module_Thresholding_Results.py",
+            "name": "Thresholding Results 1",
+            "order": 32,
+            "parentUid": -1,
+            "uid": 40
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 3,
+                "uid": 0
+            },
+            "parentUid": 40,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 3,
+                "uid": 1
+            },
+            "parentUid": 40,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 38,
+                "uid": 0
+            },
+            "parentUid": 40,
+            "uid": 2
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 39,
+                "uid": 0
+            },
+            "parentUid": 40,
+            "uid": 3
+        },
+        {
+            "category": "output",
+            "parentUid": 40,
+            "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 40,
+            "uid": 1,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 40,
+            "uid": 2,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 40,
+            "uid": 3,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        }
+    ],
+    "uidCounter": 41
+}

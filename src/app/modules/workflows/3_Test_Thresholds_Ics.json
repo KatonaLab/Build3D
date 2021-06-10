@@ -1,0 +1,372 @@
+{
+    "items": [
+        {
+            "category": "module",
+            "module": "selector/module_File.py",
+            "name": "Input Path",
+            "order": 0,
+            "parentUid": -1,
+            "uid": 6
+        },
+        {
+            "category": "parameter",
+            "parentUid": 6,
+            "uid": 0,
+            "value": ""
+        },
+        {
+            "category": "output",
+            "parentUid": 6,
+            "uid": 0,
+            "value": {
+                "color": "#0000ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "selector/module_Directory.py",
+            "name": "Output Path",
+            "order": 3,
+            "parentUid": -1,
+            "uid": 7
+        },
+        {
+            "category": "parameter",
+            "parentUid": 7,
+            "uid": 0,
+            "value": ""
+        },
+        {
+            "category": "output",
+            "parentUid": 7,
+            "uid": 0,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "native://ics source",
+            "name": "Load Channels",
+            "order": 6,
+            "parentUid": -1,
+            "uid": 8
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 6,
+                "uid": 0
+            },
+            "parentUid": 8,
+            "uid": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 8,
+            "uid": 1,
+            "value": 0
+        },
+        {
+            "category": "parameter",
+            "parentUid": 8,
+            "uid": 2,
+            "value": 1
+        },
+        {
+            "category": "output",
+            "parentUid": 8,
+            "uid": 0,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 8,
+            "uid": 1,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "thresholding/module_Threshold_Ics.py",
+            "name": "Threshold Ics 1",
+            "order": 12,
+            "parentUid": -1,
+            "uid": 24
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 6,
+                "uid": 0
+            },
+            "parentUid": 24,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 7,
+                "uid": 0
+            },
+            "parentUid": 24,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 8,
+                "uid": 0
+            },
+            "parentUid": 24,
+            "uid": 2
+        },
+        {
+            "category": "parameter",
+            "parentUid": 24,
+            "uid": 3,
+            "value": {
+                "first": -1,
+                "second": -1
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 24,
+            "uid": 4,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 24,
+            "uid": 5,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 24,
+            "uid": 6,
+            "value": true
+        },
+        {
+            "category": "parameter",
+            "parentUid": 24,
+            "uid": 7,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 24,
+            "uid": 0,
+            "value": {
+                "color": "#0000ff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "thresholding/module_Threshold_Ics.py",
+            "name": "Threshold Ics 2",
+            "order": 22,
+            "parentUid": -1,
+            "uid": 25
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 6,
+                "uid": 0
+            },
+            "parentUid": 25,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 7,
+                "uid": 0
+            },
+            "parentUid": 25,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 8,
+                "uid": 1
+            },
+            "parentUid": 25,
+            "uid": 2
+        },
+        {
+            "category": "parameter",
+            "parentUid": 25,
+            "uid": 3,
+            "value": {
+                "first": -1,
+                "second": -1
+            }
+        },
+        {
+            "category": "parameter",
+            "parentUid": 25,
+            "uid": 4,
+            "value": null
+        },
+        {
+            "category": "parameter",
+            "parentUid": 25,
+            "uid": 5,
+            "value": false
+        },
+        {
+            "category": "parameter",
+            "parentUid": 25,
+            "uid": 6,
+            "value": true
+        },
+        {
+            "category": "parameter",
+            "parentUid": 25,
+            "uid": 7,
+            "value": false
+        },
+        {
+            "category": "output",
+            "parentUid": 25,
+            "uid": 0,
+            "value": {
+                "color": "#00ffff",
+                "lutParams": {
+                    "x": 0,
+                    "y": 1
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "module",
+            "module": "thresholding/module_Thresholding_Results_Ics.py",
+            "name": "Thresholding Results Ics 2",
+            "order": 32,
+            "parentUid": -1,
+            "uid": 26
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 8,
+                "uid": 0
+            },
+            "parentUid": 26,
+            "uid": 0
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 8,
+                "uid": 1
+            },
+            "parentUid": 26,
+            "uid": 1
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 24,
+                "uid": 0
+            },
+            "parentUid": 26,
+            "uid": 2
+        },
+        {
+            "category": "input",
+            "connection": {
+                "parentUid": 25,
+                "uid": 0
+            },
+            "parentUid": 26,
+            "uid": 3
+        },
+        {
+            "category": "output",
+            "parentUid": 26,
+            "uid": 0,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 26,
+            "uid": 1,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 26,
+            "uid": 2,
+            "value": {
+                "color": "#00ff00",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        },
+        {
+            "category": "output",
+            "parentUid": 26,
+            "uid": 3,
+            "value": {
+                "color": "#ff0000",
+                "lutParams": {
+                    "x": 0,
+                    "y": 0
+                },
+                "visible": false
+            }
+        }
+    ],
+    "uidCounter": 27
+}
