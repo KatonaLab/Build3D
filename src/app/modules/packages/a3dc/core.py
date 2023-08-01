@@ -845,7 +845,7 @@ def save_data(img_list, path, file_name, to_text=True):
         
         
         # Close the Pandas Excel writer and save Excel file.
-        writer.save()
+        writer.close()
 
     elif to_text==True:
 
