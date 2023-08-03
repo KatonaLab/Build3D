@@ -321,7 +321,7 @@ class ImageClass(PythImage):
         
         #Create output MultiDimImageFloat
         self.reorder('ZYXCT')
-        multidimimage=md.MultiDimImageFloat_from_ndarray(self.image[0][0].astype(np.float))
+        multidimimage=md.MultiDimImageFloat_from_ndarray(self.image[0][0].astype(np.float64))
         
         #Clear metadata
         multidimimage.meta.clear()
